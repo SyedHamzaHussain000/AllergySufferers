@@ -11,8 +11,9 @@ type props = {
   textColor?: any
   textFontWeight?:boolean 
   textSize?:any
+  RightColour?: any
 };
-const AppButton = ({title, handlePress, textColor = AppColors.WHITE, textFontWeight = true, textSize= 2.5, bgColor}: props) => {
+const AppButton = ({title, handlePress, textColor = AppColors.WHITE, textFontWeight = true, textSize= 2.5, bgColor, RightColour = AppColors.BTNCOLOURS}: props) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -35,7 +36,7 @@ const AppButton = ({title, handlePress, textColor = AppColors.WHITE, textFontWei
 
       <FontAwesome6
       name={"circle-arrow-right"}
-      color={AppColors.BTNCOLOURS}
+      color={RightColour}
       size={responsiveFontSize(2.5)}
       
       />

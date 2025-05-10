@@ -79,6 +79,20 @@ const Symptom = () => {
   bezier
 /> */}
 
+<View style={{marginTop: 10}}>
+          <AppText
+            title={'Tips & Tricks'}
+            textSize={3}
+            textColor={AppColors.BLACK}
+            textFontWeight
+          />
+        </View>
+
+        <View style={{flexDirection:'row', marginTop:10}}>
+                <AppText title={"Allergy Tip"} textFontWeight textSize={1.5}/>
+                <AppText title={" - Check pollen counts on your app in the morning and try to say indoors when they’re high."} textColor={"#777777"} textSize={1.5}/>
+        </View>
+
     </View>
   );
 };
