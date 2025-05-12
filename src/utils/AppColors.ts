@@ -11,6 +11,7 @@ type Colors = {
     BGCOLOURS2: string
     PRIMARY: string
     TEXTCOLOR: string
+    rightArrowCOlor: string
 
   };
   
@@ -18,7 +19,7 @@ const   AppColors: Colors = {
     BLACK: "#000000",
     WHITE: "#FFFFFF",
     BTNCOLOURS: "#032198",
-    LIGHTGRAY: "#D9D9D9",
+    // LIGHTGRAY: "#D9D9D9",
     BLUE: "#001AB0",
     DARKGRAY: "#939393",
     PEACHCOLOUR: "#F7D794",
@@ -26,7 +27,10 @@ const   AppColors: Colors = {
     BGCOLOURS: "#80FF45",
     BGCOLOURS2: "#FE3F9B",
     PRIMARY:"#032198",
-    TEXTCOLOR: "#494949"
+    TEXTCOLOR: "#494949",
+    LIGHTGRAY: "#777777",
+    rightArrowCOlor: "#3D56F0"
+
 
   };
   

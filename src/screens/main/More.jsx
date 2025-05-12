@@ -1,4 +1,4 @@
-import {View, Text, FlatList, ScrollView} from 'react-native';
+import {View, Text, FlatList, ScrollView, TouchableOpacity} from 'react-native';
 import React from 'react';
 import AppHeader from '../../components/AppHeader';
 import AppText from '../../components/AppTextComps/AppText';
@@ -7,9 +7,10 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {responsiveFontSize} from '../../utils/Responsive_Dimensions';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import AppButton from '../../components/AppButton';
-const More = () => {
+import Entypo from 'react-native-vector-icons/Entypo'
+const More = ({navigation}) => {
   const pollens = [
-    {id: 1, name: 'App Settings', top: true},
+    {id: 1, name: 'App Settings', top: true, onPress: ()=> navigation.navigate("AppSetting")},
     {id: 2, name: 'Data Visualizer'},
     {id: 3, name: 'Help'},
     {id: 4, name: 'Send Feedback'},
@@ -21,7 +22,7 @@ const More = () => {
   return (
     <View style={{padding: 20}}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <AppHeader heading="More" />
+        <AppHeader heading="More" icon={<Entypo name={"location-pin"} size={responsiveFontSize(2.5)} color={AppColors.BTNCOLOURS}/>}/>
 
         <View style={{flexDirection: 'row', gap: 20, alignItems: 'center'}}>
           <AppText title={'Account ID: 2157945'} textSize={2} />
@@ -49,9 +50,11 @@ const More = () => {
             data={pollens}
             renderItem={({item}) => {
               return (
-                <View
+                <TouchableOpacity
+                  onPress={item.onPress}
+                  activeOpacity={0.8}
                   style={{
-                    borderWidth: 1,
+                    borderWidth: 1, 
                     borderTopRightRadius: item.top ? 10 : 0,
                     borderTopLeftRadius: item.top ? 10 : 0,
                     borderBottomRightRadius: item.bottom ? 10 : 0,
@@ -81,7 +84,7 @@ const More = () => {
                     size={responsiveFontSize(2.5)}
                     color={'#032198'}
                   />
-                </View>
+                </TouchableOpacity>
               );
             }}
           />
@@ -92,10 +95,23 @@ const More = () => {
           bgColor={AppColors.BTNCOLOURS}
           RightColour={'#3D56F0'}
         />
-       
-        <View style={{flexDirection:'row', marginTop:10, justifyContent:'space-between'}}>
-                <AppText title={"Privacy Policy"}  textColor={AppColors.BLACK} textSize={1.5}/>
-                <AppText title={"Terms & Conditions"} textColor={AppColors.BLACK} textSize={1.5}/>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            marginTop: 10,
+            justifyContent: 'space-between',
+          }}>
+          <AppText
+            title={'Privacy Policy'}
+            textColor={AppColors.BLACK}
+            textSize={1.5}
+          />
+          <AppText
+            title={'Terms & Conditions'}
+            textColor={AppColors.BLACK}
+            textSize={1.5}
+          />
         </View>
       </ScrollView>
     </View>

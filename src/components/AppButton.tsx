@@ -2,7 +2,7 @@ import {View, Text, TouchableOpacity} from 'react-native';
 import React from 'react';
 import AppColors from '../utils/AppColors';
 import AppText from './AppTextComps/AppText';
-import { responsiveFontSize } from '../utils/Responsive_Dimensions';
+import { responsiveFontSize, responsiveHeight } from '../utils/Responsive_Dimensions';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 type props = {
   title?: any;
@@ -34,12 +34,15 @@ const AppButton = ({title, handlePress, textColor = AppColors.WHITE, textFontWei
         textFontWeight={textFontWeight}
       />
 
+
+
       <FontAwesome6
       name={"circle-arrow-right"}
       color={RightColour}
-      size={responsiveFontSize(2.5)}
-      
+      size={responsiveFontSize(3)}
+
       />
+
 
     </TouchableOpacity>
   );
