@@ -15,11 +15,13 @@ import AddPollens from '../screens/main/stacks/Pollens/AddPollens';
 import ManageMedications from '../screens/main/stacks/Medications/ManageMedications';
 import AddMedications from '../screens/main/stacks/Medications/AddMedications';
 import FeedBack from '../screens/main/stacks/info/FeedBack';
+import PrivacyPolicy from '../screens/main/stacks/info/PrivacyPolicy';
+import TermsCondition from '../screens/main/stacks/info/TermsCondition';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const Main = () => {
   return (
-    <Stack.Navigator initialRouteName="FeedBack" screenOptions={{headerShown:false}}>
+    <Stack.Navigator initialRouteName="TermsCondition" screenOptions={{headerShown:false}}>
       <Stack.Screen name="Home" component={MyTabs} />
       <Stack.Screen name="AppSetting" component={AppSetting} />
       <Stack.Screen name="AddCity" component={AddCity} />
@@ -30,6 +32,9 @@ const Main = () => {
       <Stack.Screen name="AddMedications" component={AddMedications} />
 
       <Stack.Screen name="FeedBack" component={FeedBack} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+      <Stack.Screen name="TermsCondition" component={TermsCondition} />
+      
 
 
 
