@@ -5,7 +5,7 @@ import AppColors from '../../../utils/AppColors';
 import AppTextInput from '../../../components/AppTextInput';
 import AppButton from '../../../components/AppButton';
 
-const ForgetPassword = () => {
+const ForgetPassword = ({navigation}) => {
   return (
     <View
       style={{
@@ -29,7 +29,7 @@ const ForgetPassword = () => {
       </View>
 
       <AppTextInput title="Email Address" inputPlaceHolder={'Input email'} />
-      <AppButton title={'Next'} RightColour={AppColors.WHITE} />
+      <AppButton title={'Next'} RightColour={AppColors.WHITE} handlePress={() => navigation.navigate('EnterOtp')}/>
     </View>
   );
 };

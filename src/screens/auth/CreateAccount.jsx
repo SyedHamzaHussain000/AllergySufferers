@@ -9,7 +9,7 @@ import {
   responsiveWidth,
 } from '../../utils/Responsive_Dimensions';
 
-const CreateAccount = () => {
+const CreateAccount = ({navigation}) => {
   return (
     <View
       style={{
@@ -118,13 +118,14 @@ const CreateAccount = () => {
           <AppTextInput title="Phone" inputPlaceHolder={'123-456-7890'} />
 
           <View style={{gap: 10}}>
-            <AppButton title={'Sign up'} RightColour={AppColors.WHITE} />
+            <AppButton title={'Sign up'} RightColour={AppColors.WHITE} handlePress={()=> navigation.navigate("Main")}/>
           </View>
 
 
           <View style={{flexDirection:'row', alignItems:'center', alignSelf:'center', paddingBottom:20}}>
-                <AppText  title={"Already have an account? "} textSize={2}/>
-                <TouchableOpacity>
+                <AppText  title={"Already have an account? "} textSize={2} />
+
+                <TouchableOpacity onPress={()=> navigation.navigate("Login")}>
                 <AppText  title={"Login"} textSize={2} textColor={AppColors.BLUE} textFontWeight/>
                 </TouchableOpacity>
           </View>

@@ -7,7 +7,7 @@ import AppButton from '../../../components/AppButton';
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
 import { responsiveFontSize, responsiveWidth } from '../../../utils/Responsive_Dimensions';
 
-const EnterOtp = () => {
+const EnterOtp = ({navigation}) => {
 const CELL_COUNT = 4;
 
   const [value, setValue] = useState('');
@@ -64,7 +64,7 @@ const CELL_COUNT = 4;
       />
       </View>
 
-      <AppButton title={'Submit'} RightColour={AppColors.WHITE} />
+      <AppButton title={'Submit'} RightColour={AppColors.WHITE} handlePress={() => navigation.navigate('EnternewPassword')} />
     </View>
   )
 }
@@ -84,8 +84,9 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(5),
     borderWidth: 0,
     borderBottomWidth:1,
-    borderColor: '#00000030',
+    borderColor: '#000000',
     textAlign: 'center',
+    color:AppColors.BTNCOLOURS
   },
   focusCell: {
     borderColor: AppColors.BLUE,

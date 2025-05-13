@@ -5,7 +5,7 @@ import AppColors from '../../../utils/AppColors';
 import AppTextInput from '../../../components/AppTextInput';
 import AppButton from '../../../components/AppButton';
 
-const EnternewPassword = () => {
+const EnternewPassword = ({navigation}) => {
   return (
     <View
       style={{
@@ -33,7 +33,7 @@ const EnternewPassword = () => {
       <AppTextInput title="New Password" inputPlaceHolder={'Input password'} />
       <AppTextInput title="Confirm New Password" inputPlaceHolder={'Input password'} />
       </View>
-      <AppButton title={'Next'} RightColour={AppColors.WHITE} />
+      <AppButton title={'Next'} RightColour={AppColors.WHITE} handlePress={() => navigation.navigate('Login')}  />
     </View>
   );
 };

@@ -5,7 +5,7 @@ import AppText from '../../components/AppTextComps/AppText'
 import AppColors from '../../utils/AppColors'
 import AppButton from '../../components/AppButton'
 
-const GetStarted = ({}) => {
+const GetStarted = ({navigation}) => {
   return (
     <BackgroundScreen >
         <View style={{ flex:0.98, justifyContent:'space-between',}}>
@@ -14,7 +14,7 @@ const GetStarted = ({}) => {
                 <AppText title={"Allergy Sufferers"} textColor={AppColors.WHITE} textSize={4} textFontWeight/>
                 </View>
 
-                <AppButton bgColor={AppColors.WHITE} title={"GET STARTED"} textColor={AppColors.BTNCOLOURS} textSize={2} />
+                <AppButton bgColor={AppColors.WHITE} title={"GET STARTED"} textColor={AppColors.BTNCOLOURS} textSize={2} handlePress={()=> navigation.navigate("Login")}/>
         </View>
     </BackgroundScreen>
   )

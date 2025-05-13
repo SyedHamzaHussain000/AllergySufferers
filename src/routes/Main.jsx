@@ -28,7 +28,7 @@ const Tab = createBottomTabNavigator();
 const Main = () => {
   return (
     <Stack.Navigator
-      initialRouteName="DataVisualizer"
+      initialRouteName="Home"
       screenOptions={{headerShown: false}}>
       <Stack.Screen name="Home" component={MyTabs} />
       <Stack.Screen name="AppSetting" component={AppSetting} />
