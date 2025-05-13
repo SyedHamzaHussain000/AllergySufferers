@@ -12,8 +12,9 @@ type props = {
   textFontWeight?:boolean 
   textSize?:any
   RightColour?: any
+  buttoWidth?: number 
 };
-const AppButton = ({title, handlePress, textColor = AppColors.WHITE, textFontWeight = true, textSize= 2.5, bgColor, RightColour = AppColors.BTNCOLOURS}: props) => {
+const AppButton = ({title, handlePress, textColor = AppColors.WHITE, textFontWeight = true, textSize= 2.5, bgColor, RightColour = AppColors.BTNCOLOURS, buttoWidth= 90}: props) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -24,7 +25,7 @@ const AppButton = ({title, handlePress, textColor = AppColors.WHITE, textFontWei
         padding: 10,
         borderRadius: 10,
         flexDirection:'row',
-        width:responsiveWidth(90)
+        width:responsiveWidth(buttoWidth)
       }}>
         <View/>
       <AppText

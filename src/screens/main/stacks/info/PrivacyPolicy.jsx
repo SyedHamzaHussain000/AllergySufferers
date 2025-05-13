@@ -2,6 +2,7 @@ import {View, Text, useWindowDimensions} from 'react-native';
 import React from 'react';
 import RenderHtml from 'react-native-render-html';
 import {responsiveWidth} from '../../../../utils/Responsive_Dimensions';
+import AppHeader from '../../../../components/AppHeader';
 
 const PrivacyPolicy = () => {
   const {width} = useWindowDimensions();
@@ -77,6 +78,7 @@ allergy suffering and allergy treatment.</p>
 
   return (
     <View style={{padding: 20}}>
+      <AppHeader goBack/>
       <RenderHtml
         contentWidth={responsiveWidth(100)}
         source={source}

@@ -2,6 +2,8 @@ import {View, Text, useWindowDimensions} from 'react-native';
 import React from 'react';
 import RenderHtml from 'react-native-render-html';
 import {responsiveWidth} from '../../../../utils/Responsive_Dimensions';
+import AppImages from '../../../../assets/images/AppImages';
+import AppHeader from '../../../../components/AppHeader';
 
 const TipsTrick = () => {
   const {width} = useWindowDimensions();
@@ -53,6 +55,7 @@ const TipsTrick = () => {
 
   return (
     <View style={{padding: 20}}>
+      <AppHeader goBack={true}/>
       <RenderHtml
         contentWidth={responsiveWidth(100)}
         source={source}

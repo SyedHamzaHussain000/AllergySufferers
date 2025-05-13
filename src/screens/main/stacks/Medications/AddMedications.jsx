@@ -27,6 +27,7 @@ const AddMedications = () => {
             color={AppColors.BTNCOLOURS}
           />
         }
+        goBack
       />
 
         <View style={{gap:10}}>

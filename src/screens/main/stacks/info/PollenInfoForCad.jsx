@@ -23,6 +23,7 @@ const PollenInfoForCad = () => {
     <View style={{padding:20}}>
         <AppHeader
         heading="Pollen Information for Canada"
+        goBack={true}
       />
 
       <AppText 

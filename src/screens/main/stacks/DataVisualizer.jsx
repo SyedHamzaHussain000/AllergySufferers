@@ -54,6 +54,7 @@ const DataVisualizer = () => {
         heading="Data Visualizer"
         Rightheading="Today"
         subheading="Your Data, Visualized"
+        goBack
       />
 
       <View

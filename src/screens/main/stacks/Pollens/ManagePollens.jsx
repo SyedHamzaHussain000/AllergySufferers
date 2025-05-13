@@ -15,7 +15,7 @@ import SocialAuthButton from '../../../../components/SocialAuthButton';
 import AppTextInput from '../../../../components/AppTextInput';
 import Octicons from 'react-native-vector-icons/Octicons'
 
-const ManagePollens = () => {
+const ManagePollens = ({navigation}) => {
   return (
       <View style={{padding: 20}}>
       <AppHeader
@@ -27,6 +27,7 @@ const ManagePollens = () => {
             color={AppColors.BTNCOLOURS}
           />
         }
+        goBack
       />
 
         <View style={{gap:10}}>
@@ -35,7 +36,7 @@ const ManagePollens = () => {
         </View>
 
       <View style={{marginTop: 20, gap: 10}}>
-        <AppButton title={'Add Pollens'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  />
+        <AppButton title={'Add Pollens'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor} handlePress={()=> navigation.navigate("AddPollens")}  />
       </View>
     </View>
   )

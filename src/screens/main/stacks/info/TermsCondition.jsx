@@ -2,6 +2,7 @@ import {View, Text, useWindowDimensions} from 'react-native';
 import React from 'react';
 import RenderHtml from 'react-native-render-html';
 import {responsiveWidth} from '../../../../utils/Responsive_Dimensions';
+import AppHeader from '../../../../components/AppHeader';
 
 const TermsCondition = () => {
   const {width} = useWindowDimensions();
@@ -55,6 +56,7 @@ on your acceptance of and compliance with these Terms. These Terms apply to all 
 
   return (
     <View style={{padding: 20}}>
+      <AppHeader goBack/>
       <RenderHtml
         contentWidth={responsiveWidth(100)}
         source={source}

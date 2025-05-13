@@ -9,7 +9,7 @@ import AppButton from '../../../../components/AppButton';
 const FeedBack = () => {
   return (
     <View style={{padding: 20}}>
-      <AppHeader heading="Aerobiology" subheading="Feedback" />
+      <AppHeader heading="Aerobiology" subheading="Feedback"  goBack={true}/>
 
       <View style={{gap: 10, marginTop: 20}}>
         <AppText

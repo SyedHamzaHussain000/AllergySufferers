@@ -14,7 +14,7 @@ import AppButton from '../../../../components/AppButton';
 import SocialAuthButton from '../../../../components/SocialAuthButton';
 import AppTextInput from '../../../../components/AppTextInput';
 import Octicons from 'react-native-vector-icons/Octicons'
-const ManageCities = () => {
+const ManageCities = ({navigation}) => {
   return (
     <View style={{padding: 20}}>
       <AppHeader
@@ -26,6 +26,7 @@ const ManageCities = () => {
             color={AppColors.BTNCOLOURS}
           />
         }
+        goBack
       />
 
         <View style={{gap:10}}>
@@ -34,7 +35,7 @@ const ManageCities = () => {
         </View>
 
       <View style={{marginTop: 20, gap: 10}}>
-        <AppButton title={'Add city'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  />
+        <AppButton title={'Add city'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor} handlePress={()=> navigation.navigate("AddCity")}  />
         <AppButton title={'Manage pollens'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  />
         <AppButton title={'Manage medications'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  />
         <AppButton title={'Manage push notifications'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  />

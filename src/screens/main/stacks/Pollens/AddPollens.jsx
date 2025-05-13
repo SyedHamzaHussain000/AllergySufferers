@@ -27,6 +27,7 @@ const AddPollens = () => {
             color={AppColors.BTNCOLOURS}
           />
         }
+        goBack
       />
 
         <View style={{gap:10}}>

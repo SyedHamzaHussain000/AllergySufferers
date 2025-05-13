@@ -8,10 +8,15 @@ import AppColors from '../../../../utils/AppColors';
 import Entypo from 'react-native-vector-icons/Entypo'
 import AppButton from '../../../../components/AppButton';
 import SocialAuthButton from '../../../../components/SocialAuthButton';
-const AddCity = () => {
+const AddCity = ({navigation}) => {
   return (
     <View style={{padding:20}}>
-      <AppHeader heading="Add City" subheading='Pollen Forecast' icon={<Entypo name={"location-pin"} size={responsiveFontSize(2.5)} color={AppColors.BTNCOLOURS}/>}/>
+      <AppHeader 
+      heading="Add City" 
+      subheading='Pollen Forecast' 
+      icon={<Entypo name={"location-pin"} size={responsiveFontSize(2.5)} color={AppColors.BTNCOLOURS} />}
+      goBack
+      />
 
         <TextInput
         placeholder='Type City'
@@ -30,7 +35,7 @@ const AddCity = () => {
 
                 <View style={{marginTop:20, gap:10}}>
 
-            <AppButton title={"Add city"} bgColor={AppColors.BTNCOLOURS}/>
+            <AppButton title={"Add city"} bgColor={AppColors.BTNCOLOURS} buttoWidth={85} />
             <TouchableOpacity style={{borderWidth:1, borderRadius:10, borderColor:AppColors.BTNCOLOURS, height:responsiveHeight(5), alignItems:'center', justifyContent:'center', }}>
                 <AppText title={"Cancel"} textSize={2} textColor={AppColors.BTNCOLOURS} textFontWeight/>
             </TouchableOpacity>

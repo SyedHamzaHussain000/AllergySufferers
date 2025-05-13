@@ -11,12 +11,12 @@ import Entypo from 'react-native-vector-icons/Entypo'
 const More = ({navigation}) => {
   const pollens = [
     {id: 1, name: 'App Settings', top: true, onPress: ()=> navigation.navigate("AppSetting")},
-    {id: 2, name: 'Data Visualizer'},
+    {id: 2, name: 'Data Visualizer', onPress: ()=> navigation.navigate("DataVisualizer")},
     {id: 3, name: 'Help'},
-    {id: 4, name: 'Send Feedback'},
+    {id: 4, name: 'Send Feedback', onPress: ()=> navigation.navigate("FeedBack")},
     {id: 5, name: 'Account'},
-    {id: 6, name: 'Tips & Tricks'},
-    {id: 7, name: 'Pollen Information for Canada', bottom: true},
+    {id: 6, name: 'Tips & Tricks', onPress: ()=> navigation.navigate("TipsTrick")},
+    {id: 7, name: 'Pollen Information for Canada', bottom: true, onPress: ()=> navigation.navigate("PollenInfoForCad")},
   ];
 
   return (
@@ -102,16 +102,21 @@ const More = ({navigation}) => {
             marginTop: 10,
             justifyContent: 'space-between',
           }}>
+            <TouchableOpacity onPress={()=> navigation.navigate("PrivacyPolicy")}>
           <AppText
             title={'Privacy Policy'}
             textColor={AppColors.BLACK}
             textSize={1.5}
-          />
+            />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={()=> navigation.navigate("TermsCondition")}>
           <AppText
             title={'Terms & Conditions'}
             textColor={AppColors.BLACK}
             textSize={1.5}
-          />
+            />
+            </TouchableOpacity>
         </View>
       </ScrollView>
     </View>

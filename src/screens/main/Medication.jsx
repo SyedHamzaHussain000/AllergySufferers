@@ -19,7 +19,7 @@ import AppColors from '../../utils/AppColors';
 import {BarChart} from 'react-native-chart-kit';
 import AppButton from '../../components/AppButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-const Medication = () => {
+const Medication = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
 
   const chartConfig = {
@@ -137,6 +137,7 @@ const Medication = () => {
         <AppButton
           title={'Go TO DATA VISUALIZER'}
           RightColour={AppColors.rightArrowCOlor}
+          handlePress={()=> navigation.navigate("DataVisualizer")}
         />
       </View>
     </View>

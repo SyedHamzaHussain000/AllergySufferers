@@ -16,7 +16,7 @@ import AppTextInput from '../../../../components/AppTextInput';
 import Octicons from 'react-native-vector-icons/Octicons'
 
 
-const ManageMedications = () => {
+const ManageMedications = ({navigation}) => {
   return (
         <View style={{padding: 20}}>
       <AppHeader
@@ -36,7 +36,7 @@ const ManageMedications = () => {
         </View>
 
       <View style={{marginTop: 20, gap: 10}}>
-        <AppButton title={'Add MEDICATION'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  />
+        <AppButton title={'Add MEDICATION'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor} handlePress={()=> navigation.navigate("AddMedications")}  />
       </View>
     </View>
   )

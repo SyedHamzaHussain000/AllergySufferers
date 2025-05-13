@@ -5,22 +5,20 @@ import AppText from '../../../components/AppTextComps/AppText';
 import { responsiveFontSize } from '../../../utils/Responsive_Dimensions';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 import AppColors from '../../../utils/AppColors';
-const AppSetting = () => {
+const AppSetting = ({navigation}) => {
 
      const pollens = [
-    {id: 1, name: 'Cities', top: true, },
-    {id: 2, name: 'Pollen types'},
-    {id: 3, name: 'Medications'},
-    {id: 4, name: 'Push Notifications',bottom: true},
+    {id: 1, name: 'Cities', top: true, onPress: ()=> navigation.navigate("ManageCities")},
+    {id: 2, name: 'Pollen types', onPress: ()=> navigation.navigate("ManagePollens")},
+    {id: 3, name: 'Medications', onPress: ()=> navigation.navigate("ManagePollens")},
+    {id: 4, name: 'Push Notifications',bottom: true },
   ];
 
 
   return (
     <View style={{padding:20}}>
-      <AppHeader heading='App Settings' />
 
-
-
+      <AppHeader heading='App Settings'  goBack={true}/>
 
         <FlatList
             data={pollens}
