@@ -16,4 +16,14 @@ export default AppImages = {
   Star:require('./Star.png'),
   Bored:require('./Bored.png'),
 
+  meterdarkred:require('./meterdarkred.png'),
+  metergreen:require('./metergreen.png'),
+  meterred:require('./meterred.png'),
+  meteryellow:require('./meteryellow.png'),
+
+  Forcast: require('./FORECAST.png'),
+  Medication: require('./Medication.png'),
+  SYMPTOMS: require('./SYMPTOMS.png'),
+  More: require('./More.png'),
+
 };

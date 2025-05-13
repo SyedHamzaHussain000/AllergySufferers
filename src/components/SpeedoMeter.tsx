@@ -11,6 +11,8 @@ import Speedometer, {
     Indicator,
     DangerPath,
   } from 'react-native-cool-speedometer';
+import AppText from './AppTextComps/AppText';
+import AppColors from '../utils/AppColors';
 
 type props = {
  imgWeight?: Number,
@@ -23,22 +25,24 @@ type props = {
 }
 
 
-const SpeedoMeter = ({imgWeight = 90, imgHeight = 20, speedometerWidth = 80, imageTop = 0 , TextBottom = -220, TempreaturePriority = "High", TempreaturePriorityFontSize=2.5}:props) => {
+const SpeedoMeter = ({imgWeight = 90, imgHeight = 20}:props) => {
   return (
        <View style={{alignItems: 'center', justifyContent: 'center'}}>
               <Image
-                source={AppImages.graph}
+                source={AppImages.meterred}
                 style={{
-                  position: 'absolute',
-                  zIndex: 1,
+                  // position: 'absolute',
+                  // zIndex: 1,
                   height: responsiveHeight(imgHeight),
                   width: responsiveWidth(imgWeight),
                   resizeMode: 'contain',
-                  top: imageTop,
+                  // top: imageTop,
                 }}
               />
-    
-              <Speedometer
+
+              <AppText title={"High"} textColor={AppColors.BLACK} textSize={2}/>
+
+              {/* <Speedometer
                 value={50}
                 min={0}
                 max={100}
@@ -73,7 +77,8 @@ const SpeedoMeter = ({imgWeight = 90, imgHeight = 20, speedometerWidth = 80, ima
                     </Text>
                   )}
                 </Indicator>
-              </Speedometer>
+              </Speedometer> */}
+
             </View>
   )
 }

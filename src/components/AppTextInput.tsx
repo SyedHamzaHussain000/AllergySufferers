@@ -6,6 +6,7 @@ import {
 } from '../utils/Responsive_Dimensions';
 import AppColors from '../utils/AppColors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import AppText from './AppTextComps/AppText';
 type props = {
   logo?: any;
   inputPlaceHolder?: any;
@@ -13,6 +14,7 @@ type props = {
   inputWidth?: number;
   containerBg?: any;
   rightLogo?: any;
+  title?: string
 };
 const AppTextInput = ({
   logo,
@@ -21,8 +23,11 @@ const AppTextInput = ({
   inputWidth = 80,
   containerBg,
   rightLogo,
+  title
 }: props) => {
   return (
+    <View style={{gap:5}}>
+      <AppText title={title} textColor={AppColors.BLACK} textSize={2} textFontWeight/>
     <View
       style={{
         flexDirection: 'row',
@@ -37,6 +42,8 @@ const AppTextInput = ({
       }}>
       {logo}
 
+      
+
       <TextInput
         placeholder={inputPlaceHolder}
         placeholderTextColor={AppColors.LIGHTGRAY}
@@ -44,6 +51,7 @@ const AppTextInput = ({
       />
 
       {rightLogo}
+    </View>
     </View>
   );
 };

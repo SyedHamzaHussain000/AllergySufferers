@@ -5,7 +5,7 @@ import AppText from '../../components/AppTextComps/AppText'
 import AppColors from '../../utils/AppColors'
 import AppButton from '../../components/AppButton'
 
-const GetStarted = () => {
+const GetStarted = ({}) => {
   return (
     <BackgroundScreen >
         <View style={{ flex:0.98, justifyContent:'space-between',}}>

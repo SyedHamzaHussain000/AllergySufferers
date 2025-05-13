@@ -2,7 +2,7 @@ import {View, Text, TouchableOpacity} from 'react-native';
 import React from 'react';
 import AppColors from '../utils/AppColors';
 import AppText from './AppTextComps/AppText';
-import { responsiveFontSize, responsiveHeight } from '../utils/Responsive_Dimensions';
+import { responsiveFontSize, responsiveHeight, responsiveWidth } from '../utils/Responsive_Dimensions';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 type props = {
   title?: any;
@@ -24,7 +24,7 @@ const AppButton = ({title, handlePress, textColor = AppColors.WHITE, textFontWei
         padding: 10,
         borderRadius: 10,
         flexDirection:'row',
-
+        width:responsiveWidth(90)
       }}>
         <View/>
       <AppText
