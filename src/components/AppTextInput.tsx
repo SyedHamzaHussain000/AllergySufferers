@@ -14,7 +14,9 @@ type props = {
   inputWidth?: number;
   containerBg?: any;
   rightLogo?: any;
-  title?: string
+  title?: string;
+  onChangeText?: (text: string) => void;
+ value?: string;
 };
 const AppTextInput = ({
   logo,
@@ -23,7 +25,9 @@ const AppTextInput = ({
   inputWidth = 80,
   containerBg,
   rightLogo,
-  title
+  title,
+  value,
+  onChangeText
 }: props) => {
   return (
     <View style={{gap:5}}>
@@ -47,7 +51,9 @@ const AppTextInput = ({
       <TextInput
         placeholder={inputPlaceHolder}
         placeholderTextColor={AppColors.LIGHTGRAY}
-        style={{width: responsiveWidth(inputWidth), color: AppColors.WHITE}}
+        style={{width: responsiveWidth(inputWidth), color: AppColors.BLACK}}
+        onChangeText={onChangeText}
+        value={value}
       />
 
       {rightLogo}

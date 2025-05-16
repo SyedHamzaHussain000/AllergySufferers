@@ -1,5 +1,5 @@
 import {View, Text, ScrollView, TextInput, TouchableOpacity} from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import AppColors from '../../utils/AppColors';
 import AppText from '../../components/AppTextComps/AppText';
 import AppTextInput from '../../components/AppTextInput';
@@ -8,8 +8,65 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from '../../utils/Responsive_Dimensions';
+import axios from 'axios';
+import BASE_URL from '../../utils/BASE_URL';
 
 const CreateAccount = ({navigation}) => {
+
+  const [userData, setUserData] = useState({
+    full_name: "John Doe",
+    user_name: "John_Doe",
+    email: "john@example.com",
+    password: "mysecurepassword",
+
+    gender: "male",
+    phone: "03121234567",
+  })
+
+  const [day, setDay] = useState('');
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState('');
+
+  const fullDob = `${day}-${month}-${year}`;
+
+
+  console.log("ul", fullDob)
+
+  const SignUpUser = () => {
+
+    let data = JSON.stringify({
+      full_name: userData.full_name,
+      user_name: userData.user_name,
+      email: userData.email,
+      password: userData.password,
+      dob: userData.dob,
+      gender: userData.gender,
+      phone: userData.phone,
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v2/user/signup`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        navigation.navigate("Login")
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
+
+
   return (
     <View
       style={{
@@ -46,13 +103,15 @@ const CreateAccount = ({navigation}) => {
           <AppTextInput
             title="Full Name"
             inputPlaceHolder={'Input Full Name'}
+            onChangeText={(text)=>  setUserData({...userData, full_name: text})} value={userData.full_name}
           />
-          <AppTextInput title="Username" inputPlaceHolder={'Input Username'} />
+          <AppTextInput title="Username" inputPlaceHolder={'Input Username'} onChangeText={(text)=>  setUserData({...userData, user_name: text})} value={userData.user_name}/>
           <AppTextInput
             title="Email Address"
             inputPlaceHolder={'Input email'}
+            onChangeText={(text)=>  setUserData({...userData, email: text})} value={userData.email}
           />
-          <AppTextInput title="Password" inputPlaceHolder={'Input password'} />
+          <AppTextInput title="Password" inputPlaceHolder={'Input password'} onChangeText={(text)=>  setUserData({...userData, password: text})} value={userData.password} />
 
           <AppText
             title={'Date of Birth'}
@@ -79,7 +138,10 @@ const CreateAccount = ({navigation}) => {
               }}
               maxLength={2}
               keyboardType="number-pad"
-              
+              onChangeText={(txt)=>{
+                setDay(txt)
+              }}
+              value={day}
               
             />
 
@@ -96,6 +158,10 @@ const CreateAccount = ({navigation}) => {
               }}
               maxLength={2}
               keyboardType="number-pad"
+              onChangeText={(txt)=>{
+                setMonth(txt)
+              }}
+              value={month}
             />
 
             <TextInput
@@ -111,21 +177,25 @@ const CreateAccount = ({navigation}) => {
               }}
               maxLength={4}
               keyboardType="number-pad"
+              onChangeText={(txt)=>{
+                setYear(txt)
+              }}
+              value={year}
             />
           </View>
 
-          <AppTextInput title="Gender" inputPlaceHolder={'Male'} />
-          <AppTextInput title="Phone" inputPlaceHolder={'123-456-7890'} />
+          <AppTextInput title="Gender" inputPlaceHolder={'Male'} onChangeText={(text)=>  setUserData({...userData, gender: text})} value={userData.gender}/>
+          <AppTextInput title="Phone" inputPlaceHolder={'123-456-7890'} onChangeText={(text)=>  setUserData({...userData, phone: text})} value={userData.phone}/>
 
           <View style={{gap: 10}}>
-            <AppButton title={'Sign up'} RightColour={AppColors.WHITE} handlePress={()=> navigation.navigate("Main")}/>
+            <AppButton title={'Sign up'} RightColour={AppColors.WHITE} handlePress={()=> SignUpUser()}/>
           </View>
 
 
           <View style={{flexDirection:'row', alignItems:'center', alignSelf:'center', paddingBottom:20}}>
                 <AppText  title={"Already have an account? "} textSize={2} />
 
-                <TouchableOpacity onPress={()=> navigation.navigate("Login")}>
+                <TouchableOpacity onPress={()=>navigation.navigate("Login")  }>
                 <AppText  title={"Login"} textSize={2} textColor={AppColors.BLUE} textFontWeight/>
                 </TouchableOpacity>
           </View>

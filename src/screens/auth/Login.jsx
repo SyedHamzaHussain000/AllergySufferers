@@ -4,8 +4,37 @@ import AppColors from '../../utils/AppColors';
 import AppText from '../../components/AppTextComps/AppText';
 import AppTextInput from '../../components/AppTextInput';
 import AppButton from '../../components/AppButton';
+import BASE_URL from '../../utils/BASE_URL';
+import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { CurrentLogin } from '../../redux/Slices/AuthSlice';
 
 const Login = ({navigation}) => {
+
+
+  const dispatch = useDispatch()
+
+  const LoginUser = () => {
+    let data = new FormData();
+    data.append('email', 'john@example.com');
+    data.append('password', 'mysecurepassword');
+
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v2/user/signin`,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      data: data,
+    };
+
+    dispatch(CurrentLogin(config))
+
+  };
+
+
   return (
     <View
       style={{
@@ -48,25 +77,26 @@ const Login = ({navigation}) => {
             title="Email Address"
             inputPlaceHolder={'Input email'}
           />
-          <View style={{gap:5}}>
+          <View style={{gap: 5}}>
             <AppTextInput
               title="Password"
               inputPlaceHolder={'Input password'}
             />
-            <TouchableOpacity onPress={()=> navigation.navigate("ForgetPassword")}>
-            <AppText
-              title={'Forget Password'}
-              textColor={AppColors.BLUE}
-              textSize={1.8}
-              textAlignment={'flex-end'}
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ForgetPassword')}>
+              <AppText
+                title={'Forget Password'}
+                textColor={AppColors.BLUE}
+                textSize={1.8}
+                textAlignment={'flex-end'}
               />
-              </TouchableOpacity>
+            </TouchableOpacity>
           </View>
           <View style={{gap: 10}}>
             <AppButton
               title={'LOGIN'}
               RightColour={AppColors.WHITE}
-              handlePress={() => navigation.navigate('Main')}
+              handlePress={() => LoginUser()}
             />
             <AppButton
               title={'Create Account'}
