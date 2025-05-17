@@ -5,13 +5,17 @@ import AppText from '../../../components/AppTextComps/AppText';
 import { responsiveFontSize } from '../../../utils/Responsive_Dimensions';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 import AppColors from '../../../utils/AppColors';
+import { useDispatch } from 'react-redux';
+import { setLogout } from '../../../redux/Slices/AuthSlice';
 const AppSetting = ({navigation}) => {
 
+  const dispatch = useDispatch()
      const pollens = [
     {id: 1, name: 'Cities', top: true, onPress: ()=> navigation.navigate("ManageCities")},
     {id: 2, name: 'Pollen types', onPress: ()=> navigation.navigate("ManagePollens")},
     {id: 3, name: 'Medications', onPress: ()=> navigation.navigate("ManagePollens")},
-    {id: 4, name: 'Push Notifications',bottom: true },
+    {id: 4, name: 'Push Notifications', },
+    {id: 5, name: 'Logout',bottom: true, onPress: ()=>  dispatch(setLogout())},
   ];
 
 

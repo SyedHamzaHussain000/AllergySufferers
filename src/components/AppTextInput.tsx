@@ -17,6 +17,7 @@ type props = {
   title?: string;
   onChangeText?: (text: string) => void;
  value?: string;
+ secure?: boolean;
 };
 const AppTextInput = ({
   logo,
@@ -27,6 +28,7 @@ const AppTextInput = ({
   rightLogo,
   title,
   value,
+  secure,
   onChangeText
 }: props) => {
   return (
@@ -54,6 +56,7 @@ const AppTextInput = ({
         style={{width: responsiveWidth(inputWidth), color: AppColors.BLACK}}
         onChangeText={onChangeText}
         value={value}
+        secureTextEntry={secure}
       />
 
       {rightLogo}

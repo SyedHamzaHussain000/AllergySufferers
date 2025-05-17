@@ -14,7 +14,7 @@ console.log("data", data)
   return (
     <Stack.Navigator initialRouteName="Auth" screenOptions={{headerShown:false}}>
       {
-        data ? 
+        data?.email ? 
         <Stack.Screen name="Main" component={Main} />
         :
 

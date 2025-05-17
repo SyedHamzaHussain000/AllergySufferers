@@ -1,5 +1,5 @@
 import {View, Text, Image, FlatList, ScrollView} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   responsiveFontSize,
@@ -23,8 +23,12 @@ import AppImages from '../../assets/images/AppImages';
 import SpeedoMeter from '../../components/SpeedoMeter';
 import SelectionButton from '../../components/SelectionButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {useSelector} from 'react-redux';
+import axios from 'axios';
+import BASE_URL from '../../utils/BASE_URL';
 
-const Home = () => {
+const Home = ({navigation}) => {
+  const useData = useSelector(state => state.auth);
   const pollens = [
     {id: 1, name: 'Total Spores', top: true},
     {id: 2, name: 'Leptosphaeria etc.'},
@@ -48,6 +52,58 @@ const Home = () => {
   ];
 
   const [selected, setSelected] = useState('');
+  const [pollenData, setPollenData] = useState();
+  const [todayPollensData, setTodayPollensData] = useState();
+
+  // console.log("pollenData",pollenData.user)
+
+  useEffect(()=>{
+    const nav = navigation.addListener('focus', () => {
+
+      getPollensData()
+    })
+
+    return nav
+
+  },[navigation])
+
+  const getPollensData = () => {
+    let data = new FormData();
+    data.append('lat', '43.65107');
+    data.append('lng', '-79.347015');
+    data.append('email', 'john@example.com');
+    data.append('tense', 'past');
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/get_allergy_data`,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+
+        const res = response.data
+
+        const city = res?.user?.locations?.closest?.name
+
+        const today = response?.data?.forecast?.[city]?.today
+
+        console.log("today........", today)
+
+        setPollenData(response.data)
+
+        setTodayPollensData(today)
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
 
   return (
     <LinearGradient
@@ -81,7 +137,7 @@ const Home = () => {
               style={{marginTop: 6}}
             />
             <View>
-              <AppText title={'Hamilton'} textSize={2.5} textFontWeight />
+              <AppText title={pollenData?.user?.locations?.closest?.name} textSize={2.5} textFontWeight />
               <AppText
                 title={'Allergen Forecast'}
                 textSize={2}
@@ -195,21 +251,23 @@ const Home = () => {
         />
 
         <FlatList
-          data={pollens}
-          renderItem={({item}) => {
+          data={todayPollensData?.current}
+          renderItem={({item, index}) => {
+
+            console.log("index",index, todayPollensData?.current?.length)
             return (
               <View
                 style={{
                   borderWidth: 1,
-                  borderTopRightRadius: item.top ? 10 : 0,
-                  borderTopLeftRadius: item.top ? 10 : 0,
-                  borderBottomRightRadius: item.bottom ? 10 : 0,
-                  borderBottomLeftRadius: item.bottom ? 10 : 0,
+                  borderTopRightRadius: index == 0 ? 10 : 0,
+                  borderTopLeftRadius: index == 0 ? 10 : 0,
+                  borderBottomRightRadius: index == todayPollensData?.current?.length - 1 ? 10 : 0,
+                  borderBottomLeftRadius: index == todayPollensData?.current?.length - 1 ? 10 : 0,
                   padding: 20,
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderBottomWidth: item.bottom ? 1 : 0,
+                  borderBottomWidth: index == todayPollensData?.current?.length - 1   ? 1 : 0,
                 }}>
                 <View
                   style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>

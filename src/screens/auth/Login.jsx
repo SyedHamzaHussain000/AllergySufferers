@@ -1,29 +1,45 @@
-import {View, Text, ScrollView, TouchableOpacity} from 'react-native';
-import React from 'react';
+import {View, Text, ScrollView, TouchableOpacity, Alert, ToastAndroid, Platform, } from 'react-native';
+import React, { useState } from 'react';
 import AppColors from '../../utils/AppColors';
 import AppText from '../../components/AppTextComps/AppText';
 import AppTextInput from '../../components/AppTextInput';
 import AppButton from '../../components/AppButton';
 import BASE_URL from '../../utils/BASE_URL';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
-import { CurrentLogin } from '../../redux/Slices/AuthSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { CurrentLogin, setLoader } from '../../redux/Slices/AuthSlice';
 
 const Login = ({navigation}) => {
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+
+  const loading = useSelector(state => state.auth.loader)
 
 
   const dispatch = useDispatch()
 
   const LoginUser = () => {
+    if(email === '' || password === ''){
+      if(Platform.OS === 'android'){
+
+        ToastAndroid.show('Please fill all fields', ToastAndroid.SHORT)
+      }else{
+        Alert.prompt('Please fill all fields')
+      }
+      return
+    }
+    dispatch(setLoader(true))
     let data = new FormData();
-    data.append('email', 'john@example.com');
-    data.append('password', 'mysecurepassword');
+    data.append('email', email);
+    data.append('password', password);
 
 
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v2/user/signin`,
+      url: `${BASE_URL}/allergy_data/v1/user/signin`,
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -64,6 +80,7 @@ const Login = ({navigation}) => {
             textColor={AppColors.BLACK}
             textSize={2.5}
             textFontWeight
+            
           />
           <AppText
             title={'Let’s login for explore continues'}
@@ -76,11 +93,16 @@ const Login = ({navigation}) => {
           <AppTextInput
             title="Email Address"
             inputPlaceHolder={'Input email'}
+            onChangeText={(txt)=> setEmail(txt) }
+            value={email}
           />
           <View style={{gap: 5}}>
             <AppTextInput
               title="Password"
               inputPlaceHolder={'Input password'}
+              onChangeText={(txt)=> setPassword(txt) }
+            value={password}
+            secure={true}
             />
             <TouchableOpacity
               onPress={() => navigation.navigate('ForgetPassword')}>
@@ -97,6 +119,7 @@ const Login = ({navigation}) => {
               title={'LOGIN'}
               RightColour={AppColors.WHITE}
               handlePress={() => LoginUser()}
+              isLoading={loading}
             />
             <AppButton
               title={'Create Account'}
