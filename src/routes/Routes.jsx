@@ -12,7 +12,7 @@ const data = useSelector(state => state.auth.user)
 console.log("data", data)
 
   return (
-    <Stack.Navigator initialRouteName="Auth" screenOptions={{headerShown:false}}>
+    <Stack.Navigator  screenOptions={{headerShown:false}}>
       {
         data?.email ? 
         <Stack.Screen name="Main" component={Main} />

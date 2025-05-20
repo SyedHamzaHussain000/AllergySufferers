@@ -1,5 +1,5 @@
-import {View, Text, FlatList, Image, Dimensions} from 'react-native';
-import React from 'react';
+import {View, Text, FlatList, Image, Dimensions, TouchableOpacity} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
 import AppImages from '../../assets/images/AppImages';
 import {
@@ -10,26 +10,28 @@ import AppText from '../../components/AppTextComps/AppText';
 import AppColors from '../../utils/AppColors';
 import {LineChart} from 'react-native-chart-kit';
 import AppButton from '../../components/AppButton';
-const Symptom = () => {
+import axios from 'axios';
+import BASE_URL from '../../utils/BASE_URL';
+import moment from 'moment';
+import { useSelector } from 'react-redux';
+const Symptom = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
+
+  const [symtomsData, setSymtomsData] = useState(null);
+  const [systomsNumber, setSymtomsNumber] = useState()
+
+  const userData = useSelector(state => state)
+
   const mojis = [
-    {id: 1, img: AppImages.Mask, title: 'Very Bad'},
-    {id: 2, img: AppImages.Pain, title: 'Bad'},
-    {id: 3, img: AppImages.Bored, title: 'Okay'},
-    {id: 4, img: AppImages.Hello, title: 'Good'},
     {id: 5, img: AppImages.Star, title: 'Very Good'},
+    {id: 4, img: AppImages.Hello, title: 'Good'},
+    {id: 3, img: AppImages.Bored, title: 'Okay'},
+    {id: 2, img: AppImages.Pain, title: 'Bad'},
+    {id: 1, img: AppImages.Mask, title: 'Very Bad'},
   ];
 
-  const data = {
-    labels: ['Mar16', 'Mar17', 'Mar18', 'Mar19', 'Mar20', 'Mar21'],
-    datasets: [
-      {
-        data: [20, 45, 28, 80, 99, 43],
+ 
 
-        strokeWidth: 2, // optional
-      },
-    ],
-  };
   const chartConfig = {
     backgroundGradientFrom: '#FFFFFF',
     backgroundGradientFromOpacity: 0,
@@ -43,6 +45,79 @@ const Symptom = () => {
       strokeDasharray: '', // solid background lines
     },
   };
+
+  useEffect(() => {
+    const nav = navigation.addListener('focus', () => {
+      getSymtomsData();
+    });
+
+    return nav;
+  }, [navigation]);
+
+  const getSymtomsData = () => {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.auth?.user?.id}/rest_get_symptom_records`,
+      headers: {},
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        const sorted = response.data.symptoms.sort(
+          (a, b) => new Date(a.date) - new Date(b.date),
+        );
+
+        const labels = sorted.map(item => {
+          const formatDate = moment(item.date, 'MMMM, DD YYYY').format('MMM D');
+          return formatDate;
+        });
+
+        const values = sorted.map(item => parseFloat(item.symptom_level));
+
+        setSymtomsData({
+          labels,
+          datasets: [{data: values, strokeWidth: 2}],
+        });
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
+
+
+  const setApiSymtomsData = (id) => {
+
+    setSymtomsNumber(id)
+
+    const todayDate = moment().format('YYYY-MM-DD');
+    let data = JSON.stringify({
+      level: id,
+      date: todayDate,
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.auth?.user?.id}/set_symptom_record`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        getSymtomsData()
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
   return (
     <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
       <AppHeader heading="Symptom" Rightheading="Today" subheading="Tracker" />
@@ -55,12 +130,12 @@ const Symptom = () => {
           contentContainerStyle={{gap: 5, marginTop: 20}}
           renderItem={({item}) => {
             return (
-              <View>
+              <TouchableOpacity onPress={()=>setApiSymtomsData(item.id)}>
                 <Image
                   source={item.img}
                   style={{
-                    height: responsiveHeight(8),
-                    width: responsiveHeight(8),
+                    height: responsiveHeight(item.id == systomsNumber ?  10 :8),
+                    width: responsiveHeight(item.id == systomsNumber ?  10 :8),
                     resizeMode: 'contain',
                   }}
                 />
@@ -70,7 +145,7 @@ const Symptom = () => {
                   textSize={1.5}
                   textFontWeight
                 />
-              </View>
+              </TouchableOpacity>
             );
           }}
         />
@@ -87,7 +162,7 @@ const Symptom = () => {
           justifyContent: 'center',
         }}>
         <LineChart
-          data={data}
+          data={symtomsData || {labels: [], datasets: [{data: []}]}}
           width={screenWidth * 0.89}
           height={responsiveHeight(30)}
           verticalLabelRotation={0}

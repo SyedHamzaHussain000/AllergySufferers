@@ -1,4 +1,12 @@
-import {View, Text, Image, FlatList, ScrollView} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -10,15 +18,6 @@ import AppColors from '../../utils/AppColors';
 import AppText from '../../components/AppTextComps/AppText';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Speedometer, {
-  Background,
-  Arc,
-  Needle,
-  Progress,
-  Marks,
-  Indicator,
-  DangerPath,
-} from 'react-native-cool-speedometer';
 import AppImages from '../../assets/images/AppImages';
 import SpeedoMeter from '../../components/SpeedoMeter';
 import SelectionButton from '../../components/SelectionButton';
@@ -26,6 +25,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useSelector} from 'react-redux';
 import axios from 'axios';
 import BASE_URL from '../../utils/BASE_URL';
+import DatePicker from 'react-native-date-picker';
 
 const Home = ({navigation}) => {
   const useData = useSelector(state => state.auth);
@@ -51,23 +51,37 @@ const Home = ({navigation}) => {
     {id: 19, name: 'Powdery mildew', bottom: true},
   ];
 
+  const color = [
+    '#f10000',
+    '#f42d00',
+    '#e98e26',
+    '#e9bc00',
+    '#39e649',
+    '#3cff43',
+  ];
+
   const [selected, setSelected] = useState('');
   const [pollenData, setPollenData] = useState();
   const [todayPollensData, setTodayPollensData] = useState();
+  const [pollenLoader, setPollenLoader] = useState(false);
 
-  // console.log("pollenData",pollenData.user)
+  //data states
+  const [date, setDate] = useState(new Date());
+  const [open, setOpen] = useState(false);
 
-  useEffect(()=>{
+  console.log('pollenData', pollenData?.today?.text);
+
+  useEffect(() => {
     const nav = navigation.addListener('focus', () => {
+      getPollensData();
+    });
 
-      getPollensData()
-    })
-
-    return nav
-
-  },[navigation])
+    return nav;
+  }, [navigation]);
 
   const getPollensData = () => {
+    setPollenLoader(true);
+
     let data = new FormData();
     data.append('lat', '43.65107');
     data.append('lng', '-79.347015');
@@ -87,21 +101,22 @@ const Home = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
+        const res = response.data;
 
-        const res = response.data
+        const city = res?.user?.locations?.closest?.name;
 
-        const city = res?.user?.locations?.closest?.name
+        const today = response?.data?.forecast?.[city]?.today;
 
-        const today = response?.data?.forecast?.[city]?.today
+        console.log('today........', today);
 
-        console.log("today........", today)
+        setPollenData(response.data);
 
-        setPollenData(response.data)
-
-        setTodayPollensData(today)
+        setTodayPollensData(today);
+        setPollenLoader(false);
       })
       .catch(error => {
         console.log(error);
+        setPollenLoader(false);
       });
   };
 
@@ -116,6 +131,19 @@ const Home = ({navigation}) => {
       <ScrollView
         contentContainerStyle={{flexGrow: 1, paddingBottom: 100}}
         showsVerticalScrollIndicator={false}>
+        <DatePicker
+          modal
+          open={open}
+          date={date}
+          mode="date"
+          onConfirm={date => {
+            setOpen(false);
+            setDate(date);
+          }}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />
         <Ionicons
           name={'notifications-outline'}
           size={responsiveFontSize(3)}
@@ -137,7 +165,15 @@ const Home = ({navigation}) => {
               style={{marginTop: 6}}
             />
             <View>
-              <AppText title={pollenData?.user?.locations?.closest?.name} textSize={2.5} textFontWeight />
+              {pollenLoader == true ? (
+                <ActivityIndicator size={'small'} color={AppColors.BLACK} />
+              ) : (
+                <AppText
+                  title={pollenData?.user?.locations?.closest?.name}
+                  textSize={2.5}
+                  textFontWeight
+                />
+              )}
               <AppText
                 title={'Allergen Forecast'}
                 textSize={2}
@@ -146,10 +182,14 @@ const Home = ({navigation}) => {
             </View>
           </View>
 
-          <View>
+          <TouchableOpacity onPress={() => setOpen(true)}>
             <AppText title={'Today'} textFontWeight textSize={2} />
-            <AppText title={'March 27th 2025'} textColor={'#777777'} />
-          </View>
+            {pollenLoader == true ? (
+              <ActivityIndicator size={'small'} color={AppColors.BLACK} />
+            ) : (
+              <AppText title={pollenData?.today?.text} textColor={'#777777'} />
+            )}
+          </TouchableOpacity>
         </View>
 
         <View style={{marginTop: 20, gap: 20, height: responsiveHeight(35)}}>
@@ -164,6 +204,44 @@ const Home = ({navigation}) => {
         </View>
 
         <View style={{flexDirection: 'row', gap: 5}}>
+          {/* <View style={{backgroundColor:'white'}}> */}
+
+          {/* <Image
+            accessibilityLabel="React logo"
+            source={{ uri: logoUri }}
+            resizeMode="contain"
+            style={{height:100 ,width:100}}
+          /> */}
+          {/* <ReactSpeedometer
+            style={{ marginBottom: 50 }}
+            minValue={0}
+            maxValue={100}
+            value={50}
+            needleColor="red"
+            startColor="green"
+            segments={6}
+            endColor="blue"
+          /> */}
+          {/* </View> */}
+
+          {/* <Speedometer
+        value={75} // e.g. 75
+        totalValue={100}
+        size={250}
+        outerColor="#e6e6e6"
+        internalColor="#f44336" // red for high
+        showIndicator={true}
+        indicatorColor="#000"
+        showText={true}
+        text={`${75}%`}
+        textStyle={{ color: 'black', fontSize: 18 }}
+        showLabels={true}
+        labelStyle={{ color: 'gray', fontSize: 14 }}
+        labelFormatter={val => `${74}%`}
+        showPercent={true}
+        percentStyle={{ color: 'green', fontSize: 16 }}
+      /> */}
+
           <View style={{gap: 10}}>
             <AppText
               title={'BOXELDER, M'}
@@ -172,6 +250,7 @@ const Home = ({navigation}) => {
               textColor={AppColors.BLACK}
               textFontWeight
             />
+
             <SpeedoMeter
               imgWeight={30}
               imgHeight={10}
@@ -250,64 +329,73 @@ const Home = ({navigation}) => {
           textColor={AppColors.TEXTCOLOR}
         />
 
-        <FlatList
-          data={todayPollensData?.current}
-          renderItem={({item, index}) => {
-
-            console.log("index",index, todayPollensData?.current?.length)
-            return (
-              <View
-                style={{
-                  borderWidth: 1,
-                  borderTopRightRadius: index == 0 ? 10 : 0,
-                  borderTopLeftRadius: index == 0 ? 10 : 0,
-                  borderBottomRightRadius: index == todayPollensData?.current?.length - 1 ? 10 : 0,
-                  borderBottomLeftRadius: index == todayPollensData?.current?.length - 1 ? 10 : 0,
-                  padding: 20,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  borderBottomWidth: index == todayPollensData?.current?.length - 1   ? 1 : 0,
-                }}>
+        {pollenLoader == true ? (
+          <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+        ) : (
+          <FlatList
+            data={todayPollensData?.current}
+            renderItem={({item, index}) => {
+              return (
                 <View
-                  style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
+                  style={{
+                    borderWidth: 1,
+                    borderTopRightRadius: index == 0 ? 10 : 0,
+                    borderTopLeftRadius: index == 0 ? 10 : 0,
+                    borderBottomRightRadius:
+                      index == todayPollensData?.current?.length - 1 ? 10 : 0,
+                    borderBottomLeftRadius:
+                      index == todayPollensData?.current?.length - 1 ? 10 : 0,
+                    padding: 20,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderBottomWidth:
+                      index == todayPollensData?.current?.length - 1 ? 1 : 0,
+                  }}>
                   <View
                     style={{
-                      height: 20,
-                      width: 20,
-                      borderRadius: 200,
-                      borderWidth: 1,
-                      borderColor: '#4C9E00',
+                      flexDirection: 'row',
+                      gap: 10,
                       alignItems: 'center',
-                      justifyContent: 'center',
                     }}>
                     <View
                       style={{
-                        height: 15,
-                        width: 15,
+                        height: 20,
+                        width: 20,
                         borderRadius: 200,
-                        backgroundColor: '#4C9E00',
-                      }}
+                        borderWidth: 1,
+                        borderColor: '#4C9E00',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <View
+                        style={{
+                          height: 15,
+                          width: 15,
+                          borderRadius: 200,
+                          backgroundColor: '#4C9E00',
+                        }}
+                      />
+                    </View>
+
+                    <AppText
+                      title={item.name}
+                      textSize={2}
+                      textColor={AppColors.BLACK}
+                      textFontWeight
                     />
                   </View>
 
-                  <AppText
-                    title={item.name}
-                    textSize={2}
-                    textColor={AppColors.BLACK}
-                    textFontWeight
+                  <AntDesign
+                    name={'plus'}
+                    size={responsiveFontSize(2.5)}
+                    color={'#777777'}
                   />
                 </View>
-
-                <AntDesign
-                  name={'plus'}
-                  size={responsiveFontSize(2.5)}
-                  color={'#777777'}
-                />
-              </View>
-            );
-          }}
-        />
+              );
+            }}
+          />
+        )}
       </ScrollView>
     </LinearGradient>
   );
