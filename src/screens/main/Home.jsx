@@ -7,8 +7,10 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Platform,
+  Animated,
+  Alert,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   responsiveFontSize,
@@ -27,10 +29,12 @@ import {useSelector} from 'react-redux';
 import axios from 'axios';
 import BASE_URL from '../../utils/BASE_URL';
 import DatePicker from 'react-native-date-picker';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import moment from 'moment';
 
 const Home = ({navigation}) => {
   const useData = useSelector(state => state.auth);
+
   const pollens = [
     {id: 1, name: 'Total Spores', top: true},
     {id: 2, name: 'Leptosphaeria etc.'},
@@ -53,19 +57,10 @@ const Home = ({navigation}) => {
     {id: 19, name: 'Powdery mildew', bottom: true},
   ];
 
-  const color = [
-    '#f10000',
-    '#f42d00',
-    '#e98e26',
-    '#e9bc00',
-    '#39e649',
-    '#3cff43',
-  ];
-
-  const [selected, setSelected] = useState('');
+  const [selected, setSelected] = useState('Today');
   const [PastPollenData, setPastPollenData] = useState();
   const [pollenData, setPollenData] = useState();
-  const [PastFutureData, setFuturePollenData] = useState();
+  const [FuturePollenData, setFuturePollenData] = useState();
 
   const [todayPollensData, setTodayPollensData] = useState();
   const [pollenLoader, setPollenLoader] = useState(false);
@@ -74,7 +69,12 @@ const Home = ({navigation}) => {
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
 
-  console.log('pollenData', selected);
+  const [PastDate, setPastDate] = useState(
+    moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD'),
+  );
+  const [FutureDate, setFutureDate] = useState(
+    moment(new Date()).add(1, 'days').format('YYYY-MM-DD'),
+  );
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -110,16 +110,15 @@ const Home = ({navigation}) => {
 
         const city = res?.user?.locations?.closest?.name;
 
-        const past = response?.data?.forecast?.[city]?.past
+        const past = response?.data?.forecast?.[city]?.past;
         const today = response?.data?.forecast?.[city]?.today;
-        const future = response?.data?.forecast?.[city]?.future
+        const future = response?.data?.forecast?.[city]?.future;
 
         setPollenData(response.data);
 
-        setPastPollenData(past)
+        setPastPollenData(past);
         setTodayPollensData(today);
-        setFuturePollenData(future)
-        
+        setFuturePollenData(future);
 
         setPollenLoader(false);
       })
@@ -129,26 +128,76 @@ const Home = ({navigation}) => {
       });
   };
 
-  return (
+  const getThBgColour = level => {
+    switch (level) {
+      case 'Very High':
+        return '#D72626';
+      case 'High':
+        return '#F26D24';
+      case 'Moderate':
+        return '#FDEB48';
+      case 'Low':
+        return '#99C817';
+      default:
+        return '#99C817';
+    }
+  };
 
+  return (
     <LinearGradient
-      colors={[todayPollensData?.label == "Very High" ? AppColors.BGCOLOURSRed : AppColors.BGCOLOURS, AppColors.WHITE]}
+      colors={[
+        getThBgColour(
+          selected == 'Past'
+            ? PastPollenData?.[PastDate]?.label
+            : selected == 'Future'
+            ? FuturePollenData?.[FutureDate]?.label
+            : todayPollensData?.label,
+        ),
+        AppColors.WHITE,
+      ]}
+      // colors={[animatedColor, AppColors.WHITE]} // 🎯 animated start, static end
       style={{
         height: responsiveHeight(100),
         width: responsiveWidth(100),
-        
       }}>
       <ScrollView
-        contentContainerStyle={{flexGrow: 1, paddingBottom: 100, padding: 20, marginTop: Platform.OS == "ios" ? 30: 0}}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: 100,
+          padding: 20,
+          marginTop: Platform.OS == 'ios' ? 30 : 0,
+        }}
         showsVerticalScrollIndicator={false}>
         <DatePicker
           modal
           open={open}
           date={date}
           mode="date"
-          onConfirm={date => {
+          onConfirm={selectedDate => {
+
             setOpen(false);
-            setDate(date);
+            const today = moment().startOf('day');
+            const picked = moment(selectedDate).startOf('day');
+            const formattedDate = picked.format('YYYY-MM-DD');
+
+            if (picked.isAfter(today)) {
+              if (FuturePollenData?.[formattedDate]?.label) {
+                console.log('formated', formattedDate);
+                setFutureDate(formattedDate)
+                setSelected('Future');
+              } else {
+                Alert.alert('Forcast not found for this date');
+              }
+            } else if (picked.isBefore(today)) {
+              if (PastPollenData?.[formattedDate]?.label) {
+                setPastDate(formattedDate)
+                setSelected('Past');
+              } else {
+                Alert.alert('Data is only avaible for 7 past days');
+              }
+            } else {
+              setSelected('Today');
+            }
           }}
           onCancel={() => {
             setOpen(false);
@@ -197,7 +246,16 @@ const Home = ({navigation}) => {
             {pollenLoader == true ? (
               <ActivityIndicator size={'small'} color={AppColors.BLACK} />
             ) : (
-              <AppText title={pollenData?.today?.text} textColor={'#777777'} />
+              <AppText
+                title={
+                  selected == 'Past'
+                    ? PastPollenData?.[PastDate]?.date_label
+                    : selected == 'Future'
+                    ? FuturePollenData?.[FutureDate]?.date_label
+                    : pollenData?.today?.text
+                }
+                textColor={'#777777'}
+              />
             )}
           </TouchableOpacity>
         </View>
@@ -210,8 +268,14 @@ const Home = ({navigation}) => {
             textColor={AppColors.BLACK}
             textFontWeight
           />
-          
-          <SpeedoMeter TextBottom={todayPollensData?.label}/>
+
+          <SpeedoMeter
+            TextBottom={
+              selected == 'Past'
+                ? PastPollenData?.[PastDate]?.label
+                : todayPollensData?.label
+            }
+          />
         </View>
 
         <View style={{flexDirection: 'row', gap: 5}}>
@@ -270,7 +334,6 @@ const Home = ({navigation}) => {
               TextBottom={todayPollensData?.label}
               TempreaturePriority={'Moderate'}
               TempreaturePriorityFontSize={1.6}
-              
             />
           </View>
 
@@ -410,7 +473,6 @@ const Home = ({navigation}) => {
         )}
       </ScrollView>
     </LinearGradient>
-
   );
 };
 

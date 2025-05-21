@@ -17,7 +17,7 @@ type props = {
   textSize?: any;
   RightColour?: any;
   buttoWidth?: number;
-  isloading?: boolean;
+  isLoading?: boolean;
 };
 const AppButton = ({
   title,

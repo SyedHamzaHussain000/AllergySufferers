@@ -17,6 +17,11 @@ const FeedBack = () => {
   const [isLoader, setIsLaoder] = useState(false);
 
   const setFeedBack = () => {
+    if(!feedBackData.name && !feedBackData.email && !feedBackData.message){ 
+      ToastAndroid.show('Please enter your name', ToastAndroid.SHORT);
+      return;
+    }
+
     setIsLaoder(true);
     let data = JSON.stringify({
       name: feedBackData.name,
@@ -40,6 +45,12 @@ const FeedBack = () => {
         console.log(JSON.stringify(response.data));
         if (response.data.status == 'success') {
           setIsLaoder(false);
+          setFeedBackData({
+            name: '',
+            email: '',
+            message: '',
+          })
+          ToastAndroid.show('Feedback submitted successfully', ToastAndroid.SHORT);
         } else {
           setIsLaoder(false);
         }
@@ -147,7 +158,7 @@ const FeedBack = () => {
           title={'SUBMIT'}
           handlePress={() => setFeedBack()}
           RightColour={AppColors.rightArrowCOlor}
-          isloading={isLoader}
+          isLoading={isLoader}
         />
       </View>
     </ScrollView>
