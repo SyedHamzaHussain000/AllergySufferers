@@ -1,15 +1,58 @@
-import {View, Text, TextInput} from 'react-native';
-import React from 'react';
+import {View, Text, TextInput, ToastAndroid, ScrollView} from 'react-native';
+import React, {useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
 import AppColors from '../../../../utils/AppColors';
-import { responsiveHeight } from '../../../../utils/Responsive_Dimensions';
+import {responsiveHeight} from '../../../../utils/Responsive_Dimensions';
 import AppButton from '../../../../components/AppButton';
+import axios from 'axios';
+import BASE_URL from '../../../../utils/BASE_URL';
 
 const FeedBack = () => {
+  const [feedBackData, setFeedBackData] = useState({
+    name: '',
+    email: '',
+    message: '',
+  });
+  const [isLoader, setIsLaoder] = useState(false);
+
+  const setFeedBack = () => {
+    setIsLaoder(true);
+    let data = JSON.stringify({
+      name: feedBackData.name,
+      email: feedBackData.email,
+      message: feedBackData.message,
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/submit_feedback`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        if (response.data.status == 'success') {
+          setIsLaoder(false);
+        } else {
+          setIsLaoder(false);
+        }
+      })
+      .catch(error => {
+        setIsLaoder(false);
+        console.log(error);
+      });
+  };
+
   return (
-    <View style={{padding: 20}}>
-      <AppHeader heading="Aerobiology" subheading="Feedback"  goBack={true}/>
+    <ScrollView contentContainerStyle={{flexGrow:1, padding: 20}}>
+      <AppHeader heading="Aerobiology" subheading="Feedback" goBack={true} />
 
       <View style={{gap: 10, marginTop: 20}}>
         <AppText
@@ -31,33 +74,83 @@ const FeedBack = () => {
         />
       </View>
 
-
-      <View style={{gap:10, marginTop:20}}>
+      <View style={{gap: 10, marginTop: 20}}>
         <View>
-            <AppText title={"Full Name"} textColor={AppColors.BLACK} textSize={2} textFontWeight/>
-            <TextInput
-            style={{borderWidth:1, borderRadius:10, borderColor:AppColors.LIGHTGRAY, paddingHorizontal:10}}
-            />
+          <AppText
+            title={'Full Name'}
+            textColor={AppColors.BLACK}
+            textSize={2}
+            textFontWeight
+          />
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderRadius: 10,
+              borderColor: AppColors.LIGHTGRAY,
+              paddingHorizontal: 10,
+              
+              
+            }}
+            multiline
+            onChangeText={text =>
+              setFeedBackData({...feedBackData, name: text})
+            }
+            value={feedBackData.name}
+          />
         </View>
 
         <View>
-            <AppText title={"Email"} textColor={AppColors.BLACK} textSize={2} textFontWeight/>
-            <TextInput
-            style={{borderWidth:1, borderRadius:10, borderColor:AppColors.LIGHTGRAY, paddingHorizontal:10}}
-            />
+          <AppText
+            title={'Email'}
+            textColor={AppColors.BLACK}
+            textSize={2}
+            textFontWeight
+          />
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderRadius: 10,
+              borderColor: AppColors.LIGHTGRAY,
+              paddingHorizontal: 10,
+            }}
+            onChangeText={text =>
+              setFeedBackData({...feedBackData, email: text})
+            }
+            value={feedBackData.email}
+          />
         </View>
 
-
         <View>
-            <AppText title={"Message"} textColor={AppColors.BLACK} textSize={2} textFontWeight/>
-            <TextInput
-            style={{borderWidth:1, borderRadius:10, borderColor:AppColors.LIGHTGRAY, paddingHorizontal:10, height:responsiveHeight(20)}}
-            />
-        </View> 
-        
-        <AppButton title={"SUBMIT"} RightColour={AppColors.rightArrowCOlor}/>
+          <AppText
+            title={'Message'}
+            textColor={AppColors.BLACK}
+            textSize={2}
+            textFontWeight
+          />
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderRadius: 10,
+              borderColor: AppColors.LIGHTGRAY,
+              paddingHorizontal: 10,
+              height: responsiveHeight(20),
+              textAlignVertical:'top'
+            }}
+            onChangeText={text =>
+              setFeedBackData({...feedBackData, message: text})
+            }
+            value={feedBackData.message}
+          />
+        </View>
+
+        <AppButton
+          title={'SUBMIT'}
+          handlePress={() => setFeedBack()}
+          RightColour={AppColors.rightArrowCOlor}
+          isloading={isLoader}
+        />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

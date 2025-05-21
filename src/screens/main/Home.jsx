@@ -6,6 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -26,6 +27,7 @@ import {useSelector} from 'react-redux';
 import axios from 'axios';
 import BASE_URL from '../../utils/BASE_URL';
 import DatePicker from 'react-native-date-picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Home = ({navigation}) => {
   const useData = useSelector(state => state.auth);
@@ -61,7 +63,10 @@ const Home = ({navigation}) => {
   ];
 
   const [selected, setSelected] = useState('');
+  const [PastPollenData, setPastPollenData] = useState();
   const [pollenData, setPollenData] = useState();
+  const [PastFutureData, setFuturePollenData] = useState();
+
   const [todayPollensData, setTodayPollensData] = useState();
   const [pollenLoader, setPollenLoader] = useState(false);
 
@@ -69,7 +74,7 @@ const Home = ({navigation}) => {
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
 
-  console.log('pollenData', pollenData?.today?.text);
+  console.log('pollenData', selected);
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -105,13 +110,17 @@ const Home = ({navigation}) => {
 
         const city = res?.user?.locations?.closest?.name;
 
+        const past = response?.data?.forecast?.[city]?.past
         const today = response?.data?.forecast?.[city]?.today;
-
-        console.log('today........', today);
+        const future = response?.data?.forecast?.[city]?.future
 
         setPollenData(response.data);
 
+        setPastPollenData(past)
         setTodayPollensData(today);
+        setFuturePollenData(future)
+        
+
         setPollenLoader(false);
       })
       .catch(error => {
@@ -121,15 +130,16 @@ const Home = ({navigation}) => {
   };
 
   return (
+
     <LinearGradient
-      colors={[AppColors.BGCOLOURS, AppColors.WHITE]}
+      colors={[todayPollensData?.label == "Very High" ? AppColors.BGCOLOURSRed : AppColors.BGCOLOURS, AppColors.WHITE]}
       style={{
         height: responsiveHeight(100),
         width: responsiveWidth(100),
-        padding: 15,
+        
       }}>
       <ScrollView
-        contentContainerStyle={{flexGrow: 1, paddingBottom: 100}}
+        contentContainerStyle={{flexGrow: 1, paddingBottom: 100, padding: 20, marginTop: Platform.OS == "ios" ? 30: 0}}
         showsVerticalScrollIndicator={false}>
         <DatePicker
           modal
@@ -200,7 +210,8 @@ const Home = ({navigation}) => {
             textColor={AppColors.BLACK}
             textFontWeight
           />
-          <SpeedoMeter />
+          
+          <SpeedoMeter TextBottom={todayPollensData?.label}/>
         </View>
 
         <View style={{flexDirection: 'row', gap: 5}}>
@@ -256,9 +267,10 @@ const Home = ({navigation}) => {
               imgHeight={10}
               speedometerWidth={30}
               imageTop={-10}
-              TextBottom={-110}
+              TextBottom={todayPollensData?.label}
               TempreaturePriority={'Moderate'}
               TempreaturePriorityFontSize={1.6}
+              
             />
           </View>
 
@@ -275,7 +287,7 @@ const Home = ({navigation}) => {
               imgHeight={10}
               speedometerWidth={30}
               imageTop={-10}
-              TextBottom={-110}
+              TextBottom={todayPollensData?.label}
               TempreaturePriority={'High'}
               TempreaturePriorityFontSize={1.6}
             />
@@ -294,7 +306,7 @@ const Home = ({navigation}) => {
               imgHeight={10}
               speedometerWidth={30}
               imageTop={-10}
-              TextBottom={-110}
+              TextBottom={todayPollensData?.label}
               TempreaturePriority={'Very High'}
               TempreaturePriorityFontSize={1.6}
             />
@@ -398,6 +410,7 @@ const Home = ({navigation}) => {
         )}
       </ScrollView>
     </LinearGradient>
+
   );
 };
 

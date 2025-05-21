@@ -5,8 +5,9 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  SafeAreaView,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AppHeader from '../../components/AppHeader';
 import AppImages from '../../assets/images/AppImages';
 import {
@@ -19,8 +20,14 @@ import AppColors from '../../utils/AppColors';
 import {BarChart} from 'react-native-chart-kit';
 import AppButton from '../../components/AppButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import BASE_URL from '../../utils/BASE_URL';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
 const Medication = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
+
+  const userData = useSelector(state => state.auth.user)
+  const [allMedication, setAllMedication] = useState()
 
   const chartConfig = {
     backgroundGradientFrom: '#FFFFFF',
@@ -34,13 +41,14 @@ const Medication = ({navigation}) => {
     propsForBackgroundLines: {
       strokeDasharray: '', // solid background lines
     },
+
   };
 
   const data = {
     labels: ['Mar 16', 'Mar 18', 'Mar 20', 'Mar 22'],
     datasets: [
       {
-        data: [3, 0, 1, 1],
+        data: [3, 1, 2, 1],
         colors: [
           () => '#E74C3C', // red
           () => '#E74C3C',
@@ -48,20 +56,40 @@ const Medication = ({navigation}) => {
           () => '#E74C3C',
         ],
       },
-      {
-        data: [2, 1, 2, 2],
-        colors: [
-          () => '#2ECC71', // green
-          () => '#2ECC71',
-          () => '#2ECC71',
-          () => '#2ECC71',
-        ],
-      },
+  
     ],
     barColors: ['#E74C3C', '#2ECC71'],
   };
 
+  useEffect(()=>{
+    const nav = navigation.addListener('focus' , ()=>{
+
+      getActiveMedication()
+    })
+
+    return nav
+  },[navigation])
+  const getActiveMedication = () => {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_medications_active`,
+      headers: {},
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+
+        setAllMedication(response.data.data)
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
   return (
+    <SafeAreaView style={{flex: 1, backgroundColor:AppColors.WHITE}}>
     <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
       <AppHeader
         heading="Medication"
@@ -137,10 +165,11 @@ const Medication = ({navigation}) => {
         <AppButton
           title={'Go TO DATA VISUALIZER'}
           RightColour={AppColors.rightArrowCOlor}
-          handlePress={()=> navigation.navigate("DataVisualizer")}
+          handlePress={() => navigation.navigate('DataVisualizer')}
         />
       </View>
     </View>
+    </SafeAreaView>
   );
 };
 

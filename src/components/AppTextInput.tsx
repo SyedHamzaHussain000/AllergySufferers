@@ -45,6 +45,7 @@ const AppTextInput = ({
         gap: 10,
         borderWidth: 1,
         borderColor: AppColors.LIGHTGRAY,
+        height: 50
       }}>
       {logo}
 

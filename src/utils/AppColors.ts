@@ -8,6 +8,9 @@ type Colors = {
     PEACHCOLOUR: string;
     INPUTBG: string
     BGCOLOURS: string
+    BGCOLOURSRed: string
+    BGCOLOURSGreen: string
+    BGCOLOURSYellow: string
     BGCOLOURS2: string
     PRIMARY: string
     TEXTCOLOR: string
@@ -24,12 +27,16 @@ const   AppColors: Colors = {
     DARKGRAY: "#939393",
     PEACHCOLOUR: "#F7D794",
     INPUTBG: "#F5F5F5",
-    BGCOLOURS: "#80FF45",
     BGCOLOURS2: "#FE3F9B",
     PRIMARY:"#032198",
     TEXTCOLOR: "#494949",
     LIGHTGRAY: "#777777",
-    rightArrowCOlor: "#3D56F0"
+    rightArrowCOlor: "#3D56F0",
+
+    BGCOLOURS: "#FDEB48",
+    BGCOLOURSRed: "#D72626",
+    BGCOLOURSGreen: "#F26D24",
+    BGCOLOURSYellow: "#99C817"
 
 
   };

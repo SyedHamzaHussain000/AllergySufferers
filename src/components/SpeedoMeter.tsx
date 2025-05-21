@@ -25,11 +25,11 @@ type props = {
 }
 
 
-const SpeedoMeter = ({imgWeight = 90, imgHeight = 20}:props) => {
+const SpeedoMeter = ({imgWeight = 90, imgHeight = 20,TempreaturePriority,TextBottom,imageTop,speedometerWidth}:props) => {
   return (
        <View style={{alignItems: 'center', justifyContent: 'center'}}>
               <Image
-                source={AppImages.meterred}
+                source={ TextBottom == "Very High" ? AppImages.meterdarkred : TextBottom == "High" ? AppImages.meterred :  TextBottom == "Moderate" ? AppImages.meteryellow : TextBottom == "Low" ? AppImages.metergreen : AppImages.metergreen}
                 style={{
                   // position: 'absolute',
                   // zIndex: 1,
@@ -40,7 +40,7 @@ const SpeedoMeter = ({imgWeight = 90, imgHeight = 20}:props) => {
                 }}
               />
 
-              <AppText title={"High"} textColor={AppColors.BLACK} textSize={2}/>
+              <AppText title={TextBottom} textColor={AppColors.BLACK} textSize={2}/>
 
               {/* <Speedometer
                 value={50}

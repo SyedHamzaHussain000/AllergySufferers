@@ -1,19 +1,55 @@
-import {View, Text, Dimensions, TouchableOpacity, FlatList} from 'react-native';
-import React from 'react';
+import {View, Text, Dimensions, TouchableOpacity, FlatList, ScrollView} from 'react-native';
+import React, {useState} from 'react';
 import AppHeader from '../../../components/AppHeader';
 import {BarChart} from 'react-native-chart-kit';
 import AppColors from '../../../utils/AppColors';
-import { responsiveFontSize, responsiveHeight, responsiveWidth } from '../../../utils/Responsive_Dimensions';
+import {
+  responsiveFontSize,
+  responsiveHeight,
+  responsiveWidth,
+} from '../../../utils/Responsive_Dimensions';
 import AppText from '../../../components/AppTextComps/AppText';
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import BASE_URL from '../../../utils/BASE_URL';
+import {useSelector} from 'react-redux';
+import axios from 'axios';
 const DataVisualizer = () => {
   const screenWidth = Dimensions.get('window').width;
+  const userData = useSelector(state => state.auth.user);
 
-    const pollens = [
-    {id:1, name: "Cladosporium", top: true},
-    {id:2, name: "Low - Mar 28th, 2025", bottom:true },
-  ]
+  const [type, setType] = useState('');
+  const [medicationData, setMedicationsData] = useState();
 
+  const [takingMedications, setTakingMedications] = useState([]);
+
+  const pollens = [
+    {id: 1, name: 'Cladosporium', top: true},
+    {id: 2, name: 'Low - Mar 28th, 2025', bottom: true},
+  ];
+
+  const getMedicationApi = () => {
+    setType('medication');
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications`,
+      headers: {},
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        setMedicationsData(response.data.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
+  const getAllergensApi = () => {
+    setType('allergens');
+  };
 
   const chartConfig = {
     backgroundGradientFrom: '#FFFFFF',
@@ -49,7 +85,7 @@ const DataVisualizer = () => {
   };
 
   return (
-    <View style={{padding: 20, flex: 1, backgroundColor: AppColors.WHITE}}>
+    <ScrollView contentContainerStyle={{padding: 20, flexGrow: 1, backgroundColor: AppColors.WHITE}}>
       <AppHeader
         heading="Data Visualizer"
         Rightheading="Today"
@@ -63,7 +99,7 @@ const DataVisualizer = () => {
           borderRadius: 10,
           alignItems: 'center',
           justifyContent: 'center',
-          marginTop:20
+          marginTop: 20,
         }}>
         <BarChart
           data={data}
@@ -79,54 +115,142 @@ const DataVisualizer = () => {
         />
       </View>
 
-      <View style={{height:responsiveHeight(6), width:responsiveWidth(90), borderWidth:1, borderRadius:10, borderColor:AppColors.LIGHTGRAY,  marginTop:20, flexDirection:'row', justifyContent:'space-between', alignItems:'center', paddingHorizontal:20}}>
-            <AppText title={"HAMILTON"}/>
-            <AntDesign
-            name={"plus"}
-            size={responsiveFontSize(2)}
-            color={AppColors.LIGHTGRAY}
-            
-            />
+      <View>
+        <FlatList
+          data={takingMedications}
+          renderItem={({item}) => {
+            console.log('item', item);
+            return (
+              <View
+                style={{
+                  height: responsiveHeight(6),
+                  width: responsiveWidth(90),
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  borderColor: AppColors.LIGHTGRAY,
+                  marginTop: 5,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingHorizontal: 20,
+                }}>
+                <AppText title={item.name} textSize={1.5} />
+                <TouchableOpacity   onPress={() =>
+    setTakingMedications(prev =>
+      prev.filter(med => med.id !== item.id)
+    )
+  }>
+                  <AntDesign
+                    name={'minus'}
+                    size={responsiveFontSize(2)}
+                    color={AppColors.LIGHTGRAY}
+                  />
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+        />
       </View>
 
-      <View style={{marginTop:20, flexDirection:'row', justifyContent:'space-between'}}>
-        <TouchableOpacity style={{height:responsiveHeight(5), width:responsiveWidth(44), backgroundColor:AppColors.BTNCOLOURS, borderRadius:10, alignItems:'center', justifyContent:'center'}}>
-            <AppText title={"ALLERGENS"} textColor={AppColors.WHITE} textSize={2} textFontWeight/>
+      <View
+        style={{
+          marginTop: 20,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}>
+        <TouchableOpacity
+          onPress={() => getAllergensApi()}
+          style={{
+            height: responsiveHeight(5),
+            width: responsiveWidth(44),
+            backgroundColor:
+              type == 'allergens' ? AppColors.BTNCOLOURS : AppColors.WHITE,
+            borderRadius: 10,
+            borderWidth: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <AppText
+            title={'ALLERGENS'}
+            textColor={type == 'allergens' ? AppColors.WHITE : AppColors.BLACK}
+            textSize={2}
+            textFontWeight
+          />
         </TouchableOpacity>
 
-
-         <TouchableOpacity style={{height:responsiveHeight(5), width:responsiveWidth(44),borderWidth:1,  borderRadius:10, alignItems:'center', justifyContent:'center'}}>
-            <AppText title={"MEDICATIONS"} textColor={AppColors.LIGHTGRAY} textSize={2} textFontWeight/>
+        <TouchableOpacity
+          onPress={() => getMedicationApi()}
+          style={{
+            height: responsiveHeight(5),
+            width: responsiveWidth(44),
+            borderWidth: 1,
+            borderRadius: 10,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor:
+              type == 'medication' ? AppColors.BTNCOLOURS : AppColors.WHITE,
+          }}>
+          <AppText
+            title={'MEDICATIONS'}
+            textColor={type == 'medication' ? AppColors.WHITE : AppColors.BLACK}
+            textSize={2}
+            textFontWeight
+          />
         </TouchableOpacity>
       </View>
 
+      <FlatList
+        data={medicationData}
+        contentContainerStyle={{marginTop: 20, paddingBottom: 100}}
+        renderItem={({item, index}) => {
+          console.log('item', item);
+          return (
+            <View
+              
+              style={{
+                borderWidth: 1,
+                borderTopRightRadius: index == 0 ? 10 : 0,
+                borderTopLeftRadius: index == 0 ? 10 : 0,
+                borderBottomRightRadius:
+                  index == medicationData?.length - 1 ? 10 : 0,
+                borderBottomLeftRadius:
+                  index == medicationData?.length - 1 ? 10 : 0,
+                padding: 20,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                borderBottomWidth: index == medicationData?.length - 1 ? 1 : 0,
+              }}>
+              <View
+                style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
+                  <TouchableOpacity  onPress={() =>
+    setTakingMedications(prev => {
+      const alreadyExists = prev.some(med => med.id === item.id); // Assuming `id` is unique
+      if (alreadyExists) return prev; // Don't add it again
+      return [...prev, item]; // Add only if it doesn't exist
+    })
+  }>
 
-         <FlatList
-      data={pollens}
-      contentContainerStyle={{marginTop:20}}
-      renderItem={({item})=>{
-        return(
-          <View style={{borderWidth:1, borderTopRightRadius: item.top ? 10 : 0, borderTopLeftRadius: item.top ? 10 : 0, borderBottomRightRadius: item.bottom ? 10 : 0, borderBottomLeftRadius: item.bottom ? 10 : 0, padding:20, flexDirection:'row', alignItems:'center', justifyContent:'space-between', borderBottomWidth: item.bottom ? 1 :0 }}>
-            <View style={{flexDirection:'row', gap:10, alignItems:'center'}}>
-      
-            <AntDesign
-            name={"pluscircle"}
-            size={responsiveFontSize(2.5)}
-            color={AppColors.BTNCOLOURS}
-            
-            />
+                <AntDesign
+                  name={'pluscircle'}
+                  size={responsiveFontSize(2.5)}
+                  color={AppColors.BTNCOLOURS}
+                  />
+                  </TouchableOpacity>
 
-              <AppText title={item.name} textSize={2} textColor={AppColors.BLACK} textFontWeight/>
+                <AppText
+                  title={item.name}
+                  textSize={2}
+                  textColor={AppColors.BLACK}
+                  textFontWeight
+                  textwidth={70}
+                />
+              </View>
             </View>
-
-
-          </View>
-        )
-      }}
-      
+          );
+        }}
       />
-      
-    </View>
+    </ScrollView>
   );
 };
 
