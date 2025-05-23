@@ -16,8 +16,9 @@ type props = {
   rightLogo?: any;
   title?: string;
   onChangeText?: (text: string) => void;
- value?: string;
- secure?: boolean;
+  value?: string;
+  secure?: boolean;
+  arrowDelete?: any;
 };
 const AppTextInput = ({
   logo,
@@ -29,29 +30,35 @@ const AppTextInput = ({
   title,
   value,
   secure,
-  onChangeText
+  onChangeText,
+  arrowDelete,
 }: props) => {
   return (
-    <View style={{gap:5}}>
+    <View style={{gap: 5}}>
       {/* <AppText title={title} textColor={AppColors.BLACK} textSize={2} textFontWeight/> */}
-    <View
-      style={{
-        flexDirection: 'row',
-        backgroundColor: containerBg,
-        paddingHorizontal: 20,
-        paddingVertical: 5,
-        borderRadius: 12,
-        alignItems: 'center',
-        gap: 10,
-        borderWidth: 1,
-        borderColor: AppColors.LIGHTGRAY,
-        height: 50
-      }}>
-      {logo}
+      <View
+        style={{
+          flexDirection: 'row',
+          backgroundColor: containerBg,
+          paddingHorizontal: 20,
+          paddingVertical: 5,
+          borderRadius: 12,
+          alignItems: 'center',
+          gap: 10,
+          borderWidth: 1,
+          borderColor: AppColors.LIGHTGRAY,
+          height: 50,
+        }}>
+        {logo}
 
-      <AppText title={inputPlaceHolder} textColor={AppColors.LIGHTGRAY} textwidth={70} textSize={2}/>
+        <AppText
+          title={inputPlaceHolder}
+          textColor={AppColors.LIGHTGRAY}
+          textwidth={70}
+          textSize={2}
+        />
 
-      {/* <TextInput
+        {/* <TextInput
         placeholder={inputPlaceHolder}
         placeholderTextColor={AppColors.LIGHTGRAY}
         style={{width: responsiveWidth(inputWidth), color: AppColors.BLACK}}
@@ -60,8 +67,13 @@ const AppTextInput = ({
         secureTextEntry={secure}
       /> */}
 
-      {rightLogo}
-    </View>
+        <View style={{flexDirection:'row', gap:5, marginRight:100}}>
+
+        {rightLogo}
+        {arrowDelete}
+        </View>
+
+      </View>
     </View>
   );
 };
