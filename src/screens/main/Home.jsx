@@ -174,7 +174,6 @@ const Home = ({navigation}) => {
           date={date}
           mode="date"
           onConfirm={selectedDate => {
-
             setOpen(false);
             const today = moment().startOf('day');
             const picked = moment(selectedDate).startOf('day');
@@ -183,17 +182,21 @@ const Home = ({navigation}) => {
             if (picked.isAfter(today)) {
               if (FuturePollenData?.[formattedDate]?.label) {
                 console.log('formated', formattedDate);
-                setFutureDate(formattedDate)
+                setFutureDate(formattedDate);
                 setSelected('Future');
               } else {
-                Alert.alert('Forcast not found for this date');
+                Alert.alert(
+                  'No Forecast Available',
+                  'We couldn’t find any allergen forecast data for the selected date. Please try another day.',
+                )
               }
             } else if (picked.isBefore(today)) {
               if (PastPollenData?.[formattedDate]?.label) {
-                setPastDate(formattedDate)
+                setPastDate(formattedDate);
                 setSelected('Past');
               } else {
-                Alert.alert('Data is only avaible for 7 past days');
+                Alert.alert('Unavailable Date', 'Data is only available for the past 7 days. Please select a more recent date.');
+
               }
             } else {
               setSelected('Today');
@@ -273,7 +276,7 @@ const Home = ({navigation}) => {
             TextBottom={
               selected == 'Past'
                 ? PastPollenData?.[PastDate]?.label
-                : todayPollensData?.label
+                : selected == 'Future' ? FuturePollenData?.[FutureDate]?.label :  todayPollensData?.label
             }
           />
         </View>

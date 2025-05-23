@@ -11,7 +11,7 @@ import { CurrentLogin, setLoader } from '../../redux/Slices/AuthSlice';
 
 const Login = ({navigation}) => {
 
-  const [email, setEmail] = useState('john122@example.com')
+  const [email, setEmail] = useState('william.austin3939@gmail.com')
   const [password, setPassword] = useState('mysecurepassword')
 
 

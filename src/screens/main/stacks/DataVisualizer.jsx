@@ -1,4 +1,11 @@
-import {View, Text, Dimensions, TouchableOpacity, FlatList, ScrollView} from 'react-native';
+import {
+  View,
+  Text,
+  Dimensions,
+  TouchableOpacity,
+  FlatList,
+  ScrollView,
+} from 'react-native';
 import React, {useState} from 'react';
 import AppHeader from '../../../components/AppHeader';
 import {BarChart} from 'react-native-chart-kit';
@@ -85,7 +92,12 @@ const DataVisualizer = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={{padding: 20, flexGrow: 1, backgroundColor: AppColors.WHITE}}>
+    <ScrollView
+      contentContainerStyle={{
+        padding: 20,
+        flexGrow: 1,
+        backgroundColor: AppColors.WHITE,
+      }}>
       <AppHeader
         heading="Data Visualizer"
         Rightheading="Today"
@@ -135,11 +147,12 @@ const DataVisualizer = () => {
                   paddingHorizontal: 20,
                 }}>
                 <AppText title={item.name} textSize={1.5} />
-                <TouchableOpacity   onPress={() =>
-    setTakingMedications(prev =>
-      prev.filter(med => med.id !== item.id)
-    )
-  }>
+                <TouchableOpacity
+                  onPress={() =>
+                    setTakingMedications(prev =>
+                      prev.filter(med => med.id !== item.id),
+                    )
+                  }>
                   <AntDesign
                     name={'minus'}
                     size={responsiveFontSize(2)}
@@ -206,7 +219,6 @@ const DataVisualizer = () => {
           console.log('item', item);
           return (
             <View
-              
               style={{
                 borderWidth: 1,
                 borderTopRightRadius: index == 0 ? 10 : 0,
@@ -223,20 +235,22 @@ const DataVisualizer = () => {
               }}>
               <View
                 style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
-                  <TouchableOpacity  onPress={() =>
-    setTakingMedications(prev => {
-      const alreadyExists = prev.some(med => med.id === item.id); // Assuming `id` is unique
-      if (alreadyExists) return prev; // Don't add it again
-      return [...prev, item]; // Add only if it doesn't exist
-    })
-  }>
-
-                <AntDesign
-                  name={'pluscircle'}
-                  size={responsiveFontSize(2.5)}
-                  color={AppColors.BTNCOLOURS}
+                <TouchableOpacity
+                  onPress={() =>
+                    setTakingMedications(prev => {
+                      const alreadyExists = prev.some(
+                        med => med.id === item.id,
+                      ); // Assuming `id` is unique
+                      if (alreadyExists) return prev; // Don't add it again
+                      return [...prev, item]; // Add only if it doesn't exist
+                    })
+                  }>
+                  <AntDesign
+                    name={'pluscircle'}
+                    size={responsiveFontSize(2.5)}
+                    color={AppColors.BTNCOLOURS}
                   />
-                  </TouchableOpacity>
+                </TouchableOpacity>
 
                 <AppText
                   title={item.name}

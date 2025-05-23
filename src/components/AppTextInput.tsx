@@ -33,7 +33,7 @@ const AppTextInput = ({
 }: props) => {
   return (
     <View style={{gap:5}}>
-      <AppText title={title} textColor={AppColors.BLACK} textSize={2} textFontWeight/>
+      {/* <AppText title={title} textColor={AppColors.BLACK} textSize={2} textFontWeight/> */}
     <View
       style={{
         flexDirection: 'row',
@@ -49,16 +49,16 @@ const AppTextInput = ({
       }}>
       {logo}
 
-      
+      <AppText title={inputPlaceHolder} textColor={AppColors.LIGHTGRAY} textwidth={70} textSize={2}/>
 
-      <TextInput
+      {/* <TextInput
         placeholder={inputPlaceHolder}
         placeholderTextColor={AppColors.LIGHTGRAY}
         style={{width: responsiveWidth(inputWidth), color: AppColors.BLACK}}
         onChangeText={onChangeText}
         value={value}
         secureTextEntry={secure}
-      />
+      /> */}
 
       {rightLogo}
     </View>

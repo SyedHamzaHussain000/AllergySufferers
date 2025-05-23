@@ -25,17 +25,17 @@ import {useSelector} from 'react-redux';
 const Symptom = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
 
-  const [symtomsData, setSymtomsData] = useState(null);
+  const [symtomsData, setSymtomsData] = useState();
   const [systomsNumber, setSymtomsNumber] = useState();
 
   const userData = useSelector(state => state?.auth?.user);
 
   const mojis = [
-    {id: 5, img: AppImages.Star, title: 'Very Good'},
-    {id: 4, img: AppImages.Hello, title: 'Good'},
-    {id: 3, img: AppImages.Bored, title: 'Okay'},
-    {id: 2, img: AppImages.Pain, title: 'Bad'},
     {id: 1, img: AppImages.Mask, title: 'Very Bad'},
+    {id: 2, img: AppImages.Pain, title: 'Bad'},
+    {id: 3, img: AppImages.Bored, title: 'Okay'},
+    {id: 4, img: AppImages.Hello, title: 'Good'},
+    {id: 5, img: AppImages.Star, title: 'Very Good'},
   ];
 
   const chartConfig = {
@@ -52,6 +52,15 @@ const Symptom = ({navigation}) => {
     },
   };
 
+  console.log('first');
+
+  const symtomsArrayData = [
+    {
+      labels: [],
+      datasets: [{data: []}],
+    },
+  ];
+
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       getSymtomsData();
@@ -61,7 +70,7 @@ const Symptom = ({navigation}) => {
   }, [navigation]);
 
   const getSymtomsData = () => {
-    console.log('userData?.id', userData?.id);
+    // console.log('userData?.id', userData?.id);
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -71,27 +80,44 @@ const Symptom = ({navigation}) => {
 
     axios
       .request(config)
-      .then(response => {
-        const sorted = response.data.symptoms.sort(
-          (a, b) => new Date(a.date) - new Date(b.date),
-        );
+      .then(async  response => {
+        // console.log('symptoms', response.data.symptoms);
+        const datasort = response.data.symptoms
 
-        const lastFive = sorted.slice(-7);
-        // const lastFive = sorted
+              const lastFive = datasort.slice(-5);
 
-        const labels = lastFive.map(item => {
-          const formatDate = moment(item.date, 'MMMM, DD YYYY').format('MMM D');
-          return formatDate;
-        });
 
-        const values = lastFive.map(item => parseFloat(item.symptom_level));
 
-        console.log('values', values);
+        console.log("datasort", datasort)
 
-        setSymtomsData({
-          labels,
-          datasets: [{data: values, strokeWidth: 2}],
-        });
+        const symtomsArrayData = {
+            labels: await lastFive.map(item =>   moment(item.date, 'MMM, DD YYYY').format('MMM D')),
+            datasets: [
+              {
+                data: await lastFive.map(item => parseInt(item.symptom_level))
+              },
+            ],
+          }
+        
+
+        setSymtomsData(symtomsArrayData)
+        // console.log('symtomsArrayData', symtomsArrayData);
+        // const lastFive = response?.data?.symptoms?.slice(-7);
+        // // const lastFive = sorted
+
+        // const labels = lastFive.map(item => {
+        //   const formatDate = moment(item.date, 'MMMM, DD YYYY').format('MMM D');
+        //   return formatDate;
+        // });
+
+        // const values = lastFive.map(item => parseFloat(item.symptom_level));
+
+        // console.log('values', values);
+
+        // setSymtomsData({
+        //   labels,
+        //   datasets: [{data: values, strokeWidth: 2}],
+        // });
       })
       .catch(error => {
         console.log(error);
@@ -101,7 +127,9 @@ const Symptom = ({navigation}) => {
   const setApiSymtomsData = id => {
     setSymtomsNumber(id);
 
+    
     const todayDate = moment().format('YYYY-MM-DD');
+
     let data = JSON.stringify({
       level: id,
       date: todayDate,
@@ -179,6 +207,8 @@ const Symptom = ({navigation}) => {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
+
+          
           <LineChart
             data={symtomsData || {labels: [], datasets: [{data: []}]}}
             width={screenWidth * 0.89}
@@ -189,6 +219,10 @@ const Symptom = ({navigation}) => {
             withVerticalLines={false}
             bezier
             withHorizontalLabels={false}
+            segments={5} 
+            
+            
+
           />
 
           <View
@@ -198,10 +232,12 @@ const Symptom = ({navigation}) => {
               height: responsiveHeight(30),
               width: responsiveWidth(10),
               left: 10,
+              marginBottom:35,
             }}>
             <FlatList
               data={mojis}
-              contentContainerStyle={{gap: 15}}
+            inverted
+              contentContainerStyle={{gap: 15 ,}}
               renderItem={({item}) => {
                 return (
                   <Image
@@ -211,6 +247,7 @@ const Symptom = ({navigation}) => {
                       width: responsiveHeight(4),
                       resizeMode: 'contain',
                       alignSelf: 'center',
+                      
                     }}
                   />
                 );
