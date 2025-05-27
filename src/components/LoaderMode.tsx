@@ -2,6 +2,7 @@ import { View, Text, ActivityIndicator } from 'react-native'
 import React from 'react'
 import { responsiveHeight, responsiveWidth } from '../utils/Responsive_Dimensions'
 import AppColors from '../utils/AppColors'
+import AppText from './AppTextComps/AppText'
 
 const LoaderMode = () => {
   return (
@@ -10,6 +11,7 @@ const LoaderMode = () => {
 
             {/* <View style={{position:'absolute', zIndex:10}}> */}
                     <ActivityIndicator size={'large'} color={AppColors.WHITE}/>
+                    <AppText title={"Please wait..."} textColor={AppColors.WHITE} textSize={2} textFontWeight/>
             {/* </View> */}
         </View>
 

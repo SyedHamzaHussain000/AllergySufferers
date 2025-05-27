@@ -6,6 +6,8 @@ import {
   Dimensions,
   TouchableOpacity,
   SafeAreaView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -28,10 +30,10 @@ const Medication = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
 
   const userData = useSelector(state => state.auth.user);
-  const [allMedication, setAllMedication] = useState();
-  const [MedicationnRecord, setMedicationnRecord] = useState([])
-
-  console.log("MedicationnRecord",MedicationnRecord)
+  const [allMedication, setAllMedication] = useState([]);
+  const [MedicationnRecord, setMedicationnRecord] = useState([]);
+  const [loader, setLoader] = useState(false);
+  console.log('MedicationnRecord', MedicationnRecord);
 
   const chartConfig = {
     backgroundGradientFrom: '#FFFFFF',
@@ -48,7 +50,9 @@ const Medication = ({navigation}) => {
   };
 
   const data = {
-    labels: MedicationnRecord?.map(item => moment(item.date, 'MMM, DD YYYY').format('MMM D')),
+    labels: MedicationnRecord?.map(item =>
+      moment(item.date, 'MMM, DD YYYY').format('MMM D'),
+    ),
     datasets: [
       {
         data: MedicationnRecord?.map(item => parseInt(item?.units || 0)),
@@ -78,6 +82,7 @@ const Medication = ({navigation}) => {
   }, [navigation]);
 
   const getActiveMedication = () => {
+    setLoader(true)
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -88,16 +93,18 @@ const Medication = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
-
+        console.log("................................", response.data.data)
         setAllMedication(response.data.data);
+        setLoader(false)
       })
       .catch(error => {
         console.log(error);
+        setLoader(false)
       });
   };
 
   const getMedicationRecords = () => {
+    // setLoader(true)
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -111,15 +118,84 @@ const Medication = ({navigation}) => {
         console.log(JSON.stringify(response.data));
 
         const slicedata = response.data.entries.items.slice(-5);
-        setMedicationnRecord(slicedata)
-
+        setMedicationnRecord(slicedata);
+        // setLoader(false)
       })
       .catch(error => {
+        // setLoader(false)
         console.log(error);
       });
   };
 
-  
+  const addMedication = (item) => {
+    console.log("itserarsa", userData)
+    setLoader(true)
+    let data = JSON.stringify({
+      medication_id: item.id,
+      units: 1,
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/add_medication_units`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        setTimeout(()=>{
+
+          getActiveMedication();
+        },7000)
+        // getMedicationRecords();
+        
+      })
+      .catch(error => {
+        console.log(error);
+        setLoader(false)
+      });
+  };
+
+
+  const removeMedication = (item) => {
+    setLoader(true)
+    let data = JSON.stringify({
+      medication_id: item.id,
+      units: 1,
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/remove_medication_units`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        setTimeout(()=>{
+
+          getActiveMedication();
+        },7000)
+        // getMedicationRecords();
+        
+      })
+      .catch(error => {
+        console.log(error);
+        setLoader(false)
+      });
+  };
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
@@ -131,10 +207,18 @@ const Medication = ({navigation}) => {
         />
 
         <View>
+          {
+            loader == true ? 
+
+            <ActivityIndicator size={'large'} color={AppColors.BLACK}/>
+
+            :
+
           <FlatList
             data={allMedication}
             contentContainerStyle={{gap: 10, marginTop: 20, marginBottom: 20}}
             renderItem={({item}) => {
+              console.log('item', item);
               return (
                 <View
                   style={{
@@ -159,7 +243,9 @@ const Medication = ({navigation}) => {
                       alignItems: 'center',
                       gap: 10,
                     }}>
-                    <TouchableOpacity>
+                    <TouchableOpacity 
+                    onPress={() => removeMedication(item)}
+                    >
                       <AntDesign
                         name={'minus'}
                         size={responsiveFontSize(2)}
@@ -168,12 +254,14 @@ const Medication = ({navigation}) => {
                     </TouchableOpacity>
 
                     <AppText
-                      title={'0'}
+                      title={item?.units ? item?.units : 0}
                       textColor={AppColors.LIGHTGRAY}
                       textSize={2.5}
                     />
 
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => addMedication(item)}
+                    >
                       <AntDesign
                         name={'plus'}
                         size={responsiveFontSize(2)}
@@ -185,6 +273,7 @@ const Medication = ({navigation}) => {
               );
             }}
           />
+          }
         </View>
 
         <BarChart

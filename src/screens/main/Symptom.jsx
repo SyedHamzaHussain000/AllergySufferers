@@ -6,6 +6,7 @@ import {
   Dimensions,
   TouchableOpacity,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -22,11 +23,16 @@ import axios from 'axios';
 import BASE_URL from '../../utils/BASE_URL';
 import moment from 'moment';
 import {useSelector} from 'react-redux';
+import LoaderMode from '../../components/LoaderMode';
+
+
 const Symptom = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
 
   const [symtomsData, setSymtomsData] = useState();
   const [systomsNumber, setSymtomsNumber] = useState();
+
+  const [loader, setLoader] = useState(false)
 
   const userData = useSelector(state => state?.auth?.user);
 
@@ -70,8 +76,8 @@ const Symptom = ({navigation}) => {
   }, [navigation]);
 
   const getSymtomsData = () => {
-    // console.log('userData?.id', userData?.id);
-    let config = {
+    setLoader(true)
+    let config = {  
       method: 'get',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_symptom_records`,
@@ -84,12 +90,7 @@ const Symptom = ({navigation}) => {
         // console.log('symptoms', response.data.symptoms);
         const datasort = response.data.symptoms
 
-              const lastFive = datasort.slice(-5);
-
-
-
-        console.log("datasort", datasort)
-
+        const lastFive = datasort.slice(-5);
         const symtomsArrayData = {
             labels: await lastFive.map(item =>   moment(item.date, 'MMM, DD YYYY').format('MMM D')),
             datasets: [
@@ -98,26 +99,13 @@ const Symptom = ({navigation}) => {
               },
             ],
           }
-        
 
         setSymtomsData(symtomsArrayData)
-        // console.log('symtomsArrayData', symtomsArrayData);
-        // const lastFive = response?.data?.symptoms?.slice(-7);
-        // // const lastFive = sorted
+          
+          setTimeout(() => {
 
-        // const labels = lastFive.map(item => {
-        //   const formatDate = moment(item.date, 'MMMM, DD YYYY').format('MMM D');
-        //   return formatDate;
-        // });
-
-        // const values = lastFive.map(item => parseFloat(item.symptom_level));
-
-        // console.log('values', values);
-
-        // setSymtomsData({
-        //   labels,
-        //   datasets: [{data: values, strokeWidth: 2}],
-        // });
+            setLoader(false)
+          },10000)
       })
       .catch(error => {
         console.log(error);
@@ -127,6 +115,7 @@ const Symptom = ({navigation}) => {
   const setApiSymtomsData = id => {
     setSymtomsNumber(id);
 
+    setLoader(true)
     
     const todayDate = moment().format('YYYY-MM-DD');
 
@@ -148,7 +137,7 @@ const Symptom = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+
         getSymtomsData();
       })
       .catch(error => {
@@ -163,8 +152,12 @@ const Symptom = ({navigation}) => {
           Rightheading="Today"
           subheading="Tracker"
         />
-
+          
         <View>
+          {
+            loader ?
+            <ActivityIndicator size={'large'} color={AppColors.BLACK}/>
+            :
           <FlatList
             data={mojis}
             horizontal
@@ -195,6 +188,7 @@ const Symptom = ({navigation}) => {
               );
             }}
           />
+          }
         </View>
 
         <View
