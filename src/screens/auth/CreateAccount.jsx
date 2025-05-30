@@ -84,6 +84,7 @@ const CreateAccount = ({navigation}) => {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 20,
+          padding:20
         }}>
         <View style={{alignItems: 'center', justifyContent: 'center'}}>
           <AppText
@@ -104,14 +105,16 @@ const CreateAccount = ({navigation}) => {
             title="Full Name"
             inputPlaceHolder={'Input Full Name'}
             onChangeText={(text)=>  setUserData({...userData, full_name: text})} value={userData.full_name}
+            textInput
           />
-          <AppTextInput title="Username" inputPlaceHolder={'Input Username'} onChangeText={(text)=>  setUserData({...userData, user_name: text})} value={userData.user_name}/>
+          <AppTextInput title="Username" inputPlaceHolder={'Input Username'} onChangeText={(text)=>  setUserData({...userData, user_name: text})} value={userData.user_name} textInput/>
           <AppTextInput
             title="Email Address"
             inputPlaceHolder={'Input email'}
             onChangeText={(text)=>  setUserData({...userData, email: text})} value={userData.email}
+            textInput
           />
-          <AppTextInput title="Password" inputPlaceHolder={'Input password'} onChangeText={(text)=>  setUserData({...userData, password: text})} value={userData.password} />
+          <AppTextInput title="Password" inputPlaceHolder={'Input password'} onChangeText={(text)=>  setUserData({...userData, password: text})} value={userData.password} textInput/>
 
           <AppText
             title={'Date of Birth'}
@@ -184,8 +187,8 @@ const CreateAccount = ({navigation}) => {
             />
           </View>
 
-          <AppTextInput title="Gender" inputPlaceHolder={'Male'} onChangeText={(text)=>  setUserData({...userData, gender: text})} value={userData.gender}/>
-          <AppTextInput title="Phone" inputPlaceHolder={'123-456-7890'} onChangeText={(text)=>  setUserData({...userData, phone: text})} value={userData.phone}/>
+          <AppTextInput title="Gender" textInput inputPlaceHolder={'Male'} onChangeText={(text)=>  setUserData({...userData, gender: text})} value={userData.gender}/>
+          <AppTextInput title="Phone" textInput inputPlaceHolder={'123-456-7890'} onChangeText={(text)=>  setUserData({...userData, phone: text})} value={userData.phone}/>
 
           <View style={{gap: 10}}>
             <AppButton title={'Sign up'} RightColour={AppColors.WHITE} handlePress={()=> SignUpUser()}/>

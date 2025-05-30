@@ -71,10 +71,15 @@ const AppTextInput = ({
           />
         )}
 
+    {textInput == true ? 
+      null
+      :
         <View style={{flexDirection: 'row', gap: 5, marginRight: 100}}>
           {rightLogo}
           {arrowDelete}
         </View>
+        
+    }
       </View>
     </View>
   );

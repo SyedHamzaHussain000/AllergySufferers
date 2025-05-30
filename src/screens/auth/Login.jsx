@@ -11,8 +11,8 @@ import { CurrentLogin, setLoader } from '../../redux/Slices/AuthSlice';
 
 const Login = ({navigation}) => {
 
-  const [email, setEmail] = useState('william.austin3939@gmail.com')
-  const [password, setPassword] = useState('mysecurepassword')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
 
   const loading = useSelector(state => state.auth.loader)
@@ -93,17 +93,19 @@ const Login = ({navigation}) => {
         <View style={{gap: 20}}>
           <AppTextInput
             title="Email Address"
-            inputPlaceHolder={'Input email'}
+            inputPlaceHolder={'Enter email'}
             onChangeText={(txt)=> setEmail(txt) }
             value={email}
+            textInput={true}
           />
           <View style={{gap: 5}}>
             <AppTextInput
               title="Password"
-              inputPlaceHolder={'Input password'}
+              inputPlaceHolder={'Enter password'}
               onChangeText={(txt)=> setPassword(txt) }
             value={password}
             secure={true}
+            textInput={true}
             />
             <TouchableOpacity
               onPress={() => navigation.navigate('ForgetPassword')}>
