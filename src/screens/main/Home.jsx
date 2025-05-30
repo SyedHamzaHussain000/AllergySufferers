@@ -188,15 +188,17 @@ const Home = ({navigation}) => {
                 Alert.alert(
                   'No Forecast Available',
                   'We couldn’t find any allergen forecast data for the selected date. Please try another day.',
-                )
+                );
               }
             } else if (picked.isBefore(today)) {
               if (PastPollenData?.[formattedDate]?.label) {
                 setPastDate(formattedDate);
                 setSelected('Past');
               } else {
-                Alert.alert('Unavailable Date', 'Data is only available for the past 7 days. Please select a more recent date.');
-
+                Alert.alert(
+                  'Unavailable Date',
+                  'Data is only available for the past 7 days. Please select a more recent date.',
+                );
               }
             } else {
               setSelected('Today');
@@ -276,107 +278,44 @@ const Home = ({navigation}) => {
             TextBottom={
               selected == 'Past'
                 ? PastPollenData?.[PastDate]?.label
-                : selected == 'Future' ? FuturePollenData?.[FutureDate]?.label :  todayPollensData?.label
+                : selected == 'Future'
+                ? FuturePollenData?.[FutureDate]?.label
+                : todayPollensData?.label
             }
           />
         </View>
 
         <View style={{flexDirection: 'row', gap: 5}}>
-          {/* <View style={{backgroundColor:'white'}}> */}
+          <FlatList
+            data={todayPollensData?.current}
+            horizontal
+            contentContainerStyle={{gap: 20}}
+            renderItem={({item}) => {
+              console.log('item', item);
+              return (
+                <View style={{gap: 10}}>
+                  <AppText
+                    title={item.name}
+                    textAlignment={'center'}
+                    textSize={1.5}
+                    textColor={AppColors.BLACK}
+                    textFontWeight
+                  />
 
-          {/* <Image
-            accessibilityLabel="React logo"
-            source={{ uri: logoUri }}
-            resizeMode="contain"
-            style={{height:100 ,width:100}}
-          /> */}
-          {/* <ReactSpeedometer
-            style={{ marginBottom: 50 }}
-            minValue={0}
-            maxValue={100}
-            value={50}
-            needleColor="red"
-            startColor="green"
-            segments={6}
-            endColor="blue"
-          /> */}
-          {/* </View> */}
-
-          {/* <Speedometer
-        value={75} // e.g. 75
-        totalValue={100}
-        size={250}
-        outerColor="#e6e6e6"
-        internalColor="#f44336" // red for high
-        showIndicator={true}
-        indicatorColor="#000"
-        showText={true}
-        text={`${75}%`}
-        textStyle={{ color: 'black', fontSize: 18 }}
-        showLabels={true}
-        labelStyle={{ color: 'gray', fontSize: 14 }}
-        labelFormatter={val => `${74}%`}
-        showPercent={true}
-        percentStyle={{ color: 'green', fontSize: 16 }}
-      /> */}
-
-          <View style={{gap: 10}}>
-            <AppText
-              title={'BOXELDER, M'}
-              textAlignment={'center'}
-              textSize={1.5}
-              textColor={AppColors.BLACK}
-              textFontWeight
-            />
-
-            <SpeedoMeter
-              imgWeight={30}
-              imgHeight={10}
-              speedometerWidth={30}
-              imageTop={-10}
-              TextBottom={todayPollensData?.label}
-              TempreaturePriority={'Moderate'}
-              TempreaturePriorityFontSize={1.6}
-            />
-          </View>
-
-          <View style={{gap: 10}}>
-            <AppText
-              title={'CEDAR, CYPR...'}
-              textAlignment={'center'}
-              textSize={1.5}
-              textColor={AppColors.BLACK}
-              textFontWeight
-            />
-            <SpeedoMeter
-              imgWeight={30}
-              imgHeight={10}
-              speedometerWidth={30}
-              imageTop={-10}
-              TextBottom={todayPollensData?.label}
-              TempreaturePriority={'High'}
-              TempreaturePriorityFontSize={1.6}
-            />
-          </View>
-
-          <View style={{gap: 10}}>
-            <AppText
-              title={'ELM'}
-              textAlignment={'center'}
-              textSize={1.5}
-              textColor={AppColors.BLACK}
-              textFontWeight
-            />
-            <SpeedoMeter
-              imgWeight={30}
-              imgHeight={10}
-              speedometerWidth={30}
-              imageTop={-10}
-              TextBottom={todayPollensData?.label}
-              TempreaturePriority={'Very High'}
-              TempreaturePriorityFontSize={1.6}
-            />
-          </View>
+                  <SpeedoMeter
+                    imgWeight={30}
+                    imgHeight={10}
+                    speedometerWidth={30}
+                    imageTop={-10}
+                    TextBottom={item?.level == 1 ? "Low" : item?.level == 2 ? "Moderate" : item?.level == 3 ? "High" : item?.level == 4 ? "Very High" : null  }
+                    TempreaturePriority={'Moderate'}
+                    
+                    TempreaturePriorityFontSize={1.6}
+                  />
+                </View>
+              );
+            }}
+          />
         </View>
 
         <View style={{flexDirection: 'row', gap: 10, marginBottom: 20}}>
