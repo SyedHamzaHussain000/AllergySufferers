@@ -210,10 +210,12 @@ const Symptom = ({navigation}) => {
             verticalLabelRotation={0}
             chartConfig={chartConfig}
             withShadow={false}
-            withVerticalLines={false}
+            withVerticalLines={true}
             bezier
             withHorizontalLabels={false}
             segments={5} 
+            yAxisInterval={5}
+            yAxisLabel='0'
             
             
 

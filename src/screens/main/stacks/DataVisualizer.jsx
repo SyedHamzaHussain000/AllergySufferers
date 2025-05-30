@@ -31,15 +31,14 @@ const DataVisualizer = ({navigation}) => {
 
   const [takingMedications, setTakingMedications] = useState([]);
   const [todayPollensData, setTodayPollensData] = useState();
-    const [MedicationnRecord, setMedicationnRecord] = useState([]);
-  
+  const [MedicationnRecord, setMedicationnRecord] = useState([]);
 
   const [pollenLoader, setPollenLoader] = useState(false);
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       getPollensData();
-      getMedicationRecords()
+      getMedicationRecords();
     });
 
     return nav;
@@ -105,7 +104,7 @@ const DataVisualizer = ({navigation}) => {
       });
   };
 
-    const getMedicationRecords = () => {
+  const getMedicationRecords = () => {
     // setLoader(true)
     let config = {
       method: 'get',
@@ -129,8 +128,6 @@ const DataVisualizer = ({navigation}) => {
       });
   };
 
-  
-
   const chartConfig = {
     backgroundGradientFrom: '#FFFFFF',
     backgroundGradientTo: '#FFFFFF',
@@ -146,15 +143,14 @@ const DataVisualizer = ({navigation}) => {
     },
   };
 
- 
-    const data = {
-      labels: MedicationnRecord?.map(item =>
-        moment(item.date, 'MMM, DD YYYY').format('MMM D'),
-      ),
-      datasets: [
-        {
-          data: MedicationnRecord?.map(item => parseInt(item?.units || 0)),
-          colors: [
+  const data = {
+    labels: MedicationnRecord?.map(item =>
+      moment(item.date, 'MMM, DD YYYY').format('MMM D'),
+    ),
+    datasets: [
+      {
+        data: MedicationnRecord?.map(item => parseInt(item?.units || 0)),
+        colors: [
           () => '#D9B61A',
           () => '#B768F9',
           () => '#21B777',
@@ -162,9 +158,9 @@ const DataVisualizer = ({navigation}) => {
           () => '#FFCBCF',
           () => '#032198',
         ],
-        },
-      ],
-    };
+      },
+    ],
+  };
 
   return (
     <ScrollView
@@ -286,14 +282,11 @@ const DataVisualizer = ({navigation}) => {
           />
         </TouchableOpacity>
       </View>
-          {
-            pollenLoader && (
-              <View style={{marginTop:30,}}>
-
-              <ActivityIndicator size={'large'} color={AppColors.BLACK}/> 
-              </View>
-            )
-          }
+      {pollenLoader && (
+        <View style={{marginTop: 30}}>
+          <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+        </View>
+      )}
       {type == 'medication' ? (
         <View>
           <FlatList
@@ -373,7 +366,6 @@ const DataVisualizer = ({navigation}) => {
                     paddingHorizontal: 20,
                   }}>
                   <AppText title={item.name} textSize={1.5} />
-                  
                 </View>
               );
             }}

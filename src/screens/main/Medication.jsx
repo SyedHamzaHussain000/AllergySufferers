@@ -56,19 +56,40 @@ const Medication = ({navigation}) => {
     datasets: [
       {
         data: MedicationnRecord?.map(item => parseInt(item?.units || 0)),
-        colors: [
-          () => '#E74C3C', // red
-          () => '#E74C3C',
-          () => '#E74C3C',
-          () => '#E74C3C',
-          () => '#E74C3C',
-          () => '#E74C3C',
-          () => '#E74C3C',
-          () => '#E74C3C',
-        ],
+        colors: MedicationnRecord.flatMap(() => [
+          () => '#E74C3C', // color for unitsA
+          () => '#3498DB', // color for unitsB
+        ]),
       },
     ],
   };
+  
+
+  //   const data = {
+  //   labels: [
+  //     'May 1', 'May 1',
+  //     'May 2', 'May 2',
+  //     'May 3', 'May 3',
+  //   ],
+  //   datasets: [
+  //     {
+  //       data: [
+  //         5, 8,  // May 1 → unitsA, unitsB
+  //         3, 6,  // May 2 → unitsA, unitsB
+  //         4, 7   // May 3 → unitsA, unitsB
+  //       ],
+  //       // Correct way: Array of functions for each bar
+  //       colors: [
+  //         () => '#E74C3C', // May 1 A
+  //         () => '#3498DB', // May 1 B
+  //         () => '#E74C3C', // May 2 A
+  //         () => '#3498DB', // May 2 B
+  //         () => '#E74C3C', // May 3 A
+  //         () => '#3498DB'  // May 3 B
+  //       ],
+  //     },
+  //   ],
+  // };
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -82,7 +103,7 @@ const Medication = ({navigation}) => {
   }, [navigation]);
 
   const getActiveMedication = () => {
-    setLoader(true)
+    setLoader(true);
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -93,13 +114,13 @@ const Medication = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log("................................", response.data.data)
+        console.log('................................', response.data.data);
         setAllMedication(response.data.data);
-        setLoader(false)
+        setLoader(false);
       })
       .catch(error => {
         console.log(error);
-        setLoader(false)
+        setLoader(false);
       });
   };
 
@@ -127,11 +148,15 @@ const Medication = ({navigation}) => {
       });
   };
 
-  const addMedication = (item) => {
-    console.log("itserarsa", userData)
-    setLoader(true)
+  const addMedication = item => {
+
+    const formatedDate = moment(new Date).format("YYYY-MM-DD")
+
+
+    setLoader(true);
     let data = JSON.stringify({
       medication_id: item.id,
+      date: formatedDate, 
       units: 1,
     });
 
@@ -149,22 +174,20 @@ const Medication = ({navigation}) => {
       .request(config)
       .then(response => {
         console.log(JSON.stringify(response.data));
-        setTimeout(()=>{
-
+        setTimeout(() => {
           getActiveMedication();
-        },7000)
+          getMedicationRecords()
+        }, 7000);
         // getMedicationRecords();
-        
       })
       .catch(error => {
         console.log(error);
-        setLoader(false)
+        setLoader(false);
       });
   };
 
-
-  const removeMedication = (item) => {
-    setLoader(true)
+  const removeMedication = item => {
+    setLoader(true);
     let data = JSON.stringify({
       medication_id: item.id,
       units: 1,
@@ -184,16 +207,14 @@ const Medication = ({navigation}) => {
       .request(config)
       .then(response => {
         console.log(JSON.stringify(response.data));
-        setTimeout(()=>{
-
+        setTimeout(() => {
           getActiveMedication();
-        },7000)
+        }, 7000);
         // getMedicationRecords();
-        
       })
       .catch(error => {
         console.log(error);
-        setLoader(false)
+        setLoader(false);
       });
   };
 
@@ -207,73 +228,65 @@ const Medication = ({navigation}) => {
         />
 
         <View>
-          {
-            loader == true ? 
-
-            <ActivityIndicator size={'large'} color={AppColors.BLACK}/>
-
-            :
-
-          <FlatList
-            data={allMedication}
-            contentContainerStyle={{gap: 10, marginTop: 20, marginBottom: 20}}
-            renderItem={({item}) => {
-              console.log('item', item);
-              return (
-                <View
-                  style={{
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    borderColor: '#37BC07',
-                    height: responsiveHeight(6),
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                    paddingHorizontal: 10,
-                    justifyContent: 'space-between',
-                  }}>
-                  <AppText
-                    title={item.name}
-                    textSize={1.6}
-                    textColor={AppColors.LIGHTGRAY}
-                  />
-
+          {loader == true ? (
+            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+          ) : (
+            <FlatList
+              data={allMedication}
+              contentContainerStyle={{gap: 10, marginTop: 20, marginBottom: 20}}
+              renderItem={({item}) => {
+                console.log('item', item);
+                return (
                   <View
                     style={{
-                      flexDirection: 'row',
+                      borderWidth: 1,
+                      borderRadius: 10,
+                      borderColor: '#37BC07',
+                      height: responsiveHeight(6),
                       alignItems: 'center',
-                      gap: 10,
+                      flexDirection: 'row',
+                      paddingHorizontal: 10,
+                      justifyContent: 'space-between',
                     }}>
-                    <TouchableOpacity 
-                    onPress={() => removeMedication(item)}
-                    >
-                      <AntDesign
-                        name={'minus'}
-                        size={responsiveFontSize(2)}
-                        color={AppColors.LIGHTGRAY}
-                      />
-                    </TouchableOpacity>
-
                     <AppText
-                      title={item?.units ? item?.units : 0}
+                      title={item.name}
+                      textSize={1.6}
                       textColor={AppColors.LIGHTGRAY}
-                      textSize={2.5}
                     />
 
-                    <TouchableOpacity
-                      onPress={() => addMedication(item)}
-                    >
-                      <AntDesign
-                        name={'plus'}
-                        size={responsiveFontSize(2)}
-                        color={AppColors.LIGHTGRAY}
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 10,
+                      }}>
+                      <TouchableOpacity onPress={() => removeMedication(item)}>
+                        <AntDesign
+                          name={'minus'}
+                          size={responsiveFontSize(2)}
+                          color={AppColors.LIGHTGRAY}
+                        />
+                      </TouchableOpacity>
+
+                      <AppText
+                        title={item?.units ? item?.units : 0}
+                        textColor={AppColors.LIGHTGRAY}
+                        textSize={2.5}
                       />
-                    </TouchableOpacity>
+
+                      <TouchableOpacity onPress={() => addMedication(item)}>
+                        <AntDesign
+                          name={'plus'}
+                          size={responsiveFontSize(2)}
+                          color={AppColors.LIGHTGRAY}
+                        />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                </View>
-              );
-            }}
-          />
-          }
+                );
+              }}
+            />
+          )}
         </View>
 
         <BarChart

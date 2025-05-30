@@ -66,6 +66,7 @@ const Login = ({navigation}) => {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 20,
+          padding:20
         }}>
         <AppText
           title={'Allergy Sufferers'}

@@ -19,6 +19,7 @@ type props = {
   value?: string;
   secure?: boolean;
   arrowDelete?: any;
+  textInput?: boolean;
 };
 const AppTextInput = ({
   logo,
@@ -32,6 +33,7 @@ const AppTextInput = ({
   secure,
   onChangeText,
   arrowDelete,
+  textInput,
 }: props) => {
   return (
     <View style={{gap: 5}}>
@@ -51,28 +53,28 @@ const AppTextInput = ({
         }}>
         {logo}
 
-        <AppText
-          title={inputPlaceHolder}
-          textColor={AppColors.LIGHTGRAY}
-          textwidth={70}
-          textSize={2}
-        />
+        {textInput == true ? (
+          <TextInput
+            placeholder={inputPlaceHolder}
+            placeholderTextColor={AppColors.LIGHTGRAY}
+            style={{width: responsiveWidth(inputWidth), color: AppColors.BLACK}}
+            onChangeText={onChangeText}
+            value={value}
+            secureTextEntry={secure}
+          />
+        ) : (
+          <AppText
+            title={inputPlaceHolder}
+            textColor={AppColors.LIGHTGRAY}
+            textwidth={70}
+            textSize={2}
+          />
+        )}
 
-        {/* <TextInput
-        placeholder={inputPlaceHolder}
-        placeholderTextColor={AppColors.LIGHTGRAY}
-        style={{width: responsiveWidth(inputWidth), color: AppColors.BLACK}}
-        onChangeText={onChangeText}
-        value={value}
-        secureTextEntry={secure}
-      /> */}
-
-        <View style={{flexDirection:'row', gap:5, marginRight:100}}>
-
-        {rightLogo}
-        {arrowDelete}
+        <View style={{flexDirection: 'row', gap: 5, marginRight: 100}}>
+          {rightLogo}
+          {arrowDelete}
         </View>
-
       </View>
     </View>
   );
