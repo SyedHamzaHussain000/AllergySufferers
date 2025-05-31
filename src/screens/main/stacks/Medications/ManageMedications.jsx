@@ -134,72 +134,63 @@ const ManageMedications = ({navigation}) => {
             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
           )}
 
-
-          
-          {
-            activeMedication ? (
-
-          <NestableScrollContainer>
-            <NestableDraggableFlatList
-              data={activeMedication}
-              contentContainerStyle={{gap: 10}}
-              renderItem={({item, drag, isActive}) => {
-                return (
-                  <TouchableOpacity onLongPress={drag}>
-                    <AppTextInput
-                      inputPlaceHolder={item.name}
-                      inputWidth={75}
-                      arrowDelete={
-                        <TouchableOpacity
-                          onPress={() =>
-                            Alert.alert(
-                              'Delete Medication',
-                              'Are you sure you want to delete this medication?',
-                              [
-                                {
-                                  text: 'Cancel',
-                                  onPress: () => console.log('Cancel Pressed'),
-                                  style: 'cancel',
-                                },
-                                {
-                                  text: 'OK',
-                                  onPress: () => deleteActiveMedication(item),
-                                },
-                              ],
-                              {cancelable: false},
-                            )
-                          }>
-                          <MaterialCommunityIcons
-                            name={'delete'}
+          {activeMedication ? (
+            <NestableScrollContainer>
+              <NestableDraggableFlatList
+                data={activeMedication}
+                contentContainerStyle={{gap: 10}}
+                renderItem={({item, drag, isActive}) => {
+                  return (
+                    <TouchableOpacity onLongPress={drag}>
+                      <AppTextInput
+                        inputPlaceHolder={item.name}
+                        inputWidth={75}
+                        arrowDelete={
+                          <TouchableOpacity
+                            onPress={() =>
+                              Alert.alert(
+                                'Delete Medication',
+                                'Are you sure you want to delete this medication?',
+                                [
+                                  {
+                                    text: 'Cancel',
+                                    onPress: () =>
+                                      console.log('Cancel Pressed'),
+                                    style: 'cancel',
+                                  },
+                                  {
+                                    text: 'OK',
+                                    onPress: () => deleteActiveMedication(item),
+                                  },
+                                ],
+                                {cancelable: false},
+                              )
+                            }>
+                            <MaterialCommunityIcons
+                              name={'delete'}
+                              size={responsiveFontSize(2.5)}
+                              color={AppColors.LIGHTGRAY}
+                            />
+                          </TouchableOpacity>
+                        }
+                        rightLogo={
+                          <Octicons
+                            name={'arrow-switch'}
                             size={responsiveFontSize(2.5)}
                             color={AppColors.LIGHTGRAY}
                           />
-                        </TouchableOpacity>
-                      }
-                      rightLogo={
-                        <Octicons
-                          name={'arrow-switch'}
-                          size={responsiveFontSize(2.5)}
-                          color={AppColors.LIGHTGRAY}
-                        />
-                      }
-                    />
-                  </TouchableOpacity>
-                );
-              }}
-              keyExtractor={(item, index) => index.toString()}
-              onDragEnd={({data}) => setActiveMedication(data)}
-              dragEnabled={true}
-              activationDistance={10}
-            />
-          </NestableScrollContainer>
-            )
-            :
-            (
-              null
-            )
-          }
-
+                        }
+                      />
+                    </TouchableOpacity>
+                  );
+                }}
+                keyExtractor={(item, index) => index.toString()}
+                onDragEnd={({data}) => setActiveMedication(data)}
+                dragEnabled={true}
+                activationDistance={10}
+              />
+            </NestableScrollContainer>
+          ) : null}
 
           {/* <AppTextInput inputPlaceHolder={"Advil Cold and Sinus"} inputWidth={75} rightLogo={<Octicons name={"arrow-switch"} size={responsiveFontSize(2)} color={AppColors.LIGHTGRAY} />}/>
          <AppTextInput inputPlaceHolder={"A Generic Brand"} inputWidth={75} rightLogo={<Octicons name={"arrow-switch"} size={responsiveFontSize(2)} color={AppColors.LIGHTGRAY} />}/> */}
