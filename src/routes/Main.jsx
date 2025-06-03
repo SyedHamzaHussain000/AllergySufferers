@@ -1,4 +1,4 @@
-import {View, Text, Image} from 'react-native';
+import {View, Text, Image, StyleSheet, SafeAreaView} from 'react-native';
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -31,8 +31,8 @@ const Main = () => {
       initialRouteName="Home"
       screenOptions={{headerShown: false}}>
       <Stack.Screen name="Home" component={MyTabs} />
-      <Stack.Screen name="AppSetting" component={AppSetting} />
-      <Stack.Screen name="AddCity" component={AddCity} />
+      <Stack.Screen name="AppSetting" component={HomeWithSafeArea(AppSetting)} />
+      <Stack.Screen name="AddCity" component={HomeWithSafeArea(AddCity)} />
       <Stack.Screen name="ManageCities" component={ManageCities} />
       <Stack.Screen name="ManagePollens" component={ManagePollens} />
       <Stack.Screen name="AddPollens" component={AddPollens} />
@@ -40,8 +40,8 @@ const Main = () => {
       <Stack.Screen name="AddMedications" component={AddMedications} />
 
       <Stack.Screen name="FeedBack" component={FeedBack} />
-      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-      <Stack.Screen name="TermsCondition" component={TermsCondition} />
+      <Stack.Screen name="PrivacyPolicy" component={HomeWithSafeArea(PrivacyPolicy)} />
+      <Stack.Screen name="TermsCondition" component={HomeWithSafeArea(TermsCondition)} />
       <Stack.Screen name="TipsTrick" component={TipsTrick} />
       <Stack.Screen name="PollenInfoForCad" component={PollenInfoForCad} />
       <Stack.Screen name="DeleteAllData" component={DeleteAllData} />
@@ -122,5 +122,23 @@ function MyTabs() {
     </Tab.Navigator>
   );
 }
+
+
+
+// If needed, wrap MyTabs too:
+const HomeWithSafeArea = Component => props => {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <Component {...props} />
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff', // or AppColors.BACKGROUND
+  },
+});
 
 export default Main;

@@ -1,4 +1,4 @@
-import {View, Text, FlatList, TouchableOpacity, TextInput} from 'react-native';
+import {View, Text, FlatList, TouchableOpacity, TextInput, SafeAreaView} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
@@ -82,6 +82,7 @@ const AddMedications = ({navigation}) => {
   };
 
   return (
+    <SafeAreaView style={{flex:1}}>
     <View style={{padding: 20}}>
       <AppHeader
         heading="Add Medication"
@@ -147,6 +148,7 @@ const AddMedications = ({navigation}) => {
         {/* <AppButton title={'Save'} bgColor={AppColors.BTNCOLOURS} /> */}
       </View>
     </View>
+    </SafeAreaView>
   );
 };
 

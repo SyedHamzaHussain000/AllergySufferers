@@ -6,6 +6,7 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  SafeAreaView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -100,6 +101,7 @@ const ManageMedications = ({navigation}) => {
   };
 
   return (
+    <SafeAreaView style={{flex:1}}>
     <GestureHandlerRootView style={{flex: 1}}>
       <View style={{padding: 20}}>
         <AppHeader
@@ -197,6 +199,7 @@ const ManageMedications = ({navigation}) => {
         </View>
       </View>
     </GestureHandlerRootView>
+    </SafeAreaView>
   );
 };
 

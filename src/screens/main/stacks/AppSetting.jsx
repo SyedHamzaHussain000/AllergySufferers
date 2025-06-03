@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, SafeAreaView } from 'react-native'
 import React from 'react'
 import AppHeader from '../../../components/AppHeader'
 import AppText from '../../../components/AppTextComps/AppText';
@@ -20,6 +20,7 @@ const AppSetting = ({navigation}) => {
 
 
   return (
+    <SafeAreaView style={{flex:1}}>  
     <View style={{padding:20}}>
 
       <AppHeader heading='App Settings'  goBack={true}/>
@@ -68,6 +69,7 @@ const AppSetting = ({navigation}) => {
           />
 
     </View>
+    </SafeAreaView>
   )
 }
 

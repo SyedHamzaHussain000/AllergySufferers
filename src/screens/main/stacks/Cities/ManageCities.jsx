@@ -1,4 +1,4 @@
-import {View, Text, FlatList, TouchableOpacity, TextInput} from 'react-native';
+import {View, Text, FlatList, TouchableOpacity, TextInput, SafeAreaView} from 'react-native';
 import React from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
@@ -16,6 +16,7 @@ import AppTextInput from '../../../../components/AppTextInput';
 import Octicons from 'react-native-vector-icons/Octicons'
 const ManageCities = ({navigation}) => {
   return (
+    <SafeAreaView style={{flex:1}}>
     <View style={{padding: 20}}>
       <AppHeader
         heading="Manage City"
@@ -36,11 +37,12 @@ const ManageCities = ({navigation}) => {
 
       <View style={{marginTop: 20, gap: 10}}>
         <AppButton title={'Add city'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor} handlePress={()=> navigation.navigate("AddCity")}  />
-        <AppButton title={'Manage pollens'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  />
-        <AppButton title={'Manage medications'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  />
-        <AppButton title={'Manage push notifications'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  />
+        <AppButton title={'Manage pollens'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor} handlePress={()=> navigation.navigate("ManagePollens")}  />
+        <AppButton title={'Manage medications'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  handlePress={()=> navigation.navigate("ManageMedications")}  />
+        {/* <AppButton title={'Manage push notifications'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  /> */}
       </View>
     </View>
+    </SafeAreaView>
   );
 };
 

@@ -6,6 +6,7 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
+  SafeAreaView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../components/AppHeader';
@@ -163,6 +164,7 @@ const DataVisualizer = ({navigation}) => {
   };
 
   return (
+    <SafeAreaView style={{flex:1}}>
     <ScrollView
       contentContainerStyle={{
         padding: 20,
@@ -373,6 +375,7 @@ const DataVisualizer = ({navigation}) => {
         </View>
       )}
     </ScrollView>
+    </SafeAreaView>
   );
 };
 

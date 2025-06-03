@@ -5,6 +5,7 @@ import Routes from './src/routes/Routes';
 import {store} from './src/redux/store';
 import {Provider} from 'react-redux';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 
 const App = () => {
   return (
@@ -12,6 +13,7 @@ const App = () => {
     <Provider store={store}>
       <NavigationContainer>
         <Routes />
+      <Toast/>
       </NavigationContainer>
     </Provider>
 

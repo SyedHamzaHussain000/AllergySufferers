@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, TextInput, SafeAreaView } from 'react-native'
 import React from 'react'
 import AppHeader from '../../../../components/AppHeader'
 import AppText from '../../../../components/AppTextComps/AppText';
@@ -10,6 +10,7 @@ import AppButton from '../../../../components/AppButton';
 import SocialAuthButton from '../../../../components/SocialAuthButton';
 const AddCity = ({navigation}) => {
   return (
+    <SafeAreaView style={{flex:1}}>
     <View style={{padding:20}}>
       <AppHeader 
       heading="Add City" 
@@ -44,6 +45,7 @@ const AddCity = ({navigation}) => {
 
 
     </View>
+    </SafeAreaView>
   )
 }
 

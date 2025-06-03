@@ -1,4 +1,4 @@
-import {View, Text, TextInput, ToastAndroid, ScrollView} from 'react-native';
+import {View, Text, TextInput, ToastAndroid, ScrollView, SafeAreaView} from 'react-native';
 import React, {useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
@@ -62,6 +62,7 @@ const FeedBack = () => {
   };
 
   return (
+    <SafeAreaView style={{flex:1}}>
     <ScrollView contentContainerStyle={{flexGrow:1, padding: 20}}>
       <AppHeader heading="Aerobiology" subheading="Feedback" goBack={true} />
 
@@ -100,7 +101,7 @@ const FeedBack = () => {
               borderColor: AppColors.LIGHTGRAY,
               paddingHorizontal: 10,
               
-              
+              padding:10,
             }}
             multiline
             onChangeText={text =>
@@ -123,6 +124,7 @@ const FeedBack = () => {
               borderRadius: 10,
               borderColor: AppColors.LIGHTGRAY,
               paddingHorizontal: 10,
+              padding:10,
             }}
             onChangeText={text =>
               setFeedBackData({...feedBackData, email: text})
@@ -145,7 +147,8 @@ const FeedBack = () => {
               borderColor: AppColors.LIGHTGRAY,
               paddingHorizontal: 10,
               height: responsiveHeight(20),
-              textAlignVertical:'top'
+              textAlign:'left',
+              textAlignVertical: 'top'
             }}
             onChangeText={text =>
               setFeedBackData({...feedBackData, message: text})
@@ -162,6 +165,7 @@ const FeedBack = () => {
         />
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 };
 
