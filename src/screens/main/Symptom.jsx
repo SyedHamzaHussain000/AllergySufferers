@@ -25,14 +25,13 @@ import moment from 'moment';
 import {useSelector} from 'react-redux';
 import LoaderMode from '../../components/LoaderMode';
 
-
 const Symptom = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
 
   const [symtomsData, setSymtomsData] = useState();
   const [systomsNumber, setSymtomsNumber] = useState();
 
-  const [loader, setLoader] = useState(false)
+  const [loader, setLoader] = useState(false);
 
   const userData = useSelector(state => state?.auth?.user);
 
@@ -58,12 +57,18 @@ const Symptom = ({navigation}) => {
     },
   };
 
-  console.log('first');
-
   const symtomsArrayData = [
     {
       labels: [],
-      datasets: [{data: []}],
+      datasets: [
+        {data: []},
+        {
+          data: [5], // min
+        },
+        {
+          data: [5], // max
+        },
+      ],
     },
   ];
 
@@ -76,8 +81,8 @@ const Symptom = ({navigation}) => {
   }, [navigation]);
 
   const getSymtomsData = () => {
-    setLoader(true)
-    let config = {  
+    setLoader(true);
+    let config = {
       method: 'get',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_symptom_records`,
@@ -86,26 +91,33 @@ const Symptom = ({navigation}) => {
 
     axios
       .request(config)
-      .then(async  response => {
+      .then(async response => {
         // console.log('symptoms', response.data.symptoms);
-        const datasort = response.data.symptoms
+        const datasort = response.data.symptoms;
 
         const lastFive = datasort.slice(-5);
         const symtomsArrayData = {
-            labels: await lastFive.map(item =>   moment(item.date, 'MMM, DD YYYY').format('MMM D')),
-            datasets: [
-              {
-                data: await lastFive.map(item => parseInt(item.symptom_level))
-              },
-            ],
-          }
+          labels: await lastFive.map(item =>
+            moment(item.date, 'MMM, DD YYYY').format('MMM D'),
+          ),
+          datasets: [
+            {
+              data: await lastFive.map(item => parseInt(item.symptom_level)),
+            },
+            {
+              data: [1],
+            },
+            {
+              data: [5],
+            },
+          ],
+        };
 
-        setSymtomsData(symtomsArrayData)
-          
-          setTimeout(() => {
+        setSymtomsData(symtomsArrayData);
 
-            setLoader(false)
-          },10000)
+        setTimeout(() => {
+          setLoader(false);
+        }, 10000);
       })
       .catch(error => {
         console.log(error);
@@ -115,8 +127,8 @@ const Symptom = ({navigation}) => {
   const setApiSymtomsData = id => {
     setSymtomsNumber(id);
 
-    setLoader(true)
-    
+    setLoader(true);
+
     const todayDate = moment().format('YYYY-MM-DD');
 
     let data = JSON.stringify({
@@ -137,7 +149,6 @@ const Symptom = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-
         getSymtomsData();
       })
       .catch(error => {
@@ -152,43 +163,42 @@ const Symptom = ({navigation}) => {
           Rightheading="Today"
           subheading="Tracker"
         />
-          
+
         <View>
-          {
-            loader ?
-            <ActivityIndicator size={'large'} color={AppColors.BLACK}/>
-            :
-          <FlatList
-            data={mojis}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{gap: 5, marginTop: 20}}
-            renderItem={({item}) => {
-              return (
-                <TouchableOpacity onPress={() => setApiSymtomsData(item.id)}>
-                  <Image
-                    source={item.img}
-                    style={{
-                      height: responsiveHeight(
-                        item.id == systomsNumber ? 10 : 8,
-                      ),
-                      width: responsiveHeight(
-                        item.id == systomsNumber ? 10 : 8,
-                      ),
-                      resizeMode: 'contain',
-                    }}
-                  />
-                  <AppText
-                    title={item.title}
-                    textAlignment={'center'}
-                    textSize={1.5}
-                    textFontWeight
-                  />
-                </TouchableOpacity>
-              );
-            }}
-          />
-          }
+          {loader ? (
+            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+          ) : (
+            <FlatList
+              data={mojis}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{gap: 5, marginTop: 20}}
+              renderItem={({item}) => {
+                return (
+                  <TouchableOpacity onPress={() => setApiSymtomsData(item.id)}>
+                    <Image
+                      source={item.img}
+                      style={{
+                        height: responsiveHeight(
+                          item.id == systomsNumber ? 10 : 8,
+                        ),
+                        width: responsiveHeight(
+                          item.id == systomsNumber ? 10 : 8,
+                        ),
+                        resizeMode: 'contain',
+                      }}
+                    />
+                    <AppText
+                      title={item.title}
+                      textAlignment={'center'}
+                      textSize={1.5}
+                      textFontWeight
+                    />
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          )}
         </View>
 
         <View
@@ -201,8 +211,6 @@ const Symptom = ({navigation}) => {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-
-          
           <LineChart
             data={symtomsData || {labels: [], datasets: [{data: []}]}}
             width={screenWidth * 0.89}
@@ -213,12 +221,9 @@ const Symptom = ({navigation}) => {
             withVerticalLines={true}
             bezier
             withHorizontalLabels={false}
-            segments={5} 
+            segments={5}
             yAxisInterval={5}
-            yAxisLabel='0'
-            
-            
-
+            yAxisLabel="0"
           />
 
           <View
@@ -228,12 +233,12 @@ const Symptom = ({navigation}) => {
               height: responsiveHeight(30),
               width: responsiveWidth(10),
               left: 10,
-              marginBottom:35,
+              marginBottom: 35,
             }}>
             <FlatList
               data={mojis}
-            inverted
-              contentContainerStyle={{gap: 15 ,}}
+              inverted
+              contentContainerStyle={{gap: 15}}
               renderItem={({item}) => {
                 return (
                   <Image
@@ -243,7 +248,6 @@ const Symptom = ({navigation}) => {
                       width: responsiveHeight(4),
                       resizeMode: 'contain',
                       alignSelf: 'center',
-                      
                     }}
                   />
                 );
@@ -256,6 +260,7 @@ const Symptom = ({navigation}) => {
           <AppButton
             title={'Go TO DATA VISUALIZER'}
             RightColour={AppColors.rightArrowCOlor}
+            handlePress={() => navigation.navigate('DataVisualizer')}
           />
         </View>
         <View style={{marginTop: 30}}>

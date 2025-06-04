@@ -34,6 +34,7 @@ import moment from 'moment';
 
 const Home = ({navigation}) => {
   const useData = useSelector(state => state.auth);
+  const userData = useSelector(state => state.auth.user);
 
   const pollens = [
     {id: 1, name: 'Total Spores', top: true},
@@ -69,6 +70,9 @@ const Home = ({navigation}) => {
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
 
+  const [activePollen, setActivePollen] = useState([]);
+  const [activeLoader, setActiveLoader] = useState(false);
+
   const [PastDate, setPastDate] = useState(
     moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD'),
   );
@@ -79,6 +83,7 @@ const Home = ({navigation}) => {
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       getPollensData();
+      getActivePollens();
     });
 
     return nav;
@@ -141,6 +146,29 @@ const Home = ({navigation}) => {
       default:
         return '#99C817';
     }
+  };
+
+  const getActivePollens = () => {
+    setActiveLoader(true);
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_pollens`,
+      headers: {},
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log('resesdsadsajkkdasbhkk', response.data);
+
+        setActivePollen(response.data.data);
+        setActiveLoader(false);
+      })
+      .catch(error => {
+        console.log(error);
+        setActiveLoader(false);
+      });
   };
 
   return (
@@ -286,36 +314,121 @@ const Home = ({navigation}) => {
         </View>
 
         <View style={{flexDirection: 'row', gap: 5}}>
-          <FlatList
-            data={todayPollensData?.current}
-            horizontal
-            contentContainerStyle={{gap: 20}}
-            renderItem={({item}) => {
-              console.log('item', item);
-              return (
-                <View style={{gap: 10}}>
-                  <AppText
-                    title={item.name}
-                    textAlignment={'center'}
-                    textSize={1.5}
-                    textColor={AppColors.BLACK}
-                    textFontWeight
-                  />
+          {activeLoader == true ? (
+            <View style={{alignItems: 'center', justifyContent: 'center'}}>
+              <ActivityIndicator
+                size={'large'}
+                color={AppColors.BLACK}
+                style={{alignSelf: 'center'}}
+              />
+            </View>
+          ) : (
+            <>
+              {todayPollensData?.current?.length > 0 ? (
+                <FlatList
+                  data={activePollen}
+                  horizontal
+                  contentContainerStyle={{gap: 20}}
+                  renderItem={({item}) => {
+                    const index = todayPollensData?.current.findIndex(
+                      p => p.scientific_name === item.name,
+                    );
+                    const todayPollenInAir = todayPollensData?.current;
 
-                  <SpeedoMeter
+                    return (
+                      <View style={{gap: 10}}>
+                        <AppText
+                          title={item.name}
+                          textAlignment={'center'}
+                          textSize={1.5}
+                          textColor={AppColors.BLACK}
+                          textFontWeight
+                        />
+
+                        {/* <SpeedoMeter
                     imgWeight={30}
                     imgHeight={10}
                     speedometerWidth={30}
                     imageTop={-10}
-                    TextBottom={item?.level == 1 ? "Low" : item?.level == 2 ? "Moderate" : item?.level == 3 ? "High" : item?.level == 4 ? "Very High" : null  }
+                    TextBottom={
+                      item?.level == 1
+                        ? 'Low'
+                        : item?.level == 2
+                        ? 'Moderate'
+                        : item?.level == 3
+                        ? 'High'
+                        : item?.level == 4
+                        ? 'Very High'
+                        : null
+                    }
                     TempreaturePriority={'Moderate'}
-                    
                     TempreaturePriorityFontSize={1.6}
-                  />
-                </View>
-              );
-            }}
-          />
+                  /> */}
+                        <SpeedoMeter
+                          imgWeight={30}
+                          imgHeight={10}
+                          speedometerWidth={30}
+                          imageTop={-10}
+                          TextBottom={
+                            todayPollenInAir[index]?.level == 1
+                              ? 'Low'
+                              : todayPollenInAir[index]?.level == 2
+                              ? 'Moderate'
+                              : todayPollenInAir[index]?.level == 3
+                              ? 'High'
+                              : todayPollenInAir[index]?.level == 4
+                              ? 'Very High'
+                              : 'Low'
+                          }
+                          TempreaturePriority={'Moderate'}
+                          TempreaturePriorityFontSize={1.6}
+                        />
+                      </View>
+                    );
+                  }}
+                />
+              ) : (
+                <FlatList
+                  data={activePollen}
+                  horizontal
+                  contentContainerStyle={{gap: 20}}
+                  renderItem={({item}) => {
+                    return (
+                      <View style={{gap: 10}}>
+                        <AppText
+                          title={item.name}
+                          textAlignment={'center'}
+                          textSize={1.5}
+                          textColor={AppColors.BLACK}
+                          textFontWeight
+                        />
+
+                        <SpeedoMeter
+                          imgWeight={30}
+                          imgHeight={10}
+                          speedometerWidth={30}
+                          imageTop={-10}
+                          TextBottom={
+                            item?.level == 1
+                              ? 'Low'
+                              : item?.level == 2
+                              ? 'Moderate'
+                              : item?.level == 3
+                              ? 'High'
+                              : item?.level == 4
+                              ? 'Very High'
+                              : null
+                          }
+                          TempreaturePriority={'Moderate'}
+                          TempreaturePriorityFontSize={1.6}
+                        />
+                      </View>
+                    );
+                  }}
+                />
+              )}
+            </>
+          )}
         </View>
 
         <View style={{flexDirection: 'row', gap: 10, marginBottom: 20}}>

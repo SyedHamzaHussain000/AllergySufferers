@@ -5,8 +5,10 @@ import {
   TouchableOpacity,
   TextInput,
   SafeAreaView,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
 import {
@@ -23,24 +25,29 @@ import AppTextInput from '../../../../components/AppTextInput';
 import Octicons from 'react-native-vector-icons/Octicons';
 import BASE_URL from '../../../../utils/BASE_URL';
 import {useSelector} from 'react-redux';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { NestableDraggableFlatList, NestableScrollContainer } from 'react-native-draggable-flatlist';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {
+  NestableDraggableFlatList,
+  NestableScrollContainer,
+} from 'react-native-draggable-flatlist';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
 const ManagePollens = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const [myPollens, setMyPollens] = useState([]);
 
-  useEffect(()=>{
-    const nav  = navigation.addListener('focus', () => {
+  const [Loader, setLoader] = useState(false);
 
-      getAllPollens()
-    })
+  useEffect(() => {
+    const nav = navigation.addListener('focus', () => {
+      getAllPollens();
+    });
 
-    return nav
-  },[navigation])
+    return nav;
+  }, [navigation]);
 
   const getAllPollens = () => {
+    setLoader(true);
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
@@ -52,29 +59,64 @@ const ManagePollens = ({navigation}) => {
       .request(config)
       .then(response => {
         console.log(JSON.stringify(response.data));
-        setMyPollens(response.data.data)
+        setMyPollens(response.data.data);
+        setLoader(false);
       })
       .catch(error => {
         console.log(error);
+        setLoader(false);
+      });
+  };
+
+  const deletePolles = (item) => {
+    setLoader(true)
+
+    let data = JSON.stringify({
+      data: item.id,
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/delete_pollen`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        getAllPollens()
+      })
+      .catch(error => {
+        console.log(error);
+            setLoader(false)
+
       });
   };
   return (
     <SafeAreaView style={{flex: 1}}>
-          <GestureHandlerRootView style={{flex: 1}}>
-      <View style={{padding: 20}}>
-        <AppHeader
-          heading="Manage Pollens"
-          icon={
-            <Entypo
-              name={'location-pin'}
-              size={responsiveFontSize(2.5)}
-              color={AppColors.BTNCOLOURS}
-            />
-          }
-          goBack
-        />
+      <GestureHandlerRootView style={{flex: 1}}>
+        <View style={{padding: 20}}>
+          <AppHeader
+            heading="Manage Pollens"
+            icon={
+              <Entypo
+                name={'location-pin'}
+                size={responsiveFontSize(2.5)}
+                color={AppColors.BTNCOLOURS}
+              />
+            }
+            goBack
+          />
+          {Loader == true ? (
+            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+          ) : null}
 
-             {myPollens ? (
+          {myPollens ? (
             <NestableScrollContainer>
               <NestableDraggableFlatList
                 data={myPollens}
@@ -100,7 +142,7 @@ const ManagePollens = ({navigation}) => {
                                   },
                                   {
                                     text: 'OK',
-                                    onPress: () => deleteActiveMedication(item),
+                                    onPress: () => deletePolles(item),
                                   },
                                 ],
                                 {cancelable: false},
@@ -132,15 +174,15 @@ const ManagePollens = ({navigation}) => {
             </NestableScrollContainer>
           ) : null}
 
-        <View style={{marginTop: 20, gap: 10}}>
-          <AppButton
-            title={'Add Pollens'}
-            bgColor={AppColors.BTNCOLOURS}
-            RightColour={AppColors.rightArrowCOlor}
-            handlePress={() => navigation.navigate('AddPollens')}
-          />
+          <View style={{marginTop: 20, gap: 10}}>
+            <AppButton
+              title={'Add Pollens'}
+              bgColor={AppColors.BTNCOLOURS}
+              RightColour={AppColors.rightArrowCOlor}
+              handlePress={() => navigation.navigate('AddPollens')}
+            />
+          </View>
         </View>
-      </View>
       </GestureHandlerRootView>
     </SafeAreaView>
   );

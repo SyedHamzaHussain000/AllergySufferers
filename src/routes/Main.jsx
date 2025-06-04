@@ -33,19 +33,19 @@ const Main = () => {
       <Stack.Screen name="Home" component={MyTabs} />
       <Stack.Screen name="AppSetting" component={HomeWithSafeArea(AppSetting)} />
       <Stack.Screen name="AddCity" component={HomeWithSafeArea(AddCity)} />
-      <Stack.Screen name="ManageCities" component={ManageCities} />
-      <Stack.Screen name="ManagePollens" component={ManagePollens} />
-      <Stack.Screen name="AddPollens" component={AddPollens} />
-      <Stack.Screen name="ManageMedications" component={ManageMedications} />
-      <Stack.Screen name="AddMedications" component={AddMedications} />
+      <Stack.Screen name="ManageCities" component={HomeWithSafeArea(ManageCities)} />
+      <Stack.Screen name="ManagePollens" component={HomeWithSafeArea(ManagePollens)} />
+      <Stack.Screen name="AddPollens" component={HomeWithSafeArea(AddPollens)} />
+      <Stack.Screen name="ManageMedications" component={HomeWithSafeArea(ManageMedications)} />
+      <Stack.Screen name="AddMedications" component={HomeWithSafeArea(AddMedications)} />
 
-      <Stack.Screen name="FeedBack" component={FeedBack} />
+      <Stack.Screen name="FeedBack" component={HomeWithSafeArea(FeedBack)} />
       <Stack.Screen name="PrivacyPolicy" component={HomeWithSafeArea(PrivacyPolicy)} />
       <Stack.Screen name="TermsCondition" component={HomeWithSafeArea(TermsCondition)} />
-      <Stack.Screen name="TipsTrick" component={TipsTrick} />
-      <Stack.Screen name="PollenInfoForCad" component={PollenInfoForCad} />
-      <Stack.Screen name="DeleteAllData" component={DeleteAllData} />
-      <Stack.Screen name="DataVisualizer" component={DataVisualizer} />
+      <Stack.Screen name="TipsTrick" component={HomeWithSafeArea(TipsTrick)} />
+      <Stack.Screen name="PollenInfoForCad" component={HomeWithSafeArea(PollenInfoForCad)} />
+      <Stack.Screen name="DeleteAllData" component={HomeWithSafeArea(DeleteAllData)} />
+      <Stack.Screen name="DataVisualizer" component={HomeWithSafeArea(DataVisualizer)} />
 
 
       
