@@ -24,12 +24,18 @@ import BASE_URL from '../../utils/BASE_URL';
 import moment from 'moment';
 import {useSelector} from 'react-redux';
 import LoaderMode from '../../components/LoaderMode';
+import DatePicker from 'react-native-date-picker';
 
 const Symptom = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
 
   const [symtomsData, setSymtomsData] = useState();
   const [systomsNumber, setSymtomsNumber] = useState();
+
+  //data states
+    const [date, setDate] = useState(new Date());
+    const [selecteddate, setSelectedDate] = useState(moment(new Date()).format('YYYY-MM-DD'));
+    const [open, setOpen] = useState(false);
 
   const [loader, setLoader] = useState(false);
 
@@ -104,14 +110,20 @@ const Symptom = ({navigation}) => {
             {
               data: await lastFive.map(item => parseInt(item.symptom_level)),
             },
+
             {
               data: [1],
+              withDots: false, 
             },
+            
             {
               data: [5],
+              withDots: false, 
             },
           ],
         };
+
+        console.log("lastFive",lastFive)
 
         setSymtomsData(symtomsArrayData);
 
@@ -133,7 +145,7 @@ const Symptom = ({navigation}) => {
 
     let data = JSON.stringify({
       level: id,
-      date: todayDate,
+      date: selecteddate,
     });
 
     let config = {
@@ -155,6 +167,8 @@ const Symptom = ({navigation}) => {
         console.log(error);
       });
   };
+
+  console.log("AppText",selecteddate)
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
@@ -162,7 +176,32 @@ const Symptom = ({navigation}) => {
           heading="Symptom"
           Rightheading="Today"
           subheading="Tracker"
+          selecteddate={selecteddate}
+          setOpen={() => setOpen(!open)}
+          
         />
+
+
+
+
+           <DatePicker
+                  modal
+                  open={open}
+                  date={date}
+                  mode="date"
+                  maximumDate={new Date()}
+                  onConfirm={selectedDate => {
+                    setOpen(false);
+                    const today = moment().startOf('day');
+                    const picked = moment(selectedDate).startOf('day');
+                    const formattedDate = picked.format('YYYY-MM-DD');
+                    setSelectedDate(formattedDate);
+                 
+                  }}
+                  onCancel={() => {
+                    setOpen(false);
+                  }}
+                />
 
         <View>
           {loader ? (
@@ -214,7 +253,7 @@ const Symptom = ({navigation}) => {
           <LineChart
             data={symtomsData || {labels: [], datasets: [{data: []}]}}
             width={screenWidth * 0.89}
-            height={responsiveHeight(30)}
+            height={responsiveHeight(32)}
             verticalLabelRotation={0}
             chartConfig={chartConfig}
             withShadow={false}
@@ -222,6 +261,7 @@ const Symptom = ({navigation}) => {
             bezier
             withHorizontalLabels={false}
             segments={5}
+            
             yAxisInterval={5}
             yAxisLabel="0"
           />
