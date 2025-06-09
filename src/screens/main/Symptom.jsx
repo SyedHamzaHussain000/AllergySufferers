@@ -33,9 +33,11 @@ const Symptom = ({navigation}) => {
   const [systomsNumber, setSymtomsNumber] = useState();
 
   //data states
-    const [date, setDate] = useState(new Date());
-    const [selecteddate, setSelectedDate] = useState(moment(new Date()).format('YYYY-MM-DD'));
-    const [open, setOpen] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [selecteddate, setSelectedDate] = useState(
+    moment(new Date()).format('YYYY-MM-DD'),
+  );
+  const [open, setOpen] = useState(false);
 
   const [loader, setLoader] = useState(false);
 
@@ -80,6 +82,7 @@ const Symptom = ({navigation}) => {
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
+      setLoader(true);
       getSymtomsData();
     });
 
@@ -87,18 +90,16 @@ const Symptom = ({navigation}) => {
   }, [navigation]);
 
   const getSymtomsData = () => {
-    setLoader(true);
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_symptom_records`,
-      headers: {},
+      headers: {'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0'},
     };
 
     axios
       .request(config)
       .then(async response => {
-        // console.log('symptoms', response.data.symptoms);
         const datasort = response.data.symptoms;
 
         const lastFive = datasort.slice(-5);
@@ -113,26 +114,23 @@ const Symptom = ({navigation}) => {
 
             {
               data: [1],
-              withDots: false, 
+              withDots: false,
             },
-            
+
             {
               data: [5],
-              withDots: false, 
+              withDots: false,
             },
           ],
         };
 
-        console.log("lastFive",lastFive)
-
         setSymtomsData(symtomsArrayData);
-
-        setTimeout(() => {
-          setLoader(false);
-        }, 10000);
       })
       .catch(error => {
         console.log(error);
+      })
+      .finally(() => {
+        setLoader(false);
       });
   };
 
@@ -140,35 +138,38 @@ const Symptom = ({navigation}) => {
     setSymtomsNumber(id);
 
     setLoader(true);
+    try {
+      const todayDate = moment().format('YYYY-MM-DD');
 
-    const todayDate = moment().format('YYYY-MM-DD');
-
-    let data = JSON.stringify({
-      level: id,
-      date: selecteddate,
-    });
-
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/set_symptom_record`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: data,
-    };
-
-    axios
-      .request(config)
-      .then(response => {
-        getSymtomsData();
-      })
-      .catch(error => {
-        console.log(error);
+      let data = JSON.stringify({
+        level: id,
+        date: selecteddate,
       });
+
+      let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/set_symptom_record`,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: data,
+      };
+
+      axios
+        .request(config)
+        .then(response => {
+          getSymtomsData();
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
-  console.log("AppText",selecteddate)
+  console.log('AppText', selecteddate);
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
@@ -178,30 +179,25 @@ const Symptom = ({navigation}) => {
           subheading="Tracker"
           selecteddate={selecteddate}
           setOpen={() => setOpen(!open)}
-          
         />
 
-
-
-
-           <DatePicker
-                  modal
-                  open={open}
-                  date={date}
-                  mode="date"
-                  maximumDate={new Date()}
-                  onConfirm={selectedDate => {
-                    setOpen(false);
-                    const today = moment().startOf('day');
-                    const picked = moment(selectedDate).startOf('day');
-                    const formattedDate = picked.format('YYYY-MM-DD');
-                    setSelectedDate(formattedDate);
-                 
-                  }}
-                  onCancel={() => {
-                    setOpen(false);
-                  }}
-                />
+        <DatePicker
+          modal
+          open={open}
+          date={date}
+          mode="date"
+          maximumDate={new Date()}
+          onConfirm={selectedDate => {
+            setOpen(false);
+            const today = moment().startOf('day');
+            const picked = moment(selectedDate).startOf('day');
+            const formattedDate = picked.format('YYYY-MM-DD');
+            setSelectedDate(formattedDate);
+          }}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />
 
         <View>
           {loader ? (
@@ -261,7 +257,6 @@ const Symptom = ({navigation}) => {
             bezier
             withHorizontalLabels={false}
             segments={5}
-            
             yAxisInterval={5}
             yAxisLabel="0"
           />

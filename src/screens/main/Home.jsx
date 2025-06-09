@@ -345,25 +345,7 @@ const Home = ({navigation}) => {
                           textFontWeight
                         />
 
-                        {/* <SpeedoMeter
-                    imgWeight={30}
-                    imgHeight={10}
-                    speedometerWidth={30}
-                    imageTop={-10}
-                    TextBottom={
-                      item?.level == 1
-                        ? 'Low'
-                        : item?.level == 2
-                        ? 'Moderate'
-                        : item?.level == 3
-                        ? 'High'
-                        : item?.level == 4
-                        ? 'Very High'
-                        : null
-                    }
-                    TempreaturePriority={'Moderate'}
-                    TempreaturePriorityFontSize={1.6}
-                  /> */}
+                     
                         <SpeedoMeter
                           imgWeight={30}
                           imgHeight={10}
@@ -516,11 +498,7 @@ const Home = ({navigation}) => {
                     />
                   </View>
 
-                  <AntDesign
-                    name={'plus'}
-                    size={responsiveFontSize(2.5)}
-                    color={'#777777'}
-                  />
+                 
                 </View>
               );
             }}
