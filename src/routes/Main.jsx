@@ -23,6 +23,7 @@ import DeleteAllData from '../screens/main/stacks/info/DeleteAllData';
 import Medication from '../screens/main/Medication';
 import AppImages from '../assets/images/AppImages';
 import DataVisualizer from '../screens/main/stacks/DataVisualizer';
+import Account from '../screens/main/stacks/accounts/Account';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const Main = () => {
@@ -46,6 +47,7 @@ const Main = () => {
       <Stack.Screen name="PollenInfoForCad" component={HomeWithSafeArea(PollenInfoForCad)} />
       <Stack.Screen name="DeleteAllData" component={HomeWithSafeArea(DeleteAllData)} />
       <Stack.Screen name="DataVisualizer" component={HomeWithSafeArea(DataVisualizer)} />
+            <Stack.Screen name="Account" component={HomeWithSafeArea(Account)} />
 
 
       

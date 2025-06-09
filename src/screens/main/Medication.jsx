@@ -63,7 +63,6 @@ const Medication = ({navigation}) => {
       },
     ],
   };
-  
 
   //   const data = {
   //   labels: [
@@ -108,7 +107,7 @@ const Medication = ({navigation}) => {
       method: 'get',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_medications_active`,
-      headers: {},
+      headers: {'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0'},
     };
 
     axios
@@ -130,7 +129,7 @@ const Medication = ({navigation}) => {
       method: 'get',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
-      headers: {},
+      headers: {'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0'},
     };
 
     axios
@@ -149,14 +148,12 @@ const Medication = ({navigation}) => {
   };
 
   const addMedication = item => {
-
-    const formatedDate = moment(new Date).format("YYYY-MM-DD")
-
+    const formatedDate = moment(new Date()).format('YYYY-MM-DD');
 
     setLoader(true);
     let data = JSON.stringify({
       medication_id: item.id,
-      date: formatedDate, 
+      date: formatedDate,
       units: 1,
     });
 
@@ -174,10 +171,10 @@ const Medication = ({navigation}) => {
       .request(config)
       .then(response => {
         console.log(JSON.stringify(response.data));
-        setTimeout(() => {
-          getActiveMedication();
-          getMedicationRecords()
-        }, 7000);
+
+        getActiveMedication();
+        getMedicationRecords();
+
         // getMedicationRecords();
       })
       .catch(error => {
@@ -187,9 +184,12 @@ const Medication = ({navigation}) => {
   };
 
   const removeMedication = item => {
+    const formatedDate = moment(new Date()).format('YYYY-MM-DD');
+
     setLoader(true);
     let data = JSON.stringify({
       medication_id: item.id,
+      date: formatedDate,
       units: 1,
     });
 
@@ -207,10 +207,10 @@ const Medication = ({navigation}) => {
       .request(config)
       .then(response => {
         console.log(JSON.stringify(response.data));
-        setTimeout(() => {
-          getActiveMedication();
-        }, 7000);
-        // getMedicationRecords();
+        // setTimeout(() => {
+        getActiveMedication();
+        getMedicationRecords();
+        // }, 7000);
       })
       .catch(error => {
         console.log(error);

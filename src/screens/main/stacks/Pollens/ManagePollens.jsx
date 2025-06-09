@@ -102,7 +102,7 @@ const ManagePollens = ({navigation}) => {
       <GestureHandlerRootView style={{flex: 1}}>
         <View style={{padding: 20}}>
           <AppHeader
-            heading="Manage Pollens"
+            heading="Manage pollen and spores"
             icon={
               <Entypo
                 name={'location-pin'}
@@ -131,8 +131,8 @@ const ManagePollens = ({navigation}) => {
                           <TouchableOpacity
                             onPress={() =>
                               Alert.alert(
-                                'Delete Medication',
-                                'Are you sure you want to delete this medication?',
+                                'Delete pollen and spores',
+                                'Are you sure you want to delete this pollen or spores?',
                                 [
                                   {
                                     text: 'Cancel',
@@ -176,7 +176,7 @@ const ManagePollens = ({navigation}) => {
 
           <View style={{marginTop: 20, gap: 10}}>
             <AppButton
-              title={'Add Pollens'}
+              title={'Add pollen and spores'}
               bgColor={AppColors.BTNCOLOURS}
               RightColour={AppColors.rightArrowCOlor}
               handlePress={() => navigation.navigate('AddPollens')}

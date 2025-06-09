@@ -101,7 +101,7 @@ const AddPollens = ({navigation}) => {
     <SafeAreaView style={{flex: 1}}>
       <View style={{padding: 20}}>
         <AppHeader
-          heading="Add Pollens"
+          heading="Add pollen and spores"
           icon={
             <Entypo
               name={'location-pin'}
@@ -148,7 +148,7 @@ const AddPollens = ({navigation}) => {
                 item.common_name.toLowerCase().includes(search.toLowerCase()),
             )
             .map((item, index) => (
-              <View
+              <TouchableOpacity onPress={() => setPollenApi(item)}
                 style={{
                   padding: 20,
                   borderWidth: 1,
@@ -169,14 +169,14 @@ const AddPollens = ({navigation}) => {
                   <AppText title={item.common_name} textSize={1.8} textwidth={70}/>
                 </View>
 
-                <TouchableOpacity onPress={() => setPollenApi(item)}>
+                <View >
                   <AntDesign
                     name={'pluscircle'}
                     size={responsiveFontSize(3)}
                     color={AppColors.BTNCOLOURS}
                   />
-                </TouchableOpacity>
-              </View>
+                </View>
+              </TouchableOpacity>
             ))}
         </ScrollView>
         <Toast />

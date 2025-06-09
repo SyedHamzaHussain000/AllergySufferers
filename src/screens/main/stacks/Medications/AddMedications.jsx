@@ -107,7 +107,8 @@ const AddMedications = ({navigation}) => {
           renderItem={({item, index}) => {
             console.log('item', item);
             return (
-              <View
+              <TouchableOpacity
+              onPress={() => AddMedicationActive(item)}
                 style={{
                   borderWidth: 1,
                   borderTopRightRadius: index == 0 ? 10 : 0,
@@ -125,13 +126,13 @@ const AddMedications = ({navigation}) => {
                 }}>
                 <View
                   style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
-                  <TouchableOpacity onPress={() => AddMedicationActive(item)}>
+                  <View >
                     <AntDesign
                       name={'pluscircle'}
                       size={responsiveFontSize(2.5)}
                       color={AppColors.BTNCOLOURS}
                     />
-                  </TouchableOpacity>
+                  </View>
 
                   <AppText
                     title={item.name}
@@ -141,7 +142,7 @@ const AddMedications = ({navigation}) => {
                     textwidth={70}
                   />
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           }}
         />

@@ -12,7 +12,7 @@ const AppSetting = ({navigation}) => {
   const dispatch = useDispatch()
      const pollens = [
     {id: 1, name: 'Cities', top: true, onPress: ()=> navigation.navigate("ManageCities")},
-    {id: 2, name: 'Pollen types', onPress: ()=> navigation.navigate("ManagePollens")},
+    {id: 2, name: 'Pollen and Spores types', onPress: ()=> navigation.navigate("ManagePollens")},
     {id: 3, name: 'Medications', onPress: ()=> navigation.navigate("ManageMedications")},
     {id: 4, name: 'Push Notifications', },
     {id: 5, name: 'Logout',bottom: true, onPress: ()=>  dispatch(setLogout())},
