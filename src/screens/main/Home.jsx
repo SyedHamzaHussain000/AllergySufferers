@@ -83,12 +83,14 @@ const Home = ({navigation}) => {
   const [ispastArray, setIsPastArray] = useState([]);
   const [isfutureArray, setIsFutureArray] = useState([]);
 
-  const [loadAllCities, setAllCities] = useState();
+  const [AllCities, setAllCities] = useState([]);
   const [loadCities, setLoadCities] = useState(false);
+  const [index , setIndex] = useState(0);
 
+  // console.log("AllCities",AllCities)
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
-      getPollensData();
+      
       getActivePollens();
       getAllCities();
     });
@@ -96,14 +98,14 @@ const Home = ({navigation}) => {
     return nav;
   }, [navigation]);
 
-  const getPollensData = () => {
-    setPollenLoader(true);
 
+  const getPollensData = (newindex) => {
+
+    setPollenLoader(true);
     let data = new FormData();
-    data.append('lat', '43.65107');
-    data.append('lng', '-79.347015');
-    data.append('email', 'john@example.com');
-    data.append('tense', 'past');
+    data.append('lat', AllCities[newindex ? newindex : 0]?.lat);
+    data.append('lng', AllCities[newindex ? newindex : 0]?.lng);
+    data.append('email', userData.email);
 
     let config = {
       method: 'post',
@@ -206,6 +208,8 @@ const Home = ({navigation}) => {
       .then(response => {
         console.log(JSON.stringify(response.data));
         setLoadCities(false);
+        setAllCities(response.data.cities)
+        getPollensData();
       })
       .catch(error => {
         console.log(error);
@@ -290,12 +294,13 @@ const Home = ({navigation}) => {
             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
           ) : (
             <AppIntroSlider
-              data={slides}
+              data={AllCities}
               activeDotStyle={{backgroundColor: AppColors.BLUE, marginTop: 20}}
               dotStyle={{backgroundColor: AppColors.LIGHTGRAY, marginTop: 20}}
               showDoneButton={false}
               showNextButton={false}
-              renderItem={({item}) => {
+              onSlideChange={(index) => getPollensData(index) }
+              renderItem={({item, index}) => {
                 return (
                   <>
                     <View
