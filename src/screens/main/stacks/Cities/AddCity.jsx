@@ -6,7 +6,7 @@ import {
   TextInput,
   SafeAreaView,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
 import {
@@ -19,7 +19,55 @@ import AppColors from '../../../../utils/AppColors';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AppButton from '../../../../components/AppButton';
 import SocialAuthButton from '../../../../components/SocialAuthButton';
+import GooglePlacesTextInput from 'react-native-google-places-textinput';
+import BASE_URL from '../../../../utils/BASE_URL';
+import {useSelector} from 'react-redux';
+import axios from 'axios';
+
 const AddCity = ({navigation}) => {
+  const userdata = useSelector(state => state.auth.user);
+
+  const [detail, setDetil] = useState();
+  const [cityLoader, setCityLoader] = useState(false);
+
+  const addNewCity = () => {
+    setCityLoader(true);
+    if (detail) {
+      let data = JSON.stringify({
+        data: {
+          lat: JSON.stringify(detail?.location?.latitude),
+          lng: JSON.stringify(detail?.location?.longitude),
+          city_name: detail?.displayName?.text,
+        },
+      });
+
+      let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: `${BASE_URL}/allergy_data/v1/user/${userdata.id}/set_cities`,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: data,
+      };
+
+      axios
+        .request(config)
+        .then(response => {
+          console.log('Response', response.data);
+          navigation.navigate('ManageCities');
+          setCityLoader(false);
+        })
+        .catch(error => {
+          console.log(error);
+          setCityLoader(false);
+        });
+    } else {
+      alert('Please select a city');
+      setCityLoader(false);
+    }
+  };
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={{padding: 20}}>
@@ -36,16 +84,17 @@ const AddCity = ({navigation}) => {
           goBack
         />
 
-        <TextInput
-          placeholder="Type City"
-          style={{
-            borderWidth: 1,
-            borderRadius: 10,
-            borderColor: AppColors.LIGHTGRAY,
-            marginTop: 20,
-            paddingHorizontal: 10,
-            height: 50,
+        <GooglePlacesTextInput
+          apiKey="AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc"
+          onPlaceSelect={res => {
+            // console.log('res', );
+            setDetil(res.details);
           }}
+          debounceDelay={200}
+          languageCode="en"
+          placeHolderText="Enter city"
+          fetchDetails={true}
+          includedRegionCodes={['CA']}
         />
 
         <View
@@ -61,6 +110,8 @@ const AddCity = ({navigation}) => {
               title={'Add city'}
               bgColor={AppColors.BTNCOLOURS}
               buttoWidth={85}
+              handlePress={() => addNewCity()}
+              isLoading={cityLoader}
             />
             <TouchableOpacity
               style={{

@@ -1,0 +1,16 @@
+{
+  "place": "places/ChIJpTvG15DL1IkRd8S0KlBVNTI",
+  "placeId": "ChIJpTvG15DL1IkRd8S0KlBVNTI",
+  "text": {"text": "Toronto, ON, Canada", "matches": [{"endOffset": 4}]},
+  "structuredFormat": {
+    "mainText": {"text": "Toronto", "matches": [{"endOffset": 4}]},
+    "secondaryText": {"text": "ON, Canada"}
+  },
+  "types": ["political", "geocode", "locality"],
+  "details": {
+    "id": "ChIJpTvG15DL1IkRd8S0KlBVNTI",
+    "formattedAddress": "Toronto, ON, Canada",
+    "location": {"latitude": 43.653226, "longitude": -79.3831843},
+    "displayName": {"text": "Toronto", "languageCode": "en"}
+  }
+}
