@@ -11,13 +11,13 @@ const Account = ({navigation}) => {
       id: 1,
       name: 'Cancle Subscription',
       top: true,
-      onPress: () => navigation.navigate('subscription'),
+
     },
     
     {
       id: 2,
       name: 'Refresh Data From Server',
-      onPress: () => navigation.navigate('DeleteAllData'),
+
       
     },
     {

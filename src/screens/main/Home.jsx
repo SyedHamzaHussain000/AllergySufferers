@@ -99,7 +99,7 @@ const Home = ({navigation}) => {
 
   const getPollensData = ( allcities ,newindex) => {
 
-    console.log("AllCities......................",allcities, newindex)
+    console.log("AllCities......................",allcities[newindex].city_name, newindex)
     setPollenLoader(true);
     let data = new FormData();
     data.append('lat', allcities[newindex ? newindex : 0]?.lat);

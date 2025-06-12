@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../components/AppHeader';
-import {BarChart} from 'react-native-chart-kit';
+import {BarChart, LineChart} from 'react-native-chart-kit';
 import AppColors from '../../../utils/AppColors';
 import {
   responsiveFontSize,
@@ -144,6 +144,29 @@ const DataVisualizer = ({navigation}) => {
     },
   };
 
+ const linechartConfig = {
+  backgroundColor: 'rgba(0,0,0,0)',
+  backgroundGradientFrom: 'rgba(0,0,0,0)',
+  backgroundGradientTo: 'rgba(0,0,0,0)',
+  decimalPlaces: 2, 
+  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // your line color
+  labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  propsForDots: {
+    r: "4",
+    strokeWidth: "2",
+    stroke: "#ffa726"
+  },
+  style: {
+    borderRadius: 16,
+    paddingLeft: 0,
+  },
+  propsForBackgroundLines: {
+    strokeDasharray: '',
+  },
+}
+
+
+
   const data = {
     labels: MedicationnRecord?.map(item =>
       moment(item.date, 'MMM, DD YYYY').format('MMM D'),
@@ -185,6 +208,8 @@ const DataVisualizer = ({navigation}) => {
           alignItems: 'center',
           justifyContent: 'center',
           marginTop: 20,
+    backgroundColor: 'transparent',
+
         }}>
         <BarChart
           data={data}
@@ -197,7 +222,32 @@ const DataVisualizer = ({navigation}) => {
           showBarTops={false}
           yLabelsOffset={50}
           style={{backgroundColor: 'red'}}
+        
         />
+
+      {/* <LineChart
+  data={data}
+  width={screenWidth * 0.89}
+  height={responsiveHeight(32)}
+  verticalLabelRotation={0}
+  chartConfig={linechartConfig}
+  withShadow={false}
+  withVerticalLines={false}
+  withHorizontalLines={false}
+  withInnerLines={false}
+  bezier
+  segments={5}
+  yAxisInterval={1}
+  withHorizontalLabels={false}
+  withVerticalLabels={false}
+  style={{
+    position: 'absolute',
+    zIndex: 1,
+    backgroundColor: 'transparent' // keep it here too, but mainly handled in chartConfig
+  }}
+/> */}
+
+
       </View>
 
       <View>

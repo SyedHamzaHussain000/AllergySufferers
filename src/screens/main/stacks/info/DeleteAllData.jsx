@@ -9,7 +9,7 @@ import AppButton from '../../../../components/AppButton';
 const DeleteAllData = () => {
   return (
     <View style={{ padding: 20}}>
-      <AppHeader heading="Delete All Data" />
+      <AppHeader  goBack={true} heading="Delete All Data" />
 
         <View style={{height:responsiveHeight(100), justifyContent:'center',    gap:20}}>
         <View style={{flexDirection:'row', width:responsiveWidth(80)}}>

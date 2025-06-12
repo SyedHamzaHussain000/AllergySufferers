@@ -17,13 +17,15 @@ import AddMedications from '../screens/main/stacks/Medications/AddMedications';
 import FeedBack from '../screens/main/stacks/info/FeedBack';
 import PrivacyPolicy from '../screens/main/stacks/info/PrivacyPolicy';
 import TermsCondition from '../screens/main/stacks/info/TermsCondition';
-import TipsTrick from '../screens/main/stacks/info/TipsTrick';
-import PollenInfoForCad from '../screens/main/stacks/info/PollenInfoForCad';
+
 import DeleteAllData from '../screens/main/stacks/info/DeleteAllData';
 import Medication from '../screens/main/Medication';
 import AppImages from '../assets/images/AppImages';
 import DataVisualizer from '../screens/main/stacks/DataVisualizer';
 import Account from '../screens/main/stacks/accounts/Account';
+import TipsTrick from '../screens/main/stacks/Help/TipsTrick';
+import PollenInfoForCad from '../screens/main/stacks/Help/PollenInfoForCad';
+import HelpScreen from '../screens/main/stacks/Help/HelpScreen';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const Main = () => {
@@ -32,25 +34,59 @@ const Main = () => {
       initialRouteName="Home"
       screenOptions={{headerShown: false}}>
       <Stack.Screen name="Home" component={MyTabs} />
-      <Stack.Screen name="AppSetting" component={HomeWithSafeArea(AppSetting)} />
+      <Stack.Screen
+        name="AppSetting"
+        component={HomeWithSafeArea(AppSetting)}
+      />
       <Stack.Screen name="AddCity" component={HomeWithSafeArea(AddCity)} />
-      <Stack.Screen name="ManageCities" component={HomeWithSafeArea(ManageCities)} />
-      <Stack.Screen name="ManagePollens" component={HomeWithSafeArea(ManagePollens)} />
-      <Stack.Screen name="AddPollens" component={HomeWithSafeArea(AddPollens)} />
-      <Stack.Screen name="ManageMedications" component={HomeWithSafeArea(ManageMedications)} />
-      <Stack.Screen name="AddMedications" component={HomeWithSafeArea(AddMedications)} />
+      <Stack.Screen
+        name="ManageCities"
+        component={HomeWithSafeArea(ManageCities)}
+      />
+      <Stack.Screen
+        name="ManagePollens"
+        component={HomeWithSafeArea(ManagePollens)}
+      />
+      <Stack.Screen
+        name="AddPollens"
+        component={HomeWithSafeArea(AddPollens)}
+      />
+      <Stack.Screen
+        name="ManageMedications"
+        component={HomeWithSafeArea(ManageMedications)}
+      />
+      <Stack.Screen
+        name="AddMedications"
+        component={HomeWithSafeArea(AddMedications)}
+      />
 
       <Stack.Screen name="FeedBack" component={HomeWithSafeArea(FeedBack)} />
-      <Stack.Screen name="PrivacyPolicy" component={HomeWithSafeArea(PrivacyPolicy)} />
-      <Stack.Screen name="TermsCondition" component={HomeWithSafeArea(TermsCondition)} />
+      <Stack.Screen
+        name="PrivacyPolicy"
+        component={HomeWithSafeArea(PrivacyPolicy)}
+      />
+      <Stack.Screen
+        name="TermsCondition"
+        component={HomeWithSafeArea(TermsCondition)}
+      />
       <Stack.Screen name="TipsTrick" component={HomeWithSafeArea(TipsTrick)} />
-      <Stack.Screen name="PollenInfoForCad" component={HomeWithSafeArea(PollenInfoForCad)} />
-      <Stack.Screen name="DeleteAllData" component={HomeWithSafeArea(DeleteAllData)} />
-      <Stack.Screen name="DataVisualizer" component={HomeWithSafeArea(DataVisualizer)} />
-            <Stack.Screen name="Account" component={HomeWithSafeArea(Account)} />
-
-
-      
+      <Stack.Screen
+        name="PollenInfoForCad"
+        component={HomeWithSafeArea(PollenInfoForCad)}
+      />
+      <Stack.Screen
+        name="DeleteAllData"
+        component={HomeWithSafeArea(DeleteAllData)}
+      />
+      <Stack.Screen
+        name="DataVisualizer"
+        component={HomeWithSafeArea(DataVisualizer)}
+      />
+      <Stack.Screen name="Account" component={HomeWithSafeArea(Account)} />
+      <Stack.Screen
+        name="HelpScreen"
+        component={HomeWithSafeArea(HelpScreen)}
+      />
     </Stack.Navigator>
   );
 };
@@ -124,8 +160,6 @@ function MyTabs() {
     </Tab.Navigator>
   );
 }
-
-
 
 // If needed, wrap MyTabs too:
 const HomeWithSafeArea = Component => props => {

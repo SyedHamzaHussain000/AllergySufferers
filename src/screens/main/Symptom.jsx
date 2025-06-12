@@ -12,6 +12,7 @@ import React, {useEffect, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
 import AppImages from '../../assets/images/AppImages';
 import {
+  responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from '../../utils/Responsive_Dimensions';
@@ -25,9 +26,12 @@ import moment from 'moment';
 import {useSelector} from 'react-redux';
 import LoaderMode from '../../components/LoaderMode';
 import DatePicker from 'react-native-date-picker';
+import {AllergyTips} from '../../utils/AllergyTips';
 
 const Symptom = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
+
+  const [randomTip, setRandomTip] = useState(null);
 
   const [symtomsData, setSymtomsData] = useState();
   const [systomsNumber, setSymtomsNumber] = useState();
@@ -84,6 +88,10 @@ const Symptom = ({navigation}) => {
     const nav = navigation.addListener('focus', () => {
       setLoader(true);
       getSymtomsData();
+
+      const random =
+        AllergyTips[Math.floor(Math.random() * AllergyTips.length)];
+      setRandomTip(random);
     });
 
     return nav;
@@ -298,7 +306,7 @@ const Symptom = ({navigation}) => {
             handlePress={() => navigation.navigate('DataVisualizer')}
           />
         </View>
-        <View style={{marginTop: 30}}>
+        <View style={{marginTop: 10}}>
           <AppText
             title={'Tips & Tricks'}
             textSize={3}
@@ -307,8 +315,8 @@ const Symptom = ({navigation}) => {
           />
         </View>
 
-        <View style={{flexDirection: 'row', marginTop: 10}}>
-          <AppText title={'Allergy Tip'} textFontWeight textSize={1.5} />
+        <View style={{marginTop: 10}}>
+          {/* <AppText title={'Allergy Tip'} textFontWeight textSize={1.5} />
           <AppText
             title={
               ' - Check pollen counts on your app in the morning and try to say indoors when they’re high.'
@@ -316,7 +324,19 @@ const Symptom = ({navigation}) => {
             textColor={'#777777'}
             textSize={1.5}
             textwidth={70}
-          />
+          /> */}
+        
+          <Text
+            style={{
+              fontSize: responsiveFontSize(2),
+              fontWeight: 'bold',
+              marginBottom: 5,
+            }}>
+            Allergy tip #{randomTip?.id}
+          </Text>
+          <Text style={{fontSize: responsiveFontSize(1.8), color: '#333'}}>
+            {randomTip?.tip}
+          </Text>
         </View>
       </View>
     </SafeAreaView>
