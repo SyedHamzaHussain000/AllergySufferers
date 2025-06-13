@@ -1,4 +1,11 @@
-import {View, Text, FlatList, TouchableOpacity, TextInput, SafeAreaView} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+  SafeAreaView,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
@@ -23,6 +30,8 @@ const AddMedications = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const [medicationData, setMedicationsData] = useState();
   const [MedicationLoader, setMedciationLoader] = useState(false);
+
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -81,74 +90,86 @@ const AddMedications = ({navigation}) => {
       });
   };
 
+   const filteredMedications = medicationData?.filter(item =>
+    item.name.toLowerCase().includes(search.trim().toLowerCase())
+  );
+
+
   return (
-    <SafeAreaView style={{flex:1}}>
-    <View style={{padding: 20}}>
-      <AppHeader
-        heading="Add Medication"
-        icon={
-          <Entypo
-            name={'location-pin'}
-            size={responsiveFontSize(2.5)}
-            color={AppColors.BTNCOLOURS}
+    <SafeAreaView style={{flex: 1}}>
+      <View style={{padding: 20}}>
+        <AppHeader
+          heading="Add Medication"
+          icon={
+            <Entypo
+              name={'location-pin'}
+              size={responsiveFontSize(2.5)}
+              color={AppColors.BTNCOLOURS}
+            />
+          }
+          goBack
+        />
+
+        {MedicationLoader && <LoaderMode />}
+
+        <View style={{gap: 10}}>
+          <AppTextInput
+            inputPlaceHolder={'Search Medications'}
+            textInput={true}
+            onChangeText={text => setSearch(text)}
           />
-        }
-        goBack
-      />
+          <FlatList
+            data={filteredMedications}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{marginTop: 20, paddingBottom: 300}}
+            renderItem={({item, index}) => {
+              console.log('item', item);
+              return (
+                <TouchableOpacity
+                  onPress={() => AddMedicationActive(item)}
+                  style={{
+                    borderWidth: 1,
+                    borderTopRightRadius: index == 0 ? 10 : 0,
+                    borderTopLeftRadius: index == 0 ? 10 : 0,
+                    borderBottomRightRadius:
+                      index == medicationData?.length - 1 ? 10 : 0,
+                    borderBottomLeftRadius:
+                      index == medicationData?.length - 1 ? 10 : 0,
+                    padding: 20,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderBottomWidth:
+                      index == medicationData?.length - 1 ? 1 : 0,
+                  }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      gap: 10,
+                      alignItems: 'center',
+                    }}>
+                    <View>
+                      <AntDesign
+                        name={'pluscircle'}
+                        size={responsiveFontSize(2.5)}
+                        color={AppColors.BTNCOLOURS}
+                      />
+                    </View>
 
-      {MedicationLoader && <LoaderMode />}
-
-      <View style={{gap: 10}}>
-        <AppTextInput inputPlaceHolder={'Search Medications'} />
-        <FlatList
-          data={medicationData}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{marginTop: 20, paddingBottom: 300}}
-          renderItem={({item, index}) => {
-            console.log('item', item);
-            return (
-              <TouchableOpacity
-              onPress={() => AddMedicationActive(item)}
-                style={{
-                  borderWidth: 1,
-                  borderTopRightRadius: index == 0 ? 10 : 0,
-                  borderTopLeftRadius: index == 0 ? 10 : 0,
-                  borderBottomRightRadius:
-                    index == medicationData?.length - 1 ? 10 : 0,
-                  borderBottomLeftRadius:
-                    index == medicationData?.length - 1 ? 10 : 0,
-                  padding: 20,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  borderBottomWidth:
-                    index == medicationData?.length - 1 ? 1 : 0,
-                }}>
-                <View
-                  style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
-                  <View >
-                    <AntDesign
-                      name={'pluscircle'}
-                      size={responsiveFontSize(2.5)}
-                      color={AppColors.BTNCOLOURS}
+                    <AppText
+                      title={item.name}
+                      textSize={2}
+                      textColor={AppColors.BLACK}
+                      textFontWeight
+                      textwidth={70}
                     />
                   </View>
-
-                  <AppText
-                    title={item.name}
-                    textSize={2}
-                    textColor={AppColors.BLACK}
-                    textFontWeight
-                    textwidth={70}
-                  />
-                </View>
-              </TouchableOpacity>
-            );
-          }}
-        />
-        {/* <AppButton title={'Save'} bgColor={AppColors.BTNCOLOURS} /> */}
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </View>
       </View>
-    </View>
     </SafeAreaView>
   );
 };

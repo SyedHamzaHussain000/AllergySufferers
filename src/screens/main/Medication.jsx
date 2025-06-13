@@ -26,6 +26,8 @@ import BASE_URL from '../../utils/BASE_URL';
 import {useSelector} from 'react-redux';
 import axios from 'axios';
 import moment from 'moment';
+import DatePicker from 'react-native-date-picker';
+
 const Medication = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
 
@@ -33,7 +35,13 @@ const Medication = ({navigation}) => {
   const [allMedication, setAllMedication] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
   const [loader, setLoader] = useState(false);
-  console.log('MedicationnRecord', MedicationnRecord);
+
+  const [date, setDate] = useState(new Date());
+  const [selecteddate, setSelectedDate] = useState(
+    moment(new Date()).format('YYYY-MM-DD'),
+  );
+
+    const [open, setOpen] = useState(false);
 
   const chartConfig = {
     backgroundGradientFrom: '#FFFFFF',
@@ -123,13 +131,23 @@ const Medication = ({navigation}) => {
       });
   };
 
-  const getMedicationRecords = () => {
-    // setLoader(true)
+  const getMedicationRecords = ewformateddate => {
+    setLoader(true);
+    let data = JSON.stringify({
+      date: ewformateddate ? ewformateddate : selecteddate,
+    });
+
     let config = {
-      method: 'get',
+      method: 'post',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
-      headers: {'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+      data: data,
     };
 
     axios
@@ -139,10 +157,10 @@ const Medication = ({navigation}) => {
 
         const slicedata = response.data.entries.items.slice(-5);
         setMedicationnRecord(slicedata);
-        // setLoader(false)
+        setLoader(false)
       })
       .catch(error => {
-        // setLoader(false)
+        setLoader(false)
         console.log(error);
       });
   };
@@ -153,7 +171,7 @@ const Medication = ({navigation}) => {
     setLoader(true);
     let data = JSON.stringify({
       medication_id: item.id,
-      date: formatedDate,
+      date: selecteddate,
       units: 1,
     });
 
@@ -224,7 +242,10 @@ const Medication = ({navigation}) => {
         <AppHeader
           heading="Medication"
           Rightheading="Today"
+
           subheading="Tracker"
+          selecteddate={selecteddate}
+          setOpen={()=>setOpen(true)}
         />
 
         <View>
@@ -288,6 +309,26 @@ const Medication = ({navigation}) => {
             />
           )}
         </View>
+
+            <DatePicker
+                  modal
+                  open={open}
+                  date={date}
+                  mode="date"
+                  maximumDate={new Date()}
+                  onConfirm={selectedDate => {
+                    setOpen(false);
+                    const today = moment().startOf('day');
+                    const picked = moment(selectedDate).startOf('day');
+                    const formattedDate = picked.format('YYYY-MM-DD');
+                    setSelectedDate(formattedDate);
+        
+                    getMedicationRecords(formattedDate)
+                  }}
+                  onCancel={() => {
+                    setOpen(false);
+                  }}
+                />
 
         <BarChart
           data={data}

@@ -39,7 +39,7 @@ const Symptom = ({navigation}) => {
   //data states
   const [date, setDate] = useState(new Date());
   const [selecteddate, setSelectedDate] = useState(
-    moment(new Date()).format('YYYY-MM-DD'),
+  moment().subtract(5, 'days').format('YYYY-MM-DD')
   );
   const [open, setOpen] = useState(false);
 
@@ -96,18 +96,31 @@ const Symptom = ({navigation}) => {
 
     return nav;
   }, [navigation]);
+// setLoader(false);
+  const getSymtomsData = (ewformateddate) => {
+    setLoader(true);
+    let data = JSON.stringify({
+      date: ewformateddate ? ewformateddate : selecteddate,
+    });
 
-  const getSymtomsData = () => {
     let config = {
-      method: 'get',
+      method: 'post',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_symptom_records`,
-      headers: {'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0'},
+      headers: {
+        'Content-Type': 'application/json',
+         'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+      data: data,
     };
 
     axios
       .request(config)
       .then(async response => {
+        console.log('datasorted', response.data);
+
         const datasort = response.data.symptoms;
 
         const lastFive = datasort.slice(-5);
@@ -133,9 +146,11 @@ const Symptom = ({navigation}) => {
         };
 
         setSymtomsData(symtomsArrayData);
+        setLoader(false);
       })
       .catch(error => {
-        console.log(error);
+        console.log(error.message);
+        setLoader(false);
       })
       .finally(() => {
         setLoader(false);
@@ -201,6 +216,8 @@ const Symptom = ({navigation}) => {
             const picked = moment(selectedDate).startOf('day');
             const formattedDate = picked.format('YYYY-MM-DD');
             setSelectedDate(formattedDate);
+
+            getSymtomsData(formattedDate)
           }}
           onCancel={() => {
             setOpen(false);
@@ -325,7 +342,7 @@ const Symptom = ({navigation}) => {
             textSize={1.5}
             textwidth={70}
           /> */}
-        
+
           <Text
             style={{
               fontSize: responsiveFontSize(2),
