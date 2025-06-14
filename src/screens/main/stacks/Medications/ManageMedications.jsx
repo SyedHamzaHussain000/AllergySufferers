@@ -55,7 +55,11 @@ const ManageMedications = ({navigation}) => {
       method: 'get',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications_active`,
-      headers: {},
+      headers: {
+             'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     };
 
     axios
@@ -72,7 +76,6 @@ const ManageMedications = ({navigation}) => {
   };
 
   const deleteActiveMedication = medicationdata => {
-    console.log('medicationdata', medicationdata);
 
     setLoader(true);
     let data = JSON.stringify({
@@ -82,7 +85,7 @@ const ManageMedications = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/125310/delete_medication`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/delete_medication`,
       headers: {
         'Content-Type': 'application/json',
       },

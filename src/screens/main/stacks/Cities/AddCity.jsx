@@ -87,7 +87,7 @@ const AddCity = ({navigation}) => {
         <GooglePlacesTextInput
           apiKey="AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc"
           onPlaceSelect={res => {
-            // console.log('res', );
+            console.log('res', res);
             setDetil(res.details);
           }}
           debounceDelay={200}
@@ -95,6 +95,7 @@ const AddCity = ({navigation}) => {
           placeHolderText="Enter city"
           fetchDetails={true}
           includedRegionCodes={['CA']}
+
         />
 
         <View

@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   TextInput,
   SafeAreaView,
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -26,9 +27,10 @@ import {useSelector} from 'react-redux';
 import axios from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import LoaderMode from '../../../../components/LoaderMode';
+import Toast from 'react-native-toast-message';
 const AddMedications = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
-  const [medicationData, setMedicationsData] = useState();
+  const [medicationData, setMedicationsData] = useState([]);
   const [MedicationLoader, setMedciationLoader] = useState(false);
 
   const [search, setSearch] = useState('');
@@ -53,6 +55,7 @@ const AddMedications = ({navigation}) => {
       .request(config)
       .then(response => {
         console.log(JSON.stringify(response.data));
+
         setMedicationsData(response.data.data);
         setMedciationLoader(false);
       })
@@ -74,6 +77,9 @@ const AddMedications = ({navigation}) => {
       url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_medications`,
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
       data: data,
     };
@@ -83,17 +89,16 @@ const AddMedications = ({navigation}) => {
       .then(response => {
         console.log(JSON.stringify(response.data));
         setMedciationLoader(false);
+        Toast.show({
+          type: 'success',
+          text1: 'Medication added successfully',
+        });
       })
       .catch(error => {
         setMedciationLoader(false);
         console.log(error);
       });
   };
-
-   const filteredMedications = medicationData?.filter(item =>
-    item.name.toLowerCase().includes(search.trim().toLowerCase())
-  );
-
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -118,56 +123,72 @@ const AddMedications = ({navigation}) => {
             textInput={true}
             onChangeText={text => setSearch(text)}
           />
-          <FlatList
-            data={filteredMedications}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{marginTop: 20, paddingBottom: 300}}
-            renderItem={({item, index}) => {
-              console.log('item', item);
-              return (
-                <TouchableOpacity
-                  onPress={() => AddMedicationActive(item)}
-                  style={{
-                    borderWidth: 1,
-                    borderTopRightRadius: index == 0 ? 10 : 0,
-                    borderTopLeftRadius: index == 0 ? 10 : 0,
-                    borderBottomRightRadius:
-                      index == medicationData?.length - 1 ? 10 : 0,
-                    borderBottomLeftRadius:
-                      index == medicationData?.length - 1 ? 10 : 0,
-                    padding: 20,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    borderBottomWidth:
-                      index == medicationData?.length - 1 ? 1 : 0,
-                  }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      gap: 10,
-                      alignItems: 'center',
-                    }}>
-                    <View>
-                      <AntDesign
-                        name={'pluscircle'}
-                        size={responsiveFontSize(2.5)}
-                        color={AppColors.BTNCOLOURS}
-                      />
-                    </View>
 
-                    <AppText
-                      title={item.name}
-                      textSize={2}
-                      textColor={AppColors.BLACK}
-                      textFontWeight
-                      textwidth={70}
-                    />
-                  </View>
-                </TouchableOpacity>
-              );
-            }}
-          />
+          <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 220}}>
+            {medicationData?.length > 0 ? (
+              <>
+                {medicationData
+                  ?.filter(item =>
+                    item.name
+                      .toLowerCase()
+                      .includes(search.trim().toLowerCase()),
+                  )
+                  .map((item, index) => {
+                    return (
+                      <TouchableOpacity
+                        onPress={() => AddMedicationActive(item)}
+                        style={{
+                          borderWidth: 1,
+                          borderTopRightRadius: index == 0 ? 10 : 0,
+                          borderTopLeftRadius: index == 0 ? 10 : 0,
+                          borderBottomRightRadius:
+                            index == medicationData?.length - 1 ? 10 : 0,
+                          borderBottomLeftRadius:
+                            index == medicationData?.length - 1 ? 10 : 0,
+                          padding: 20,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          borderBottomWidth:
+                            index == medicationData?.length - 1 ? 1 : 0,
+                        }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            gap: 10,
+                            alignItems: 'center',
+                          }}>
+                          <View>
+                            <AntDesign
+                              name={'pluscircle'}
+                              size={responsiveFontSize(2.5)}
+                              color={AppColors.BTNCOLOURS}
+                            />
+                          </View>
+
+                          <AppText
+                            title={item.name}
+                            textSize={2}
+                            textColor={AppColors.BLACK}
+                            textFontWeight
+                            textwidth={70}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+              </>
+            ) : (
+              <View
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  paddingTop: 20,
+                }}>
+                <AppText title={'Please buy a subscription'} textSize={2.2} />
+              </View>
+            )}
+          </ScrollView>
         </View>
       </View>
     </SafeAreaView>
