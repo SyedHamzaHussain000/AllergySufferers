@@ -57,6 +57,8 @@ const Medication = ({navigation}) => {
     },
   };
 
+  console.log("MedicationnRecord",MedicationnRecord)
+
   const data = {
     labels: MedicationnRecord?.map(item =>
       moment(item.date, 'MMM, DD YYYY').format('MMM D'),
@@ -72,31 +74,6 @@ const Medication = ({navigation}) => {
     ],
   };
 
-  //   const data = {
-  //   labels: [
-  //     'May 1', 'May 1',
-  //     'May 2', 'May 2',
-  //     'May 3', 'May 3',
-  //   ],
-  //   datasets: [
-  //     {
-  //       data: [
-  //         5, 8,  // May 1 → unitsA, unitsB
-  //         3, 6,  // May 2 → unitsA, unitsB
-  //         4, 7   // May 3 → unitsA, unitsB
-  //       ],
-  //       // Correct way: Array of functions for each bar
-  //       colors: [
-  //         () => '#E74C3C', // May 1 A
-  //         () => '#3498DB', // May 1 B
-  //         () => '#E74C3C', // May 2 A
-  //         () => '#3498DB', // May 2 B
-  //         () => '#E74C3C', // May 3 A
-  //         () => '#3498DB'  // May 3 B
-  //       ],
-  //     },
-  //   ],
-  // };
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -134,7 +111,7 @@ const Medication = ({navigation}) => {
   const getMedicationRecords = ewformateddate => {
     setLoader(true);
     let data = JSON.stringify({
-      date: ewformateddate ? ewformateddate : selecteddate,
+      date: moment(ewformateddate ? ewformateddate : selecteddate).subtract(7, 'days').format("YYYY-MM-DD"),
     });
 
     let config = {

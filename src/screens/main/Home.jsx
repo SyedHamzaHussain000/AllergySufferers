@@ -34,6 +34,9 @@ import moment from 'moment';
 import AppIntroSlider from 'react-native-app-intro-slider';
 import * as Animatable from 'react-native-animatable';
 import AppButton from '../../components/AppButton';
+import {GetCurrentLocation} from '../../global/GetCurrentLocation';
+import {AddCityApi} from '../../global/AddCityApi';
+// import AddCityApi from '../../global/AddCityApi';
 
 const Home = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
@@ -89,22 +92,26 @@ const Home = ({navigation}) => {
 
   // console.log("AllCities",AllCities)
   useEffect(() => {
-    const nav = navigation.addListener('focus', () => {
-      getActivePollens();
-      getAllCities();
+    const nav = navigation.addListener('focus', async () => {
+      if (userData) {
+        getActivePollens();
+        getAllCities();
+      } else {
+        setLoadCities(true);
+        const currentLatLng = await GetCurrentLocation();
+        getPollensDataLatLng(currentLatLng?.latitude, currentLatLng?.longitude);
+      }
     });
 
     return nav;
   }, [navigation]);
 
-  const getPollensData = ( allcities ,newindex) => {
-
-    console.log("AllCities......................",allcities[newindex].city_name, newindex)
+  const getPollensData = (allcities, newindex) => {
     setPollenLoader(true);
     let data = new FormData();
     data.append('lat', allcities[newindex ? newindex : 0]?.lat);
     data.append('lng', allcities[newindex ? newindex : 0]?.lng);
-    data.append('email', userData.email);
+    data.append('email', userData?.email);
 
     let config = {
       method: 'post',
@@ -147,10 +154,93 @@ const Home = ({navigation}) => {
         setIsFutureArray(futureArray);
 
         setPollenLoader(false);
+        setLoadCities(false);
       })
       .catch(error => {
         console.log(error);
         setPollenLoader(false);
+      });
+  };
+
+  const getPollensDataLatLng = (Lat, Lng) => {
+    setPollenLoader(true);
+    setLoadCities(true);
+    let data = new FormData();
+    data.append('lat', Lat);
+    data.append('lng', Lng);
+    // data.append('email', userData?.email);
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/get_allergy_data`,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(async response => {
+        const res = response.data;
+
+        const city = res?.user?.locations?.closest?.name;
+
+        console.log('city', city);
+        const newCityObj = {
+          id: 1,
+          lat: Lat,
+          lng: Lng,
+          city_name: city,
+        };
+
+        if (userData) {
+          console.log('userData...............', userData);
+          const res = await AddCityApi(userData.id, city, Lat, Lng);
+
+          console.log('Response is ........ =====>', res);
+
+          if (res.status) {
+            console.log('Something went wrong', res.details);
+            return getAllCities();
+          } else {
+            console.log('City added successfully', res);
+          }
+        }
+
+        setAllCities([newCityObj]);
+
+        const past = response?.data?.forecast?.[city]?.past;
+        const today = response?.data?.forecast?.[city]?.today;
+        const future = response?.data?.forecast?.[city]?.future;
+
+        const pastArray = Object.entries(past).map(([date, data]) => ({
+          key: date,
+          ...data,
+        }));
+
+        const futureArray = Object.entries(future).map(([date, data]) => ({
+          key: date,
+          ...data,
+        }));
+
+        setPollenData(response.data);
+
+        setPastPollenData(past);
+        setTodayPollensData(today);
+        setFuturePollenData(future);
+
+        setIsPastArray(pastArray);
+        setIsFutureArray(futureArray);
+
+        setPollenLoader(false);
+        setLoadCities(false);
+      })
+      .catch(error => {
+        console.log(error);
+        setPollenLoader(false);
+        setLoadCities(false);
       });
   };
 
@@ -174,14 +264,13 @@ const Home = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_pollens`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_pollens`,
       headers: {},
     };
 
     axios
       .request(config)
       .then(response => {
-        console.log('resesdsadsajkkdasbhkk', response.data);
 
         setActivePollen(response.data.data);
         setActiveLoader(false);
@@ -193,28 +282,28 @@ const Home = ({navigation}) => {
   };
 
   const getAllCities = () => {
-
-    console.log("callinng ??")
-        
-
     setLoadCities(true);
-
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_cities`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_cities`,
       headers: {},
     };
 
     axios
       .request(config)
-      .then(response => {
+      .then(async response => {
         console.log(JSON.stringify(response.data));
-        setLoadCities(false);
         setAllCities(response.data.cities);
-        if(response.data.cities){
-
+        if (response?.data?.cities?.length > 0) {
           getPollensData(response.data.cities, 0);
+          setLoadCities(false);
+        } else {
+          const currentLatLng = await GetCurrentLocation();
+          getPollensDataLatLng(
+            currentLatLng?.latitude,
+            currentLatLng?.longitude,
+          );
         }
       })
       .catch(error => {
@@ -243,8 +332,25 @@ const Home = ({navigation}) => {
           width: responsiveWidth(100),
         }}>
         {loadCities == true ? (
-          <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
-          <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+            }}>
+            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+            {userData ? (
+              <AppText
+                title={'Fetching pollen data please wait...'}
+                textSize={2}
+              />
+            ) : (
+              <AppText
+                title={'Fetching current location data please wait...'}
+                textSize={2}
+              />
+            )}
           </View>
         ) : (
           <>
@@ -305,7 +411,9 @@ const Home = ({navigation}) => {
                   style={{alignSelf: 'flex-end'}}
                 />
                 {loadCities == true ? (
-                  <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+                  <>
+                    <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+                  </>
                 ) : (
                   <AppIntroSlider
                     data={AllCities}
@@ -471,7 +579,7 @@ const Home = ({navigation}) => {
                                       ? 'High'
                                       : todayPollenInAir[index]?.level == 4
                                       ? 'Very High'
-                                      : 'Low'
+                                      : 'None'
                                   }
                                   TempreaturePriority={'Moderate'}
                                   TempreaturePriorityFontSize={1.6}
@@ -1009,7 +1117,7 @@ const Home = ({navigation}) => {
                 <AppButton
                   textColor={AppColors.WHITE}
                   textFontWeight
-                  title={'Add City'}
+                  title={'Please add city'}
                   textSize={2}
                   handlePress={() => navigation.navigate('AddCity')}
                 />

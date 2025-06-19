@@ -12,14 +12,13 @@ const data = useSelector(state => state.auth.user)
 console.log("data", data)
 
   return (
-    <Stack.Navigator  screenOptions={{headerShown:false}}>
-      {
-        data?.email ? 
+    <Stack.Navigator initialRouteName='Auth'  screenOptions={{headerShown:false}}>
+      
         <Stack.Screen name="Main" component={Main} />
-        :
+        
 
       <Stack.Screen name="Auth" component={Auth} />
-      }
+      
     </Stack.Navigator>
   );
 };

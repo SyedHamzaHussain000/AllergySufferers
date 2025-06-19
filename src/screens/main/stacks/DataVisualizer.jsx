@@ -7,10 +7,11 @@ import {
   ScrollView,
   ActivityIndicator,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../components/AppHeader';
-import {BarChart, LineChart} from 'react-native-chart-kit';
+// import {BarChart, LineChart} from 'react-native-chart-kit';
 import AppColors from '../../../utils/AppColors';
 import {
   responsiveFontSize,
@@ -24,6 +25,13 @@ import {useSelector} from 'react-redux';
 import axios from 'axios';
 import moment from 'moment';
 import DatePicker from 'react-native-date-picker';
+import {
+  BarChart,
+  LineChart,
+  PieChart,
+  PopulationPyramid,
+  RadarChart,
+} from 'react-native-gifted-charts';
 
 const DataVisualizer = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
@@ -33,7 +41,7 @@ const DataVisualizer = ({navigation}) => {
   const [medicationData, setMedicationsData] = useState();
 
   const [takingMedications, setTakingMedications] = useState([]);
-  const [todayPollensData, setTodayPollensData] = useState();
+  const [todayPollensData, setTodayPollensData] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
 
   const [pollenLoader, setPollenLoader] = useState(false);
@@ -43,53 +51,43 @@ const DataVisualizer = ({navigation}) => {
     moment(new Date()).format('YYYY-MM-DD'),
   );
 
+  const colours = ['lightblue', 'lightgreen'];
+
   const [open, setOpen] = useState(false);
+
+  const [PrimaryLineData, setPrimaryLineData] = useState([]);
+  const [SecondaryLineData, setSecondaryLineData] = useState([]);
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
-      getPollensData();
+      getAllAllergens();
       getMedicationRecords();
+      getSelectedAllergens();
     });
 
     return nav;
   }, [navigation]);
 
-  const getPollensData = () => {
+  const getAllAllergens = () => {
     setType('allergens');
     setPollenLoader(true);
 
-    let data = new FormData();
-    data.append('lat', '43.65107');
-    data.append('lng', '-79.347015');
-    data.append('email', 'john@example.com');
-    data.append('tense', 'past');
-
     let config = {
-      method: 'post',
+      method: 'get',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/get_allergy_data`,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      data: data,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_all_allergens`,
+      headers: {'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0'},
     };
 
     axios
       .request(config)
       .then(response => {
-        const res = response.data;
-
-        const city = res?.user?.locations?.closest?.name;
-
-        const today = response?.data?.forecast?.[city]?.today;
-
-        setTodayPollensData(today);
-
+        console.log(JSON.stringify(response.data));
         setPollenLoader(false);
+        setTodayPollensData(response.data);
       })
       .catch(error => {
         console.log(error);
-        setPollenLoader(false);
       });
   };
 
@@ -100,7 +98,11 @@ const DataVisualizer = ({navigation}) => {
       method: 'get',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications_active`,
-      headers: {},
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     };
 
     axios
@@ -114,10 +116,11 @@ const DataVisualizer = ({navigation}) => {
       });
   };
 
-   const getMedicationRecords = ewformateddate => {
-    // setLoader(true);
+  const getMedicationRecords = ewformateddate => {
     let data = JSON.stringify({
-      date: ewformateddate ? ewformateddate : selecteddate,
+      date: moment(ewformateddate ? ewformateddate : selecteddate)
+        .subtract(7, 'days')
+        .format('YYYY-MM-DD'),
     });
 
     let config = {
@@ -136,74 +139,201 @@ const DataVisualizer = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+        const allentriesArr = response.data.entries.items;
 
-        const slicedata = response.data.entries.items.slice(-5);
-        setMedicationnRecord(slicedata);
-        // setLoader(false)
+        const grouped = {};
+
+        allentriesArr.forEach(entry => {
+          const label = moment(entry.date, 'MMMM, DD YYYY').format('MMM DD');
+
+          if (entry.medication_id) {
+            if (!grouped[label]) {
+              grouped[label] = 1;
+            } else {
+              grouped[label]++;
+            }
+          }
+        });
+
+        // Step 2: Convert to barData array
+        const barData = Object.keys(grouped).map(label => ({
+          label,
+          value: grouped[label],
+        }));
+
+        setMedicationnRecord(barData);
       })
       .catch(error => {
         // setLoader(false)
+        console.log('what no found ?', error);
+      });
+  };
+
+  const getDataVisualizer = selecallergens => {
+
+    if (!selecallergens || selecallergens.length === 0) {
+      // no allergens selected, clear chart data
+      setPrimaryLineData([]);
+      setSecondaryLineData([]);
+      return;
+    }
+
+    const allergenParams = selecallergens
+      .map(
+        item => `scientific_names[]=${encodeURIComponent(item.allergen_name)}`,
+      )
+      .join('&');
+
+    const config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=43.653226&lng=-79.3831843&date=${selecteddate}&${allergenParams}`,
+      headers: {},
+    };
+
+    console.log('config', config);
+
+    axios
+      .request(config)
+      .then(response => {
+        const apiData = response.data;
+        console.log('api data', apiData);
+
+        const chartLineData = {};
+        Object.keys(apiData).forEach(key => {
+          if (key !== 'dates') {
+            chartLineData[key] = apiData[key].map(val => ({value: val}));
+          }
+        });
+
+        const allergenNames = Object.keys(chartLineData);
+        setPrimaryLineData(chartLineData[allergenNames[0]] || []);
+        setSecondaryLineData(chartLineData[allergenNames[1]] || []);
+      })
+      .then(response => {
+        const allergens = response.data.allergens;
+        setTakingMedications(allergens);
+
+        if (allergens.length > 0) {
+          getDataVisualizer(allergens);
+        } else {
+          // No allergens selected, clear graph
+          setPrimaryLineData([]);
+          setSecondaryLineData([]);
+        }
+      })
+      .catch(error => {
         console.log(error);
       });
   };
 
-  const chartConfig = {
-    backgroundGradientFrom: '#FFFFFF',
-    backgroundGradientTo: '#FFFFFF',
-    decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    style: {
-      borderRadius: 16,
-      paddingLeft: 0, // add this
-    },
-    propsForBackgroundLines: {
-      strokeDasharray: '', // solid background lines
-    },
-  };
+  const addAllergens = item => {
+    setPollenLoader(true);
 
-  const linechartConfig = {
-    backgroundColor: 'rgba(0,0,0,0)',
-    backgroundGradientFrom: 'rgba(0,0,0,0)',
-    backgroundGradientTo: 'rgba(0,0,0,0)',
-    decimalPlaces: 2,
-    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // your line color
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    propsForDots: {
-      r: '4',
-      strokeWidth: '2',
-      stroke: '#ffa726',
-    },
-    style: {
-      borderRadius: 16,
-      paddingLeft: 0,
-    },
-    propsForBackgroundLines: {
-      strokeDasharray: '',
-    },
-  };
+    if (takingMedications.length == 2) {
+      setPollenLoader(false);
+      return Alert.alert(
+        'Limit Reached',
+        `You can only view 2 allergens at a time. Please remove one of: ${takingMedications
+          .map(item => item.allergen_name)
+          .join(', ')}.`,
+      );
+    }
 
-  const data = {
-    labels: MedicationnRecord?.map(item =>
-      moment(item.date, 'MMM, DD YYYY').format('MMM D'),
-    ),
-    datasets: [
-      {
-        data: MedicationnRecord?.map(item => parseInt(item?.units || 0)),
-        colors: [
-          () => '#D9B61A',
-          () => '#B768F9',
-          () => '#21B777',
-          () => '#50837A',
-          () => '#FFCBCF',
-          () => '#032198',
-        ],
+    let data = JSON.stringify({
+      data: {
+        allergen_name: item.name,
       },
-    ],
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_allergens`,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        setPollenLoader(false);
+        console.log(JSON.stringify(response.data));
+        getSelectedAllergens();
+      })
+      .catch(error => {
+        console.log(error);
+        setPollenLoader(false);
+      });
   };
 
+  const getSelectedAllergens = () => {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_allergens`,
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+    };
 
+    axios
+      .request(config)
+      .then(response => {
+        console.log('allergens', response.data.allergens);
+        setTakingMedications(response.data.allergens);
+
+        getDataVisualizer(response.data.allergens);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
+  const deleteAllergens = item => {
+    let data = JSON.stringify({
+      allergen_id: item.id,
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/delete_allergen`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        getSelectedAllergens();
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
+  const primaryLineData = [
+    {value: 10},
+    {value: 30},
+    {value: 10},
+    {value: 20},
+    {value: 10},
+    {value: 20},
+    {value: 30},
+  ];
+
+  const secondaryLineData = [{value: 20}, {value: 10}, {value: 30}];
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -219,8 +349,44 @@ const DataVisualizer = ({navigation}) => {
           subheading="Your Data, Visualized"
           goBack
           selecteddate={selecteddate}
-          setOpen={()=> setOpen(true)}
+          setOpen={() => setOpen(true)}
         />
+
+        <View>
+          {MedicationnRecord.length > 0 ? (
+            <BarChart
+              data={MedicationnRecord}
+              barWidth={10}
+              frontColor="#E23131" // bar color
+              showLine
+              lineData={PrimaryLineData}
+              lineData2={SecondaryLineData}
+              lineConfig={{
+                color: colours[0],
+                thickness: 2,
+                curved: false,
+                dataPointsColor: colours[0],
+              }}
+              xAxisLabelTextStyle={{
+                fontSize: 10, // 👈 smaller font size
+                color: '#000', // optional, customize color
+                fontWeight: '400', // optional
+              }}
+              barBorderRadius={2}
+              isAnimated={true}
+              lineConfig2={{
+                color: colours[1],
+                thickness: 2,
+                curved: false,
+                dataPointsColor: colours[1],
+              }}
+              noOfSections={7}
+              spacing={30}
+            />
+          ) : (
+            <AppText title={'No data available'} textSize={2} />
+          )}
+        </View>
 
         <View
           style={{
@@ -231,19 +397,6 @@ const DataVisualizer = ({navigation}) => {
             marginTop: 20,
             backgroundColor: 'transparent',
           }}>
-          <BarChart
-            data={data}
-            width={screenWidth * 0.86}
-            height={220}
-            chartConfig={chartConfig}
-            fromZero
-            withCustomBarColorFromData={true}
-            flatColor={true}
-            showBarTops={false}
-            yLabelsOffset={50}
-            style={{backgroundColor: 'red'}}
-          />
-
           <DatePicker
             modal
             open={open}
@@ -284,13 +437,8 @@ const DataVisualizer = ({navigation}) => {
                     alignItems: 'center',
                     paddingHorizontal: 20,
                   }}>
-                  <AppText title={item.name} textSize={1.5} />
-                  <TouchableOpacity
-                    onPress={() =>
-                      setTakingMedications(prev =>
-                        prev.filter(med => med.id !== item.id),
-                      )
-                    }>
+                  <AppText title={item.allergen_name} textSize={1.5} />
+                  <TouchableOpacity onPress={() => deleteAllergens(item)}>
                     <AntDesign
                       name={'minus'}
                       size={responsiveFontSize(2)}
@@ -310,7 +458,7 @@ const DataVisualizer = ({navigation}) => {
             justifyContent: 'space-between',
           }}>
           <TouchableOpacity
-            onPress={() => getPollensData()}
+            onPress={() => getAllAllergens()}
             style={{
               height: responsiveHeight(5),
               width: responsiveWidth(44),
@@ -364,6 +512,7 @@ const DataVisualizer = ({navigation}) => {
               data={medicationData}
               contentContainerStyle={{marginTop: 20, paddingBottom: 100}}
               renderItem={({item, index}) => {
+                console.log("medicaiton", item)
                 return (
                   <View
                     style={{
@@ -387,7 +536,7 @@ const DataVisualizer = ({navigation}) => {
                         gap: 10,
                         alignItems: 'center',
                       }}>
-                      <TouchableOpacity
+                      {/* <TouchableOpacity
                         onPress={() =>
                           setTakingMedications(prev => {
                             const alreadyExists = prev.some(
@@ -402,7 +551,7 @@ const DataVisualizer = ({navigation}) => {
                           size={responsiveFontSize(2.5)}
                           color={AppColors.BTNCOLOURS}
                         />
-                      </TouchableOpacity>
+                      </TouchableOpacity> */}
 
                       <AppText
                         title={item.name}
@@ -420,7 +569,7 @@ const DataVisualizer = ({navigation}) => {
         ) : (
           <View>
             <FlatList
-              data={todayPollensData?.current}
+              data={todayPollensData}
               renderItem={({item}) => {
                 return (
                   <View
@@ -432,11 +581,29 @@ const DataVisualizer = ({navigation}) => {
                       borderColor: AppColors.LIGHTGRAY,
                       marginTop: 5,
                       flexDirection: 'row',
-                      justifyContent: 'space-between',
+                      gap: 10,
                       alignItems: 'center',
                       paddingHorizontal: 20,
                     }}>
-                    <AppText title={item.name} textSize={1.5} />
+                    <TouchableOpacity
+                      onPress={() =>
+                        // setTakingMedications(prev => {
+                        //   const alreadyExists = prev.some(
+                        //     med => med.id === item.id,
+                        //   ); // Assuming `id` is unique
+                        //   if (alreadyExists) return prev; // Don't add it again
+                        //   return [...prev, item]; // Add only if it doesn't exist
+                        // })
+                        addAllergens(item)
+                      }>
+                      <AntDesign
+                        name={'pluscircle'}
+                        size={responsiveFontSize(2.5)}
+                        color={AppColors.BTNCOLOURS}
+                      />
+                    </TouchableOpacity>
+
+                    <AppText title={item.common_name} textSize={1.5} />
                   </View>
                 );
               }}

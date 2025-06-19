@@ -15,7 +15,7 @@ const AppSetting = ({navigation}) => {
     {id: 2, name: 'Pollen and Spores types', onPress: ()=> navigation.navigate("ManagePollens")},
     {id: 3, name: 'Medications', onPress: ()=> navigation.navigate("ManageMedications")},
     {id: 4, name: 'Push Notifications', },
-    {id: 5, name: 'Logout',bottom: true, onPress: ()=>  dispatch(setLogout())},
+    {id: 5, name: 'Logout',bottom: true, onPress: ()=>  {dispatch(setLogout()), navigation.navigate("Auth")}},
   ];
 
 

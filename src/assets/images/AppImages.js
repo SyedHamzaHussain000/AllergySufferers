@@ -20,10 +20,12 @@ export default AppImages = {
   metergreen:require('./metergreen.png'),
   meterred:require('./meterred.png'),
   meteryellow:require('./meteryellow.png'),
+  meternone: require('./none.png'),
 
   Forcast: require('./FORECAST.png'),
   Medication: require('./Medication.png'),
   SYMPTOMS: require('./SYMPTOMS.png'),
   More: require('./More.png'),
+  
 
 };

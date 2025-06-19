@@ -192,7 +192,6 @@ const Symptom = ({navigation}) => {
     }
   };
 
-  console.log('AppText', selecteddate);
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
@@ -333,16 +332,6 @@ const Symptom = ({navigation}) => {
         </View>
 
         <View style={{marginTop: 10}}>
-          {/* <AppText title={'Allergy Tip'} textFontWeight textSize={1.5} />
-          <AppText
-            title={
-              ' - Check pollen counts on your app in the morning and try to say indoors when they’re high.'
-            }
-            textColor={'#777777'}
-            textSize={1.5}
-            textwidth={70}
-          /> */}
-
           <Text
             style={{
               fontSize: responsiveFontSize(2),
@@ -355,6 +344,7 @@ const Symptom = ({navigation}) => {
             {randomTip?.tip}
           </Text>
         </View>
+
       </View>
     </SafeAreaView>
   );

@@ -1,5 +1,5 @@
 import {View, Text, ScrollView, TouchableOpacity, Alert, ToastAndroid, Platform, } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppColors from '../../utils/AppColors';
 import AppText from '../../components/AppTextComps/AppText';
 import AppTextInput from '../../components/AppTextInput';
@@ -16,9 +16,15 @@ const Login = ({navigation}) => {
 
 
   const loading = useSelector(state => state.auth.loader)
-
+const userData = useSelector(state => state.auth.user)
 
   const dispatch = useDispatch()
+
+  useEffect(()=>{
+    if(userData?.email){
+      navigation.navigate("Main")
+    }
+  },[userData])
 
   const LoginUser = () => {
     if(email === '' || password === ''){

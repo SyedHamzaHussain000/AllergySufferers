@@ -29,7 +29,7 @@ const SpeedoMeter = ({imgWeight = 90, imgHeight = 20,TempreaturePriority,TextBot
   return (
        <View style={{alignItems: 'center', justifyContent: 'center'}}>
               <Image
-                source={ TextBottom == "Very High" ? AppImages.meterdarkred : TextBottom == "High" ? AppImages.meterred :  TextBottom == "Moderate" ? AppImages.meteryellow : TextBottom == "Low" ? AppImages.metergreen : AppImages.metergreen}
+                source={ TextBottom == "Very High" ? AppImages.meterdarkred : TextBottom == "High" ? AppImages.meterred :  TextBottom == "Moderate" ? AppImages.meteryellow : TextBottom == "Low" ? AppImages.metergreen : TextBottom == "None" ? AppImages.meternone : AppImages.metergreen}
                 style={{
                   // position: 'absolute',
                   // zIndex: 1,

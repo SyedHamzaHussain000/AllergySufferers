@@ -5,8 +5,17 @@ import {signOut} from '../../screens/auth/SignInWithGoogle';
 const initialState = {
   user: null,
   showError: '',
-  loader: false
+  loader: false,
+  isSubscribe: false, 
+  expireDate: "",
+  currentLocation : {
+    Lat: null,
+    Lng: null
+  }
+  
+
 };
+
 
 export const CurrentLogin = createAsyncThunk(
   'user',
@@ -39,13 +48,23 @@ export const AuthSlice = createSlice({
     },
     setLoader: (state, action) => {
       state.loader = action.payload
+    },
+    setSubscription: (state, action) => {
+
+    },
+    setCurrentLatLng: (state, action) => {
+      console.log("act", action.payload)
+      state.currentLocation.Lat = action.payload.Lat
+      state.currentLocation.Lng = action.payload.Lng
     }
   },
   extraReducers: builder => {
     builder
       .addCase(CurrentLogin.fulfilled, (state, action) => {
+        
         state.user = action.payload
         state.loader = false;
+        
       })
       .addCase(CurrentLogin.pending, (state, action) => {
       })
@@ -60,7 +79,9 @@ export const {
   setData,
   setLogout,
   setLoader,
-  setCurrentUserData
+  setCurrentUserData,
+  setSubscription,
+  setCurrentLatLng
 } = AuthSlice.actions;
 
 export default AuthSlice.reducer;

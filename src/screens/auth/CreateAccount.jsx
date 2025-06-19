@@ -14,11 +14,10 @@ import BASE_URL from '../../utils/BASE_URL';
 const CreateAccount = ({navigation}) => {
 
   const [userData, setUserData] = useState({
-    full_name: "John Doe",
-    user_name: "John_Doe",
-    email: "john@example.com",
-    password: "mysecurepassword",
-
+    full_name: "test",
+    user_name: "tester",
+    email: "test@gmail.com",
+    password: "1234567890",
     gender: "male",
     phone: "03121234567",
   })
@@ -42,7 +41,7 @@ const CreateAccount = ({navigation}) => {
       dob: userData.dob,
       gender: userData.gender,
       phone: userData.phone,
-    });
+    })
 
     let config = {
       method: 'post',
