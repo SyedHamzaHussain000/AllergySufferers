@@ -94,6 +94,7 @@ const Home = ({navigation}) => {
   useEffect(() => {
     const nav = navigation.addListener('focus', async () => {
       if (userData) {
+        
         getActivePollens();
         getAllCities();
       } else {
@@ -107,6 +108,8 @@ const Home = ({navigation}) => {
   }, [navigation]);
 
   const getPollensData = (allcities, newindex) => {
+
+    
     setPollenLoader(true);
     let data = new FormData();
     data.append('lat', allcities[newindex ? newindex : 0]?.lat);
@@ -128,8 +131,10 @@ const Home = ({navigation}) => {
       .then(response => {
         const res = response.data;
 
-        const city = res?.user?.locations?.closest?.name;
+        
+        const city = res?.user?.locations?.closest?.name
 
+        
         const past = response?.data?.forecast?.[city]?.past;
         const today = response?.data?.forecast?.[city]?.today;
         const future = response?.data?.forecast?.[city]?.future;
@@ -151,16 +156,19 @@ const Home = ({navigation}) => {
         setFuturePollenData(future);
 
         setIsPastArray(pastArray);
-        setIsFutureArray(futureArray);
-
+        setIsFutureArray(futureArray);        
+        
         setPollenLoader(false);
-        setLoadCities(false);
+        setLoadCities(false)
+        
+
       })
       .catch(error => {
         console.log(error);
         setPollenLoader(false);
       });
   };
+
 
   const getPollensDataLatLng = (Lat, Lng) => {
     setPollenLoader(true);
@@ -187,7 +195,7 @@ const Home = ({navigation}) => {
 
         const city = res?.user?.locations?.closest?.name;
 
-        console.log('city', city);
+        console.log("city",city)
         const newCityObj = {
           id: 1,
           lat: Lat,
@@ -195,18 +203,20 @@ const Home = ({navigation}) => {
           city_name: city,
         };
 
-        if (userData) {
-          console.log('userData...............', userData);
+        if(userData){
+          console.log("userData...............",userData)
           const res = await AddCityApi(userData.id, city, Lat, Lng);
+          
+            console.log("Response is ........ =====>", res)
 
-          console.log('Response is ........ =====>', res);
 
           if (res.status) {
-            console.log('Something went wrong', res.details);
-            return getAllCities();
+            console.log("Something went wrong", res.details);
+            return getAllCities()
           } else {
-            console.log('City added successfully', res);
+            console.log("City added successfully", res);
           }
+
         }
 
         setAllCities([newCityObj]);
@@ -271,6 +281,7 @@ const Home = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
+        console.log('resesdsadsajkkdasbhkk', response.data);
 
         setActivePollen(response.data.data);
         setActiveLoader(false);
@@ -298,12 +309,10 @@ const Home = ({navigation}) => {
         if (response?.data?.cities?.length > 0) {
           getPollensData(response.data.cities, 0);
           setLoadCities(false);
-        } else {
+        }else{
           const currentLatLng = await GetCurrentLocation();
-          getPollensDataLatLng(
-            currentLatLng?.latitude,
-            currentLatLng?.longitude,
-          );
+        getPollensDataLatLng(currentLatLng?.latitude, currentLatLng?.longitude);
+
         }
       })
       .catch(error => {
@@ -1127,7 +1136,7 @@ const Home = ({navigation}) => {
         )}
       </LinearGradient>
     </>
-  );
+  )
 };
 
 export default Home;

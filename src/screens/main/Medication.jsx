@@ -19,7 +19,14 @@ import {
 } from '../../utils/Responsive_Dimensions';
 import AppText from '../../components/AppTextComps/AppText';
 import AppColors from '../../utils/AppColors';
-import {BarChart} from 'react-native-chart-kit';
+// import {BarChart} from 'react-native-chart-kit';
+import {
+  BarChart,
+  LineChart,
+  PieChart,
+  PopulationPyramid,
+  RadarChart,
+} from 'react-native-gifted-charts';
 import AppButton from '../../components/AppButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import BASE_URL from '../../utils/BASE_URL';
@@ -34,6 +41,8 @@ const Medication = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const [allMedication, setAllMedication] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
+        
+  const [Medication , setMedicationLoader] = useState(false)
   const [loader, setLoader] = useState(false);
 
   const [date, setDate] = useState(new Date());
@@ -41,7 +50,7 @@ const Medication = ({navigation}) => {
     moment(new Date()).format('YYYY-MM-DD'),
   );
 
-    const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const chartConfig = {
     backgroundGradientFrom: '#FFFFFF',
@@ -57,7 +66,7 @@ const Medication = ({navigation}) => {
     },
   };
 
-  console.log("MedicationnRecord",MedicationnRecord)
+  console.log('MedicationnRecord', MedicationnRecord);
 
   const data = {
     labels: MedicationnRecord?.map(item =>
@@ -73,7 +82,6 @@ const Medication = ({navigation}) => {
       },
     ],
   };
-
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -98,8 +106,8 @@ const Medication = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log('................................', response.data.data);
-        setAllMedication(response.data.data);
+        // console.log('................................', response.data.data);
+        setAllMedication(response?.data?.data);
         setLoader(false);
       })
       .catch(error => {
@@ -109,9 +117,14 @@ const Medication = ({navigation}) => {
   };
 
   const getMedicationRecords = ewformateddate => {
+
+    console.log("called ......")
+    setMedicationLoader(true)
     setLoader(true);
     let data = JSON.stringify({
-      date: moment(ewformateddate ? ewformateddate : selecteddate).subtract(7, 'days').format("YYYY-MM-DD"),
+      date: moment(ewformateddate ? ewformateddate : selecteddate).format('YYYY-MM-DD'),
+        // .subtract(7, 'days')
+        
     });
 
     let config = {
@@ -132,18 +145,47 @@ const Medication = ({navigation}) => {
       .then(response => {
         console.log(JSON.stringify(response.data));
 
-        const slicedata = response.data.entries.items.slice(-5);
-        setMedicationnRecord(slicedata);
-        setLoader(false)
+        const slicedata = response.data.entries.items;
+
+
+        const seenDates = new Set();
+        const barData = [];
+
+        slicedata.forEach(entry => {
+          const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
+            'MMM DD',
+          );
+          const value = parseInt(entry.units) || 0;
+
+          if (!seenDates.has(entry.date)) {
+            seenDates.add(entry.date);
+            barData.push({
+              value,
+              label: formattedDate,
+              spacing: 3,
+              frontColor: entry.frontColor
+            });
+          } else {
+            barData.push({
+              value,
+              frontColor: entry.frontColor,
+              spacing:0
+            });
+          }
+        });
+
+        setMedicationnRecord(barData);
+        setLoader(false);
+        setMedicationLoader(false)
       })
       .catch(error => {
-        setLoader(false)
+        setLoader(false);
+        setMedicationLoader(false)
         console.log(error);
       });
   };
 
   const addMedication = item => {
-    const formatedDate = moment(new Date()).format('YYYY-MM-DD');
 
     setLoader(true);
     let data = JSON.stringify({
@@ -219,10 +261,9 @@ const Medication = ({navigation}) => {
         <AppHeader
           heading="Medication"
           Rightheading="Today"
-
           subheading="Tracker"
           selecteddate={selecteddate}
-          setOpen={()=>setOpen(true)}
+          setOpen={() => setOpen(true)}
         />
 
         <View>
@@ -233,7 +274,6 @@ const Medication = ({navigation}) => {
               data={allMedication}
               contentContainerStyle={{gap: 10, marginTop: 20, marginBottom: 20}}
               renderItem={({item}) => {
-                console.log('item', item);
                 return (
                   <View
                     style={{
@@ -287,36 +327,62 @@ const Medication = ({navigation}) => {
           )}
         </View>
 
-            <DatePicker
-                  modal
-                  open={open}
-                  date={date}
-                  mode="date"
-                  maximumDate={new Date()}
-                  onConfirm={selectedDate => {
-                    setOpen(false);
-                    const today = moment().startOf('day');
-                    const picked = moment(selectedDate).startOf('day');
-                    const formattedDate = picked.format('YYYY-MM-DD');
-                    setSelectedDate(formattedDate);
-        
-                    getMedicationRecords(formattedDate)
-                  }}
-                  onCancel={() => {
-                    setOpen(false);
-                  }}
-                />
+        <DatePicker
+          modal
+          open={open}
+          date={date}
+          mode="date"
+          maximumDate={new Date()}
+          onConfirm={selectedDate => {
+            setOpen(false);
+            const today = moment().startOf('day');
+            const picked = moment(selectedDate).startOf('day');
+            const formattedDate = picked.format('YYYY-MM-DD');
+            setSelectedDate(formattedDate);
 
-        <BarChart
-          data={data}
-          width={screenWidth * 0.9}
-          height={220}
-          chartConfig={chartConfig}
-          fromZero
-          withCustomBarColorFromData={true}
-          flatColor={true}
-          showBarTops={false}
-        />
+            getMedicationRecords(formattedDate);
+          }}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />  
+
+
+        {
+          Medication == true &&( 
+            <ActivityIndicator size={'large'} color={AppColors.BLACK}/>
+          )
+        }
+
+        {MedicationnRecord.length > 0 && (
+          // <BarChart
+          //   data={MedicationnRecord}
+          //   width={screenWidth * 0.9}
+          //   height={220}
+          //   chartConfig={chartConfig}
+          //   fromZero
+          //   withCustomBarColorFromData={true}
+          //   flatColor={true}
+          //   showBarTops={false}
+          // />
+
+          <BarChart
+            data={MedicationnRecord}
+            barWidth={10}
+            frontColor="#E23131" // bar color
+            showLine={false}
+            xAxisLabelTextStyle={{
+              fontSize: 10, // 👈 smaller font size
+              color: '#000', // optional, customize color
+              fontWeight: '400', // optional
+              width:30
+            }}
+            barBorderRadius={2}
+            isAnimated={true}
+            noOfSections={7}
+            spacing={30}
+          />
+        )}
 
         <View style={{marginTop: 20}}>
           <AppButton

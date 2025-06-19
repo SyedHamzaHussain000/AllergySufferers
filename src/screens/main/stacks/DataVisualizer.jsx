@@ -108,7 +108,6 @@ const DataVisualizer = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
         setMedicationsData(response?.data?.data);
       })
       .catch(error => {
@@ -141,25 +140,62 @@ const DataVisualizer = ({navigation}) => {
       .then(response => {
         const allentriesArr = response.data.entries.items;
 
-        const grouped = {};
+        console.log('allentriesArr', allentriesArr);
+
+        // const grouped = {};
+
+        // allentriesArr.forEach(entry => {
+        //   const label = moment(entry.date, 'MMMM, DD YYYY').format('MMM DD');
+
+        //   if (entry.medication_id) {
+        //     if (!grouped[label]) {
+        //       grouped[label] = 1;
+        //     } else {
+        //       grouped[label]++;
+        //     }
+        //   }
+        // });
+        // console.log("grouped============>>", grouped)
+        const seenDates = new Set();
+        const barData = [];
 
         allentriesArr.forEach(entry => {
-          const label = moment(entry.date, 'MMMM, DD YYYY').format('MMM DD');
+          const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
+            'MMM DD',
+          );
+          const value = parseInt(entry.units) || 0;
 
-          if (entry.medication_id) {
-            if (!grouped[label]) {
-              grouped[label] = 1;
-            } else {
-              grouped[label]++;
-            }
+          if (!seenDates.has(entry.date)) {
+            seenDates.add(entry.date);
+            barData.push({
+              value,
+              label: formattedDate,
+              spacing: 2,
+              frontColor: entry.frontColor
+
+            });
+          } else {
+            barData.push({
+              value,
+              spacing: 0,
+              frontColor: entry.frontColor
+            });
           }
         });
 
-        // Step 2: Convert to barData array
-        const barData = Object.keys(grouped).map(label => ({
-          label,
-          value: grouped[label],
-        }));
+        // const barData1  = allentriesArr.map(res => ({
+        //   label: moment(res.date, 'MMMM, DD YYYY').format('MMM DD'),
+        //   value: res.units,
+        //   frontColor: "#213212"
+        // }))
+
+        // console.log("barData1", barData1)
+        // // Step 2: Convert to barData array
+        // const barData = Object.keys(grouped).map(label => ({
+        //   label,
+        //   value: grouped[label],
+        //   frontColor: "#000000"
+        // }));
 
         setMedicationnRecord(barData);
       })
@@ -170,7 +206,6 @@ const DataVisualizer = ({navigation}) => {
   };
 
   const getDataVisualizer = selecallergens => {
-
     if (!selecallergens || selecallergens.length === 0) {
       // no allergens selected, clear chart data
       setPrimaryLineData([]);
@@ -191,13 +226,12 @@ const DataVisualizer = ({navigation}) => {
       headers: {},
     };
 
-    console.log('config', config);
 
     axios
       .request(config)
       .then(response => {
         const apiData = response.data;
-        console.log('api data', apiData);
+        // console.log('api data', apiData);
 
         const chartLineData = {};
         Object.keys(apiData).forEach(key => {
@@ -263,7 +297,7 @@ const DataVisualizer = ({navigation}) => {
       .request(config)
       .then(response => {
         setPollenLoader(false);
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         getSelectedAllergens();
       })
       .catch(error => {
@@ -287,7 +321,7 @@ const DataVisualizer = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log('allergens', response.data.allergens);
+        // console.log('allergens', response.data.allergens);
         setTakingMedications(response.data.allergens);
 
         getDataVisualizer(response.data.allergens);
@@ -315,7 +349,7 @@ const DataVisualizer = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         getSelectedAllergens();
       })
       .catch(error => {
@@ -323,14 +357,70 @@ const DataVisualizer = ({navigation}) => {
       });
   };
 
+  const barData = [
+    {
+      value: 40,
+      label: 'Jan',
+      spacing: 2,
+      labelWidth: 30,
+      labelTextStyle: {color: 'gray'},
+      frontColor: '#177AD5',
+    },
+    {value: 20, spacing: 0, frontColor: '#ED6665'},
+    {value: 20, spacing: 0, frontColor: '#ED6665'},
+    {value: 30, frontColor: '#000000'},
+    {
+      value: 50,
+      label: 'Feb',
+      spacing: 2,
+      labelWidth: 30,
+      labelTextStyle: {color: 'gray'},
+      frontColor: '#177AD5',
+    },
+    {value: 40, frontColor: '#ED6665'},
+    {
+      value: 75,
+      label: 'Mar',
+      spacing: 2,
+      labelWidth: 30,
+      labelTextStyle: {color: 'gray'},
+      frontColor: '#177AD5',
+    },
+    {value: 25, frontColor: '#ED6665'},
+    {
+      value: 30,
+      label: 'Apr',
+      spacing: 2,
+      labelWidth: 30,
+      labelTextStyle: {color: 'gray'},
+      frontColor: '#177AD5',
+    },
+    {value: 20, frontColor: '#ED6665'},
+    {
+      value: 60,
+      label: 'May',
+      spacing: 2,
+      labelWidth: 30,
+      labelTextStyle: {color: 'gray'},
+      frontColor: '#177AD5',
+    },
+    {value: 40, frontColor: '#ED6665'},
+    {
+      value: 65,
+      label: 'Jun',
+      spacing: 2,
+      labelWidth: 30,
+      labelTextStyle: {color: 'gray'},
+      frontColor: '#177AD5',
+    },
+    {value: 30, frontColor: '#ED6665'},
+  ];
+
   const primaryLineData = [
-    {value: 10},
-    {value: 30},
-    {value: 10},
-    {value: 20},
-    {value: 10},
-    {value: 20},
-    {value: 30},
+    {value: 10, label: '2025-06-15'},
+    {value: 30, label: '2025-06-16'},
+    {value: 10, label: '2025-06-17'},
+    {value: 20, label: '2025-06-18'},
   ];
 
   const secondaryLineData = [{value: 20}, {value: 10}, {value: 30}];
@@ -371,6 +461,7 @@ const DataVisualizer = ({navigation}) => {
                 fontSize: 10, // 👈 smaller font size
                 color: '#000', // optional, customize color
                 fontWeight: '400', // optional
+                width:30
               }}
               barBorderRadius={2}
               isAnimated={true}
@@ -422,7 +513,7 @@ const DataVisualizer = ({navigation}) => {
           <FlatList
             data={takingMedications}
             renderItem={({item}) => {
-              console.log('item', item);
+              // console.log('item', item);
               return (
                 <View
                   style={{
@@ -512,11 +603,12 @@ const DataVisualizer = ({navigation}) => {
               data={medicationData}
               contentContainerStyle={{marginTop: 20, paddingBottom: 100}}
               renderItem={({item, index}) => {
-                console.log("medicaiton", item)
+                
                 return (
                   <View
                     style={{
                       borderWidth: 1,
+                      
                       borderTopRightRadius: index == 0 ? 10 : 0,
                       borderTopLeftRadius: index == 0 ? 10 : 0,
                       borderBottomRightRadius:
