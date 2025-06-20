@@ -103,13 +103,7 @@ const ManagePollens = ({navigation}) => {
         <View style={{padding: 20}}>
           <AppHeader
             heading="Manage pollen and spores"
-            icon={
-              <Entypo
-                name={'location-pin'}
-                size={responsiveFontSize(2.5)}
-                color={AppColors.BTNCOLOURS}
-              />
-            }
+            
             goBack
           />
           {Loader == true ? (

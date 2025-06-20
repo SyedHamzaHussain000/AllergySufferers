@@ -68,6 +68,11 @@ const DataVisualizer = ({navigation}) => {
     return nav;
   }, [navigation]);
 
+
+  useEffect(()=>{
+getSelectedAllergens()
+  },[selecteddate])
+
   const getAllAllergens = () => {
     setType('allergens');
     setPollenLoader(true);
@@ -116,10 +121,11 @@ const DataVisualizer = ({navigation}) => {
   };
 
   const getMedicationRecords = ewformateddate => {
+
+
+
     let data = JSON.stringify({
-      date: moment(ewformateddate ? ewformateddate : selecteddate)
-        .subtract(7, 'days')
-        .format('YYYY-MM-DD'),
+      date: moment(ewformateddate?ewformateddate:selecteddate).subtract('days', 6).format("YYYY-MM-DD"),
     });
 
     let config = {
@@ -139,8 +145,6 @@ const DataVisualizer = ({navigation}) => {
       .request(config)
       .then(response => {
         const allentriesArr = response.data.entries.items;
-
-        console.log('allentriesArr', allentriesArr);
 
         // const grouped = {};
 
@@ -171,31 +175,47 @@ const DataVisualizer = ({navigation}) => {
               value,
               label: formattedDate,
               spacing: 2,
-              frontColor: entry.frontColor
-
+              frontColor: entry.frontColor,
+              labelWidth: 30,
             });
           } else {
             barData.push({
               value,
               spacing: 0,
-              frontColor: entry.frontColor
+              frontColor: entry.frontColor,
             });
           }
         });
 
-        // const barData1  = allentriesArr.map(res => ({
-        //   label: moment(res.date, 'MMMM, DD YYYY').format('MMM DD'),
-        //   value: res.units,
-        //   frontColor: "#213212"
-        // }))
+        // ✅ Remove spacing from the last item before each new label
+        for (let i = 0; i < barData.length - 1; i++) {
+          const current = barData[i];
+          const next = barData[i + 1];
 
-        // console.log("barData1", barData1)
-        // // Step 2: Convert to barData array
-        // const barData = Object.keys(grouped).map(label => ({
-        //   label,
-        //   value: grouped[label],
-        //   frontColor: "#000000"
-        // }));
+          if (!current.label && next.label && 'spacing' in current) {
+            delete current.spacing;
+          }
+        }
+
+        // Optional: Also remove spacing from the very last item if it has no label
+        const lastItem = barData[barData.length - 1];
+        if (lastItem && !lastItem.label && 'spacing' in lastItem) {
+          delete lastItem.spacing;
+        }
+
+        // ✅ Ensure a dummy item exists after each label if next item is another label or nothing
+      for (let i = 0; i < barData.length; i++) {
+        const current = barData[i];
+        const next = barData[i + 1];
+
+        if (current.label && (!next || next.label)) {
+          // Insert a dummy
+          barData.splice(i + 1, 0, {
+            value: 0,
+            frontColor: 'transparent',
+          });
+        }
+      }
 
         setMedicationnRecord(barData);
       })
@@ -218,20 +238,29 @@ const DataVisualizer = ({navigation}) => {
         item => `scientific_names[]=${encodeURIComponent(item.allergen_name)}`,
       )
       .join('&');
+    // console.log('selecteddate', selecteddate, 'allergenParams', allergenParams);
+
+
+    const dateis =  moment(selecteddate).subtract('days', 6).format("YYYY-MM-DD")
+
+    console.log("dateis",dateis)
 
     const config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=43.653226&lng=-79.3831843&date=${selecteddate}&${allergenParams}`,
-      headers: {},
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=45.420057199999995&lng=-75.7003397&date=${dateis}&${allergenParams}`,
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     };
-
 
     axios
       .request(config)
       .then(response => {
         const apiData = response.data;
-        // console.log('api data', apiData);
+        console.log('api data', apiData);
 
         const chartLineData = {};
         Object.keys(apiData).forEach(key => {
@@ -241,12 +270,15 @@ const DataVisualizer = ({navigation}) => {
         });
 
         const allergenNames = Object.keys(chartLineData);
+
         setPrimaryLineData(chartLineData[allergenNames[0]] || []);
         setSecondaryLineData(chartLineData[allergenNames[1]] || []);
       })
       .then(response => {
         const allergens = response.data.allergens;
         setTakingMedications(allergens);
+
+        console.log("allertgens", allergens)
 
         if (allergens.length > 0) {
           getDataVisualizer(allergens);
@@ -322,9 +354,8 @@ const DataVisualizer = ({navigation}) => {
       .request(config)
       .then(response => {
         // console.log('allergens', response.data.allergens);
-        setTakingMedications(response.data.allergens);
-
         getDataVisualizer(response.data.allergens);
+        setTakingMedications(response.data.allergens);
       })
       .catch(error => {
         console.log(error);
@@ -360,7 +391,7 @@ const DataVisualizer = ({navigation}) => {
   const barData = [
     {
       value: 40,
-      label: 'Jan',
+      label: 'Jan 12',
       spacing: 2,
       labelWidth: 30,
       labelTextStyle: {color: 'gray'},
@@ -371,7 +402,7 @@ const DataVisualizer = ({navigation}) => {
     {value: 30, frontColor: '#000000'},
     {
       value: 50,
-      label: 'Feb',
+      label: 'Feb 22',
       spacing: 2,
       labelWidth: 30,
       labelTextStyle: {color: 'gray'},
@@ -380,7 +411,7 @@ const DataVisualizer = ({navigation}) => {
     {value: 40, frontColor: '#ED6665'},
     {
       value: 75,
-      label: 'Mar',
+      label: 'Mar 11',
       spacing: 2,
       labelWidth: 30,
       labelTextStyle: {color: 'gray'},
@@ -389,7 +420,7 @@ const DataVisualizer = ({navigation}) => {
     {value: 25, frontColor: '#ED6665'},
     {
       value: 30,
-      label: 'Apr',
+      label: 'Apr 11',
       spacing: 2,
       labelWidth: 30,
       labelTextStyle: {color: 'gray'},
@@ -398,7 +429,7 @@ const DataVisualizer = ({navigation}) => {
     {value: 20, frontColor: '#ED6665'},
     {
       value: 60,
-      label: 'May',
+      label: 'May 12',
       spacing: 2,
       labelWidth: 30,
       labelTextStyle: {color: 'gray'},
@@ -407,7 +438,7 @@ const DataVisualizer = ({navigation}) => {
     {value: 40, frontColor: '#ED6665'},
     {
       value: 65,
-      label: 'Jun',
+      label: 'Jun 21',
       spacing: 2,
       labelWidth: 30,
       labelTextStyle: {color: 'gray'},
@@ -425,6 +456,7 @@ const DataVisualizer = ({navigation}) => {
 
   const secondaryLineData = [{value: 20}, {value: 10}, {value: 30}];
 
+  console.log("PrimaryLineData",PrimaryLineData , "secondaryLineData", SecondaryLineData, "MedicationnRecord",MedicationnRecord)
   return (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView
@@ -444,6 +476,7 @@ const DataVisualizer = ({navigation}) => {
 
         <View>
           {MedicationnRecord.length > 0 ? (
+            <View>
             <BarChart
               data={MedicationnRecord}
               barWidth={10}
@@ -456,12 +489,13 @@ const DataVisualizer = ({navigation}) => {
                 thickness: 2,
                 curved: false,
                 dataPointsColor: colours[0],
+                spacing: 60,
               }}
               xAxisLabelTextStyle={{
                 fontSize: 10, // 👈 smaller font size
                 color: '#000', // optional, customize color
                 fontWeight: '400', // optional
-                width:30
+                labelWidth: 60,
               }}
               barBorderRadius={2}
               isAnimated={true}
@@ -470,10 +504,21 @@ const DataVisualizer = ({navigation}) => {
                 thickness: 2,
                 curved: false,
                 dataPointsColor: colours[1],
+                spacing: 60,
               }}
               noOfSections={7}
               spacing={30}
+              formatYLabel={label => parseFloat(label).toFixed(0)}
+              stepValue={1}
             />
+
+            <View style={{position:'absolute', zIndex:1, right:0, bottom:40, gap:11}}>
+                <AppText title={"Very High"} textSize={1.7}/>
+                <AppText title={"High"} textSize={1.7}/>
+                <AppText title={"Moderate"} textSize={1.7}/>
+                <AppText title={"Low"} textSize={1.7}/>
+            </View>
+            </View>
           ) : (
             <AppText title={'No data available'} textSize={2} />
           )}
@@ -499,9 +544,10 @@ const DataVisualizer = ({navigation}) => {
               const today = moment().startOf('day');
               const picked = moment(selectedDate).startOf('day');
               const formattedDate = picked.format('YYYY-MM-DD');
-              setSelectedDate(formattedDate);
 
+              setSelectedDate(formattedDate);
               getMedicationRecords(formattedDate);
+              
             }}
             onCancel={() => {
               setOpen(false);
@@ -512,7 +558,7 @@ const DataVisualizer = ({navigation}) => {
         <View>
           <FlatList
             data={takingMedications}
-            renderItem={({item}) => {
+            renderItem={({item, index}) => {
               // console.log('item', item);
               return (
                 <View
@@ -523,6 +569,7 @@ const DataVisualizer = ({navigation}) => {
                     borderRadius: 10,
                     borderColor: AppColors.LIGHTGRAY,
                     marginTop: 5,
+                    backgroundColor: colours[index],
                     flexDirection: 'row',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -603,12 +650,11 @@ const DataVisualizer = ({navigation}) => {
               data={medicationData}
               contentContainerStyle={{marginTop: 20, paddingBottom: 100}}
               renderItem={({item, index}) => {
-                
                 return (
                   <View
                     style={{
                       borderWidth: 1,
-                      
+                      backgroundColor: item.frontColor,
                       borderTopRightRadius: index == 0 ? 10 : 0,
                       borderTopLeftRadius: index == 0 ? 10 : 0,
                       borderBottomRightRadius:

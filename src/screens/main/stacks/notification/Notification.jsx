@@ -1,36 +1,18 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  ActivityIndicator,
-  SafeAreaView,
-} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {View, Text, TouchableOpacity, FlatList, ActivityIndicator, ScrollView} from 'react-native';
+import React, { useEffect, useState } from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
-import {
-  responsiveFontSize,
-  responsiveHeight,
-  responsiveWidth,
-} from '../../../../utils/Responsive_Dimensions';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import {responsiveFontSize, responsiveWidth} from '../../../../utils/Responsive_Dimensions';
 import AppColors from '../../../../utils/AppColors';
-import Entypo from 'react-native-vector-icons/Entypo';
-import AppButton from '../../../../components/AppButton';
-import SocialAuthButton from '../../../../components/SocialAuthButton';
-import AppTextInput from '../../../../components/AppTextInput';
-import Octicons from 'react-native-vector-icons/Octicons';
-import BASE_URL from '../../../../utils/BASE_URL';
 import axios from 'axios';
+import AppTextInput from '../../../../components/AppTextInput';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {useSelector} from 'react-redux';
+import BASE_URL from '../../../../utils/BASE_URL';
+import { useSelector } from 'react-redux';
 import Toast from 'react-native-toast-message';
+const Notification = ({navigation}) => {
 
-const AddPollens = ({navigation}) => {
-  const userData = useSelector(state => state.auth.user);
+const userData = useSelector(state => state.auth.user);
   const [allPollens, setALlPollens] = useState([]);
   const [search, setSearch] = useState('');
   const [loader, setLoader] = useState(false);
@@ -65,65 +47,63 @@ const AddPollens = ({navigation}) => {
       });
   };
 
-  const setPollenApi = item => {
-    setPollenApiLoader(true);
-    let data = JSON.stringify({
-      data: item.id,
-    });
-
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_pollens`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: data,
-    };
-
-    axios
-      .request(config)
-      .then(response => {
-
-
-        setPollenApiLoader(false);
-
-        if(response.data.code == 'max-limit'){
-            Toast.show({
-              type: 'error',
-              text1: "You have reached the maximum number of allowed pollen entries."
-            })
-        }else{
-          Toast.show({
-            type: 'success',
-            text1: 'Pollen added successfully',
-            position:'top'
-          });
-        }
-      })
-      .catch(error => {
-        console.log(error.response.data.message);
-        setPollenApiLoader(false);
-      });
-  };
-
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <View style={{padding: 20}}>
-        <AppHeader
-          heading="Add pollen and spores"
-          
-          goBack
+    <View style={{padding: 20}}>
+      <AppHeader heading="Push Notification" goBack={true} />
+
+      <View style={{padding: 10, borderWidth: 1, borderRadius: 10, gap: 10}}>
+        <AppText
+          title={'Daily Pollen Notification'}
+          textSize={2}
+          textFontWeight
         />
 
-        <View style={{gap: 10}}>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={[
+            {id: 1, name: 'Low'},
+            {id: 2, name: 'Moderate'},
+            {id: 3, name: 'High'},
+            {id: 4, name: 'Very High'},
+          ]}
+          contentContainerStyle={{gap: 5}}
+          renderItem={({item}) => {
+            return (
+              <TouchableOpacity
+                style={{
+                  height: 30,
+                  paddingHorizontal: 20,
+                  borderColor: AppColors.BLACK,
+                  borderWidth: 1,
+                  borderRadius: 200,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <AppText title={item.name} textSize={1.7} />
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </View>
+
+
+      
+      
+
+
+
+
+
+          <View style={{marginTop:20}}/>
+
+
           <AppTextInput
             inputPlaceHolder={'Search Pollens'}
             textInput={true}
             onChangeText={res => setSearch(res)}
             value={search}
           />
-        </View>
 
         {loader && (
           <View
@@ -184,9 +164,12 @@ const AddPollens = ({navigation}) => {
             ))}
         </ScrollView>
         <Toast />
-      </View>
-    </SafeAreaView>
+
+
+
+
+    </View>
   );
 };
 
-export default AddPollens;
+export default Notification;

@@ -567,7 +567,7 @@ const Home = ({navigation}) => {
                             return (
                               <View style={{gap: 10}}>
                                 <AppText
-                                  title={item.name}
+                                  title={item.common_name}
                                   textAlignment={'center'}
                                   textSize={1.5}
                                   textColor={AppColors.BLACK}

@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Alert,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -41,8 +42,8 @@ const Medication = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const [allMedication, setAllMedication] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
-        
-  const [Medication , setMedicationLoader] = useState(false)
+
+  const [Medication, setMedicationLoader] = useState(false);
   const [loader, setLoader] = useState(false);
 
   const [date, setDate] = useState(new Date());
@@ -117,14 +118,13 @@ const Medication = ({navigation}) => {
   };
 
   const getMedicationRecords = ewformateddate => {
-
-    console.log("called ......")
-    setMedicationLoader(true)
+    console.log('called ......');
+    setMedicationLoader(true);
     setLoader(true);
     let data = JSON.stringify({
-      date: moment(ewformateddate ? ewformateddate : selecteddate).format('YYYY-MM-DD'),
-        // .subtract(7, 'days')
-        
+      date: moment(ewformateddate ? ewformateddate : selecteddate).subtract('days', 6).format(
+        'YYYY-MM-DD',
+      )
     });
 
     let config = {
@@ -145,48 +145,103 @@ const Medication = ({navigation}) => {
       .then(response => {
         console.log(JSON.stringify(response.data));
 
-        const slicedata = response.data.entries.items;
+        const allentriesArr = response.data.entries.items;
 
+        // const seenDates = new Set();
+        // const barData = [];
 
-        const seenDates = new Set();
-        const barData = [];
+        // slicedata.forEach(entry => {
+        //   const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
+        //     'MMM DD',
+        //   );
+        //   const value = parseInt(entry.units) || 0;
 
-        slicedata.forEach(entry => {
-          const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
-            'MMM DD',
-          );
-          const value = parseInt(entry.units) || 0;
+        //   if (!seenDates.has(entry.date)) {
+        //     seenDates.add(entry.date);
+        //     barData.push({
+        //       value,
+        //       label: formattedDate,
+        //       spacing: 3,
+        //       frontColor: entry.frontColor,
+        //     });
+        //   } else {
+        //     barData.push({
+        //       value,
+        //       frontColor: entry.frontColor,
+        //       spacing: 0,
+        //     });
+        //   }
+        // });
 
-          if (!seenDates.has(entry.date)) {
-            seenDates.add(entry.date);
-            barData.push({
-              value,
-              label: formattedDate,
-              spacing: 3,
-              frontColor: entry.frontColor
-            });
-          } else {
-            barData.push({
-              value,
-              frontColor: entry.frontColor,
-              spacing:0
-            });
-          }
-        });
+         const seenDates = new Set();
+                const barData = [];
+        
+                allentriesArr.forEach(entry => {
+                  const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
+                    'MMM DD',
+                  );
+                  const value = parseInt(entry.units) || 0;
+        
+                  if (!seenDates.has(entry.date)) {
+                    seenDates.add(entry.date);
+                    barData.push({
+                      value,
+                      label: formattedDate,
+                      spacing: 2,
+                      frontColor: entry.frontColor,
+                      labelWidth: 30,
+                    });
+                  } else {
+                    barData.push({
+                      value,
+                      spacing: 0,
+                      frontColor: entry.frontColor,
+                    });
+                  }
+                });
+        
+                // ✅ Remove spacing from the last item before each new label
+                for (let i = 0; i < barData.length - 1; i++) {
+                  const current = barData[i];
+                  const next = barData[i + 1];
+        
+                  if (!current.label && next.label && 'spacing' in current) {
+                    delete current.spacing;
+                  }
+                }
+        
+                // Optional: Also remove spacing from the very last item if it has no label
+                const lastItem = barData[barData.length - 1];
+                if (lastItem && !lastItem.label && 'spacing' in lastItem) {
+                  delete lastItem.spacing;
+                }
+        
+                // ✅ Ensure a dummy item exists after each label if next item is another label or nothing
+              for (let i = 0; i < barData.length; i++) {
+                const current = barData[i];
+                const next = barData[i + 1];
+        
+                if (current.label && (!next || next.label)) {
+                  // Insert a dummy
+                  barData.splice(i + 1, 0, {
+                    value: 0,
+                    frontColor: 'transparent',
+                  });
+                }
+              }
 
         setMedicationnRecord(barData);
         setLoader(false);
-        setMedicationLoader(false)
+        setMedicationLoader(false);
       })
       .catch(error => {
         setLoader(false);
-        setMedicationLoader(false)
+        setMedicationLoader(false);
         console.log(error);
       });
   };
 
   const addMedication = item => {
-
     setLoader(true);
     let data = JSON.stringify({
       medication_id: item.id,
@@ -265,132 +320,140 @@ const Medication = ({navigation}) => {
           selecteddate={selecteddate}
           setOpen={() => setOpen(true)}
         />
-
-        <View>
+  
+        <ScrollView contentContainerStyle={{flexGrow: 1}}>
           {loader == true ? (
             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
           ) : (
-            <FlatList
-              data={allMedication}
-              contentContainerStyle={{gap: 10, marginTop: 20, marginBottom: 20}}
-              renderItem={({item}) => {
-                return (
-                  <View
-                    style={{
-                      borderWidth: 1,
-                      borderRadius: 10,
-                      borderColor: '#37BC07',
-                      height: responsiveHeight(6),
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      paddingHorizontal: 10,
-                      justifyContent: 'space-between',
-                    }}>
-                    <AppText
-                      title={item.name}
-                      textSize={1.6}
-                      textColor={AppColors.LIGHTGRAY}
-                    />
-
+            <View>
+              <FlatList
+                data={allMedication}
+                contentContainerStyle={{
+                  gap: 10,
+                  marginTop: 20,
+                  marginBottom: 20,
+                }}
+                renderItem={({item}) => {
+                  return (
                     <View
                       style={{
-                        flexDirection: 'row',
+                        borderWidth: 1,
+                        borderRadius: 10,
+                        borderColor: '#37BC07',
+                        height: responsiveHeight(6),
                         alignItems: 'center',
-                        gap: 10,
+                        flexDirection: 'row',
+                        paddingHorizontal: 10,
+                        justifyContent: 'space-between',
                       }}>
-                      <TouchableOpacity onPress={() => removeMedication(item)}>
-                        <AntDesign
-                          name={'minus'}
-                          size={responsiveFontSize(2)}
-                          color={AppColors.LIGHTGRAY}
-                        />
-                      </TouchableOpacity>
-
                       <AppText
-                        title={item?.units ? item?.units : 0}
+                        title={item.name}
+                        textSize={1.6}
                         textColor={AppColors.LIGHTGRAY}
-                        textSize={2.5}
                       />
 
-                      <TouchableOpacity onPress={() => addMedication(item)}>
-                        <AntDesign
-                          name={'plus'}
-                          size={responsiveFontSize(2)}
-                          color={AppColors.LIGHTGRAY}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 10,
+                        }}>
+                        <TouchableOpacity
+                          onPress={() => removeMedication(item)}>
+                          <AntDesign
+                            name={'minus'}
+                            size={responsiveFontSize(2)}
+                            color={AppColors.LIGHTGRAY}
+                          />
+                        </TouchableOpacity>
+
+                        <AppText
+                          title={item?.units ? item?.units : 0}
+                          textColor={AppColors.LIGHTGRAY}
+                          textSize={2.5}
                         />
-                      </TouchableOpacity>
+
+                        <TouchableOpacity onPress={() => addMedication(item)}>
+                          <AntDesign
+                            name={'plus'}
+                            size={responsiveFontSize(2)}
+                            color={AppColors.LIGHTGRAY}
+                          />
+                        </TouchableOpacity>
+                      </View>
                     </View>
-                  </View>
-                );
+                  );
+                }}
+              />
+            </View>
+          )}
+
+          <DatePicker
+            modal
+            open={open}
+            date={date}
+            mode="date"
+            maximumDate={new Date()}
+            onConfirm={selectedDate => {
+              setOpen(false);
+              const today = moment().startOf('day');
+              const picked = moment(selectedDate).startOf('day');
+              const formattedDate = picked.format('YYYY-MM-DD');
+              setSelectedDate(formattedDate);
+
+              getMedicationRecords(formattedDate);
+            }}
+            onCancel={() => {
+              setOpen(false);
+            }}
+          />
+
+          {Medication == true && (
+            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+          )}
+
+          {MedicationnRecord.length > 0 && (
+            // <BarChart
+            //   data={MedicationnRecord}
+            //   width={screenWidth * 0.9}
+            //   height={220}
+            //   chartConfig={chartConfig}
+            //   fromZero
+            //   withCustomBarColorFromData={true}
+            //   flatColor={true}
+            //   showBarTops={false}
+            // />
+
+            <BarChart
+              data={MedicationnRecord}
+              barWidth={10}
+              frontColor="#E23131" // bar color
+              showLine={false}
+              xAxisLabelTextStyle={{
+                fontSize: 10, // 👈 smaller font size
+                color: '#000', // optional, customize color
+                fontWeight: '400', // optional
+                width: 40,
               }}
+              barBorderRadius={2}
+              isAnimated={true}
+
+              stepValue={1}
+              hideDataPoints={false}
+              spacing={30}
+                formatYLabel={label => parseFloat(label).toFixed(0)}
+
             />
           )}
-        </View>
 
-        <DatePicker
-          modal
-          open={open}
-          date={date}
-          mode="date"
-          maximumDate={new Date()}
-          onConfirm={selectedDate => {
-            setOpen(false);
-            const today = moment().startOf('day');
-            const picked = moment(selectedDate).startOf('day');
-            const formattedDate = picked.format('YYYY-MM-DD');
-            setSelectedDate(formattedDate);
-
-            getMedicationRecords(formattedDate);
-          }}
-          onCancel={() => {
-            setOpen(false);
-          }}
-        />  
-
-
-        {
-          Medication == true &&( 
-            <ActivityIndicator size={'large'} color={AppColors.BLACK}/>
-          )
-        }
-
-        {MedicationnRecord.length > 0 && (
-          // <BarChart
-          //   data={MedicationnRecord}
-          //   width={screenWidth * 0.9}
-          //   height={220}
-          //   chartConfig={chartConfig}
-          //   fromZero
-          //   withCustomBarColorFromData={true}
-          //   flatColor={true}
-          //   showBarTops={false}
-          // />
-
-          <BarChart
-            data={MedicationnRecord}
-            barWidth={10}
-            frontColor="#E23131" // bar color
-            showLine={false}
-            xAxisLabelTextStyle={{
-              fontSize: 10, // 👈 smaller font size
-              color: '#000', // optional, customize color
-              fontWeight: '400', // optional
-              width:30
-            }}
-            barBorderRadius={2}
-            isAnimated={true}
-            noOfSections={7}
-            spacing={30}
-          />
-        )}
-
-        <View style={{marginTop: 20}}>
-          <AppButton
-            title={'Go TO DATA VISUALIZER'}
-            RightColour={AppColors.rightArrowCOlor}
-            handlePress={() => navigation.navigate('DataVisualizer')}
-          />
-        </View>
+          <View style={{marginTop: 20}}>
+            <AppButton
+              title={'Go TO DATA VISUALIZER'}
+              RightColour={AppColors.rightArrowCOlor}
+              handlePress={() => navigation.navigate('DataVisualizer')}
+            />
+          </View>
+        </ScrollView>
       </View>
     </SafeAreaView>
   );
