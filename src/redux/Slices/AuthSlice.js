@@ -6,14 +6,12 @@ const initialState = {
   user: null,
   showError: '',
   loader: false,
-  isSubscribe: false, 
+  isExpired: true, 
   expireDate: "",
   currentLocation : {
     Lat: null,
     Lng: null
   }
-  
-
 };
 
 
@@ -39,9 +37,16 @@ export const AuthSlice = createSlice({
     setData: (state, action) => {
       // Redux Toolkit allows us to write "mutating" logic in reducers. It
       state.user = action.payload;
+
     },
     setLogout: state => {
+      
       state.user = null;
+      state.expireDate = ""
+      state.isExpired = true
+      state.currentLocation.Lat = null
+      state.currentLocation.Lng = null
+
     },
     setCurrentUserData: (state, action) => {
       state.user = action.payload;
@@ -50,7 +55,8 @@ export const AuthSlice = createSlice({
       state.loader = action.payload
     },
     setSubscription: (state, action) => {
-
+      state.isExpired = action.payload.isExpired
+      state.expireDate = action.payload.expireDate
     },
     setCurrentLatLng: (state, action) => {
       console.log("act", action.payload)

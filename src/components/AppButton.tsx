@@ -18,6 +18,7 @@ type props = {
   RightColour?: any;
   buttoWidth?: number;
   isLoading?: boolean;
+  loadingColour?: any
 };
 const AppButton = ({
   title,
@@ -29,6 +30,7 @@ const AppButton = ({
   RightColour = AppColors.BTNCOLOURS,
   buttoWidth = 90,
   isLoading,
+  loadingColour
 }: props) => {
   return (
     <>
@@ -43,7 +45,7 @@ const AppButton = ({
             width: responsiveWidth(buttoWidth),
           }}> 
 
-        <ActivityIndicator size={'large'} color={AppColors.WHITE} />
+        <ActivityIndicator size={'large'} color={ loadingColour ? loadingColour :AppColors.WHITE} />
         </View>
       ) : (
         <TouchableOpacity

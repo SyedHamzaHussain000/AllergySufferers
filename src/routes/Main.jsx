@@ -27,6 +27,7 @@ import TipsTrick from '../screens/main/stacks/Help/TipsTrick';
 import PollenInfoForCad from '../screens/main/stacks/Help/PollenInfoForCad';
 import HelpScreen from '../screens/main/stacks/Help/HelpScreen';
 import Notification from '../screens/main/stacks/notification/Notification';
+import Subscription from '../screens/main/subscription/Subscription';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const Main = () => {
@@ -93,6 +94,8 @@ const Main = () => {
         name="Notification"
         component={HomeWithSafeArea(Notification)}
       />
+
+      
     </Stack.Navigator>
   );
 };

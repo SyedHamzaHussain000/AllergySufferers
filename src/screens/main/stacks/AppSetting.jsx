@@ -17,8 +17,8 @@ const AppSetting = ({navigation}) => {
     {id: 4, name: 'Push Notifications', onPress: ()=> navigation.navigate("Notification") },
     {id: 5, name: 'Logout',bottom: true, onPress: ()=>  {dispatch(setLogout()), navigation.navigate("Auth")}},
   ];
-
-
+  
+  
   return (
     <SafeAreaView style={{flex:1}}>  
     <View style={{padding:20}}>
