@@ -13,7 +13,7 @@ const Subscription = ({navigation}) => {
     if (userData?.email) {
       navigation.navigate('Main');
     } else {
-      navigation.navigate('Main');
+      navigation.navigate('Login');
     }
   };
 

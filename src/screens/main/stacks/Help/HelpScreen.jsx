@@ -49,7 +49,7 @@ const HelpScreen = ({navigation}) => {
                                 }}>
                                 <AppText
                                   title={item.name}
-                                  textSize={2}
+                                  textSize={1.8}
                                   textColor={AppColors.BLACK}
                                   textFontWeight
                                 />

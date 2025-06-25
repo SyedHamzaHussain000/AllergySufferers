@@ -25,7 +25,7 @@ export const AllergyTips = [
   { id: 24, tip: "Remove your shoes outside and place clothes in the hamper to avoid spreading allergens indoors." },
   { id: 25, tip: "The best time to go outside is after a good rain, which clears pollen from the air." },
   { id: 26, tip: "Trim your lawn. Shorter blades won't trap as much pollen from trees and flowers." },
-  { id: 27, tip: "Consider switching from carpet to hardwood or tile flooring, which are easier to clean and less allergen-prone." },
+  // { id: 27, tip: "Consider switching from carpet to hardwood or tile flooring, which are easier to clean and less allergen-prone." },
   { id: 28, tip: "Avoid drying laundry outside on high pollen count days." },
   { id: 29, tip: "Keep indoor air clean using a portable HEPA filter in your bedroom." },
   { id: 30, tip: "Fine-tune your fitness routine. Indoor workouts are better when pollen is high." },

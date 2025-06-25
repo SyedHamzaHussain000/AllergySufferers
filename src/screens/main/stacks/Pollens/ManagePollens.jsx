@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -32,6 +33,7 @@ import {
 } from 'react-native-draggable-flatlist';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
+import AppImages from '../../../../assets/images/AppImages';
 const ManagePollens = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const [myPollens, setMyPollens] = useState([]);
@@ -150,11 +152,9 @@ const ManagePollens = ({navigation}) => {
                           </TouchableOpacity>
                         }
                         rightLogo={
-                          <Octicons
-                            name={'arrow-switch'}
-                            size={responsiveFontSize(2.5)}
-                            color={AppColors.LIGHTGRAY}
-                          />
+                          <View style={{marginTop:4 }}>
+                                                    <Image source={AppImages.updown} style={{height:14, width:14, resizeMode:'contain'}}/>
+                                                    </View>
                         }
                       />
                     </TouchableOpacity>

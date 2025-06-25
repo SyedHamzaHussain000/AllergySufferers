@@ -97,6 +97,7 @@ const More = ({navigation}) => {
           title={'Forecasting explanation'}
           bgColor={AppColors.BTNCOLOURS}
           RightColour={'#3D56F0'}
+          handlePress={()=> navigation.navigate("ForcastExplaination")}
         />
 
         <View

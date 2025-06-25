@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   SafeAreaView,
+  Image,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -32,6 +33,7 @@ import {
 } from 'react-native-draggable-flatlist';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import AppImages from '../../../../assets/images/AppImages';
 // import { NestableScrollContainer, NestableDraggableFlatList } from "react-native-draggable-flatlist"
 
 const ManageMedications = ({navigation}) => {
@@ -119,14 +121,7 @@ const ManageMedications = ({navigation}) => {
           goBack
         />
 
-        <View style={{marginTop: 20, gap: 10}}>
-          <AppButton
-            title={'Add MEDICATION'}
-            bgColor={AppColors.BTNCOLOURS}
-            RightColour={AppColors.rightArrowCOlor}
-            handlePress={() => navigation.navigate('AddMedications')}
-          />
-        </View>
+      
 
         <View style={{gap: 10}}>
           <AppText
@@ -179,11 +174,9 @@ const ManageMedications = ({navigation}) => {
                           </TouchableOpacity>
                         }
                         rightLogo={
-                          <Octicons
-                            name={'arrow-switch'}
-                            size={responsiveFontSize(2.5)}
-                            color={AppColors.LIGHTGRAY}
-                          />
+                          <View style={{marginTop:4 }}>
+                          <Image source={AppImages.updown} style={{height:14, width:14, resizeMode:'contain'}}/>
+                          </View>
                         }
                       />
                     </TouchableOpacity>
@@ -199,6 +192,15 @@ const ManageMedications = ({navigation}) => {
 
           {/* <AppTextInput inputPlaceHolder={"Advil Cold and Sinus"} inputWidth={75} rightLogo={<Octicons name={"arrow-switch"} size={responsiveFontSize(2)} color={AppColors.LIGHTGRAY} />}/>
          <AppTextInput inputPlaceHolder={"A Generic Brand"} inputWidth={75} rightLogo={<Octicons name={"arrow-switch"} size={responsiveFontSize(2)} color={AppColors.LIGHTGRAY} />}/> */}
+        </View>
+
+          <View style={{marginTop: 20, gap: 10}}>
+          <AppButton
+            title={'Add MEDICATION'}
+            bgColor={AppColors.BTNCOLOURS}
+            RightColour={AppColors.rightArrowCOlor}
+            handlePress={() => navigation.navigate('AddMedications')}
+          />
         </View>
       </View>
     </GestureHandlerRootView>

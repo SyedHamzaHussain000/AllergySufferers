@@ -43,8 +43,12 @@ const Medication = ({navigation}) => {
   const [allMedication, setAllMedication] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
 
-  const [Medication, setMedicationLoader] = useState(false);
+  const [MedicationLoader, setMedicationLoader] = useState(false);
+
+  const [ActiveMedicationLoader, setActiveMedicationLoader] = useState(false);
   const [loader, setLoader] = useState(false);
+
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
   const [date, setDate] = useState(new Date());
   const [selecteddate, setSelectedDate] = useState(
@@ -96,7 +100,8 @@ const Medication = ({navigation}) => {
   }, [navigation]);
 
   const getActiveMedication = () => {
-    setLoader(true);
+    setActiveMedicationLoader(true);
+    setLoader(true)
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -109,22 +114,25 @@ const Medication = ({navigation}) => {
       .then(response => {
         // console.log('................................', response.data.data);
         setAllMedication(response?.data?.data);
-        setLoader(false);
+        setActiveMedicationLoader(true);
+        setLoader(false)
+        setSelectedIndex(null);
       })
       .catch(error => {
         console.log(error);
-        setLoader(false);
+        setLoader(false)
+        setActiveMedicationLoader(true);
       });
   };
 
   const getMedicationRecords = ewformateddate => {
     console.log('called ......');
-    setMedicationLoader(true);
+    // setMedicationLoader(true);
     setLoader(true);
     let data = JSON.stringify({
-      date: moment(ewformateddate ? ewformateddate : selecteddate).subtract('days', 6).format(
-        'YYYY-MM-DD',
-      )
+      date: moment(ewformateddate ? ewformateddate : selecteddate)
+        .subtract('days', 6)
+        .format('YYYY-MM-DD'),
     });
 
     let config = {
@@ -173,76 +181,77 @@ const Medication = ({navigation}) => {
         //   }
         // });
 
-         const seenDates = new Set();
-                const barData = [];
-        
-                allentriesArr.forEach(entry => {
-                  const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
-                    'MMM DD',
-                  );
-                  const value = parseInt(entry.units) || 0;
-        
-                  if (!seenDates.has(entry.date)) {
-                    seenDates.add(entry.date);
-                    barData.push({
-                      value,
-                      label: formattedDate,
-                      spacing: 2,
-                      frontColor: entry.frontColor,
-                      labelWidth: 30,
-                    });
-                  } else {
-                    barData.push({
-                      value,
-                      spacing: 0,
-                      frontColor: entry.frontColor,
-                    });
-                  }
-                });
-        
-                // ✅ Remove spacing from the last item before each new label
-                for (let i = 0; i < barData.length - 1; i++) {
-                  const current = barData[i];
-                  const next = barData[i + 1];
-        
-                  if (!current.label && next.label && 'spacing' in current) {
-                    delete current.spacing;
-                  }
-                }
-        
-                // Optional: Also remove spacing from the very last item if it has no label
-                const lastItem = barData[barData.length - 1];
-                if (lastItem && !lastItem.label && 'spacing' in lastItem) {
-                  delete lastItem.spacing;
-                }
-        
-                // ✅ Ensure a dummy item exists after each label if next item is another label or nothing
-              for (let i = 0; i < barData.length; i++) {
-                const current = barData[i];
-                const next = barData[i + 1];
-        
-                if (current.label && (!next || next.label)) {
-                  // Insert a dummy
-                  barData.splice(i + 1, 0, {
-                    value: 0,
-                    frontColor: 'transparent',
-                  });
-                }
-              }
+        const seenDates = new Set();
+        const barData = [];
+
+        allentriesArr.forEach(entry => {
+          const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
+            'MMM DD',
+          );
+          const value = parseInt(entry.units) || 0;
+
+          if (!seenDates.has(entry.date)) {
+            seenDates.add(entry.date);
+            barData.push({
+              value,
+              label: formattedDate,
+              spacing: 2,
+              frontColor: entry.frontColor,
+              labelWidth: 30,
+            });
+          } else {
+            barData.push({
+              value,
+              spacing: 0,
+              frontColor: entry.frontColor,
+            });
+          }
+        });
+
+        // ✅ Remove spacing from the last item before each new label
+        for (let i = 0; i < barData.length - 1; i++) {
+          const current = barData[i];
+          const next = barData[i + 1];
+
+          if (!current.label && next.label && 'spacing' in current) {
+            delete current.spacing;
+          }
+        }
+
+        // Optional: Also remove spacing from the very last item if it has no label
+        const lastItem = barData[barData.length - 1];
+        if (lastItem && !lastItem.label && 'spacing' in lastItem) {
+          delete lastItem.spacing;
+        }
+
+        // ✅ Ensure a dummy item exists after each label if next item is another label or nothing
+        for (let i = 0; i < barData.length; i++) {
+          const current = barData[i];
+          const next = barData[i + 1];
+
+          if (current.label && (!next || next.label)) {
+            // Insert a dummy
+            barData.splice(i + 1, 0, {
+              value: 0,
+              frontColor: 'transparent',
+            });
+          }
+        }
 
         setMedicationnRecord(barData);
         setLoader(false);
-        setMedicationLoader(false);
+        // setMedicationLoader(false);
       })
       .catch(error => {
         setLoader(false);
-        setMedicationLoader(false);
+        // setMedicationLoader(false);
         console.log(error);
       });
   };
 
-  const addMedication = item => {
-    setLoader(true);
+  const addMedication = (item, index) => {
+    setSelectedIndex(index);
+    setActiveMedicationLoader(true);
     let data = JSON.stringify({
       medication_id: item.id,
       date: selecteddate,
@@ -262,23 +271,24 @@ const Medication = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
 
         getActiveMedication();
         getMedicationRecords();
 
-        // getMedicationRecords();
       })
       .catch(error => {
         console.log(error);
         setLoader(false);
+        setActiveMedicationLoader(false);
       });
   };
 
-  const removeMedication = item => {
+  const removeMedication = (item, index) => {
+    setSelectedIndex(index);
+    setActiveMedicationLoader(true);
     const formatedDate = moment(new Date()).format('YYYY-MM-DD');
 
-    setLoader(true);
+    setActiveMedicationLoader(false);
     let data = JSON.stringify({
       medication_id: item.id,
       date: formatedDate,
@@ -307,6 +317,8 @@ const Medication = ({navigation}) => {
       .catch(error => {
         console.log(error);
         setLoader(false);
+        setActiveMedicationLoader(false);
+        
       });
   };
 
@@ -320,38 +332,45 @@ const Medication = ({navigation}) => {
           selecteddate={selecteddate}
           setOpen={() => setOpen(true)}
         />
-  
-        <ScrollView contentContainerStyle={{flexGrow: 1}}>
-          {loader == true ? (
-            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-          ) : (
-            <View>
-              <FlatList
-                data={allMedication}
-                contentContainerStyle={{
-                  gap: 10,
-                  marginTop: 20,
-                  marginBottom: 20,
-                }}
-                renderItem={({item}) => {
-                  return (
-                    <View
-                      style={{
-                        borderWidth: 1,
-                        borderRadius: 10,
-                        borderColor: '#37BC07',
-                        height: responsiveHeight(6),
-                        alignItems: 'center',
-                        flexDirection: 'row',
-                        paddingHorizontal: 10,
-                        justifyContent: 'space-between',
-                      }}>
-                      <AppText
-                        title={item.name}
-                        textSize={1.6}
-                        textColor={AppColors.LIGHTGRAY}
-                      />
 
+        <ScrollView contentContainerStyle={{flexGrow: 1}}>
+          {/* {ActiveMedicationLoader == true ? (
+            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+          ) : ( */}
+          <View>
+            <FlatList
+              data={allMedication}
+              contentContainerStyle={{
+                gap: 10,
+                marginTop: 20,
+                marginBottom: 20,
+              }}
+              renderItem={({item, index}) => {
+                return (
+                  <View
+                    style={{
+                      borderWidth: 1,
+                      borderRadius: 10,
+                      borderColor: '#37BC07',
+                      height: responsiveHeight(6),
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      paddingHorizontal: 10,
+                      justifyContent: 'space-between',
+                    }}>
+                    <AppText
+                      title={item.name}
+                      textSize={1.6}
+                      textColor={AppColors.LIGHTGRAY}
+                    />
+
+                    {selectedIndex == index && ActiveMedicationLoader == true ? (
+                      <ActivityIndicator
+                        size={'large'}
+                        color={AppColors.BLACK}
+                        
+                      />
+                    ) : (
                       <View
                         style={{
                           flexDirection: 'row',
@@ -359,7 +378,7 @@ const Medication = ({navigation}) => {
                           gap: 10,
                         }}>
                         <TouchableOpacity
-                          onPress={() => removeMedication(item)}>
+                          onPress={() => removeMedication(item, index)}>
                           <AntDesign
                             name={'minus'}
                             size={responsiveFontSize(2)}
@@ -373,7 +392,8 @@ const Medication = ({navigation}) => {
                           textSize={2.5}
                         />
 
-                        <TouchableOpacity onPress={() => addMedication(item)}>
+                        <TouchableOpacity
+                          onPress={() => addMedication(item, index)}>
                           <AntDesign
                             name={'plus'}
                             size={responsiveFontSize(2)}
@@ -381,12 +401,13 @@ const Medication = ({navigation}) => {
                           />
                         </TouchableOpacity>
                       </View>
-                    </View>
-                  );
-                }}
-              />
-            </View>
-          )}
+                    )}
+                  </View>
+                );
+              }}
+            />
+          </View>
+          {/* )} */}
 
           <DatePicker
             modal
@@ -408,9 +429,9 @@ const Medication = ({navigation}) => {
             }}
           />
 
-          {Medication == true && (
+          {/* {Medication == true && (
             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-          )}
+          )} */}
 
           {MedicationnRecord.length > 0 && (
             // <BarChart
@@ -437,12 +458,11 @@ const Medication = ({navigation}) => {
               }}
               barBorderRadius={2}
               isAnimated={true}
-
+              maxValue={8}
               stepValue={1}
               hideDataPoints={false}
               spacing={30}
-                formatYLabel={label => parseFloat(label).toFixed(0)}
-
+              formatYLabel={label => parseFloat(label).toFixed(0)}
             />
           )}
 

@@ -9,7 +9,7 @@ const Account = ({navigation}) => {
   const pollens = [
     {
       id: 1,
-      name: 'Cancle Subscription',
+      name: 'Cancel Subscription',
       top: true,
 
     },

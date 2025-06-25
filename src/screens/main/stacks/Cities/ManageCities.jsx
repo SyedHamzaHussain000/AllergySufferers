@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -31,6 +32,7 @@ import {
   NestableScrollContainer,
 } from 'react-native-draggable-flatlist';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AppImages from '../../../../assets/images/AppImages';
 
 const ManageCities = ({navigation}) => {
   const userdata = useSelector(state => state.auth.user);
@@ -86,8 +88,8 @@ const ManageCities = ({navigation}) => {
       .request(config)
       .then(response => {
         console.log(JSON.stringify(response.data));
-        getAllCities()
-        Alert.alert("Success", "City deleted successfully")
+        getAllCities();
+        Alert.alert('Success', 'City deleted successfully');
       })
       .catch(error => {
         console.log(error);
@@ -110,10 +112,7 @@ const ManageCities = ({navigation}) => {
           goBack
         />
 
-            {loader && (
-            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-          )}
-
+        {loader && <ActivityIndicator size={'large'} color={AppColors.BLACK} />}
 
         {cities ? (
           <NestableScrollContainer>
@@ -155,11 +154,16 @@ const ManageCities = ({navigation}) => {
                         </TouchableOpacity>
                       }
                       rightLogo={
-                        <Octicons
-                          name={'arrow-switch'}
-                          size={responsiveFontSize(2.5)}
-                          color={AppColors.LIGHTGRAY}
-                        />
+                        <View style={{marginTop: 4}}>
+                          <Image
+                            source={AppImages.updown}
+                            style={{
+                              height: 14,
+                              width: 14,
+                              resizeMode: 'contain',
+                            }}
+                          />
+                        </View>
                       }
                     />
                   </TouchableOpacity>

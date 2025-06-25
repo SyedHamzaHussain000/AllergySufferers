@@ -12,11 +12,11 @@ const DeleteAllData = () => {
       <AppHeader  goBack={true} heading="Delete All Data" />
 
         <View style={{height:responsiveHeight(100), justifyContent:'center',    gap:20}}>
-        <View style={{flexDirection:'row', width:responsiveWidth(80)}}>
+        <AppButton title={"Yes, delete my data"} RightColour={AppColors.rightArrowCOlor}/>
+        <View style={{flexDirection:'row', width:responsiveWidth(80), alignSelf:'center'}}>
                 <AppText title={"Note:"} textFontWeight textColor={AppColors.BLACK} textSize={1.7}/>
                 <AppText textSize={1.7} title={"This will send a request to irrevocably delete all your data. Are you sure you want to do this?"} textColor={AppColors.LIGHTGRAY} />
         </View>  
-        <AppButton title={"Yes, delete my data"} RightColour={AppColors.rightArrowCOlor}/>
         </View>
     </View>
   );

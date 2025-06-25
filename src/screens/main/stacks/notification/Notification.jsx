@@ -132,7 +132,7 @@ const userData = useSelector(state => state.auth.user);
                 item.common_name.toLowerCase().includes(search.toLowerCase()),
             )
             .map((item, index) => (
-              <TouchableOpacity onPress={() => setPollenApi(item)}
+              <TouchableOpacity 
                 style={{
                   padding: 20,
                   borderWidth: 1,

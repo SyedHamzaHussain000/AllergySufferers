@@ -57,7 +57,7 @@ const AppTextInput = ({
           <TextInput
             placeholder={inputPlaceHolder}
             placeholderTextColor={AppColors.LIGHTGRAY}
-            style={{width: responsiveWidth(inputWidth), color: AppColors.BLACK}}
+            style={{width: responsiveWidth(inputWidth), height: 50, color: AppColors.BLACK}}
             onChangeText={onChangeText}
             value={value}
             secureTextEntry={secure}
@@ -74,7 +74,7 @@ const AppTextInput = ({
     {textInput == true ? 
       null
       :
-        <View style={{flexDirection: 'row', gap: 5, marginRight: 100}}>
+        <View style={{flexDirection: 'row', gap: 5, marginRight: 100, }}>
           {rightLogo}
           {arrowDelete}
         </View>

@@ -322,6 +322,12 @@ const Home = ({navigation}) => {
       });
   };
 
+
+  const PollenCurrentTodayData = todayPollensData?.current?.filter(
+  (item, index, self) =>
+    index === self.findIndex((t) => t.name === item.name)
+);
+
   return (
     <>
       <LinearGradient
@@ -564,6 +570,8 @@ const Home = ({navigation}) => {
                               p => p.scientific_name === item.name,
                             );
                             const todayPollenInAir = todayPollensData?.current;
+
+                            
                             return (
                               <View style={{gap: 10}}>
                                 <AppText
@@ -590,7 +598,7 @@ const Home = ({navigation}) => {
                                       ? 'Very High'
                                       : 'None'
                                   }
-                                  TempreaturePriority={'Moderate'}
+                                  isPollenorSpores={todayPollenInAir[index]?.type}
                                   TempreaturePriorityFontSize={1.6}
                                 />
                               </View>
@@ -863,8 +871,9 @@ const Home = ({navigation}) => {
                       />
                     ) : selected == 'Today' ? (
                       <FlatList
-                        data={todayPollensData?.current}
+                        data={PollenCurrentTodayData}
                         renderItem={({item, index}) => {
+
                           return (
                             <View
                               style={{
@@ -872,11 +881,11 @@ const Home = ({navigation}) => {
                                 borderTopRightRadius: index == 0 ? 10 : 0,
                                 borderTopLeftRadius: index == 0 ? 10 : 0,
                                 borderBottomRightRadius:
-                                  index == todayPollensData?.current?.length - 1
+                                  index == PollenCurrentTodayData?.length - 1
                                     ? 10
                                     : 0,
                                 borderBottomLeftRadius:
-                                  index == todayPollensData?.current?.length - 1
+                                  index == PollenCurrentTodayData?.length - 1
                                     ? 10
                                     : 0,
                                 padding: 20,
@@ -884,7 +893,7 @@ const Home = ({navigation}) => {
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
                                 borderBottomWidth:
-                                  index == todayPollensData?.current?.length - 1
+                                  index == PollenCurrentTodayData?.length - 1
                                     ? 1
                                     : 0,
                               }}>
