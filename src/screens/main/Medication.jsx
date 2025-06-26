@@ -2,32 +2,20 @@ import {
   View,
   Text,
   FlatList,
-  Image,
-  Dimensions,
   TouchableOpacity,
   SafeAreaView,
-  Alert,
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
-import AppImages from '../../assets/images/AppImages';
 import {
   responsiveFontSize,
   responsiveHeight,
-  responsiveWidth,
 } from '../../utils/Responsive_Dimensions';
 import AppText from '../../components/AppTextComps/AppText';
 import AppColors from '../../utils/AppColors';
-// import {BarChart} from 'react-native-chart-kit';
-import {
-  BarChart,
-  LineChart,
-  PieChart,
-  PopulationPyramid,
-  RadarChart,
-} from 'react-native-gifted-charts';
+import {BarChart} from 'react-native-gifted-charts';
 import AppButton from '../../components/AppButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import BASE_URL from '../../utils/BASE_URL';
@@ -38,390 +26,189 @@ import DatePicker from 'react-native-date-picker';
 import AppIntroSlider from 'react-native-app-intro-slider';
 
 const Medication = ({navigation}) => {
-  const screenWidth = Dimensions.get('window').width;
-
   const userData = useSelector(state => state.auth.user);
   const [allMedication, setAllMedication] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
-
-  const [MedicationLoader, setMedicationLoader] = useState(false);
-
-  const [ActiveMedicationLoader, setActiveMedicationLoader] = useState(false);
+  const [medicationLoadingMap, setMedicationLoadingMap] = useState({});
   const [loader, setLoader] = useState(false);
-
-  const [selectedIndex, setSelectedIndex] = useState(null);
 
   const [date, setDate] = useState(new Date());
   const [selecteddate, setSelectedDate] = useState(
     moment(new Date()).format('YYYY-MM-DD'),
   );
-
   const [open, setOpen] = useState(false);
 
-  const chartConfig = {
-    backgroundGradientFrom: '#FFFFFF',
-    backgroundGradientTo: '#FFFFFF',
-    decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    style: {
-      borderRadius: 16,
-    },
-    propsForBackgroundLines: {
-      strokeDasharray: '', // solid background lines
-    },
+  const setMedicationLoading = (id, isLoading) => {
+    setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
   };
 
-  console.log('MedicationnRecord', MedicationnRecord);
-
-  const data = {
-    labels: MedicationnRecord?.map(item =>
-      moment(item.date, 'MMM, DD YYYY').format('MMM D'),
-    ),
-    datasets: [
-      {
-        data: MedicationnRecord?.map(item => parseInt(item?.units || 0)),
-        colors: MedicationnRecord.flatMap(() => [
-          () => '#E74C3C', // color for unitsA
-          () => '#3498DB', // color for unitsB
-        ]),
-      },
-    ],
-  };
-
-  useEffect(() => {
-    const nav = navigation.addListener('focus', () => {
-      try {
-        getActiveMedication();
-        // getMedicationRecords();
-        generateMedicationSlides()
-      } catch (error) {}
-    });
-
-    return nav;
-  }, [navigation]);
-
-  const getActiveMedication = () => {
-    setActiveMedicationLoader(true);
-    setLoader(true)
-    let config = {
-      method: 'get',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_medications_active`,
-      headers: {'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0'},
-    };
-
-    axios
-      .request(config)
-      .then(response => {
-        // console.log('................................', response.data.data);
-        setAllMedication(response?.data?.data);
-        setActiveMedicationLoader(true);
-        setLoader(false)
-        setSelectedIndex(null);
-      })
-      .catch(error => {
-        console.log(error);
-        setLoader(false)
-        setActiveMedicationLoader(true);
-      });
-  };
-
-  // const getMedicationRecords = ewformateddate => {
-  //   console.log('called ......');
-  //   // setMedicationLoader(true);
-  //   setLoader(true);
-  //   let data = JSON.stringify({
-  //     date: moment(ewformateddate ? ewformateddate : selecteddate)
-  //       .subtract('days', 6)
-  //       .format('YYYY-MM-DD'),
-  //   });
-
-  //   let config = {
-  //     method: 'post',
-  //     maxBodyLength: Infinity,
-  //     url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'Cache-Control': 'no-cache',
-  //       Pragma: 'no-cache',
-  //       Expires: '0',
-  //     },
-  //     data: data,
-  //   };
-
-  //   axios
-  //     .request(config)
-  //     .then(response => {
-  //       console.log(JSON.stringify(response.data));
-
-  //       const allentriesArr = response.data.entries.items;
-
-  //       // const seenDates = new Set();
-  //       // const barData = [];
-
-  //       // slicedata.forEach(entry => {
-  //       //   const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
-  //       //     'MMM DD',
-  //       //   );
-  //       //   const value = parseInt(entry.units) || 0;
-
-  //       //   if (!seenDates.has(entry.date)) {
-  //       //     seenDates.add(entry.date);
-  //       //     barData.push({
-  //       //       value,
-  //       //       label: formattedDate,
-  //       //       spacing: 3,
-  //       //       frontColor: entry.frontColor,
-  //       //     });
-  //       //   } else {
-  //       //     barData.push({
-  //       //       value,
-  //       //       frontColor: entry.frontColor,
-  //       //       spacing: 0,
-  //       //     });
-  //       //   }
-  //       // });
-
-  //       const seenDates = new Set();
-  //       const barData = [];
-
-  //       allentriesArr.forEach(entry => {
-  //         const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
-  //           'MMM DD',
-  //         );
-  //         const value = parseInt(entry.units) || 0;
-
-  //         if (!seenDates.has(entry.date)) {
-  //           seenDates.add(entry.date);
-  //           barData.push({
-  //             value,
-  //             label: formattedDate,
-  //             spacing: 2,
-  //             frontColor: entry.frontColor,
-  //             labelWidth: 30,
-  //           });
-  //         } else {
-  //           barData.push({
-  //             value,
-  //             spacing: 0,
-  //             frontColor: entry.frontColor,
-  //           });
-  //         }
-  //       });
-
-  //       // ✅ Remove spacing from the last item before each new label
-  //       for (let i = 0; i < barData.length - 1; i++) {
-  //         const current = barData[i];
-  //         const next = barData[i + 1];
-
-  //         if (!current.label && next.label && 'spacing' in current) {
-  //           delete current.spacing;
-  //         }
-  //       }
-
-  //       // Optional: Also remove spacing from the very last item if it has no label
-  //       const lastItem = barData[barData.length - 1];
-  //       if (lastItem && !lastItem.label && 'spacing' in lastItem) {
-  //         delete lastItem.spacing;
-  //       }
-
-  //       // ✅ Ensure a dummy item exists after each label if next item is another label or nothing
-  //       for (let i = 0; i < barData.length; i++) {
-  //         const current = barData[i];
-  //         const next = barData[i + 1];
-
-  //         if (current.label && (!next || next.label)) {
-  //           // Insert a dummy
-  //           barData.splice(i + 1, 0, {
-  //             value: 0,
-  //             frontColor: 'transparent',
-  //           });
-  //         }
-  //       }
-
-  //       setMedicationnRecord(barData);
-  //       setLoader(false);
-  //       // setMedicationLoader(false);
-  //     })
-  //     .catch(error => {
-  //       setLoader(false);
-  //       // setMedicationLoader(false);
-  //       console.log(error);
-  //     });
-  // };
-
-
-const generateMedicationSlides = async selectedDate => {
-  setLoader(true);
-  const slides = [];
-
-  const baseDate = moment(selectedDate ? selectedDate : new Date, 'YYYY-MM-DD');
-
-  try {
-    for (let i = 0; i < 3; i++) {
-      const end = moment(baseDate).subtract(i * 7, 'days');
-      const start = moment(baseDate).subtract(i * 7 + 6, 'days');
-
-      const payload = JSON.stringify({
-        start_date: start.format('YYYY-MM-DD'),
-        end_date: end.format('YYYY-MM-DD'),
-      });
-
-      const response = await axios.post(
-        `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
-        payload,
+  const getActiveMedication = async () => {
+    setLoader(true);
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_medications_active`,
         {
           headers: {
-            'Content-Type': 'application/json',
             'Cache-Control': 'no-cache',
             Pragma: 'no-cache',
             Expires: '0',
           },
-        }
+        },
       );
+      setAllMedication(response?.data?.data || []);
+    } catch (error) {
+      console.log(error);
+    }
+    setLoader(false);
+  };
 
-      const entries = response?.data?.entries || [];
+  const generateMedicationSlides = async selectedDate => {
+    setLoader(true);
+    const slides = [];
+    const baseDate = moment(selectedDate ? selectedDate : new Date, 'YYYY-MM-DD');
 
-      const seenDates = new Set();
-      const barData = [];
+    try {
+      for (let i = 0; i < 3; i++) {
+        const end = moment(baseDate).subtract(i * 7, 'days');
+        const start = moment(baseDate).subtract(i * 7 + 6, 'days');
 
-      entries.forEach(entry => {
-        const formattedLabel = moment(entry.date, 'MMMM, DD YYYY').format('MMM DD');
-        const value = parseInt(entry.units) || 0;
+        const payload = JSON.stringify({
+          start_date: start.format('YYYY-MM-DD'),
+          end_date: end.format('YYYY-MM-DD'),
+        });
 
-        if (!seenDates.has(entry.date)) {
-          seenDates.add(entry.date);
-          barData.push({
-            value,
-            label: formattedLabel,
-            spacing: 2,
-            frontColor: entry.frontColor || '#E23131',
-            labelWidth: 30,
-          });
-        } else {
-          barData.push({
-            value,
-            spacing: 0,
-            frontColor: entry.frontColor || '#E23131',
-          });
+        const response = await axios.post(
+          `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+          payload,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache',
+              Pragma: 'no-cache',
+              Expires: '0',
+            },
+          },
+        );
+
+        const entries = response?.data?.entries?.items || [];
+        const seenDates = new Set();
+        const barData = [];
+
+        entries.forEach(entry => {
+          const formattedLabel = moment(entry.date, 'MMMM, DD YYYY').format('MMM DD');
+          const value = parseInt(entry.units) || 0;
+
+          if (!seenDates.has(entry.date)) {
+            seenDates.add(entry.date);
+            barData.push({
+              value,
+              label: formattedLabel,
+              spacing: 2,
+              frontColor: entry.frontColor || '#E23131',
+              labelWidth: 30,
+            });
+          } else {
+            barData.push({
+              value,
+              spacing: 0,
+              frontColor: entry.frontColor || '#E23131',
+            });
+          }
+        });
+
+        for (let i = 0; i < barData.length - 1; i++) {
+          const current = barData[i];
+          const next = barData[i + 1];
+          if (!current.label && next.label && 'spacing' in current) {
+            delete current.spacing;
+          }
         }
-      });
 
-      for (let i = 0; i < barData.length - 1; i++) {
-        const current = barData[i];
-        const next = barData[i + 1];
-        if (!current.label && next.label && 'spacing' in current) {
-          delete current.spacing;
+        const lastItem = barData[barData.length - 1];
+        if (lastItem && !lastItem.label && 'spacing' in lastItem) {
+          delete lastItem.spacing;
         }
+
+        for (let i = 0; i < barData.length; i++) {
+          const current = barData[i];
+          const next = barData[i + 1];
+          if (current.label && (!next || next.label)) {
+            barData.splice(i + 1, 0, {
+              value: 0,
+              frontColor: 'transparent',
+            });
+          }
+        }
+
+        slides.unshift({
+          key: `${i}`,
+          title: `${start.format('DD MMM')} - ${end.format('DD MMM')}`,
+          barData,
+        });
       }
 
-      const lastItem = barData[barData.length - 1];
-      if (lastItem && !lastItem.label && 'spacing' in lastItem) {
-        delete lastItem.spacing;
-      }
-
-      for (let i = 0; i < barData.length; i++) {
-        const current = barData[i];
-        const next = barData[i + 1];
-        if (current.label && (!next || next.label)) {
-          barData.splice(i + 1, 0, {
-            value: 0,
-            frontColor: 'transparent',
-          });
-        }
-      }
-
-      slides.unshift({
-        key: `${i}`,
-        title: `${start.format('DD MMM')} - ${end.format('DD MMM')}`,
-        barData,
-      });
+      setMedicationnRecord(slides);
+    } catch (error) {
+      console.log('generateMedicationSlides error:', error);
     }
 
-    setMedicationnRecord(slides); // use AppIntroSlider now
-  } catch (error) {
-    console.log('generateMedicationSlides error:', error);
-  }
-
-  setLoader(false);
-};
-
-
-  const addMedication = (item, index) => {
-    setSelectedIndex(index);
-    setActiveMedicationLoader(true);
-    let data = JSON.stringify({
-      medication_id: item.id,
-      date: selecteddate,
-      units: 1,
-    });
-
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/add_medication_units`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: data,
-    };
-
-    axios
-      .request(config)
-      .then(response => {
-
-        getActiveMedication();
-        // getMedicationRecords();
-        generateMedicationSlides()
-
-      })
-      .catch(error => {
-        console.log(error);
-        setLoader(false);
-        setActiveMedicationLoader(false);
-      });
+    setLoader(false);
   };
 
-  const removeMedication = (item, index) => {
-    setSelectedIndex(index);
-    setActiveMedicationLoader(true);
-    const formatedDate = moment(new Date()).format('YYYY-MM-DD');
+  const addMedication = async item => {
+    setMedicationLoading(item.id, true);
+    try {
+      const data = JSON.stringify({
+        medication_id: item.id,
+        date: selecteddate,
+        units: 1,
+      });
 
-    setActiveMedicationLoader(false);
-    let data = JSON.stringify({
-      medication_id: item.id,
-      date: formatedDate,
-      units: 1,
+      await axios.post(
+        `${BASE_URL}/allergy_data/v1/user/${userData.id}/add_medication_units`,
+        data,
+        {headers: {'Content-Type': 'application/json'}},
+      );
+
+      await getActiveMedication();
+      await generateMedicationSlides();
+    } catch (error) {
+      console.log(error);
+    }
+    setMedicationLoading(item.id, false);
+  };
+
+  const removeMedication = async item => {
+    setMedicationLoading(item.id, true);
+    try {
+      const data = JSON.stringify({
+        medication_id: item.id,
+        date: moment().format('YYYY-MM-DD'),
+        units: 1,
+      });
+
+      await axios.post(
+        `${BASE_URL}/allergy_data/v1/user/${userData.id}/remove_medication_units`,
+        data,
+        {headers: {'Content-Type': 'application/json'}},
+      );
+
+      await getActiveMedication();
+      await generateMedicationSlides();
+    } catch (error) {
+      console.log(error);
+    }
+    setMedicationLoading(item.id, false);
+  };
+
+  useEffect(() => {
+    const nav = navigation.addListener('focus', () => {
+      getActiveMedication();
+      generateMedicationSlides();
     });
 
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/remove_medication_units`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: data,
-    };
-
-    axios
-      .request(config)
-      .then(response => {
-        console.log(JSON.stringify(response.data));
-        // setTimeout(() => {
-        getActiveMedication();
-        // getMedicationRecords();
-        generateMedicationSlides()
-        // }, 7000);
-      })
-      .catch(error => {
-        console.log(error);
-        setLoader(false);
-        setActiveMedicationLoader(false);
-        
-      });
-  };
+    return nav;
+  }, [navigation]);
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
@@ -435,80 +222,69 @@ const generateMedicationSlides = async selectedDate => {
         />
 
         <ScrollView contentContainerStyle={{flexGrow: 1}}>
-          {/* {ActiveMedicationLoader == true ? (
-            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-          ) : ( */}
-          <View>
-            <FlatList
-              data={allMedication}
-              contentContainerStyle={{
-                gap: 10,
-                marginTop: 20,
-                marginBottom: 20,
-              }}
-              renderItem={({item, index}) => {
-                return (
-                  <View
-                    style={{
-                      borderWidth: 1,
-                      borderRadius: 10,
-                      borderColor: '#37BC07',
-                      height: responsiveHeight(6),
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      paddingHorizontal: 10,
-                      justifyContent: 'space-between',
-                    }}>
-                    <AppText
-                      title={item.name}
-                      textSize={1.6}
-                      textColor={AppColors.LIGHTGRAY}
-                    />
+          <FlatList
+            data={allMedication}
+            contentContainerStyle={{
+              gap: 10,
+              marginTop: 20,
+              marginBottom: 20,
+            }}
+            renderItem={({item}) => {
 
-                    {selectedIndex == index && ActiveMedicationLoader == true ? (
-                      <ActivityIndicator
-                        size={'large'}
-                        color={AppColors.BLACK}
-                        
-                      />
-                    ) : (
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 10,
-                        }}>
-                        <TouchableOpacity
-                          onPress={() => removeMedication(item, index)}>
-                          <AntDesign
-                            name={'minus'}
-                            size={responsiveFontSize(2)}
-                            color={AppColors.LIGHTGRAY}
-                          />
-                        </TouchableOpacity>
+              return (
+                <View
+                  style={{
+                    borderWidth: 2.5,
+                    borderRadius: 10,
+                    borderColor: item.frontColor,
+                    height: responsiveHeight(6),
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    paddingHorizontal: 10,
+                    justifyContent: 'space-between',
+                  }}>
+                  <AppText
+                    title={item.name}
+                    textSize={1.6}
+                    textColor={AppColors.LIGHTGRAY}
+                  />
 
-                        <AppText
-                          title={item?.units ? item?.units : 0}
-                          textColor={AppColors.LIGHTGRAY}
-                          textSize={2.5}
+                  {medicationLoadingMap[item?.id] ? (
+                    <ActivityIndicator size={'small'} color={AppColors.BLACK} />
+                  ) : (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 10,
+                      }}>
+                      <TouchableOpacity onPress={() => removeMedication(item)}>
+                        <AntDesign
+                          name={'minus'}
+                          size={responsiveFontSize(2)}
+                          color={AppColors.LIGHTGRAY}
                         />
+                      </TouchableOpacity>
 
-                        <TouchableOpacity
-                          onPress={() => addMedication(item, index)}>
-                          <AntDesign
-                            name={'plus'}
-                            size={responsiveFontSize(2)}
-                            color={AppColors.LIGHTGRAY}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </View>
-                );
-              }}
-            />
-          </View>
-          {/* )} */}
+                      <AppText
+                        title={item?.units || 0}
+                        textColor={AppColors.LIGHTGRAY}
+                        textSize={2.5}
+                      />
+
+                      <TouchableOpacity onPress={() => addMedication(item)}>
+                        <AntDesign
+                          name={'plus'}
+                          size={responsiveFontSize(2)}
+                          color={AppColors.LIGHTGRAY}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              );
+            }}
+          />
 
           <DatePicker
             modal
@@ -518,89 +294,54 @@ const generateMedicationSlides = async selectedDate => {
             maximumDate={new Date()}
             onConfirm={selectedDate => {
               setOpen(false);
-              const today = moment().startOf('day');
               const picked = moment(selectedDate).startOf('day');
               const formattedDate = picked.format('YYYY-MM-DD');
               setSelectedDate(formattedDate);
-
-              // getMedicationRecords(formattedDate);
-              generateMedicationSlides(formattedDate)
+              generateMedicationSlides(formattedDate);
             }}
             onCancel={() => {
               setOpen(false);
             }}
           />
 
-          {loader == true && (
-            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-          )}
+          {loader && <ActivityIndicator size={'large'} color={AppColors.BLACK} />}
 
           {MedicationnRecord.length > 0 && (
-            // <BarChart
-            //   data={MedicationnRecord}
-            //   width={screenWidth * 0.9}
-            //   height={220}
-            //   chartConfig={chartConfig}
-            //   fromZero
-            //   withCustomBarColorFromData={true}
-            //   flatColor={true}
-            //   showBarTops={false}
-            // />
-
-            // <BarChart
-            //   data={MedicationnRecord}
-            //   barWidth={10}
-            //   frontColor="#E23131" // bar color
-            //   showLine={false}
-            //   xAxisLabelTextStyle={{
-            //     fontSize: 10, // 👈 smaller font size
-            //     color: '#000', // optional, customize color
-            //     fontWeight: '400', // optional
-            //     width: 40,
-            //   }}
-            //   barBorderRadius={2}
-            //   isAnimated={true}
-            //   maxValue={8}
-            //   stepValue={1}
-            //   hideDataPoints={false}
-            //   spacing={30}
-            //   formatYLabel={label => parseFloat(label).toFixed(0)}
-            // />
-
-            
-  <AppIntroSlider
-    data={MedicationnRecord}
-    renderItem={({item}) => (
-      <View style={{alignItems: 'center'}}>
-        <Text style={{fontSize: 16}}>{item.title}</Text>
-        <BarChart
-          data={item.barData}
-          barWidth={10}
-          frontColor="#E23131"
-          showLine={false}
-          xAxisLabelTextStyle={{
-            fontSize: 10,
-            color: '#000',
-            fontWeight: '400',
-            width: 40,
-          }}
-          barBorderRadius={2}
-          isAnimated={true}
-          maxValue={8}
-          stepValue={1}
-          hideDataPoints={false}
-          spacing={20}
-          formatYLabel={label => parseFloat(label).toFixed(0)}
-        />
-      </View>
-    )}
-    showDoneButton={false}
-    showNextButton={false}
-    showSkipButton={false}
-    dotStyle={{backgroundColor: '#ccc'}}
-    activeDotStyle={{backgroundColor: AppColors.BLACK}}
-  />
-
+            <AppIntroSlider
+              data={MedicationnRecord}
+              showNextButton={false}
+              showPrevButton={false}
+              showDoneButton={false}
+              renderItem={({item}) => (
+                <View style={{alignItems: 'center'}}>
+                  <Text style={{fontSize: 16}}>{item.title}</Text>
+                  <BarChart
+                    data={item.barData}
+                    barWidth={10}
+                    frontColor="#E23131"
+                    showLine={false}
+                    xAxisLabelTextStyle={{
+                      fontSize: 10,
+                      color: '#000',
+                      fontWeight: '400',
+                      width: 40,
+                    }}
+                    barBorderRadius={2}
+                    isAnimated={true}
+                    maxValue={8}
+                    stepValue={1}
+                    hideDataPoints={false}
+                    spacing={20}
+                    formatYLabel={label => parseFloat(label).toFixed(0)}
+                  />
+                </View>
+              )}
+              showDoneButton={false}
+              showNextButton={false}
+              showSkipButton={false}
+              dotStyle={{backgroundColor: '#ccc'}}
+              activeDotStyle={{backgroundColor: AppColors.BLACK}}
+            />
           )}
 
           <View style={{marginTop: 20}}>

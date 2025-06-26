@@ -108,8 +108,6 @@ const Home = ({navigation}) => {
   }, [navigation]);
 
   const getPollensData = (allcities, newindex) => {
-
-    
     setPollenLoader(true);
     let data = new FormData();
     data.append('lat', allcities[newindex ? newindex : 0]?.lat);
@@ -157,7 +155,7 @@ const Home = ({navigation}) => {
 
         setIsPastArray(pastArray);
         setIsFutureArray(futureArray);        
-        
+
         setPollenLoader(false);
         setLoadCities(false)
         

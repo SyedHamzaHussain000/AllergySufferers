@@ -95,7 +95,8 @@ const AddCity = ({navigation}) => {
           placeHolderText="Enter city"
           fetchDetails={true}
           includedRegionCodes={['CA']}
-
+          
+          
         />
 
         <View

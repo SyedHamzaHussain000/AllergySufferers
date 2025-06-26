@@ -120,35 +120,33 @@ const DataVisualizer = ({navigation}) => {
   };
 
   const getMedicationRecords = ewformateddate => {
-
-
-
-
-
     const end = moment(ewformateddate ? ewformateddate : new Date());
-      const start = moment(ewformateddate ? ewformateddate : new Date()).subtract(6, 'days');
+    const start = moment(ewformateddate ? ewformateddate : new Date()).subtract(
+      6,
+      'days',
+    );
 
-      const data = JSON.stringify({
-        start_date: start.format('YYYY-MM-DD'),
-        end_date: end.format('YYYY-MM-DD'),
-      });
+    const data = JSON.stringify({
+      start_date: start.format('YYYY-MM-DD'),
+      end_date: end.format('YYYY-MM-DD'),
+    });
 
-let config = {
-  method: 'post',
-  maxBodyLength: Infinity,
-  url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
-  headers: { 
-    'Content-Type': 'application/json'
-  },
-  data : data
-};
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    };
 
-  axios
+    axios
       .request(config)
       .then(response => {
-        const allentriesArr = response.data.entries;
+        const allentriesArr = response.data.entries.items || [];
 
-        console.log("allentriuesaarr", response.data)
+        console.log('allentriuesaarr', response.data);
 
         // const grouped = {};
 
@@ -228,7 +226,7 @@ let config = {
         console.log('what no found ?', error);
       });
 
-    return
+    return;
     // const end = moment(ewformateddate ? ewformateddate : new Date());
     // const start = moment(ewformateddate ? ewformateddate : new Date()).subtract(
     //   7,

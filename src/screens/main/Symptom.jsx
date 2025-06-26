@@ -195,7 +195,7 @@ const Symptom = ({navigation}) => {
         .request(config)
         .then(response => {
           // getSymtomsData();
-          generateGraphSlides()
+          generateGraphSlides(selecteddate)
         })
         .catch(error => {
           console.log(error);
@@ -331,6 +331,8 @@ const Symptom = ({navigation}) => {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{gap: 5, marginTop: 20}}
               renderItem={({item}) => {
+
+                // console.log("emojis data", graphSlides[0])
                 return (
                   <TouchableOpacity onPress={() => setApiSymtomsData(item.id)}>
                     <Image
@@ -412,13 +414,19 @@ const Symptom = ({navigation}) => {
             />
           </View>
         </View> */}
-
+        {
+          console.log('graphSlides',graphSlides[0])
+        }
         <AppIntroSlider
           data={graphSlides}
-          activeDotStyle={{backgroundColor: AppColors.PRIMARY, marginTop: 50}}
-          dotStyle={{marginTop: 50, backgroundColor: AppColors.LIGHTGRAY}}
+          showNextButton={false}
+          showDoneButton={false}
+          showPrevButton={false}
+          activeDotStyle={{backgroundColor: AppColors.PRIMARY, marginTop:  responsiveHeight(12)}}
+          dotStyle={{marginTop: responsiveHeight(12), backgroundColor: AppColors.LIGHTGRAY}}
           renderItem={({item}) => {
-            console.log('item', item);
+
+            console.log("item..", item)
             return (
               <View
                 style={{
@@ -442,7 +450,9 @@ const Symptom = ({navigation}) => {
                   withHorizontalLabels={false}
                   segments={5}
                   yAxisInterval={5}
+                  fromZero={true}
                   yAxisLabel="0"
+  
                 />
 
                 <View
@@ -452,12 +462,12 @@ const Symptom = ({navigation}) => {
                     height: responsiveHeight(30),
                     width: responsiveWidth(10),
                     left: 10,
-                    marginBottom: 35,
+                    marginBottom: 130,
                   }}>
                   <FlatList
                     data={mojis}
                     inverted
-                    contentContainerStyle={{gap: 15}}
+                    contentContainerStyle={{gap: 6}}
                     renderItem={({item}) => {
                       return (
                         <Image
@@ -547,6 +557,10 @@ const Symptom = ({navigation}) => {
             textFontWeight
           />
         </View>
+        
+        {
+           randomTip?.id == 26 ?
+           null :
 
         <View style={{marginTop: 10}}>
           <Text
@@ -561,6 +575,7 @@ const Symptom = ({navigation}) => {
             {randomTip?.tip}
           </Text>
         </View>
+        }
       </View>
     </SafeAreaView>
   );
