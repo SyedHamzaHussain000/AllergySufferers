@@ -68,10 +68,9 @@ const DataVisualizer = ({navigation}) => {
     return nav;
   }, [navigation]);
 
-
-  useEffect(()=>{
-getSelectedAllergens()
-  },[selecteddate])
+  useEffect(() => {
+    getSelectedAllergens();
+  }, [selecteddate]);
 
   const getAllAllergens = () => {
     setType('allergens');
@@ -124,27 +123,32 @@ getSelectedAllergens()
 
 
 
-    let data = JSON.stringify({
-      date: moment(ewformateddate?ewformateddate:selecteddate).subtract('days', 6).format("YYYY-MM-DD"),
-    });
 
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
-      data: data,
-    };
 
-    axios
+    const end = moment(ewformateddate ? ewformateddate : new Date());
+      const start = moment(ewformateddate ? ewformateddate : new Date()).subtract(6, 'days');
+
+      const data = JSON.stringify({
+        start_date: start.format('YYYY-MM-DD'),
+        end_date: end.format('YYYY-MM-DD'),
+      });
+
+let config = {
+  method: 'post',
+  maxBodyLength: Infinity,
+  url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+  headers: { 
+    'Content-Type': 'application/json'
+  },
+  data : data
+};
+
+  axios
       .request(config)
       .then(response => {
-        const allentriesArr = response.data.entries.items;
+        const allentriesArr = response.data.entries;
+
+        console.log("allentriuesaarr", response.data)
 
         // const grouped = {};
 
@@ -204,18 +208,18 @@ getSelectedAllergens()
         }
 
         // ✅ Ensure a dummy item exists after each label if next item is another label or nothing
-      for (let i = 0; i < barData.length; i++) {
-        const current = barData[i];
-        const next = barData[i + 1];
+        for (let i = 0; i < barData.length; i++) {
+          const current = barData[i];
+          const next = barData[i + 1];
 
-        if (current.label && (!next || next.label)) {
-          // Insert a dummy
-          barData.splice(i + 1, 0, {
-            value: 0,
-            frontColor: 'transparent',
-          });
+          if (current.label && (!next || next.label)) {
+            // Insert a dummy
+            barData.splice(i + 1, 0, {
+              value: 0,
+              frontColor: 'transparent',
+            });
+          }
         }
-      }
 
         setMedicationnRecord(barData);
       })
@@ -223,6 +227,117 @@ getSelectedAllergens()
         // setLoader(false)
         console.log('what no found ?', error);
       });
+
+    return
+    // const end = moment(ewformateddate ? ewformateddate : new Date());
+    // const start = moment(ewformateddate ? ewformateddate : new Date()).subtract(
+    //   7,
+    //   'days'
+    // );
+
+    // let data = JSON.stringify({
+    //   start_date: start.format('YYYY-MM-DD'),
+    //   end_date: end.format('YYYY-MM-DD'),
+    // });
+
+    // let config = {
+    //   method: 'post',
+    //   maxBodyLength: Infinity,
+    //   url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Cache-Control': 'no-cache',
+    //     Pragma: 'no-cache',
+    //     Expires: '0',
+    //   },
+    //   data: data,
+    // };
+
+    // axios
+    //   .request(config)
+    //   .then(response => {
+    //     const allentriesArr = response.data.entries.items;
+
+    //     console.log("allentriuesaarr", allentriesArr)
+
+    //     // const grouped = {};
+
+    //     // allentriesArr.forEach(entry => {
+    //     //   const label = moment(entry.date, 'MMMM, DD YYYY').format('MMM DD');
+
+    //     //   if (entry.medication_id) {
+    //     //     if (!grouped[label]) {
+    //     //       grouped[label] = 1;
+    //     //     } else {
+    //     //       grouped[label]++;
+    //     //     }
+    //     //   }
+    //     // });
+    //     // console.log("grouped============>>", grouped)
+    //     const seenDates = new Set();
+    //     const barData = [];
+
+    //     allentriesArr.forEach(entry => {
+    //       const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
+    //         'MMM DD',
+    //       );
+    //       const value = parseInt(entry.units) || 0;
+
+    //       if (!seenDates.has(entry.date)) {
+    //         seenDates.add(entry.date);
+    //         barData.push({
+    //           value,
+    //           label: formattedDate,
+    //           spacing: 2,
+    //           frontColor: entry.frontColor,
+    //           labelWidth: 30,
+    //         });
+    //       } else {
+    //         barData.push({
+    //           value,
+    //           spacing: 0,
+    //           frontColor: entry.frontColor,
+    //         });
+    //       }
+    //     });
+
+    //     // ✅ Remove spacing from the last item before each new label
+    //     for (let i = 0; i < barData.length - 1; i++) {
+    //       const current = barData[i];
+    //       const next = barData[i + 1];
+
+    //       if (!current.label && next.label && 'spacing' in current) {
+    //         delete current.spacing;
+    //       }
+    //     }
+
+    //     // Optional: Also remove spacing from the very last item if it has no label
+    //     const lastItem = barData[barData.length - 1];
+    //     if (lastItem && !lastItem.label && 'spacing' in lastItem) {
+    //       delete lastItem.spacing;
+    //     }
+
+    //     // ✅ Ensure a dummy item exists after each label if next item is another label or nothing
+    //     for (let i = 0; i < barData.length; i++) {
+    //       const current = barData[i];
+    //       const next = barData[i + 1];
+
+    //       if (current.label && (!next || next.label)) {
+    //         // Insert a dummy
+    //         barData.splice(i + 1, 0, {
+    //           value: 0,
+    //           frontColor: 'transparent',
+    //         });
+    //       }
+    //     }
+
+    //     console.log("barData", barData)
+    //     setMedicationnRecord(barData);
+    //   })
+    //   .catch(error => {
+    //     // setLoader(false)
+    //     console.log('what no found ?', error);
+    //   });
   };
 
   const getDataVisualizer = selecallergens => {
@@ -240,15 +355,16 @@ getSelectedAllergens()
       .join('&');
     // console.log('selecteddate', selecteddate, 'allergenParams', allergenParams);
 
+    const dateis = moment(selecteddate)
+      .subtract('days', 6)
+      .format('YYYY-MM-DD');
 
-    const dateis =  moment(selecteddate).subtract('days', 6).format("YYYY-MM-DD")
-
-    console.log("dateis",dateis)
+    console.log('dateis', dateis);
 
     const config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=45.420057199999995&lng=-75.7003397&date=${dateis}&${allergenParams}`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=45.420057199999995&lng=-75.7003397&start_date=${dateis}&${allergenParams}`,
       headers: {
         'Cache-Control': 'no-cache',
         Pragma: 'no-cache',
@@ -278,7 +394,7 @@ getSelectedAllergens()
         const allergens = response.data.allergens;
         setTakingMedications(allergens);
 
-        console.log("allertgens", allergens)
+        console.log('allertgens', allergens);
 
         if (allergens.length > 0) {
           getDataVisualizer(allergens);
@@ -456,7 +572,14 @@ getSelectedAllergens()
 
   const secondaryLineData = [{value: 20}, {value: 10}, {value: 30}];
 
-  console.log("PrimaryLineData",PrimaryLineData , "secondaryLineData", SecondaryLineData, "MedicationnRecord",MedicationnRecord)
+  console.log(
+    'PrimaryLineData',
+    PrimaryLineData,
+    'secondaryLineData',
+    SecondaryLineData,
+    'MedicationnRecord',
+    MedicationnRecord,
+  );
   return (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView
@@ -477,47 +600,54 @@ getSelectedAllergens()
         <View>
           {MedicationnRecord.length > 0 ? (
             <View>
-            <BarChart
-              data={MedicationnRecord}
-              barWidth={10}
-              frontColor="#E23131" // bar color
-              showLine
-              lineData={PrimaryLineData}
-              lineData2={SecondaryLineData}
-              lineConfig={{
-                color: colours[0],
-                thickness: 2,
-                curved: false,
-                dataPointsColor: colours[0],
-                spacing: 60,
-              }}
-              xAxisLabelTextStyle={{
-                fontSize: 10, // 👈 smaller font size
-                color: '#000', // optional, customize color
-                fontWeight: '400', // optional
-                labelWidth: 60,
-              }}
-              barBorderRadius={2}
-              isAnimated={true}
-              lineConfig2={{
-                color: colours[1],
-                thickness: 2,
-                curved: false,
-                dataPointsColor: colours[1],
-                spacing: 60,
-              }}
-              noOfSections={7}
-              spacing={30}
-              formatYLabel={label => parseFloat(label).toFixed(0)}
-              stepValue={1}
-            />
+              <BarChart
+                data={MedicationnRecord}
+                barWidth={10}
+                frontColor="#E23131" // bar color
+                showLine
+                lineData={PrimaryLineData}
+                lineData2={SecondaryLineData}
+                lineConfig={{
+                  color: colours[0],
+                  thickness: 2,
+                  curved: false,
+                  dataPointsColor: colours[0],
+                  spacing: 60,
+                }}
+                xAxisLabelTextStyle={{
+                  fontSize: 10, // 👈 smaller font size
+                  color: '#000', // optional, customize color
+                  fontWeight: '400', // optional
+                  labelWidth: 80,
+                }}
+                barBorderRadius={2}
+                isAnimated={true}
+                lineConfig2={{
+                  color: colours[1],
+                  thickness: 2,
+                  curved: false,
+                  dataPointsColor: colours[1],
+                  spacing: 60,
+                }}
+                noOfSections={7}
+                spacing={40}
+                formatYLabel={label => parseFloat(label).toFixed(0)}
+                stepValue={1}
+              />
 
-            <View style={{position:'absolute', zIndex:1, right:0, bottom:40, gap:11}}>
-                <AppText title={"Very High"} textSize={1.7}/>
-                <AppText title={"High"} textSize={1.7}/>
-                <AppText title={"Moderate"} textSize={1.7}/>
-                <AppText title={"Low"} textSize={1.7}/>
-            </View>
+              <View
+                style={{
+                  position: 'absolute',
+                  zIndex: 1,
+                  right: 0,
+                  bottom: 40,
+                  gap: 11,
+                }}>
+                <AppText title={'Very High'} textSize={1.7} />
+                <AppText title={'High'} textSize={1.7} />
+                <AppText title={'Moderate'} textSize={1.7} />
+                <AppText title={'Low'} textSize={1.7} />
+              </View>
             </View>
           ) : (
             <AppText title={'No data available'} textSize={2} />
@@ -547,7 +677,6 @@ getSelectedAllergens()
 
               setSelectedDate(formattedDate);
               getMedicationRecords(formattedDate);
-              
             }}
             onCancel={() => {
               setOpen(false);

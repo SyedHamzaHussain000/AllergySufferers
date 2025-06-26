@@ -35,6 +35,7 @@ import {useSelector} from 'react-redux';
 import axios from 'axios';
 import moment from 'moment';
 import DatePicker from 'react-native-date-picker';
+import AppIntroSlider from 'react-native-app-intro-slider';
 
 const Medication = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
@@ -92,7 +93,8 @@ const Medication = ({navigation}) => {
     const nav = navigation.addListener('focus', () => {
       try {
         getActiveMedication();
-        getMedicationRecords();
+        // getMedicationRecords();
+        generateMedicationSlides()
       } catch (error) {}
     });
 
@@ -125,129 +127,226 @@ const Medication = ({navigation}) => {
       });
   };
 
-  const getMedicationRecords = ewformateddate => {
-    console.log('called ......');
-    // setMedicationLoader(true);
-    setLoader(true);
-    let data = JSON.stringify({
-      date: moment(ewformateddate ? ewformateddate : selecteddate)
-        .subtract('days', 6)
-        .format('YYYY-MM-DD'),
-    });
+  // const getMedicationRecords = ewformateddate => {
+  //   console.log('called ......');
+  //   // setMedicationLoader(true);
+  //   setLoader(true);
+  //   let data = JSON.stringify({
+  //     date: moment(ewformateddate ? ewformateddate : selecteddate)
+  //       .subtract('days', 6)
+  //       .format('YYYY-MM-DD'),
+  //   });
 
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
-      data: data,
-    };
+  //   let config = {
+  //     method: 'post',
+  //     maxBodyLength: Infinity,
+  //     url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Cache-Control': 'no-cache',
+  //       Pragma: 'no-cache',
+  //       Expires: '0',
+  //     },
+  //     data: data,
+  //   };
 
-    axios
-      .request(config)
-      .then(response => {
-        console.log(JSON.stringify(response.data));
+  //   axios
+  //     .request(config)
+  //     .then(response => {
+  //       console.log(JSON.stringify(response.data));
 
-        const allentriesArr = response.data.entries.items;
+  //       const allentriesArr = response.data.entries.items;
 
-        // const seenDates = new Set();
-        // const barData = [];
+  //       // const seenDates = new Set();
+  //       // const barData = [];
 
-        // slicedata.forEach(entry => {
-        //   const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
-        //     'MMM DD',
-        //   );
-        //   const value = parseInt(entry.units) || 0;
+  //       // slicedata.forEach(entry => {
+  //       //   const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
+  //       //     'MMM DD',
+  //       //   );
+  //       //   const value = parseInt(entry.units) || 0;
 
-        //   if (!seenDates.has(entry.date)) {
-        //     seenDates.add(entry.date);
-        //     barData.push({
-        //       value,
-        //       label: formattedDate,
-        //       spacing: 3,
-        //       frontColor: entry.frontColor,
-        //     });
-        //   } else {
-        //     barData.push({
-        //       value,
-        //       frontColor: entry.frontColor,
-        //       spacing: 0,
-        //     });
-        //   }
-        // });
+  //       //   if (!seenDates.has(entry.date)) {
+  //       //     seenDates.add(entry.date);
+  //       //     barData.push({
+  //       //       value,
+  //       //       label: formattedDate,
+  //       //       spacing: 3,
+  //       //       frontColor: entry.frontColor,
+  //       //     });
+  //       //   } else {
+  //       //     barData.push({
+  //       //       value,
+  //       //       frontColor: entry.frontColor,
+  //       //       spacing: 0,
+  //       //     });
+  //       //   }
+  //       // });
 
-        const seenDates = new Set();
-        const barData = [];
+  //       const seenDates = new Set();
+  //       const barData = [];
 
-        allentriesArr.forEach(entry => {
-          const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
-            'MMM DD',
-          );
-          const value = parseInt(entry.units) || 0;
+  //       allentriesArr.forEach(entry => {
+  //         const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
+  //           'MMM DD',
+  //         );
+  //         const value = parseInt(entry.units) || 0;
 
-          if (!seenDates.has(entry.date)) {
-            seenDates.add(entry.date);
-            barData.push({
-              value,
-              label: formattedDate,
-              spacing: 2,
-              frontColor: entry.frontColor,
-              labelWidth: 30,
-            });
-          } else {
-            barData.push({
-              value,
-              spacing: 0,
-              frontColor: entry.frontColor,
-            });
-          }
-        });
+  //         if (!seenDates.has(entry.date)) {
+  //           seenDates.add(entry.date);
+  //           barData.push({
+  //             value,
+  //             label: formattedDate,
+  //             spacing: 2,
+  //             frontColor: entry.frontColor,
+  //             labelWidth: 30,
+  //           });
+  //         } else {
+  //           barData.push({
+  //             value,
+  //             spacing: 0,
+  //             frontColor: entry.frontColor,
+  //           });
+  //         }
+  //       });
 
-        // ✅ Remove spacing from the last item before each new label
-        for (let i = 0; i < barData.length - 1; i++) {
-          const current = barData[i];
-          const next = barData[i + 1];
+  //       // ✅ Remove spacing from the last item before each new label
+  //       for (let i = 0; i < barData.length - 1; i++) {
+  //         const current = barData[i];
+  //         const next = barData[i + 1];
 
-          if (!current.label && next.label && 'spacing' in current) {
-            delete current.spacing;
-          }
-        }
+  //         if (!current.label && next.label && 'spacing' in current) {
+  //           delete current.spacing;
+  //         }
+  //       }
 
-        // Optional: Also remove spacing from the very last item if it has no label
-        const lastItem = barData[barData.length - 1];
-        if (lastItem && !lastItem.label && 'spacing' in lastItem) {
-          delete lastItem.spacing;
-        }
+  //       // Optional: Also remove spacing from the very last item if it has no label
+  //       const lastItem = barData[barData.length - 1];
+  //       if (lastItem && !lastItem.label && 'spacing' in lastItem) {
+  //         delete lastItem.spacing;
+  //       }
 
-        // ✅ Ensure a dummy item exists after each label if next item is another label or nothing
-        for (let i = 0; i < barData.length; i++) {
-          const current = barData[i];
-          const next = barData[i + 1];
+  //       // ✅ Ensure a dummy item exists after each label if next item is another label or nothing
+  //       for (let i = 0; i < barData.length; i++) {
+  //         const current = barData[i];
+  //         const next = barData[i + 1];
 
-          if (current.label && (!next || next.label)) {
-            // Insert a dummy
-            barData.splice(i + 1, 0, {
-              value: 0,
-              frontColor: 'transparent',
-            });
-          }
-        }
+  //         if (current.label && (!next || next.label)) {
+  //           // Insert a dummy
+  //           barData.splice(i + 1, 0, {
+  //             value: 0,
+  //             frontColor: 'transparent',
+  //           });
+  //         }
+  //       }
 
-        setMedicationnRecord(barData);
-        setLoader(false);
-        // setMedicationLoader(false);
-      })
-      .catch(error => {
-        setLoader(false);
-        // setMedicationLoader(false);
-        console.log(error);
+  //       setMedicationnRecord(barData);
+  //       setLoader(false);
+  //       // setMedicationLoader(false);
+  //     })
+  //     .catch(error => {
+  //       setLoader(false);
+  //       // setMedicationLoader(false);
+  //       console.log(error);
+  //     });
+  // };
+
+
+const generateMedicationSlides = async selectedDate => {
+  setLoader(true);
+  const slides = [];
+
+  const baseDate = moment(selectedDate ? selectedDate : new Date, 'YYYY-MM-DD');
+
+  try {
+    for (let i = 0; i < 3; i++) {
+      const end = moment(baseDate).subtract(i * 7, 'days');
+      const start = moment(baseDate).subtract(i * 7 + 6, 'days');
+
+      const payload = JSON.stringify({
+        start_date: start.format('YYYY-MM-DD'),
+        end_date: end.format('YYYY-MM-DD'),
       });
-  };
+
+      const response = await axios.post(
+        `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            Pragma: 'no-cache',
+            Expires: '0',
+          },
+        }
+      );
+
+      const entries = response?.data?.entries || [];
+
+      const seenDates = new Set();
+      const barData = [];
+
+      entries.forEach(entry => {
+        const formattedLabel = moment(entry.date, 'MMMM, DD YYYY').format('MMM DD');
+        const value = parseInt(entry.units) || 0;
+
+        if (!seenDates.has(entry.date)) {
+          seenDates.add(entry.date);
+          barData.push({
+            value,
+            label: formattedLabel,
+            spacing: 2,
+            frontColor: entry.frontColor || '#E23131',
+            labelWidth: 30,
+          });
+        } else {
+          barData.push({
+            value,
+            spacing: 0,
+            frontColor: entry.frontColor || '#E23131',
+          });
+        }
+      });
+
+      for (let i = 0; i < barData.length - 1; i++) {
+        const current = barData[i];
+        const next = barData[i + 1];
+        if (!current.label && next.label && 'spacing' in current) {
+          delete current.spacing;
+        }
+      }
+
+      const lastItem = barData[barData.length - 1];
+      if (lastItem && !lastItem.label && 'spacing' in lastItem) {
+        delete lastItem.spacing;
+      }
+
+      for (let i = 0; i < barData.length; i++) {
+        const current = barData[i];
+        const next = barData[i + 1];
+        if (current.label && (!next || next.label)) {
+          barData.splice(i + 1, 0, {
+            value: 0,
+            frontColor: 'transparent',
+          });
+        }
+      }
+
+      slides.unshift({
+        key: `${i}`,
+        title: `${start.format('DD MMM')} - ${end.format('DD MMM')}`,
+        barData,
+      });
+    }
+
+    setMedicationnRecord(slides); // use AppIntroSlider now
+  } catch (error) {
+    console.log('generateMedicationSlides error:', error);
+  }
+
+  setLoader(false);
+};
+
 
   const addMedication = (item, index) => {
     setSelectedIndex(index);
@@ -273,7 +372,8 @@ const Medication = ({navigation}) => {
       .then(response => {
 
         getActiveMedication();
-        getMedicationRecords();
+        // getMedicationRecords();
+        generateMedicationSlides()
 
       })
       .catch(error => {
@@ -311,7 +411,8 @@ const Medication = ({navigation}) => {
         console.log(JSON.stringify(response.data));
         // setTimeout(() => {
         getActiveMedication();
-        getMedicationRecords();
+        // getMedicationRecords();
+        generateMedicationSlides()
         // }, 7000);
       })
       .catch(error => {
@@ -422,16 +523,17 @@ const Medication = ({navigation}) => {
               const formattedDate = picked.format('YYYY-MM-DD');
               setSelectedDate(formattedDate);
 
-              getMedicationRecords(formattedDate);
+              // getMedicationRecords(formattedDate);
+              generateMedicationSlides(formattedDate)
             }}
             onCancel={() => {
               setOpen(false);
             }}
           />
 
-          {/* {Medication == true && (
+          {loader == true && (
             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-          )} */}
+          )}
 
           {MedicationnRecord.length > 0 && (
             // <BarChart
@@ -445,25 +547,60 @@ const Medication = ({navigation}) => {
             //   showBarTops={false}
             // />
 
-            <BarChart
-              data={MedicationnRecord}
-              barWidth={10}
-              frontColor="#E23131" // bar color
-              showLine={false}
-              xAxisLabelTextStyle={{
-                fontSize: 10, // 👈 smaller font size
-                color: '#000', // optional, customize color
-                fontWeight: '400', // optional
-                width: 40,
-              }}
-              barBorderRadius={2}
-              isAnimated={true}
-              maxValue={8}
-              stepValue={1}
-              hideDataPoints={false}
-              spacing={30}
-              formatYLabel={label => parseFloat(label).toFixed(0)}
-            />
+            // <BarChart
+            //   data={MedicationnRecord}
+            //   barWidth={10}
+            //   frontColor="#E23131" // bar color
+            //   showLine={false}
+            //   xAxisLabelTextStyle={{
+            //     fontSize: 10, // 👈 smaller font size
+            //     color: '#000', // optional, customize color
+            //     fontWeight: '400', // optional
+            //     width: 40,
+            //   }}
+            //   barBorderRadius={2}
+            //   isAnimated={true}
+            //   maxValue={8}
+            //   stepValue={1}
+            //   hideDataPoints={false}
+            //   spacing={30}
+            //   formatYLabel={label => parseFloat(label).toFixed(0)}
+            // />
+
+            
+  <AppIntroSlider
+    data={MedicationnRecord}
+    renderItem={({item}) => (
+      <View style={{alignItems: 'center'}}>
+        <Text style={{fontSize: 16}}>{item.title}</Text>
+        <BarChart
+          data={item.barData}
+          barWidth={10}
+          frontColor="#E23131"
+          showLine={false}
+          xAxisLabelTextStyle={{
+            fontSize: 10,
+            color: '#000',
+            fontWeight: '400',
+            width: 40,
+          }}
+          barBorderRadius={2}
+          isAnimated={true}
+          maxValue={8}
+          stepValue={1}
+          hideDataPoints={false}
+          spacing={20}
+          formatYLabel={label => parseFloat(label).toFixed(0)}
+        />
+      </View>
+    )}
+    showDoneButton={false}
+    showNextButton={false}
+    showSkipButton={false}
+    dotStyle={{backgroundColor: '#ccc'}}
+    activeDotStyle={{backgroundColor: AppColors.BLACK}}
+  />
+
           )}
 
           <View style={{marginTop: 20}}>

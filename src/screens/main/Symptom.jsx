@@ -27,6 +27,7 @@ import {useSelector} from 'react-redux';
 import LoaderMode from '../../components/LoaderMode';
 import DatePicker from 'react-native-date-picker';
 import {AllergyTips} from '../../utils/AllergyTips';
+import AppIntroSlider from 'react-native-app-intro-slider';
 
 const Symptom = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
@@ -36,16 +37,23 @@ const Symptom = ({navigation}) => {
   const [symtomsData, setSymtomsData] = useState();
   const [systomsNumber, setSymtomsNumber] = useState();
 
-  //data states
-  const [date, setDate] = useState(new Date());
-  const [selecteddate, setSelectedDate] = useState(
-  moment().subtract(5, 'days').format('YYYY-MM-DD')
-  );
+  //start date states
   const [open, setOpen] = useState(false);
+  const [selecteddate, setSelectedDate] = useState(
+    moment().subtract(5, 'days').format('YYYY-MM-DD'),
+  );
+
+  const [date, setDate] = useState(new Date());
+  //start date states
+  const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
+  const [endopen, setEndOpen] = useState(false);
 
   const [loader, setLoader] = useState(false);
 
+  console.log('endDate', endDate, 'startDate', selecteddate);
+
   const userData = useSelector(state => state?.auth?.user);
+  const [graphSlides, setGraphSlides] = useState([]);
 
   const mojis = [
     {id: 1, img: AppImages.Mask, title: 'Very Bad'},
@@ -87,7 +95,8 @@ const Symptom = ({navigation}) => {
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       setLoader(true);
-      getSymtomsData();
+      generateGraphSlides(); // 👈
+      // getSymtomsData();
 
       const random =
         AllergyTips[Math.floor(Math.random() * AllergyTips.length)];
@@ -96,11 +105,14 @@ const Symptom = ({navigation}) => {
 
     return nav;
   }, [navigation]);
-// setLoader(false);
-  const getSymtomsData = (ewformateddate) => {
+
+  const getSymtomsData = ewformateddate => {
     setLoader(true);
     let data = JSON.stringify({
-      date: ewformateddate ? ewformateddate : selecteddate,
+      start_date: moment(ewformateddate ? ewformateddate : selecteddate)
+        .subtract('days', 6)
+        .format('YYYY-MM-DD'), //fromat Ymd
+      end_date: endDate,
     });
 
     let config = {
@@ -109,7 +121,7 @@ const Symptom = ({navigation}) => {
       url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_symptom_records`,
       headers: {
         'Content-Type': 'application/json',
-         'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-cache',
         Pragma: 'no-cache',
         Expires: '0',
       },
@@ -182,7 +194,8 @@ const Symptom = ({navigation}) => {
       axios
         .request(config)
         .then(response => {
-          getSymtomsData();
+          // getSymtomsData();
+          generateGraphSlides()
         })
         .catch(error => {
           console.log(error);
@@ -190,6 +203,62 @@ const Symptom = ({navigation}) => {
     } catch (error) {
       console.log('error', error);
     }
+  };
+
+  const generateGraphSlides = async (selectedDate) => {
+    setLoader(true);
+    const slides = [];
+    const today = moment(selectedDate ? selectedDate : new Date());
+
+    for (let i = 0; i < 3; i++) {
+      const end = moment(today)
+        .subtract(i * 7, 'days')
+        .format('YYYY-MM-DD');
+      const start = moment(today)
+        .subtract(i * 7 + 6, 'days')
+        .format('YYYY-MM-DD');
+
+      const response = await axios.post(
+        `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_symptom_records`,
+        JSON.stringify({
+          start_date: start,
+          end_date: end,
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const data = response?.data?.symptoms || [];
+
+      const labels = data.map(item =>
+        moment(item.date, 'MMM, DD YYYY').format('MMM D'),
+      );
+
+      const values = data.map(item => parseInt(item.symptom_level));
+
+      const chartData = {
+        labels: labels,
+        datasets: [
+          {data: values},
+          {data: [1], withDots: false},
+          {data: [5], withDots: false},
+        ],
+      };
+
+      slides.unshift({
+        key: `${i}`,
+        title: `${moment(start).format('DD MMM')} - ${moment(end).format(
+          'DD MMM',
+        )}`,
+        chartData,
+      });
+    }
+
+    setGraphSlides(slides);
+    setLoader(false);
   };
 
   return (
@@ -203,6 +272,9 @@ const Symptom = ({navigation}) => {
           setOpen={() => setOpen(!open)}
         />
 
+        {
+          //start date
+        }
         <DatePicker
           modal
           open={open}
@@ -216,10 +288,36 @@ const Symptom = ({navigation}) => {
             const formattedDate = picked.format('YYYY-MM-DD');
             setSelectedDate(formattedDate);
 
-            getSymtomsData(formattedDate)
+            // getSymtomsData(formattedDate);
+            generateGraphSlides(formattedDate)
           }}
           onCancel={() => {
             setOpen(false);
+          }}
+        />
+
+        {
+          //End date
+        }
+
+        <DatePicker
+          modal
+          open={endopen}
+          date={date}
+          mode="date"
+          maximumDate={new Date()}
+          onConfirm={selectedDate => {
+            setEndOpen(false);
+            const today = moment().startOf('day');
+            const picked = moment(selectedDate).startOf('day');
+            const formattedDate = picked.format('YYYY-MM-DD');
+            setEndDate(formattedDate);
+
+            // getSymtomsData(formattedDate);
+            generateGraphSlides(formattedDate)
+          }}
+          onCancel={() => {
+            setEndOpen(false);
           }}
         />
 
@@ -260,7 +358,7 @@ const Symptom = ({navigation}) => {
           )}
         </View>
 
-        <View
+        {/* <View
           style={{
             padding: 10,
             borderWidth: 1,
@@ -313,7 +411,126 @@ const Symptom = ({navigation}) => {
               }}
             />
           </View>
-        </View>
+        </View> */}
+
+        <AppIntroSlider
+          data={graphSlides}
+          activeDotStyle={{backgroundColor: AppColors.PRIMARY, marginTop: 50}}
+          dotStyle={{marginTop: 50, backgroundColor: AppColors.LIGHTGRAY}}
+          renderItem={({item}) => {
+            console.log('item', item);
+            return (
+              <View
+                style={{
+                  padding: 10,
+                  borderWidth: 1,
+                  borderRadius: 20,
+                  paddingTop: 20,
+                  marginTop: 20,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <LineChart
+                  data={item?.chartData || {labels: [], datasets: [{data: []}]}}
+                  width={screenWidth * 0.89}
+                  height={responsiveHeight(32)}
+                  verticalLabelRotation={0}
+                  chartConfig={chartConfig}
+                  withShadow={false}
+                  withVerticalLines={true}
+                  bezier
+                  withHorizontalLabels={false}
+                  segments={5}
+                  yAxisInterval={5}
+                  yAxisLabel="0"
+                />
+
+                <View
+                  style={{
+                    position: 'absolute',
+                    zIndex: 10,
+                    height: responsiveHeight(30),
+                    width: responsiveWidth(10),
+                    left: 10,
+                    marginBottom: 35,
+                  }}>
+                  <FlatList
+                    data={mojis}
+                    inverted
+                    contentContainerStyle={{gap: 15}}
+                    renderItem={({item}) => {
+                      return (
+                        <Image
+                          source={item.img}
+                          style={{
+                            height: responsiveHeight(4),
+                            width: responsiveHeight(4),
+                            resizeMode: 'contain',
+                            alignSelf: 'center',
+                          }}
+                        />
+                      );
+                    }}
+                  />
+                </View>
+              </View>
+            );
+          }}
+        />
+        {/* <View
+          style={{
+            padding: 10,
+            borderWidth: 1,
+            borderRadius: 20,
+            paddingTop: 20,
+            marginTop: 20,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <LineChart
+            data={symtomsData || {labels: [], datasets: [{data: []}]}}
+            width={screenWidth * 0.89}
+            height={responsiveHeight(32)}
+            verticalLabelRotation={0}
+            chartConfig={chartConfig}
+            withShadow={false}
+            withVerticalLines={true}
+            bezier
+            withHorizontalLabels={false}
+            segments={5}
+            yAxisInterval={5}
+            yAxisLabel="0"
+          />
+
+          <View
+            style={{
+              position: 'absolute',
+              zIndex: 10,
+              height: responsiveHeight(30),
+              width: responsiveWidth(10),
+              left: 10,
+              marginBottom: 35,
+            }}>
+            <FlatList
+              data={mojis}
+              inverted
+              contentContainerStyle={{gap: 15}}
+              renderItem={({item}) => {
+                return (
+                  <Image
+                    source={item.img}
+                    style={{
+                      height: responsiveHeight(4),
+                      width: responsiveHeight(4),
+                      resizeMode: 'contain',
+                      alignSelf: 'center',
+                    }}
+                  />
+                );
+              }}
+            />
+          </View>
+        </View> */}
 
         <View style={{marginTop: 20}}>
           <AppButton
@@ -344,7 +561,6 @@ const Symptom = ({navigation}) => {
             {randomTip?.tip}
           </Text>
         </View>
-
       </View>
     </SafeAreaView>
   );
