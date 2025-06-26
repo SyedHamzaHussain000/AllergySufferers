@@ -31,6 +31,7 @@ const Medication = ({navigation}) => {
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
   const [medicationLoadingMap, setMedicationLoadingMap] = useState({});
   const [loader, setLoader] = useState(false);
+  const [Medicationloader, setMedicationLoader] = useState(false);
 
   const [date, setDate] = useState(new Date());
   const [selecteddate, setSelectedDate] = useState(
@@ -63,7 +64,7 @@ const Medication = ({navigation}) => {
   };
 
   const generateMedicationSlides = async selectedDate => {
-    setLoader(true);
+    setMedicationLoader(true);
     const slides = [];
     const baseDate = moment(selectedDate ? selectedDate : new Date, 'YYYY-MM-DD');
 
@@ -148,11 +149,11 @@ const Medication = ({navigation}) => {
       }
 
       setMedicationnRecord(slides);
+      setMedicationLoader(false);
     } catch (error) {
+      setMedicationLoader(false);
       console.log('generateMedicationSlides error:', error);
     }
-
-    setLoader(false);
   };
 
   const addMedication = async item => {
@@ -209,6 +210,9 @@ const Medication = ({navigation}) => {
 
     return nav;
   }, [navigation]);
+
+
+  console.log("medication loader", Medicationloader)
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
@@ -305,7 +309,13 @@ const Medication = ({navigation}) => {
           />
 
           {loader && <ActivityIndicator size={'large'} color={AppColors.BLACK} />}
-
+          <>
+            {
+              Medicationloader && (
+                <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+              )
+            }
+            </>
           {MedicationnRecord.length > 0 && (
             <AppIntroSlider
               data={MedicationnRecord}

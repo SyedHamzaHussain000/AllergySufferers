@@ -97,6 +97,7 @@ const DataVisualizer = ({navigation}) => {
 
   const getMedicationApi = () => {
     setType('medication');
+    setPollenLoader(true);
 
     let config = {
       method: 'get',
@@ -113,8 +114,10 @@ const DataVisualizer = ({navigation}) => {
       .request(config)
       .then(response => {
         setMedicationsData(response?.data?.data);
+        setPollenLoader(false);
       })
       .catch(error => {
+        setPollenLoader(false);
         console.log(error);
       });
   };

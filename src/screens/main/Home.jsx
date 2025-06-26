@@ -10,7 +10,7 @@ import {
   Animated,
   Alert,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   responsiveFontSize,
@@ -90,22 +90,43 @@ const Home = ({navigation}) => {
   const [AllCities, setAllCities] = useState([]);
   const [loadCities, setLoadCities] = useState(false);
 
-  // console.log("AllCities",AllCities)
-  useEffect(() => {
-    const nav = navigation.addListener('focus', async () => {
-      if (userData) {
-        
-        getActivePollens();
-        getAllCities();
-      } else {
-        setLoadCities(true);
-        const currentLatLng = await GetCurrentLocation();
-        getPollensDataLatLng(currentLatLng?.latitude, currentLatLng?.longitude);
-      }
-    });
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
 
-    return nav;
-  }, [navigation]);
+
+  // console.log("AllCities",AllCities)
+  // useEffect(() => {
+  //   const nav = navigation.addListener('focus', async () => {
+  //     if (userData) {
+        
+  //       getActivePollens();
+  //       getAllCities();
+  //     } else {
+  //       setLoadCities(true);
+  //       const currentLatLng = await GetCurrentLocation();
+  //       getPollensDataLatLng(currentLatLng?.latitude, currentLatLng?.longitude);
+  //     }
+  //   });
+
+  //   return nav;
+  // }, [navigation]);
+
+  useEffect(() => {
+  const nav = navigation.addListener('focus', async () => {
+    if (hasFetchedOnce) return;
+
+    if (userData) {
+      getActivePollens();
+      getAllCities();
+    } else {
+      setLoadCities(true);
+      const currentLatLng = await GetCurrentLocation();
+      getPollensDataLatLng(currentLatLng?.latitude, currentLatLng?.longitude);
+    }
+  });
+
+  return nav;
+}, [navigation, hasFetchedOnce, userData]);
+
 
   const getPollensData = (allcities, newindex) => {
     setPollenLoader(true);
@@ -158,7 +179,7 @@ const Home = ({navigation}) => {
 
         setPollenLoader(false);
         setLoadCities(false)
-        
+        setHasFetchedOnce(true);
 
       })
       .catch(error => {
@@ -244,6 +265,8 @@ const Home = ({navigation}) => {
 
         setPollenLoader(false);
         setLoadCities(false);
+        setHasFetchedOnce(true);
+
       })
       .catch(error => {
         console.log(error);
@@ -321,10 +344,20 @@ const Home = ({navigation}) => {
   };
 
 
-  const PollenCurrentTodayData = todayPollensData?.current?.filter(
-  (item, index, self) =>
-    index === self.findIndex((t) => t.name === item.name)
-);
+//   const PollenCurrentTodayData = todayPollensData?.current?.filter(
+//   (item, index, self) =>
+//     index === self.findIndex((t) => t.name === item.name)
+// );
+
+
+const PollenCurrentTodayData = useMemo(() => {
+  if (!todayPollensData?.current) return [];
+
+  return todayPollensData.current.filter(
+    (item, index, self) =>
+      index === self.findIndex(t => t.name === item.name)
+  );
+}, [todayPollensData]);
 
   return (
     <>
