@@ -250,7 +250,7 @@ const Medication = ({navigation}) => {
                   <AppText
                     title={item.name}
                     textSize={1.6}
-                    textColor={AppColors.LIGHTGRAY}
+                    textColor={AppColors.BLACK}
                   />
 
                   {medicationLoadingMap[item?.id] ? (

@@ -58,6 +58,10 @@ const DataVisualizer = ({navigation}) => {
   const [PrimaryLineData, setPrimaryLineData] = useState([]);
   const [SecondaryLineData, setSecondaryLineData] = useState([]);
 
+  const [medicationLoadingMap, setMedicationLoadingMap] = useState({});
+
+  const [loadingItemId, setLoadingItemId] = useState(null);
+
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       getAllAllergens();
@@ -71,6 +75,10 @@ const DataVisualizer = ({navigation}) => {
   useEffect(() => {
     getSelectedAllergens();
   }, [selecteddate]);
+
+  const setMedicationLoading = (id, isLoading) => {
+    setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
+  };
 
   const getAllAllergens = () => {
     setType('allergens');
@@ -480,6 +488,8 @@ const DataVisualizer = ({navigation}) => {
   };
 
   const deleteAllergens = item => {
+    setLoadingItemId(item.id); // start loader
+
     let data = JSON.stringify({
       allergen_id: item.id,
     });
@@ -497,90 +507,64 @@ const DataVisualizer = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        // console.log(JSON.stringify(response.data));
+        // Remove the item from local state
+        const updatedList = takingMedications.filter(med => med.id !== item.id);
+        setTakingMedications(updatedList);
         getSelectedAllergens();
       })
       .catch(error => {
         console.log(error);
+      })
+      .finally(() => {
+        setLoadingItemId(null); // stop loader
       });
   };
 
-  const barData = [
-    {
-      value: 40,
-      label: 'Jan 12',
-      spacing: 2,
-      labelWidth: 30,
-      labelTextStyle: {color: 'gray'},
-      frontColor: '#177AD5',
-    },
-    {value: 20, spacing: 0, frontColor: '#ED6665'},
-    {value: 20, spacing: 0, frontColor: '#ED6665'},
-    {value: 30, frontColor: '#000000'},
-    {
-      value: 50,
-      label: 'Feb 22',
-      spacing: 2,
-      labelWidth: 30,
-      labelTextStyle: {color: 'gray'},
-      frontColor: '#177AD5',
-    },
-    {value: 40, frontColor: '#ED6665'},
-    {
-      value: 75,
-      label: 'Mar 11',
-      spacing: 2,
-      labelWidth: 30,
-      labelTextStyle: {color: 'gray'},
-      frontColor: '#177AD5',
-    },
-    {value: 25, frontColor: '#ED6665'},
-    {
-      value: 30,
-      label: 'Apr 11',
-      spacing: 2,
-      labelWidth: 30,
-      labelTextStyle: {color: 'gray'},
-      frontColor: '#177AD5',
-    },
-    {value: 20, frontColor: '#ED6665'},
-    {
-      value: 60,
-      label: 'May 12',
-      spacing: 2,
-      labelWidth: 30,
-      labelTextStyle: {color: 'gray'},
-      frontColor: '#177AD5',
-    },
-    {value: 40, frontColor: '#ED6665'},
-    {
-      value: 65,
-      label: 'Jun 21',
-      spacing: 2,
-      labelWidth: 30,
-      labelTextStyle: {color: 'gray'},
-      frontColor: '#177AD5',
-    },
-    {value: 30, frontColor: '#ED6665'},
-  ];
+  const addMedication = async item => {
+    setMedicationLoading(item.id, true);
+    try {
+      const data = JSON.stringify({
+        medication_id: item.id,
+        date: selecteddate,
+        units: 1,
+      });
 
-  const primaryLineData = [
-    {value: 10, label: '2025-06-15'},
-    {value: 30, label: '2025-06-16'},
-    {value: 10, label: '2025-06-17'},
-    {value: 20, label: '2025-06-18'},
-  ];
+      await axios.post(
+        `${BASE_URL}/allergy_data/v1/user/${userData.id}/add_medication_units`,
+        data,
+        {headers: {'Content-Type': 'application/json'}},
+      );
 
-  const secondaryLineData = [{value: 20}, {value: 10}, {value: 30}];
+      await getMedicationApi();
+      await getMedicationRecords(selecteddate);
+    } catch (error) {
+      console.log(error);
+    }
+    setMedicationLoading(item.id, false);
+  };
 
-  console.log(
-    'PrimaryLineData',
-    PrimaryLineData,
-    'secondaryLineData',
-    SecondaryLineData,
-    'MedicationnRecord',
-    MedicationnRecord,
-  );
+  const removeMedication = async item => {
+    setMedicationLoading(item.id, true);
+    try {
+      const data = JSON.stringify({
+        medication_id: item.id,
+        date: moment().format('YYYY-MM-DD'),
+        units: 1,
+      });
+
+      await axios.post(
+        `${BASE_URL}/allergy_data/v1/user/${userData.id}/remove_medication_units`,
+        data,
+        {headers: {'Content-Type': 'application/json'}},
+      );
+
+      await getMedicationApi();
+      await getMedicationRecords(selecteddate);
+    } catch (error) {
+      console.log(error);
+    }
+    setMedicationLoading(item.id, false);
+  };
   return (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView
@@ -599,7 +583,7 @@ const DataVisualizer = ({navigation}) => {
         />
 
         <View>
-          {MedicationnRecord.length > 0 ? (
+          {MedicationnRecord?.length > 0 ? (
             <View>
               <BarChart
                 data={MedicationnRecord}
@@ -688,36 +672,40 @@ const DataVisualizer = ({navigation}) => {
         <View>
           <FlatList
             data={takingMedications}
-            renderItem={({item, index}) => {
-              // console.log('item', item);
-              return (
-                <View
-                  style={{
-                    height: responsiveHeight(6),
-                    width: responsiveWidth(90),
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    borderColor: AppColors.LIGHTGRAY,
-                    marginTop: 5,
-                    backgroundColor: colours[index],
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingHorizontal: 20,
-                  }}>
-                  <AppText title={item.allergen_name} textSize={1.5} />
+            keyExtractor={item => item.id.toString()}
+            renderItem={({item, index}) => (
+              <View
+                style={{
+                  height: responsiveHeight(6),
+                  width: responsiveWidth(90),
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  borderColor: AppColors.LIGHTGRAY,
+                  marginTop: 5,
+                  backgroundColor: colours[index],
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingHorizontal: 20,
+                }}>
+                <AppText title={item.allergen_name} textSize={1.5} />
+
+                {loadingItemId === item.id ? (
+                  <ActivityIndicator size="small" color={AppColors.LIGHTGRAY} />
+                ) : (
                   <TouchableOpacity onPress={() => deleteAllergens(item)}>
                     <AntDesign
-                      name={'minus'}
+                      name="minus"
                       size={responsiveFontSize(2)}
                       color={AppColors.LIGHTGRAY}
                     />
                   </TouchableOpacity>
-                </View>
-              );
-            }}
+                )}
+              </View>
+            )}
           />
         </View>
+        
 
         <View
           style={{
@@ -776,7 +764,7 @@ const DataVisualizer = ({navigation}) => {
         )}
         {type == 'medication' ? (
           <View>
-            <FlatList
+            {/* <FlatList
               data={medicationData}
               contentContainerStyle={{marginTop: 20, paddingBottom: 100}}
               renderItem={({item, index}) => {
@@ -804,22 +792,6 @@ const DataVisualizer = ({navigation}) => {
                         gap: 10,
                         alignItems: 'center',
                       }}>
-                      {/* <TouchableOpacity
-                        onPress={() =>
-                          setTakingMedications(prev => {
-                            const alreadyExists = prev.some(
-                              med => med.id === item.id,
-                            ); // Assuming `id` is unique
-                            if (alreadyExists) return prev; // Don't add it again
-                            return [...prev, item]; // Add only if it doesn't exist
-                          })
-                        }>
-                        <AntDesign
-                          name={'pluscircle'}
-                          size={responsiveFontSize(2.5)}
-                          color={AppColors.BTNCOLOURS}
-                        />
-                      </TouchableOpacity> */}
 
                       <AppText
                         title={item.name}
@@ -832,7 +804,71 @@ const DataVisualizer = ({navigation}) => {
                   </View>
                 );
               }}
-            />
+            /> */}
+
+                 <FlatList
+            data={medicationData}
+            contentContainerStyle={{
+              gap: 10,
+              marginTop: 20,
+              marginBottom: 20,
+            }}
+            renderItem={({item}) => {
+
+              return (
+                <View
+                  style={{
+                    borderWidth: 2.5,
+                    borderRadius: 10,
+                    borderColor: item.frontColor,
+                    height: responsiveHeight(6),
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    paddingHorizontal: 10,
+                    justifyContent: 'space-between',
+                  }}>
+                  <AppText
+                    title={item.name}
+                    textSize={1.6}
+                    textColor={AppColors.BLACK}
+                  />
+
+                  {medicationLoadingMap[item?.id] ? (
+                    <ActivityIndicator size={'small'} color={AppColors.BLACK} />
+                  ) : (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 10,
+                      }}>
+                      <TouchableOpacity onPress={() => removeMedication(item)}>
+                        <AntDesign
+                          name={'minus'}
+                          size={responsiveFontSize(2)}
+                          color={AppColors.LIGHTGRAY}
+                        />
+                      </TouchableOpacity>
+
+                      <AppText
+                        title={item?.units || 0}
+                        textColor={AppColors.LIGHTGRAY}
+                        textSize={2.5}
+                      />
+
+                      <TouchableOpacity onPress={() => addMedication(item)}>
+                        <AntDesign
+                          name={'plus'}
+                          size={responsiveFontSize(2)}
+                          color={AppColors.LIGHTGRAY}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              );
+            }}
+          />
           </View>
         ) : (
           <View>
@@ -840,7 +876,8 @@ const DataVisualizer = ({navigation}) => {
               data={todayPollensData}
               renderItem={({item}) => {
                 return (
-                  <View
+                  <TouchableOpacity
+                    onPress={() => addAllergens(item)}
                     style={{
                       height: responsiveHeight(6),
                       width: responsiveWidth(90),
@@ -853,26 +890,14 @@ const DataVisualizer = ({navigation}) => {
                       alignItems: 'center',
                       paddingHorizontal: 20,
                     }}>
-                    <TouchableOpacity
-                      onPress={() =>
-                        // setTakingMedications(prev => {
-                        //   const alreadyExists = prev.some(
-                        //     med => med.id === item.id,
-                        //   ); // Assuming `id` is unique
-                        //   if (alreadyExists) return prev; // Don't add it again
-                        //   return [...prev, item]; // Add only if it doesn't exist
-                        // })
-                        addAllergens(item)
-                      }>
-                      <AntDesign
-                        name={'pluscircle'}
-                        size={responsiveFontSize(2.5)}
-                        color={AppColors.BTNCOLOURS}
-                      />
-                    </TouchableOpacity>
+                    <AntDesign
+                      name={'pluscircle'}
+                      size={responsiveFontSize(2.5)}
+                      color={AppColors.BTNCOLOURS}
+                    />
 
                     <AppText title={item.common_name} textSize={1.5} />
-                  </View>
+                  </TouchableOpacity>
                 );
               }}
             />

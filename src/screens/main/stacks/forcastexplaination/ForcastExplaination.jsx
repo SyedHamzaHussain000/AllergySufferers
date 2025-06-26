@@ -7,9 +7,6 @@ const ForcastExplaination = () => {
 
 
 
-           const source = { uri: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', cache: true };
-
-
   return (
     <View >
         <View style={{padding:20, paddingBottom:0}}>
