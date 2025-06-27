@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
 import AppImages from '../../assets/images/AppImages';
 import {
@@ -31,6 +31,8 @@ import AppIntroSlider from 'react-native-app-intro-slider';
 
 const Symptom = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
+  const sliderRef = useRef(null);
+
 
   const [randomTip, setRandomTip] = useState(null);
 
@@ -106,68 +108,15 @@ const Symptom = ({navigation}) => {
     return nav;
   }, [navigation]);
 
-  const getSymtomsData = ewformateddate => {
-    setLoader(true);
-    let data = JSON.stringify({
-      start_date: moment(ewformateddate ? ewformateddate : selecteddate)
-        .subtract('days', 6)
-        .format('YYYY-MM-DD'), //fromat Ymd
-      end_date: endDate,
-    });
+  useEffect(() => {
+  if (sliderRef.current && graphSlides.length > 0) {
+    // Jump to the last slide
+    sliderRef.current.goToSlide(graphSlides.length - 1, false); // false = don't trigger onSlideChange
+  }
+}, [graphSlides]);
 
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_symptom_records`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
-      data: data,
-    };
 
-    axios
-      .request(config)
-      .then(async response => {
-        console.log('datasorted', response.data);
-
-        const datasort = response.data.symptoms;
-
-        const lastFive = datasort.slice(-5);
-        const symtomsArrayData = {
-          labels: await lastFive.map(item =>
-            moment(item.date, 'MMM, DD YYYY').format('MMM D'),
-          ),
-          datasets: [
-            {
-              data: await lastFive.map(item => parseInt(item.symptom_level)),
-            },
-
-            {
-              data: [1],
-              withDots: false,
-            },
-
-            {
-              data: [5],
-              withDots: false,
-            },
-          ],
-        };
-
-        setSymtomsData(symtomsArrayData);
-        setLoader(false);
-      })
-      .catch(error => {
-        console.log(error.message);
-        setLoader(false);
-      })
-      .finally(() => {
-        setLoader(false);
-      });
-  };
+  
 
   const setApiSymtomsData = id => {
     setSymtomsNumber(id);
@@ -414,19 +363,18 @@ const Symptom = ({navigation}) => {
             />
           </View>
         </View> */}
-        {
-          console.log('graphSlides',graphSlides[0])
-        }
+        
         <AppIntroSlider
+        ref={sliderRef}
           data={graphSlides}
           showNextButton={false}
           showDoneButton={false}
           showPrevButton={false}
-          activeDotStyle={{backgroundColor: AppColors.PRIMARY, marginTop:  responsiveHeight(12)}}
-          dotStyle={{marginTop: responsiveHeight(12), backgroundColor: AppColors.LIGHTGRAY}}
+          activeDotStyle={{backgroundColor: AppColors.PRIMARY}}
+          dotStyle={{ backgroundColor: AppColors.LIGHTGRAY}}
+          
           renderItem={({item}) => {
 
-            console.log("item..", item)
             return (
               <View
                 style={{
@@ -436,12 +384,12 @@ const Symptom = ({navigation}) => {
                   paddingTop: 20,
                   marginTop: 20,
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  justifyContent: 'flex-start',
                 }}>
                 <LineChart
                   data={item?.chartData || {labels: [], datasets: [{data: []}]}}
                   width={screenWidth * 0.89}
-                  height={responsiveHeight(32)}
+                  height={responsiveHeight(30)}
                   verticalLabelRotation={0}
                   chartConfig={chartConfig}
                   withShadow={false}
@@ -459,15 +407,15 @@ const Symptom = ({navigation}) => {
                   style={{
                     position: 'absolute',
                     zIndex: 10,
-                    height: responsiveHeight(30),
+                    height: responsiveHeight(25),
                     width: responsiveWidth(10),
                     left: 10,
-                    marginBottom: 130,
+                    
                   }}>
                   <FlatList
                     data={mojis}
                     inverted
-                    contentContainerStyle={{gap: 6}}
+                    contentContainerStyle={{gap: 5}}
                     renderItem={({item}) => {
                       return (
                         <Image

@@ -3,6 +3,7 @@ import React from 'react';
 import AppColors from '../../utils/AppColors';
 import {
   responsiveFontSize,
+  responsiveHeight,
   responsiveWidth,
 } from '../../utils/Responsive_Dimensions';
 
@@ -13,6 +14,7 @@ type textProps = {
   textFontWeight?: boolean;
   textAlignment?: any;
   textwidth?: any;
+  textHeight?:any
 };
 
 const AppText = ({
@@ -22,6 +24,7 @@ const AppText = ({
   textFontWeight,
   textAlignment,
   textwidth,
+  textHeight
 }: textProps) => {
   return (
     <Text
@@ -34,6 +37,8 @@ const AppText = ({
         color: textColor ? textColor : AppColors.BLACK,
         textAlign: textAlignment ? textAlignment : null,
         alignSelf: textAlignment ? textAlignment : null,
+        height: textHeight ? responsiveHeight(textHeight): null 
+        
       }}>
       {title}
     </Text>

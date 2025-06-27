@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
 import {
   responsiveFontSize,
@@ -26,6 +26,7 @@ import DatePicker from 'react-native-date-picker';
 import AppIntroSlider from 'react-native-app-intro-slider';
 
 const Medication = ({navigation}) => {
+  const sliderRef = useRef(null);
   const userData = useSelector(state => state.auth.user);
   const [allMedication, setAllMedication] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
@@ -104,7 +105,7 @@ const Medication = ({navigation}) => {
             barData.push({
               value,
               label: formattedLabel,
-              spacing: 2,
+              spacing: 0,
               frontColor: entry.frontColor || '#E23131',
               labelWidth: 30,
             });
@@ -210,6 +211,15 @@ const Medication = ({navigation}) => {
 
     return nav;
   }, [navigation]);
+
+
+    useEffect(() => {
+    if (sliderRef.current && MedicationnRecord.length > 0) {
+      // Jump to the last slide
+      sliderRef.current.goToSlide(MedicationnRecord.length - 1, false); // false = don't trigger onSlideChange
+    }
+  }, [MedicationnRecord]);
+  
 
 
   console.log("medication loader", Medicationloader)
@@ -318,6 +328,7 @@ const Medication = ({navigation}) => {
             </>
           {MedicationnRecord.length > 0 && (
             <AppIntroSlider
+            ref={sliderRef}
               data={MedicationnRecord}
               showNextButton={false}
               showPrevButton={false}
@@ -330,6 +341,7 @@ const Medication = ({navigation}) => {
                     barWidth={10}
                     frontColor="#E23131"
                     showLine={false}
+                    initialSpacing={0}
                     xAxisLabelTextStyle={{
                       fontSize: 10,
                       color: '#000',
@@ -346,9 +358,7 @@ const Medication = ({navigation}) => {
                   />
                 </View>
               )}
-              showDoneButton={false}
-              showNextButton={false}
-              showSkipButton={false}
+
               dotStyle={{backgroundColor: '#ccc'}}
               activeDotStyle={{backgroundColor: AppColors.BLACK}}
             />

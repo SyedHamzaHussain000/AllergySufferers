@@ -92,41 +92,22 @@ const Home = ({navigation}) => {
 
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
 
-
-  // console.log("AllCities",AllCities)
-  // useEffect(() => {
-  //   const nav = navigation.addListener('focus', async () => {
-  //     if (userData) {
-        
-  //       getActivePollens();
-  //       getAllCities();
-  //     } else {
-  //       setLoadCities(true);
-  //       const currentLatLng = await GetCurrentLocation();
-  //       getPollensDataLatLng(currentLatLng?.latitude, currentLatLng?.longitude);
-  //     }
-  //   });
-
-  //   return nav;
-  // }, [navigation]);
-
   useEffect(() => {
-  const nav = navigation.addListener('focus', async () => {
-    if (hasFetchedOnce) return;
+    const nav = navigation.addListener('focus', async () => {
+      if (hasFetchedOnce) return;
 
-    if (userData) {
-      getActivePollens();
-      getAllCities();
-    } else {
-      setLoadCities(true);
-      const currentLatLng = await GetCurrentLocation();
-      getPollensDataLatLng(currentLatLng?.latitude, currentLatLng?.longitude);
-    }
-  });
+      if (userData) {
+        getActivePollens();
+        getAllCities();
+      } else {
+        setLoadCities(true);
+        const currentLatLng = await GetCurrentLocation();
+        getPollensDataLatLng(currentLatLng?.latitude, currentLatLng?.longitude);
+      }
+    });
 
-  return nav;
-}, [navigation, hasFetchedOnce, userData]);
-
+    return nav;
+  }, [navigation, hasFetchedOnce, userData]);
 
   const getPollensData = (allcities, newindex) => {
     setPollenLoader(true);
@@ -150,10 +131,8 @@ const Home = ({navigation}) => {
       .then(response => {
         const res = response.data;
 
-        
-        const city = res?.user?.locations?.closest?.name
+        const city = res?.user?.locations?.closest?.name;
 
-        
         const past = response?.data?.forecast?.[city]?.past;
         const today = response?.data?.forecast?.[city]?.today;
         const future = response?.data?.forecast?.[city]?.future;
@@ -175,19 +154,17 @@ const Home = ({navigation}) => {
         setFuturePollenData(future);
 
         setIsPastArray(pastArray);
-        setIsFutureArray(futureArray);        
+        setIsFutureArray(futureArray);
 
         setPollenLoader(false);
-        setLoadCities(false)
+        setLoadCities(false);
         setHasFetchedOnce(true);
-
       })
       .catch(error => {
         console.log(error);
         setPollenLoader(false);
       });
   };
-
 
   const getPollensDataLatLng = (Lat, Lng) => {
     setPollenLoader(true);
@@ -214,7 +191,7 @@ const Home = ({navigation}) => {
 
         const city = res?.user?.locations?.closest?.name;
 
-        console.log("city",city)
+        console.log('city', city);
         const newCityObj = {
           id: 1,
           lat: Lat,
@@ -222,20 +199,18 @@ const Home = ({navigation}) => {
           city_name: city,
         };
 
-        if(userData){
-          console.log("userData...............",userData)
+        if (userData) {
+          console.log('userData...............', userData);
           const res = await AddCityApi(userData.id, city, Lat, Lng);
-          
-            console.log("Response is ........ =====>", res)
 
+          console.log('Response is ........ =====>', res);
 
           if (res.status) {
-            console.log("Something went wrong", res.details);
-            return getAllCities()
+            console.log('Something went wrong', res.details);
+            return getAllCities();
           } else {
-            console.log("City added successfully", res);
+            console.log('City added successfully', res);
           }
-
         }
 
         setAllCities([newCityObj]);
@@ -266,7 +241,6 @@ const Home = ({navigation}) => {
         setPollenLoader(false);
         setLoadCities(false);
         setHasFetchedOnce(true);
-
       })
       .catch(error => {
         console.log(error);
@@ -330,10 +304,12 @@ const Home = ({navigation}) => {
         if (response?.data?.cities?.length > 0) {
           getPollensData(response.data.cities, 0);
           setLoadCities(false);
-        }else{
+        } else {
           const currentLatLng = await GetCurrentLocation();
-        getPollensDataLatLng(currentLatLng?.latitude, currentLatLng?.longitude);
-
+          getPollensDataLatLng(
+            currentLatLng?.latitude,
+            currentLatLng?.longitude,
+          );
         }
       })
       .catch(error => {
@@ -343,21 +319,19 @@ const Home = ({navigation}) => {
       });
   };
 
+  //   const PollenCurrentTodayData = todayPollensData?.current?.filter(
+  //   (item, index, self) =>
+  //     index === self.findIndex((t) => t.name === item.name)
+  // );
 
-//   const PollenCurrentTodayData = todayPollensData?.current?.filter(
-//   (item, index, self) =>
-//     index === self.findIndex((t) => t.name === item.name)
-// );
+  const PollenCurrentTodayData = useMemo(() => {
+    if (!todayPollensData?.current) return [];
 
-
-const PollenCurrentTodayData = useMemo(() => {
-  if (!todayPollensData?.current) return [];
-
-  return todayPollensData.current.filter(
-    (item, index, self) =>
-      index === self.findIndex(t => t.name === item.name)
-  );
-}, [todayPollensData]);
+    return todayPollensData.current.filter(
+      (item, index, self) =>
+        index === self.findIndex(t => t.name === item.name),
+    );
+  }, [todayPollensData]);
 
   return (
     <>
@@ -602,7 +576,6 @@ const PollenCurrentTodayData = useMemo(() => {
                             );
                             const todayPollenInAir = todayPollensData?.current;
 
-                            
                             return (
                               <View style={{gap: 10}}>
                                 <AppText
@@ -611,6 +584,8 @@ const PollenCurrentTodayData = useMemo(() => {
                                   textSize={1.5}
                                   textColor={AppColors.BLACK}
                                   textFontWeight
+                                  textwidth={40}
+                                          textHeight={6}
                                 />
 
                                 <SpeedoMeter
@@ -629,7 +604,9 @@ const PollenCurrentTodayData = useMemo(() => {
                                       ? 'Very High'
                                       : 'None'
                                   }
-                                  isPollenorSpores={todayPollenInAir[index]?.type}
+                                  isPollenorSpores={
+                                    todayPollenInAir[index]?.type
+                                  }
                                   TempreaturePriorityFontSize={1.6}
                                 />
                               </View>
@@ -904,7 +881,6 @@ const PollenCurrentTodayData = useMemo(() => {
                       <FlatList
                         data={PollenCurrentTodayData}
                         renderItem={({item, index}) => {
-
                           return (
                             <View
                               style={{
@@ -985,12 +961,15 @@ const PollenCurrentTodayData = useMemo(() => {
                                 borderBottomWidth:
                                   index == isfutureArray?.length - 1 ? 1 : 0,
                               }}>
-                              <View
+                              <TouchableOpacity
                                 style={{
                                   flexDirection: 'row',
                                   gap: 10,
                                   alignItems: 'center',
+                                  justifyContent:'space-between', 
+                                  width:responsiveWidth(80)
                                 }}>
+                                  <View style={{flexDirection:'row', alignItems:'center', gap:5}}>
                                 <View
                                   style={{
                                     height: 20,
@@ -1017,130 +996,68 @@ const PollenCurrentTodayData = useMemo(() => {
                                   textColor={AppColors.BLACK}
                                   textFontWeight
                                 />
-                              </View>
+                                </View>
+
+                                <AntDesign
+                                  name={"plus"}
+                                  size={responsiveFontSize(3)}
+                                  color={AppColors.BLACK}
+                                
+                                />
+                              </TouchableOpacity>
 
                               <ScrollView
                                 horizontal
-                                style={{
-                                  flexDirection: 'row',
+                                contentContainerStyle={{
+                                  gap: 10,
                                   marginTop: 20,
-                                  rowGap: 20,
                                 }}>
-                                <View style={{gap: 10}}>
-                                  <AppText
-                                    title={'Total Spores'}
-                                    textAlignment={'center'}
-                                    textSize={1.5}
-                                    textColor={AppColors.BLACK}
-                                    textFontWeight
-                                  />
+                                {activePollen?.map(newItem => {
+                                  const indexes = item.current.findIndex(
+                                    active =>
+                                      active.name == newItem.common_name,
+                                  )
 
-                                  <SpeedoMeter
-                                    imgWeight={30}
-                                    imgHeight={10}
-                                    speedometerWidth={30}
-                                    imageTop={-10}
-                                    TextBottom={
-                                      item.total_spores == 1
-                                        ? 'Low'
-                                        : item.total_spores == 2
-                                        ? 'Moderate'
-                                        : item.total_spores == 3
-                                        ? 'High'
-                                        : item.total_spores == 4
-                                        ? 'Very High'
-                                        : 'Low'
-                                    }
-                                    TempreaturePriorityFontSize={1.6}
-                                  />
-                                </View>
+                                    return (
+                                      <View style={{gap: 10, alignItems:'center'}}>
+                                        <AppText
+                                          title={newItem.common_name}
+                                          textAlignment={'center'}
+                                          textSize={1.5}
+                                          textColor={AppColors.BLACK}
+                                          textFontWeight
+                                          textwidth={40}
+                                          textHeight={5}
+                                        />
 
-                                <View style={{gap: 10, marginLeft: 20}}>
-                                  <AppText
-                                    title={'Total Trees'}
-                                    textAlignment={'center'}
-                                    textSize={1.5}
-                                    textColor={AppColors.BLACK}
-                                    textFontWeight
-                                  />
-
-                                  <SpeedoMeter
-                                    imgWeight={30}
-                                    imgHeight={10}
-                                    speedometerWidth={30}
-                                    imageTop={-10}
-                                    TextBottom={
-                                      item.total_trees == 1
-                                        ? 'Low'
-                                        : item.total_trees == 2
-                                        ? 'Moderate'
-                                        : item.total_trees == 3
-                                        ? 'High'
-                                        : item.total_trees == 4
-                                        ? 'Very High'
-                                        : 'Low'
-                                    }
-                                    TempreaturePriorityFontSize={1.6}
-                                  />
-                                </View>
-
-                                <View style={{gap: 10, marginLeft: 20}}>
-                                  <AppText
-                                    title={'Total Grasses'}
-                                    textAlignment={'center'}
-                                    textSize={1.5}
-                                    textColor={AppColors.BLACK}
-                                    textFontWeight
-                                  />
-
-                                  <SpeedoMeter
-                                    imgWeight={30}
-                                    imgHeight={10}
-                                    speedometerWidth={30}
-                                    imageTop={-10}
-                                    TextBottom={
-                                      item.total_grasses == 1
-                                        ? 'Low'
-                                        : item.total_grasses == 2
-                                        ? 'Moderate'
-                                        : item.total_grasses == 3
-                                        ? 'High'
-                                        : item.total_grasses == 4
-                                        ? 'Very High'
-                                        : 'Low'
-                                    }
-                                    TempreaturePriorityFontSize={1.6}
-                                  />
-                                </View>
-
-                                <View style={{gap: 10, marginLeft: 20}}>
-                                  <AppText
-                                    title={'Total Weeds'}
-                                    textAlignment={'center'}
-                                    textSize={1.5}
-                                    textColor={AppColors.BLACK}
-                                    textFontWeight
-                                  />
-
-                                  <SpeedoMeter
-                                    imgWeight={30}
-                                    imgHeight={10}
-                                    speedometerWidth={30}
-                                    imageTop={-10}
-                                    TextBottom={
-                                      item.total_weeds == 1
-                                        ? 'Low'
-                                        : item.total_weeds == 2
-                                        ? 'Moderate'
-                                        : item.total_weeds == 3
-                                        ? 'High'
-                                        : item.total_weeds == 4
-                                        ? 'Very High'
-                                        : 'Low'
-                                    }
-                                    TempreaturePriorityFontSize={1.6}
-                                  />
-                                </View>
+                                        <SpeedoMeter
+                                          imgWeight={30}
+                                          imgHeight={10}
+                                          speedometerWidth={30}
+                                          imageTop={-10}
+                                          TextBottom={
+                                            item?.current[indexes]?.level == 1
+                                              ? 'Low'
+                                              : item?.current[indexes]?.level ==
+                                                2
+                                              ? 'Moderate'
+                                              : item?.current[indexes]?.level ==
+                                                3
+                                              ? 'High'
+                                              : item?.current[indexes]?.level ==
+                                                4
+                                              ? 'Very High'
+                                              : 'None'
+                                          }
+                                          isPollenorSpores={
+                                            item?.current[index]?.type
+                                          }
+                                          TempreaturePriorityFontSize={1.6}
+                                        />
+                                      </View>
+                                    );
+                                 
+                                })}
                               </ScrollView>
                             </View>
                           );
@@ -1176,7 +1093,7 @@ const PollenCurrentTodayData = useMemo(() => {
         )}
       </LinearGradient>
     </>
-  )
+  );
 };
 
 export default Home;
