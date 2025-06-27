@@ -39,6 +39,9 @@ const ManageCities = ({navigation}) => {
   const [loader, setLoader] = useState(false);
   const [cities, setCities] = useState([]);
 
+    const [activeMedication, setActiveMedication] = useState([]);
+  
+
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       getAllCities();
@@ -60,7 +63,7 @@ const ManageCities = ({navigation}) => {
       .then(response => {
         console.log(JSON.stringify(response.data));
         setLoader(false);
-        setCities(response?.data?.cities);
+        setActiveMedication(response?.data?.cities);
       })
       .catch(error => {
         console.log(error);
@@ -114,10 +117,10 @@ const ManageCities = ({navigation}) => {
 
         {loader && <ActivityIndicator size={'large'} color={AppColors.BLACK} />}
 
-        {cities ? (
+        {activeMedication ? (
           <NestableScrollContainer>
             <NestableDraggableFlatList
-              data={cities}
+              data={activeMedication}
               contentContainerStyle={{gap: 10}}
               renderItem={({item, drag, isActive}) => {
                 console.log('itemmm', item);

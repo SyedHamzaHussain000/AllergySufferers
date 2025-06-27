@@ -363,7 +363,7 @@ const Symptom = ({navigation}) => {
             />
           </View>
         </View> */}
-        
+          <View style={{height:responsiveHeight(45)}}>
         <AppIntroSlider
         ref={sliderRef}
           data={graphSlides}
@@ -435,6 +435,7 @@ const Symptom = ({navigation}) => {
             );
           }}
         />
+        </View>
         {/* <View
           style={{
             padding: 10,
@@ -490,7 +491,7 @@ const Symptom = ({navigation}) => {
           </View>
         </View> */}
 
-        <View style={{marginTop: 20}}>
+        <View style={{marginTop: 0}}>
           <AppButton
             title={'Go TO DATA VISUALIZER'}
             RightColour={AppColors.rightArrowCOlor}

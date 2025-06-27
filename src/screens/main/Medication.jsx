@@ -195,8 +195,8 @@ const Medication = ({navigation}) => {
         {headers: {'Content-Type': 'application/json'}},
       );
 
-      await getActiveMedication();
       await generateMedicationSlides();
+      await getActiveMedication();
     } catch (error) {
       console.log(error);
     }
@@ -327,6 +327,7 @@ const Medication = ({navigation}) => {
             }
             </>
           {MedicationnRecord.length > 0 && (
+            <View style={{height:responsiveHeight(35)}}>
             <AppIntroSlider
             ref={sliderRef}
               data={MedicationnRecord}
@@ -359,9 +360,10 @@ const Medication = ({navigation}) => {
                 </View>
               )}
 
-              dotStyle={{backgroundColor: '#ccc'}}
-              activeDotStyle={{backgroundColor: AppColors.BLACK}}
+              dotStyle={{backgroundColor: '#ccc', marginTop:50}}
+              activeDotStyle={{backgroundColor: AppColors.BLACK, marginTop:50}}
             />
+          </View>
           )}
 
           <View style={{marginTop: 20}}>
