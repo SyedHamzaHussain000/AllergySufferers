@@ -36,6 +36,7 @@ import * as Animatable from 'react-native-animatable';
 import AppButton from '../../components/AppButton';
 import {GetCurrentLocation} from '../../global/GetCurrentLocation';
 import {AddCityApi} from '../../global/AddCityApi';
+import PointPollenSpores from '../../components/PointPollenSpores';
 // import AddCityApi from '../../global/AddCityApi';
 
 const Home = ({navigation}) => {
@@ -91,6 +92,8 @@ const Home = ({navigation}) => {
   const [loadCities, setLoadCities] = useState(false);
 
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+  const [expandedFutureKey, setExpandedFutureKey] = useState(null);
+
 
   useEffect(() => {
     const nav = navigation.addListener('focus', async () => {
@@ -264,6 +267,9 @@ const Home = ({navigation}) => {
     }
   };
 
+
+  
+
   const getActivePollens = () => {
     setActiveLoader(true);
     let config = {
@@ -332,6 +338,23 @@ const Home = ({navigation}) => {
         index === self.findIndex(t => t.name === item.name),
     );
   }, [todayPollensData]);
+
+
+  const sortedPollenData = [...PollenCurrentTodayData].sort((a, b) => {
+  // First sort by type: pollen first, then spore
+  if (a.type !== b.type) {
+    return a.type === 'pollen' ? -1 : 1;
+  }
+  // Then sort by level descending (4 to 1)
+  return b.level - a.level;
+});
+
+
+
+
+
+  
+
 
   return (
     <>
@@ -879,65 +902,11 @@ const Home = ({navigation}) => {
                       />
                     ) : selected == 'Today' ? (
                       <FlatList
-                        data={PollenCurrentTodayData}
+                        data={sortedPollenData}
                         renderItem={({item, index}) => {
+                          // console.log("TODAY", item)
                           return (
-                            <View
-                              style={{
-                                borderWidth: 1,
-                                borderTopRightRadius: index == 0 ? 10 : 0,
-                                borderTopLeftRadius: index == 0 ? 10 : 0,
-                                borderBottomRightRadius:
-                                  index == PollenCurrentTodayData?.length - 1
-                                    ? 10
-                                    : 0,
-                                borderBottomLeftRadius:
-                                  index == PollenCurrentTodayData?.length - 1
-                                    ? 10
-                                    : 0,
-                                padding: 20,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                borderBottomWidth:
-                                  index == PollenCurrentTodayData?.length - 1
-                                    ? 1
-                                    : 0,
-                              }}>
-                              <View
-                                style={{
-                                  flexDirection: 'row',
-                                  gap: 10,
-                                  alignItems: 'center',
-                                }}>
-                                <View
-                                  style={{
-                                    height: 20,
-                                    width: 20,
-                                    borderRadius: 200,
-                                    borderWidth: 1,
-                                    borderColor: '#4C9E00',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                  }}>
-                                  <View
-                                    style={{
-                                      height: 15,
-                                      width: 15,
-                                      borderRadius: 200,
-                                      backgroundColor: '#4C9E00',
-                                    }}
-                                  />
-                                </View>
-
-                                <AppText
-                                  title={item.name}
-                                  textSize={2}
-                                  textColor={AppColors.BLACK}
-                                  textFontWeight
-                                />
-                              </View>
-                            </View>
+                            <PointPollenSpores PollenSporesArr={sortedPollenData} index={index} item={item} selected={selected}/>
                           );
                         }}
                       />
@@ -945,6 +914,17 @@ const Home = ({navigation}) => {
                       <FlatList
                         data={isfutureArray}
                         renderItem={({item, index}) => {
+
+                          console.log("Big future", item)
+
+                          
+                          const futurePollenAndSpores = item?.current?.sort((a, b) => {
+                            if (a.type !== b.type) {
+                              return a.type === 'pollen' ? -1 : 1;
+                            }
+                            return b.level - a.level;
+                          })
+                          
                           return (
                             <View
                               style={{
@@ -962,6 +942,13 @@ const Home = ({navigation}) => {
                                   index == isfutureArray?.length - 1 ? 1 : 0,
                               }}>
                               <TouchableOpacity
+                               onPress={() => {
+                                    if (expandedFutureKey === item.key) {
+                                      setExpandedFutureKey(null); // Collapse if already expanded
+                                    } else {
+                                      setExpandedFutureKey(item.key); // Expand only this one
+                                    }
+                                  }}
                                 style={{
                                   flexDirection: 'row',
                                   gap: 10,
@@ -976,7 +963,7 @@ const Home = ({navigation}) => {
                                     width: 20,
                                     borderRadius: 200,
                                     borderWidth: 1,
-                                    borderColor: '#4C9E00',
+                                    borderColor: getThBgColour(item?.label),
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                   }}>
@@ -985,7 +972,7 @@ const Home = ({navigation}) => {
                                       height: 15,
                                       width: 15,
                                       borderRadius: 200,
-                                      backgroundColor: '#4C9E00',
+                                      backgroundColor: getThBgColour(item?.label),
                                     }}
                                   />
                                 </View>
@@ -1059,6 +1046,25 @@ const Home = ({navigation}) => {
                                  
                                 })}
                               </ScrollView>
+                              
+                              {expandedFutureKey === item.key && (
+                              
+                              <View style={{marginTop:20}}>
+                              <FlatList
+                                data={futurePollenAndSpores}
+                                renderItem={({item, index})=>{
+                                  return(
+                                    <View>
+
+                                    <PointPollenSpores PollenSporesArr={futurePollenAndSpores} index={index} item={item} selected={selected} containerwidth={responsiveWidth(80)}/>
+                                    </View>
+
+                                  )
+                                }}
+                              
+                              />
+                              </View>
+                              )}
                             </View>
                           );
                         }}
