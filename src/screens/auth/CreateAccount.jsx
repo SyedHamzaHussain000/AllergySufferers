@@ -14,12 +14,12 @@ import BASE_URL from '../../utils/BASE_URL';
 const CreateAccount = ({navigation}) => {
 
   const [userData, setUserData] = useState({
-    full_name: "test",
-    user_name: "tester",
-    email: "test@gmail.com",
-    password: "1234567890",
-    gender: "male",
-    phone: "03121234567",
+    full_name: "",
+    user_name: "",
+    email: "",
+    password: "",
+    gender: "",
+    phone: "",
   })
 
   const [day, setDay] = useState('');
@@ -27,20 +27,24 @@ const CreateAccount = ({navigation}) => {
   const [year, setYear] = useState('');
 
   const fullDob = `${day}-${month}-${year}`;
+  const [loader, setLoader] = useState(false)
 
 
   console.log("ul", fullDob)
 
   const SignUpUser = () => {
 
+    setLoader(true)
+
     let data = JSON.stringify({
       full_name: userData.full_name,
       user_name: userData.user_name,
       email: userData.email,
       password: userData.password,
-      dob: userData.dob,
+      dob: fullDob,
       gender: userData.gender,
       phone: userData.phone,
+      fcm_token: "abcd",
     })
 
     let config = {
@@ -58,9 +62,11 @@ const CreateAccount = ({navigation}) => {
       .then(response => {
         console.log(JSON.stringify(response.data));
         navigation.navigate("Login")
+        setLoader(false)
       })
       .catch(error => {
         console.log(error);
+        setLoader(false)
       });
   };
 
@@ -190,7 +196,7 @@ const CreateAccount = ({navigation}) => {
           <AppTextInput title="Phone" textInput inputPlaceHolder={'123-456-7890'} onChangeText={(text)=>  setUserData({...userData, phone: text})} value={userData.phone}/>
 
           <View style={{gap: 10}}>
-            <AppButton title={'Sign up'} RightColour={AppColors.WHITE} handlePress={()=> SignUpUser()}/>
+            <AppButton title={'Sign up'} RightColour={AppColors.WHITE} handlePress={()=> SignUpUser()} isLoading={loader} loadingColour={AppColors.WHITE}/>
           </View>
 
 
