@@ -40,6 +40,7 @@ const userData = useSelector(state => state.auth.user)
     let data = new FormData();
     data.append('email', email);
     data.append('password', password);
+    data.append('fcm_token', "abcd")
 
 
     let config = {

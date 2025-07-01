@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -21,9 +22,7 @@ import axios from 'axios';
 
 
 const PollenInfoForCad = () => {
-  const [isIndex, setIndex] = useState();
-
-  const [apiCallData, setApiCallData] = useState()
+  
 
   const pollens = [
     {
@@ -2741,36 +2740,41 @@ const PollenInfoForCad = () => {
     },
   ];
 
+  const [isIndex, setIndex] = useState();
+  const [apiCallData, setApiCallData] = useState()
+  const [loadingIndex, setLoadingIndex] = useState(null);
+  const [expandedIndex, setExpandedIndex] = useState(null);
+
+
   const regex = /<br|\n|\r\s*\\?>/g;
 
   const contentWidth = Dimensions.get('window').width;
 
-  const apiCall = (itemm) => {
-    let data = JSON.stringify({
-      name: itemm,
+ const apiCall = (itemName, idx) => {
+    // If tapping the already expanded card, just collapse it
+    if (expandedIndex === idx) {
+      setExpandedIndex(null);
+      return;
+    }
+
+    setLoadingIndex(idx);
+    setApiCallData(null);
+
+    axios.post(
+      `${BASE_URL}/allergy_data/v1/user/127123/get_data`,
+      { name: itemName }
+    )
+    .then(response => {
+      setApiCallData(response.data.data);
+      setExpandedIndex(idx);
+    })
+    .catch(console.log)
+    .finally(() => {
+      setLoadingIndex(null);
     });
-
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/127123/get_data`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: data,
-    };
-
-    axios
-      .request(config)
-      .then(response => {
-        console.log(JSON.stringify(response.data));
-        setApiCallData(response.data.data)
-        
-      })
-      .catch(error => {
-        console.log(error);
-      });
   };
+
+
   return (
     <View style={{padding: 20}}>
       <AppHeader heading="Pollen Information for Canada" goBack={true} />
@@ -2783,65 +2787,57 @@ const PollenInfoForCad = () => {
         textSize={1.8}
       />
 
-      <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 200}}>
+ <ScrollView contentContainerStyle={{ paddingBottom: 200 }}>
         <FlatList
           data={pollens}
-          contentContainerStyle={{marginTop: 20}}
-          renderItem={({item, index}) => {
+          contentContainerStyle={{ marginTop: 20 }}
+          keyExtractor={(_, i) => i.toString()}
+          renderItem={({ item, index }) => {
+            const isOpen    = index === expandedIndex;
+            const isLoading = index === loadingIndex;
+
             return (
               <TouchableOpacity
-                onPress={() => {
-                  apiCall(item.name);
-                  if (index == isIndex) {
-                    setIndex();
-                  } else {
-                    setIndex(index);
-                  }
-                }}
+                onPress={() => apiCall(item.name, index)}
                 activeOpacity={0.5}
                 style={{
                   borderWidth: 1,
-                  borderTopRightRadius: item.top ? 10 : 0,
-                  borderTopLeftRadius: item.top ? 10 : 0,
-                  borderBottomRightRadius: item.bottom ? 10 : 0,
-                  borderBottomLeftRadius: item.bottom ? 10 : 0,
+                  borderRadius: 10,
                   padding: 20,
-                  alignItems: 'center',
+                  marginBottom: 10,
+                }}
+              >
+                <View style={{
+                  flexDirection: 'row',
                   justifyContent: 'space-between',
-                  borderBottomWidth: item.bottom ? 1 : 0,
+                  alignItems: 'center'
                 }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    gap: 10,
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: responsiveWidth(80),
-                  }}>
                   <AppText
                     title={item.name}
                     textSize={2}
                     textColor={AppColors.BLACK}
                     textFontWeight
                   />
-                  <TouchableOpacity>
-                    <AntDesign
-                      name={'plus'}
-                      size={responsiveFontSize(2.5)}
-                      color={AppColors.BLUE}
-                    />
-                  </TouchableOpacity>
-                </View>
-                {index == isIndex ? (
-                  <>
-                    {apiCallData?.html && (
-                      <HTMLView
-                        value={apiCallData?.html.trim().replace(regex, '')}
-                        contentWidth={contentWidth}
+
+                  {isLoading
+                    ? <ActivityIndicator color={AppColors.BLUE} />
+                    : <AntDesign
+                        name={isOpen ? 'minuscircle' : 'pluscircle'}
+                        size={responsiveFontSize(2.5)}
+                        color={AppColors.BLUE}
                       />
-                    )}
-                  </>
-                ) : null}
+                  }
+                </View>
+
+                {isOpen && apiCallData?.html && !isLoading && (
+                  <View style={{ marginTop: 20 }}>
+                    <HTMLView
+                      value={apiCallData.html.trim().replace(regex, '')}
+                      contentWidth={Dimensions.get('window').width}
+                      tagsStyles={tagsStyles}
+                    />
+                  </View>
+                )}
               </TouchableOpacity>
             );
           }}

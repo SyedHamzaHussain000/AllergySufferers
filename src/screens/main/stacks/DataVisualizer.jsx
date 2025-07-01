@@ -66,7 +66,7 @@ const DataVisualizer = ({navigation}) => {
   const [loadingItemId, setLoadingItemId] = useState(null);
 
   const [DataVisualizerLoader, setDataVisualizerLoader] = useState(false);
-  const [allSymtoms, setAllSymtoms] = useState([])
+  const [allSymtoms, setAllSymtoms] = useState([]);
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -260,8 +260,7 @@ const DataVisualizer = ({navigation}) => {
       .then(response => {
         const apiData = response.data;
 
-
-        setAllSymtoms(apiData.symptom_level)
+        setAllSymtoms(apiData.symptom_level);
         const chartLineData = {};
         Object.keys(apiData).forEach(key => {
           if (key !== 'dates' && key !== 'symptom_level') {
@@ -472,74 +471,106 @@ const DataVisualizer = ({navigation}) => {
           <View>
             {MedicationnRecord?.length > 0 ? (
               <View>
-              <ScrollView horizontal={true}>
+                <ScrollView horizontal={true}>
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      marginLeft: responsiveWidth(20),
+                      gap: 50,
+                      flexDirection: 'row',
+                    }}>
+                    {allSymtoms.map(item => {
+                      const emojiMap = {
+                        1: AppImages.Hello,
+                        2: AppImages.Mask,
+                        3: AppImages.Pain,
+                        4: AppImages.Star,
+                        5: AppImages.Bored,
+                      };
 
-                <View style={{position:'absolute', top:0, marginLeft:responsiveWidth(20), gap:50, flexDirection:'row'}}>
-                {
+                      return (
+                        <View>
+                          <Image
+                            source={
+                              item == 1
+                                ? emojiMap[1]
+                                : item == 2
+                                ? emojiMap[2]
+                                : item == 3
+                                ? emojiMap[3]
+                                : item == 4
+                                ? emojiMap[4]
+                                : item == 5
+                                ? emojiMap[5]
+                                : null
+                            }
+                            style={{
+                              height: 30,
+                              width: 30,
+                              resizeMode: 'contain',
+                            }}
+                          />
+                        </View>
+                      );
+                    })}
+                  </View>
 
-                  allSymtoms.map((item)=>{
-                    return(
-                      <View >
-                        {/* <Text>{item}</Text> */}
-                        <Image source={AppImages.Hello} style={{height:30, width:30, resizeMode:'contain'}}/>
-                      </View>
-                    )
-                  })
-                }
-                </View>
+                  <BarChart
+                    data={MedicationnRecord || []}
+                    barWidth={10}
+                    frontColor="#E23131" // bar color
+                    showLine={
+                      PrimaryLineData.length > 0 || SecondaryLineData.length > 0
+                    }
+                    lineData={PrimaryLineData || []}
+                    lineData2={SecondaryLineData || []}
+                    lineConfig={{
+                      color: 'lightblue',
+                      thickness: 2,
+                      curved: false,
+                      dataPointsColor: 'lightblue',
+                      spacing: 70,
+                    }}
+                    lineConfig2={{
+                      color: 'lightgreen',
+                      thickness: 2,
+                      curved: false,
+                      dataPointsColor: 'lightgreen',
+                      spacing: 70,
+                    }}
+                    xAxisLabelTextStyle={{
+                      fontSize: 10, // 👈 smaller font size
+                      color: '#000', // optional, customize color
+                      fontWeight: '400', // optional
+                      labelWidth: 80,
+                    }}
+                    yAxisLabelTexts={['0', ' ', '2', ' ', '4', ' ', '6', ' ', '8']}
 
-                <BarChart
-                  data={MedicationnRecord || []}
-                  barWidth={10}
-                  frontColor="#E23131" // bar color
-                  showLine={
-                    PrimaryLineData.length > 0 || SecondaryLineData.length > 0
-                  }
-                  lineData={PrimaryLineData || []}
-                  lineData2={SecondaryLineData || []}
-                  lineConfig={{
-                    color: 'lightblue',
-                    thickness: 2,
-                    curved: false,
-                    dataPointsColor: 'lightblue',
-                    spacing: 70,
-                  }}
-                  lineConfig2={{
-                    color: 'lightgreen',
-                    thickness: 2,
-                    curved: false,
-                    dataPointsColor: 'lightgreen',
-                    spacing: 70,
-                  }}
-                  xAxisLabelTextStyle={{
-                    fontSize: 10, // 👈 smaller font size
-                    color: '#000', // optional, customize color
-                    fontWeight: '400', // optional
-                    labelWidth: 80,
-                  }}
-                  barBorderRadius={2}
-                  isAnimated={true}
-                  noOfSections={8}
-                  spacing={40}
-                  formatYLabel={label => parseFloat(label).toFixed(0)}
-                  stepValue={1}
-                />
-
-              </ScrollView>
+                    barBorderRadius={2}
+                    isAnimated={true}
+                    noOfSections={8}
+                    spacing={40}
+                    formatYLabel={label => parseFloat(label).toFixed(0)}
+                    stepValue={1}
+                  />
+                </ScrollView>
                 <View
                   style={{
                     position: 'absolute',
                     zIndex: 1,
                     right: 0,
-                    bottom: 40,
-                    gap: 11,
+                    bottom: responsiveHeight(7.5),
+                    gap: 32,
                   }}>
                   <AppText title={'Very High'} textSize={1.7} />
                   <AppText title={'High'} textSize={1.7} />
-                  <AppText title={'Moderate'} textSize={1.7} />
-                  <AppText title={'Low'} textSize={1.7} />
-                </View>
 
+
+                    <AppText title={'Moderate'} textSize={1.7} />
+                    <AppText title={'Low'} textSize={1.7} />
+
+                </View>
               </View>
             ) : (
               <AppText title={'No data available'} textSize={2} />
