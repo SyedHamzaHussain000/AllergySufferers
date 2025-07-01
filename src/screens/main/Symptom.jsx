@@ -231,6 +231,7 @@ const Symptom = ({navigation}) => {
           mode="date"
           maximumDate={new Date()}
           onConfirm={selectedDate => {
+            setDate(selectedDate);
             setOpen(false);
             const today = moment().startOf('day');
             const picked = moment(selectedDate).startOf('day');

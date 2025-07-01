@@ -307,6 +307,7 @@ const Medication = ({navigation}) => {
             mode="date"
             maximumDate={new Date()}
             onConfirm={selectedDate => {
+              setDate(selectedDate);
               setOpen(false);
               const picked = moment(selectedDate).startOf('day');
               const formattedDate = picked.format('YYYY-MM-DD');

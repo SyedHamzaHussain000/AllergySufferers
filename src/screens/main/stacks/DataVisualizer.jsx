@@ -226,6 +226,8 @@ const DataVisualizer = ({navigation}) => {
   };
 
   const getDataVisualizer = selecallergens => {
+
+    console.log("selecallergens",selecallergens)
     if (!selecallergens || selecallergens.length === 0) {
       // no allergens selected, clear chart data
       setPrimaryLineData([]);
@@ -259,7 +261,6 @@ const DataVisualizer = ({navigation}) => {
       .request(config)
       .then(response => {
         const apiData = response.data;
-
         setAllSymtoms(apiData.symptom_level);
         const chartLineData = {};
         Object.keys(apiData).forEach(key => {
@@ -268,10 +269,25 @@ const DataVisualizer = ({navigation}) => {
           }
         });
 
-        const allergenNames = Object.keys(chartLineData);
+        // const allergenNames = Object.keys(chartLineData);
 
-        setPrimaryLineData(chartLineData[allergenNames[0]] || []);
-        setSecondaryLineData(chartLineData[allergenNames[1]] || []);
+        // setPrimaryLineData(chartLineData[allergenNames[0]] || []);
+        // setSecondaryLineData(chartLineData[allergenNames[1]] || []);    
+
+        //edited code
+        const first = selecallergens[0];
+        const second = selecallergens[1];
+
+        setPrimaryLineData(
+          chartLineData[first?.allergen_name] || []
+        );
+        setSecondaryLineData(
+          chartLineData[second?.allergen_name] || []
+        );
+
+        colours[0] = first?.chartColor || 'lightblue';
+        colours[1] = second?.chartColor || 'lightgreen';
+
 
         setDataVisualizerLoader(false);
       })
@@ -345,8 +361,16 @@ const DataVisualizer = ({navigation}) => {
       .request(config)
       .then(response => {
         console.log('allergens', response.data.allergens);
-        getDataVisualizer(response.data.allergens);
-        setTakingMedications(response.data.allergens);
+
+        //edited code
+              const coloredAllergens = assignColorsToAllergens(response.data.allergens, colours);
+
+        // getDataVisualizer(response.data.allergens);
+        // setTakingMedications(response.data.allergens);
+
+        //edited code
+        getDataVisualizer(coloredAllergens);
+        setTakingMedications(coloredAllergens);
       })
       .catch(error => {
         console.log(error);
@@ -448,6 +472,15 @@ const DataVisualizer = ({navigation}) => {
     setMedicationLoading(item.id, false);
   };
 
+
+  const assignColorsToAllergens = (allergens, colors) => {
+  return allergens.map((item, index) => ({
+    ...item,
+    chartColor: colors[index % colors.length],
+  }));
+};
+
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView
@@ -466,12 +499,15 @@ const DataVisualizer = ({navigation}) => {
         />
 
         {DataVisualizerLoader == true ? (
+          <View style={{height:responsiveHeight(30), alignItems:'center', justifyContent:'center'}}>
+
           <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+          </View>
         ) : (
           <View>
             {MedicationnRecord?.length > 0 ? (
               <View>
-                <ScrollView horizontal={true}>
+                <ScrollView horizontal={true} style={{height:responsiveHeight(30)}}>
                   <View
                     style={{
                       position: 'absolute',
@@ -526,17 +562,17 @@ const DataVisualizer = ({navigation}) => {
                     lineData={PrimaryLineData || []}
                     lineData2={SecondaryLineData || []}
                     lineConfig={{
-                      color: 'lightblue',
+                      color: colours[0],
                       thickness: 2,
                       curved: false,
-                      dataPointsColor: 'lightblue',
+                      dataPointsColor: colours[0],
                       spacing: 70,
                     }}
                     lineConfig2={{
-                      color: 'lightgreen',
+                      color: colours[1],
                       thickness: 2,
                       curved: false,
-                      dataPointsColor: 'lightgreen',
+                      dataPointsColor: colours[1],
                       spacing: 70,
                     }}
                     xAxisLabelTextStyle={{
@@ -555,13 +591,15 @@ const DataVisualizer = ({navigation}) => {
                     stepValue={1}
                   />
                 </ScrollView>
+
                 <View
                   style={{
                     position: 'absolute',
                     zIndex: 1,
                     right: 0,
-                    bottom: responsiveHeight(7.5),
-                    gap: 32,
+                    height:responsiveHeight(30),
+                    gap: 30,
+                    
                   }}>
                   <AppText title={'Very High'} textSize={1.7} />
                   <AppText title={'High'} textSize={1.7} />
@@ -578,6 +616,7 @@ const DataVisualizer = ({navigation}) => {
           </View>
         )}
 
+      
         <View
           style={{
             borderWidth: 1,
@@ -594,6 +633,7 @@ const DataVisualizer = ({navigation}) => {
             mode="date"
             maximumDate={new Date()}
             onConfirm={selectedDate => {
+              setDate(selectedDate)
               setOpen(false);
               const today = moment().startOf('day');
               const picked = moment(selectedDate).startOf('day');
