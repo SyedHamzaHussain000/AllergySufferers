@@ -24,10 +24,14 @@ import axios from 'axios';
 import moment from 'moment';
 import DatePicker from 'react-native-date-picker';
 import AppIntroSlider from 'react-native-app-intro-slider';
+import SubscribeBar from '../../components/SubscribeBar';
 
 const Medication = ({navigation}) => {
   const sliderRef = useRef(null);
   const userData = useSelector(state => state.auth.user);
+
+  const expireDate = useSelector(state => state.auth.expireDate);
+
   const [allMedication, setAllMedication] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
   const [medicationLoadingMap, setMedicationLoadingMap] = useState({});
@@ -67,7 +71,10 @@ const Medication = ({navigation}) => {
   const generateMedicationSlides = async selectedDate => {
     setMedicationLoader(true);
     const slides = [];
-    const baseDate = moment(selectedDate ? selectedDate : new Date, 'YYYY-MM-DD');
+    const baseDate = moment(
+      selectedDate ? selectedDate : new Date(),
+      'YYYY-MM-DD',
+    );
 
     try {
       for (let i = 0; i < 3; i++) {
@@ -97,7 +104,9 @@ const Medication = ({navigation}) => {
         const barData = [];
 
         entries.forEach(entry => {
-          const formattedLabel = moment(entry.date, 'MMMM, DD YYYY').format('MMM DD');
+          const formattedLabel = moment(entry.date, 'MMMM, DD YYYY').format(
+            'MMM DD',
+          );
           const value = parseInt(entry.units) || 0;
 
           if (!seenDates.has(entry.date)) {
@@ -212,17 +221,12 @@ const Medication = ({navigation}) => {
     return nav;
   }, [navigation]);
 
-
-    useEffect(() => {
+  useEffect(() => {
     if (sliderRef.current && MedicationnRecord.length > 0) {
       // Jump to the last slide
       sliderRef.current.goToSlide(MedicationnRecord.length - 1, false); // false = don't trigger onSlideChange
     }
   }, [MedicationnRecord]);
-  
-
-
-  console.log("medication loader", Medicationloader)
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
@@ -235,141 +239,177 @@ const Medication = ({navigation}) => {
           setOpen={() => setOpen(true)}
         />
 
+        <DatePicker
+          modal
+          open={open}
+          date={date}
+          mode="date"
+          maximumDate={new Date()}
+          onConfirm={selectedDate => {
+            setDate(selectedDate);
+            setOpen(false);
+            const picked = moment(selectedDate).startOf('day');
+            const formattedDate = picked.format('YYYY-MM-DD');
+            setSelectedDate(formattedDate);
+            generateMedicationSlides(formattedDate);
+          }}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />
         <ScrollView contentContainerStyle={{flexGrow: 1}}>
-          <FlatList
-            data={allMedication}
-            contentContainerStyle={{
-              gap: 10,
-              marginTop: 20,
-              marginBottom: 20,
-            }}
-            renderItem={({item}) => {
+          {expireDate ? (
+            <>
 
-              return (
+              {allMedication.length > 0 ? (
+                <FlatList
+                  data={allMedication}
+                  contentContainerStyle={{
+                    gap: 10,
+                    marginTop: 20,
+                    marginBottom: 20,
+                  }}
+                  renderItem={({item}) => {
+                    return (
+                      <View
+                        style={{
+                          borderWidth: 2.5,
+                          borderRadius: 10,
+                          borderColor: item.frontColor,
+                          height: responsiveHeight(6),
+                          alignItems: 'center',
+                          flexDirection: 'row',
+                          paddingHorizontal: 10,
+                          justifyContent: 'space-between',
+                        }}>
+                        <AppText
+                          title={item.name}
+                          textSize={1.6}
+                          textColor={AppColors.BLACK}
+                        />
+
+                        {medicationLoadingMap[item?.id] ? (
+                          <ActivityIndicator
+                            size={'small'}
+                            color={AppColors.BLACK}
+                          />
+                        ) : (
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              gap: 10,
+                            }}>
+                            <TouchableOpacity
+                              onPress={() => removeMedication(item)}>
+                              <AntDesign
+                                name={'minus'}
+                                size={responsiveFontSize(2)}
+                                color={AppColors.LIGHTGRAY}
+                              />
+                            </TouchableOpacity>
+
+                            <AppText
+                              title={item?.units || 0}
+                              textColor={AppColors.LIGHTGRAY}
+                              textSize={2.5}
+                            />
+
+                            <TouchableOpacity
+                              onPress={() => addMedication(item)}>
+                              <AntDesign
+                                name={'plus'}
+                                size={responsiveFontSize(2)}
+                                color={AppColors.LIGHTGRAY}
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  }}
+                />
+              ) : (
                 <View
                   style={{
-                    borderWidth: 2.5,
-                    borderRadius: 10,
-                    borderColor: item.frontColor,
-                    height: responsiveHeight(6),
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                    paddingHorizontal: 10,
-                    justifyContent: 'space-between',
+                    height: responsiveHeight(20),
+                    justifyContent: 'center',
                   }}>
-                  <AppText
-                    title={item.name}
-                    textSize={1.6}
-                    textColor={AppColors.BLACK}
-                  />
-
-                  {medicationLoadingMap[item?.id] ? (
-                    <ActivityIndicator size={'small'} color={AppColors.BLACK} />
-                  ) : (
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 10,
-                      }}>
-                      <TouchableOpacity onPress={() => removeMedication(item)}>
-                        <AntDesign
-                          name={'minus'}
-                          size={responsiveFontSize(2)}
-                          color={AppColors.LIGHTGRAY}
-                        />
-                      </TouchableOpacity>
-
-                      <AppText
-                        title={item?.units || 0}
-                        textColor={AppColors.LIGHTGRAY}
-                        textSize={2.5}
-                      />
-
-                      <TouchableOpacity onPress={() => addMedication(item)}>
-                        <AntDesign
-                          name={'plus'}
-                          size={responsiveFontSize(2)}
-                          color={AppColors.LIGHTGRAY}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
-              );
-            }}
-          />
-
-          <DatePicker
-            modal
-            open={open}
-            date={date}
-            mode="date"
-            maximumDate={new Date()}
-            onConfirm={selectedDate => {
-              setDate(selectedDate);
-              setOpen(false);
-              const picked = moment(selectedDate).startOf('day');
-              const formattedDate = picked.format('YYYY-MM-DD');
-              setSelectedDate(formattedDate);
-              generateMedicationSlides(formattedDate);
-            }}
-            onCancel={() => {
-              setOpen(false);
-            }}
-          />
-
-          {loader && <ActivityIndicator size={'large'} color={AppColors.BLACK} />}
-          <>
-            {
-              Medicationloader && (
-                <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-              )
-            }
-            </>
-          {MedicationnRecord.length > 0 && (
-            <View style={{height:responsiveHeight(35)}}>
-            <AppIntroSlider
-            ref={sliderRef}
-              data={MedicationnRecord}
-              showNextButton={false}
-              showPrevButton={false}
-              showDoneButton={false}
-              renderItem={({item}) => (
-                <View style={{alignItems: 'center'}}>
-                  <Text style={{fontSize: 16}}>{item.title}</Text>
-                  <BarChart
-                    data={item.barData}
-                    barWidth={10}
-                    frontColor="#E23131"
-                    showLine={false}
-                    initialSpacing={0}
-                    xAxisLabelTextStyle={{
-                      fontSize: 10,
-                      color: '#000',
-                      fontWeight: '400',
-                      width: 40,
-                    }}
-                    barBorderRadius={2}
-                    isAnimated={true}
-                    maxValue={8}
-                    stepValue={1}
-                    hideDataPoints={false}
-                    spacing={20}
-                    formatYLabel={label => parseFloat(label).toFixed(0)}
+                  <AppButton
+                    title={'Add Medication'}
+                    handlePress={() =>
+                      navigation.navigate('More', {
+                        screen: 'AddMedications',
+                      })
+                    }
                   />
                 </View>
               )}
 
-              dotStyle={{backgroundColor: '#ccc', marginTop:50}}
-              activeDotStyle={{backgroundColor: AppColors.BLACK, marginTop:50}}
-            />
-          </View>
+              {loader && (
+                <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+              )}
+              <>
+                {Medicationloader && (
+                  <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+                )}
+              </>
+              {MedicationnRecord.length > 0 && (
+                <View style={{height: responsiveHeight(35)}}>
+                  <AppIntroSlider
+                    ref={sliderRef}
+                    data={MedicationnRecord}
+                    showNextButton={false}
+                    showPrevButton={false}
+                    showDoneButton={false}
+                    renderItem={({item}) => (
+                      <View style={{alignItems: 'center'}}>
+                        <Text style={{fontSize: 16}}>{item.title}</Text>
+                        <BarChart
+                          data={item.barData}
+                          barWidth={10}
+                          frontColor="#E23131"
+                          showLine={false}
+                          initialSpacing={0}
+                          xAxisLabelTextStyle={{
+                            fontSize: 10,
+                            color: '#000',
+                            fontWeight: '400',
+                            width: 40,
+                          }}
+                          barBorderRadius={2}
+                          isAnimated={true}
+                          maxValue={8}
+                          stepValue={1}
+                          hideDataPoints={false}
+                          spacing={20}
+                          formatYLabel={label => parseFloat(label).toFixed(0)}
+                        />
+                      </View>
+                    )}
+                    dotStyle={{backgroundColor: '#ccc', marginTop: 50}}
+                    activeDotStyle={{
+                      backgroundColor: AppColors.BLACK,
+                      marginTop: 50,
+                    }}
+                  />
+                </View>
+              )}
+            </>
+          ) : (
+            <View
+              style={{height: responsiveHeight(30), justifyContent: 'center'}}>
+              <SubscribeBar
+                title="Subscribe Now to Track Your Medications"
+                title2={'Unlock Full Access to Medication Tracking'}
+                handlePress={() => navigation.navigate('Subscription')}
+              />
+            </View>
           )}
 
           <View style={{marginTop: 20}}>
             <AppButton
-              title={'Go TO DATA VISUALIZER'}
+              title={'GO TO DATA VISUALIZER'}
               RightColour={AppColors.rightArrowCOlor}
               handlePress={() => navigation.navigate('DataVisualizer')}
             />

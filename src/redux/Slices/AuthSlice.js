@@ -8,11 +8,12 @@ const initialState = {
   loader: false,
   isExpired: true, 
   expireDate: "",
+  SubscriptionType: "",
   currentLocation : {
     Lat: null,
     Lng: null
   }
-};
+}
 
 
 export const CurrentLogin = createAsyncThunk(
@@ -55,8 +56,11 @@ export const AuthSlice = createSlice({
       state.loader = action.payload
     },
     setSubscription: (state, action) => {
+
+
       state.isExpired = action.payload.isExpired
       state.expireDate = action.payload.expireDate
+      state.SubscriptionType = action.payload.SubscriptionType
     },
     setCurrentLatLng: (state, action) => {
       console.log("act", action.payload)

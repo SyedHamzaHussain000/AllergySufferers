@@ -12,9 +12,10 @@ type props = {
   title?: String;
   price?: String;
   type?: String;
+  subscribeNow?: () => void;
 };
 
-const SubscriptionCard = ({price, title, type}: props) => {
+const SubscriptionCard = ({price, title, type, subscribeNow}: props) => {
   return (
     <View
       style={{
@@ -55,6 +56,7 @@ const SubscriptionCard = ({price, title, type}: props) => {
         textSize={2}
         bgColor={AppColors.WHITE}
         buttoWidth={80}
+        handlePress={subscribeNow}
       />
     </View>
   );

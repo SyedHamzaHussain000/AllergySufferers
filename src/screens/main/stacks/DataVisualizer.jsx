@@ -35,10 +35,13 @@ import {
   RadarChart,
 } from 'react-native-gifted-charts';
 import AppImages from '../../../assets/images/AppImages';
+import SubscribeBar from '../../../components/SubscribeBar';
 
 const DataVisualizer = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
   const userData = useSelector(state => state.auth.user);
+    const expireDate = useSelector(state => state.auth.expireDate);
+  
 
   const [type, setType] = useState('allergens');
   const [medicationData, setMedicationsData] = useState();
@@ -498,6 +501,11 @@ const DataVisualizer = ({navigation}) => {
           setOpen={() => setOpen(true)}
         />
 
+    {
+      expireDate ? (
+
+      <>
+      
         {DataVisualizerLoader == true ? (
           <View style={{height:responsiveHeight(30), alignItems:'center', justifyContent:'center'}}>
 
@@ -735,6 +743,7 @@ const DataVisualizer = ({navigation}) => {
             />
           </TouchableOpacity>
         </View>
+
         {pollenLoader && (
           <View style={{marginTop: 30}}>
             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
@@ -884,6 +893,19 @@ const DataVisualizer = ({navigation}) => {
             />
           </View>
         )}
+        </>
+      ):(
+        <View
+            style={{height: responsiveHeight(30), justifyContent: 'center'}}>
+            <SubscribeBar
+              title="Subscribe Now to access data visualizer"
+              title2={'Unlock Full Access to data visualizer'}
+              handlePress={() => navigation.navigate('Subscription')}
+            />
+          </View>
+      )
+    }
+        
       </ScrollView>
     </SafeAreaView>
   );

@@ -28,11 +28,13 @@ import LoaderMode from '../../components/LoaderMode';
 import DatePicker from 'react-native-date-picker';
 import {AllergyTips} from '../../utils/AllergyTips';
 import AppIntroSlider from 'react-native-app-intro-slider';
+import SubscribeBar from '../../components/SubscribeBar';
 
 const Symptom = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
   const sliderRef = useRef(null);
 
+  const expireDate = useSelector(state => state.auth.expireDate);
 
   const [randomTip, setRandomTip] = useState(null);
 
@@ -109,14 +111,11 @@ const Symptom = ({navigation}) => {
   }, [navigation]);
 
   useEffect(() => {
-  if (sliderRef.current && graphSlides.length > 0) {
-    // Jump to the last slide
-    sliderRef.current.goToSlide(graphSlides.length - 1, false); // false = don't trigger onSlideChange
-  }
-}, [graphSlides]);
-
-
-  
+    if (sliderRef.current && graphSlides.length > 0) {
+      // Jump to the last slide
+      sliderRef.current.goToSlide(graphSlides.length - 1, false); // false = don't trigger onSlideChange
+    }
+  }, [graphSlides]);
 
   const setApiSymtomsData = id => {
     setSymtomsNumber(id);
@@ -144,7 +143,7 @@ const Symptom = ({navigation}) => {
         .request(config)
         .then(response => {
           // getSymtomsData();
-          generateGraphSlides(selecteddate)
+          generateGraphSlides(selecteddate);
         })
         .catch(error => {
           console.log(error);
@@ -154,7 +153,7 @@ const Symptom = ({navigation}) => {
     }
   };
 
-  const generateGraphSlides = async (selectedDate) => {
+  const generateGraphSlides = async selectedDate => {
     setLoader(true);
     const slides = [];
     const today = moment(selectedDate ? selectedDate : new Date());
@@ -239,7 +238,7 @@ const Symptom = ({navigation}) => {
             setSelectedDate(formattedDate);
 
             // getSymtomsData(formattedDate);
-            generateGraphSlides(formattedDate)
+            generateGraphSlides(formattedDate);
           }}
           onCancel={() => {
             setOpen(false);
@@ -264,233 +263,137 @@ const Symptom = ({navigation}) => {
             setEndDate(formattedDate);
 
             // getSymtomsData(formattedDate);
-            generateGraphSlides(formattedDate)
+            generateGraphSlides(formattedDate);
           }}
           onCancel={() => {
             setEndOpen(false);
           }}
         />
-
-        <View>
-          {loader ? (
-            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-          ) : (
-            <FlatList
-              data={mojis}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{gap: 5, marginTop: 20}}
-              renderItem={({item}) => {
-
-                // console.log("emojis data", graphSlides[0])
-                return (
-                  <TouchableOpacity onPress={() => setApiSymtomsData(item.id)}>
-                    <Image
-                      source={item.img}
-                      style={{
-                        height: responsiveHeight(
-                          item.id == systomsNumber ? 10 : 8,
-                        ),
-                        width: responsiveHeight(
-                          item.id == systomsNumber ? 10 : 8,
-                        ),
-                        resizeMode: 'contain',
-                      }}
-                    />
-                    <AppText
-                      title={item.title}
-                      textAlignment={'center'}
-                      textSize={1.5}
-                      textFontWeight
-                    />
-                  </TouchableOpacity>
-                );
-              }}
-            />
-          )}
-        </View>
-
-        {/* <View
-          style={{
-            padding: 10,
-            borderWidth: 1,
-            borderRadius: 20,
-            paddingTop: 20,
-            marginTop: 20,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <LineChart
-            data={symtomsData || {labels: [], datasets: [{data: []}]}}
-            width={screenWidth * 0.89}
-            height={responsiveHeight(32)}
-            verticalLabelRotation={0}
-            chartConfig={chartConfig}
-            withShadow={false}
-            withVerticalLines={true}
-            bezier
-            withHorizontalLabels={false}
-            segments={5}
-            yAxisInterval={5}
-            yAxisLabel="0"
-          />
-
-          <View
-            style={{
-              position: 'absolute',
-              zIndex: 10,
-              height: responsiveHeight(30),
-              width: responsiveWidth(10),
-              left: 10,
-              marginBottom: 35,
-            }}>
-            <FlatList
-              data={mojis}
-              inverted
-              contentContainerStyle={{gap: 15}}
-              renderItem={({item}) => {
-                return (
-                  <Image
-                    source={item.img}
-                    style={{
-                      height: responsiveHeight(4),
-                      width: responsiveHeight(4),
-                      resizeMode: 'contain',
-                      alignSelf: 'center',
-                    }}
-                  />
-                );
-              }}
-            />
-          </View>
-        </View> */}
-          <View style={{height:responsiveHeight(45)}}>
-        <AppIntroSlider
-        ref={sliderRef}
-          data={graphSlides}
-          showNextButton={false}
-          showDoneButton={false}
-          showPrevButton={false}
-          activeDotStyle={{backgroundColor: AppColors.PRIMARY}}
-          dotStyle={{ backgroundColor: AppColors.LIGHTGRAY}}
-          
-          renderItem={({item}) => {
-
-            return (
-              <View
-                style={{
-                  padding: 10,
-                  borderWidth: 1,
-                  borderRadius: 20,
-                  paddingTop: 20,
-                  marginTop: 20,
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                }}>
-                <LineChart
-                  data={item?.chartData || {labels: [], datasets: [{data: []}]}}
-                  width={screenWidth * 0.89}
-                  height={responsiveHeight(30)}
-                  verticalLabelRotation={0}
-                  chartConfig={chartConfig}
-                  withShadow={false}
-                  withVerticalLines={true}
-                  bezier
-                  withHorizontalLabels={false}
-                  segments={5}
-                  yAxisInterval={5}
-                  fromZero={true}
-                  yAxisLabel="0"
-  
-                />
-
-                <View
-                  style={{
-                    position: 'absolute',
-                    zIndex: 10,
-                    height: responsiveHeight(25),
-                    width: responsiveWidth(10),
-                    left: 10,
-                    
-                  }}>
-                  <FlatList
-                    data={mojis}
-                    inverted
-                    contentContainerStyle={{gap: 5}}
-                    renderItem={({item}) => {
-                      return (
+        {expireDate ? (
+          <>
+            <View>
+              {loader ? (
+                <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+              ) : (
+                <FlatList
+                  data={mojis}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{gap: 5, marginTop: 20}}
+                  renderItem={({item}) => {
+                    // console.log("emojis data", graphSlides[0])
+                    return (
+                      <TouchableOpacity
+                        onPress={() => setApiSymtomsData(item.id)}>
                         <Image
                           source={item.img}
                           style={{
-                            height: responsiveHeight(4),
-                            width: responsiveHeight(4),
+                            height: responsiveHeight(
+                              item.id == systomsNumber ? 10 : 8,
+                            ),
+                            width: responsiveHeight(
+                              item.id == systomsNumber ? 10 : 8,
+                            ),
                             resizeMode: 'contain',
-                            alignSelf: 'center',
                           }}
                         />
-                      );
-                    }}
-                  />
-                </View>
-              </View>
-            );
-          }}
-        />
-        </View>
-        {/* <View
-          style={{
-            padding: 10,
-            borderWidth: 1,
-            borderRadius: 20,
-            paddingTop: 20,
-            marginTop: 20,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <LineChart
-            data={symtomsData || {labels: [], datasets: [{data: []}]}}
-            width={screenWidth * 0.89}
-            height={responsiveHeight(32)}
-            verticalLabelRotation={0}
-            chartConfig={chartConfig}
-            withShadow={false}
-            withVerticalLines={true}
-            bezier
-            withHorizontalLabels={false}
-            segments={5}
-            yAxisInterval={5}
-            yAxisLabel="0"
-          />
+                        <AppText
+                          title={item.title}
+                          textAlignment={'center'}
+                          textSize={1.5}
+                          textFontWeight
+                        />
+                      </TouchableOpacity>
+                    );
+                  }}
+                />
+              )}
+            </View>
+            <View style={{height: responsiveHeight(45)}}>
+              <AppIntroSlider
+                ref={sliderRef}
+                data={graphSlides}
+                showNextButton={false}
+                showDoneButton={false}
+                showPrevButton={false}
+                activeDotStyle={{backgroundColor: AppColors.PRIMARY}}
+                dotStyle={{backgroundColor: AppColors.LIGHTGRAY}}
+                renderItem={({item}) => {
+                  return (
+                    <View
+                      style={{
+                        padding: 10,
+                        borderWidth: 1,
+                        borderRadius: 20,
+                        paddingTop: 20,
+                        marginTop: 20,
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                      }}>
+                      <LineChart
+                        data={
+                          item?.chartData || {
+                            labels: [],
+                            datasets: [{data: []}],
+                          }
+                        }
+                        width={screenWidth * 0.89}
+                        height={responsiveHeight(30)}
+                        verticalLabelRotation={0}
+                        chartConfig={chartConfig}
+                        withShadow={false}
+                        withVerticalLines={true}
+                        bezier
+                        withHorizontalLabels={false}
+                        segments={5}
+                        yAxisInterval={5}
+                        fromZero={true}
+                        yAxisLabel="0"
+                      />
 
+                      <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 10,
+                          height: responsiveHeight(25),
+                          width: responsiveWidth(10),
+                          left: 10,
+                        }}>
+                        <FlatList
+                          data={mojis}
+                          inverted
+                          contentContainerStyle={{gap: 5}}
+                          renderItem={({item}) => {
+                            return (
+                              <Image
+                                source={item.img}
+                                style={{
+                                  height: responsiveHeight(4),
+                                  width: responsiveHeight(4),
+                                  resizeMode: 'contain',
+                                  alignSelf: 'center',
+                                }}
+                              />
+                            );
+                          }}
+                        />
+                      </View>
+                    </View>
+                  );
+                }}
+              />
+            </View>
+          </>
+        ) : (
           <View
-            style={{
-              position: 'absolute',
-              zIndex: 10,
-              height: responsiveHeight(30),
-              width: responsiveWidth(10),
-              left: 10,
-              marginBottom: 35,
-            }}>
-            <FlatList
-              data={mojis}
-              inverted
-              contentContainerStyle={{gap: 15}}
-              renderItem={({item}) => {
-                return (
-                  <Image
-                    source={item.img}
-                    style={{
-                      height: responsiveHeight(4),
-                      width: responsiveHeight(4),
-                      resizeMode: 'contain',
-                      alignSelf: 'center',
-                    }}
-                  />
-                );
-              }}
+            style={{height: responsiveHeight(30), justifyContent: 'center'}}>
+            <SubscribeBar
+              title="Subscribe Now to Track Your Symptoms"
+              title2={'Unlock Full Access to Symptoms Tracking'}
+              handlePress={() => navigation.navigate('Subscription')}
             />
           </View>
-        </View> */}
+        )}
 
         <View style={{marginTop: 0}}>
           <AppButton
@@ -507,25 +410,22 @@ const Symptom = ({navigation}) => {
             textFontWeight
           />
         </View>
-        
-        {
-           randomTip?.id == 26 ?
-           null :
 
-        <View style={{marginTop: 10}}>
-          <Text
-            style={{
-              fontSize: responsiveFontSize(2),
-              fontWeight: 'bold',
-              marginBottom: 5,
-            }}>
-            Allergy tip #{randomTip?.id}
-          </Text>
-          <Text style={{fontSize: responsiveFontSize(1.8), color: '#333'}}>
-            {randomTip?.tip}
-          </Text>
-        </View>
-        }
+        {randomTip?.id == 26 ? null : (
+          <View style={{marginTop: 10}}>
+            <Text
+              style={{
+                fontSize: responsiveFontSize(2),
+                fontWeight: 'bold',
+                marginBottom: 5,
+              }}>
+              Allergy tip #{randomTip?.id}
+            </Text>
+            <Text style={{fontSize: responsiveFontSize(1.8), color: '#333'}}>
+              {randomTip?.tip}
+            </Text>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );

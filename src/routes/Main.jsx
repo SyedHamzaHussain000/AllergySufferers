@@ -63,6 +63,12 @@ const Main = () => {
         name="ForcastExplaination"
         component={HomeWithSafeArea(ForcastExplaination)}
       />
+      <Stack.Screen
+        name="Subscription"
+        component={HomeWithSafeArea(Subscription)}
+      />
+  
+      
     </Stack.Navigator>
   );
 };

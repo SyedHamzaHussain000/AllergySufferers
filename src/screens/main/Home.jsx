@@ -42,6 +42,13 @@ import PointPollenSpores from '../../components/PointPollenSpores';
 const Home = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
 
+    const isExpiredRedux = useSelector(state => state.auth.isExpired);
+    const expireDate = useSelector(state => state.auth.expireDate);
+    const SubscriptionType = useSelector(state => state.auth.SubscriptionType);
+
+    console.log("isExpiredRedux",isExpiredRedux)
+    console.log("SubscriptionType",SubscriptionType)
+
   const slides = [
     {
       key: 1,
