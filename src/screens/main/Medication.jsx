@@ -12,6 +12,7 @@ import AppHeader from '../../components/AppHeader';
 import {
   responsiveFontSize,
   responsiveHeight,
+  responsiveWidth,
 } from '../../utils/Responsive_Dimensions';
 import AppText from '../../components/AppTextComps/AppText';
 import AppColors from '../../utils/AppColors';
@@ -43,6 +44,10 @@ const Medication = ({navigation}) => {
     moment(new Date()).format('YYYY-MM-DD'),
   );
   const [open, setOpen] = useState(false);
+
+  const [sliderScrollEnabled, setSliderScrollEnabled] = useState(false);
+const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  
 
   const setMedicationLoading = (id, isLoading) => {
     setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
@@ -105,7 +110,7 @@ const Medication = ({navigation}) => {
 
         entries.forEach(entry => {
           const formattedLabel = moment(entry.date, 'MMMM, DD YYYY').format(
-            'MMM DD',
+            'D',
           );
           const value = parseInt(entry.units) || 0;
 
@@ -228,6 +233,15 @@ const Medication = ({navigation}) => {
     }
   }, [MedicationnRecord]);
 
+  useEffect(() => {
+    if (sliderScrollEnabled) {
+      const timeout = setTimeout(() => {
+        setSliderScrollEnabled(true);
+      }, 300); // smooth delay
+      return () => clearTimeout(timeout);
+    }
+  }, [sliderScrollEnabled]);
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
@@ -260,7 +274,6 @@ const Medication = ({navigation}) => {
         <ScrollView contentContainerStyle={{flexGrow: 1}}>
           {expireDate ? (
             <>
-
               {allMedication.length > 0 ? (
                 <FlatList
                   data={allMedication}
@@ -362,29 +375,35 @@ const Medication = ({navigation}) => {
                     showNextButton={false}
                     showPrevButton={false}
                     showDoneButton={false}
-                    renderItem={({item}) => (
+                    nestedScrollEnabled={true}
+                    scrollEnabled={true}
+                    
+                    renderItem={({item, index}) => (
                       <View style={{alignItems: 'center'}}>
                         <Text style={{fontSize: 16}}>{item.title}</Text>
-                        <BarChart
-                          data={item.barData}
-                          barWidth={10}
-                          frontColor="#E23131"
-                          showLine={false}
-                          initialSpacing={0}
-                          xAxisLabelTextStyle={{
-                            fontSize: 10,
-                            color: '#000',
-                            fontWeight: '400',
-                            width: 40,
-                          }}
-                          barBorderRadius={2}
-                          isAnimated={true}
-                          maxValue={8}
-                          stepValue={1}
-                          hideDataPoints={false}
-                          spacing={20}
-                          formatYLabel={label => parseFloat(label).toFixed(0)}
-                        />
+                       
+                          <BarChart
+                            data={item.barData}
+                            barWidth={7}
+                            frontColor="#E23131"
+                            showLine={false}
+                            initialSpacing={0}
+                            xAxisLabelTextStyle={{
+                              fontSize: 10,
+                              color: '#000',
+                              fontWeight: '400',
+                              width: 40,
+                            }}
+                            width={responsiveWidth(100)}
+                            
+                            barBorderRadius={2}
+                            isAnimated={true}
+                            maxValue={8}
+                            stepValue={1}
+                            hideDataPoints={false}
+                            spacing={5}
+                            formatYLabel={label => parseFloat(label).toFixed(0)}
+                          />
                       </View>
                     )}
                     dotStyle={{backgroundColor: '#ccc', marginTop: 50}}

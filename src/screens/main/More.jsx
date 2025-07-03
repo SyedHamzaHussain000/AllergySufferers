@@ -94,7 +94,7 @@ const More = ({navigation}) => {
         </View>
 
         <AppButton
-          title={'Forecasting explanation'}
+          title={'Forecast explanation'}
           bgColor={AppColors.BTNCOLOURS}
           RightColour={'#3D56F0'}
           handlePress={()=> navigation.navigate("ForcastExplaination")}

@@ -36,12 +36,14 @@ import {
 } from 'react-native-gifted-charts';
 import AppImages from '../../../assets/images/AppImages';
 import SubscribeBar from '../../../components/SubscribeBar';
+import GetAllLocation from '../../../global/GetAllLocation';
+import {G} from 'react-native-svg';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DataVisualizer = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
   const userData = useSelector(state => state.auth.user);
-    const expireDate = useSelector(state => state.auth.expireDate);
-  
+  const expireDate = useSelector(state => state.auth.expireDate);
 
   const [type, setType] = useState('allergens');
   const [medicationData, setMedicationsData] = useState();
@@ -70,6 +72,12 @@ const DataVisualizer = ({navigation}) => {
 
   const [DataVisualizerLoader, setDataVisualizerLoader] = useState(false);
   const [allSymtoms, setAllSymtoms] = useState([]);
+
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState();
+
+  const [allCities, setAllCities] = useState([]);
+  const [pickedCity, setPickedCity] = useState();
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -146,6 +154,9 @@ const DataVisualizer = ({navigation}) => {
       'days',
     );
 
+    setStartDate(start);
+    setEndDate(end);
+
     const data = JSON.stringify({
       start_date: start.format('YYYY-MM-DD'),
       end_date: end.format('YYYY-MM-DD'),
@@ -170,9 +181,7 @@ const DataVisualizer = ({navigation}) => {
         const barData = [];
 
         allentriesArr.forEach(entry => {
-          const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format(
-            'MMM DD',
-          );
+          const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format('D');
           const value = parseInt(entry.units) || 0;
 
           if (!seenDates.has(entry.date)) {
@@ -228,79 +237,80 @@ const DataVisualizer = ({navigation}) => {
       });
   };
 
-  const getDataVisualizer = selecallergens => {
+  const getDataVisualizer = async selecallergens => {
 
-    console.log("selecallergens",selecallergens)
     if (!selecallergens || selecallergens.length === 0) {
       // no allergens selected, clear chart data
       setPrimaryLineData([]);
       setSecondaryLineData([]);
       return;
     }
-    setDataVisualizerLoader(true);
-    const allergenParams = selecallergens
-      .map(
-        item => `scientific_names[]=${encodeURIComponent(item.allergen_name)}`,
-      )
-      .join('&');
-    // console.log('selecteddate', selecteddate, 'allergenParams', allergenParams);
 
-    const dateis = moment(selecteddate)
-      .subtract('days', 6)
-      .format('YYYY-MM-DD');
+    const getCity = await AsyncStorage.getItem('isCity');
+    const parseCity = JSON.parse(getCity)
 
-    const config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=45.420057199999995&lng=-75.7003397&start_date=${dateis}&${allergenParams}`,
-      headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
-    };
+    setPickedCity(parseCity)
 
-    axios
-      .request(config)
-      .then(response => {
-        const apiData = response.data;
-        setAllSymtoms(apiData.symptom_level);
-        const chartLineData = {};
-        Object.keys(apiData).forEach(key => {
-          if (key !== 'dates' && key !== 'symptom_level') {
-            chartLineData[key] = apiData[key].map(val => ({value: val}));
-          }
+    if (getCity) {
+      setDataVisualizerLoader(true);
+      const allergenParams = selecallergens
+        .map(
+          item =>
+            `scientific_names[]=${encodeURIComponent(item.allergen_name)}`,
+        )
+        .join('&');
+      // console.log('selecteddate', selecteddate, 'allergenParams', allergenParams);
+
+      const dateis = moment(selecteddate)
+        .subtract('days', 6)
+        .format('YYYY-MM-DD');
+
+      const config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=${parseCity?.lat}&lng=${parseCity?.lng}&start_date=${dateis}&${allergenParams}`,
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      };
+
+      axios
+        .request(config)
+        .then(response => {
+          const apiData = response.data;
+          setAllSymtoms(apiData.symptom_level);
+          const chartLineData = {};
+          Object.keys(apiData).forEach(key => {
+            if (key !== 'dates' && key !== 'symptom_level') {
+              chartLineData[key] = apiData[key].map(val => ({value: val}));
+            }
+          });
+
+
+          //edited code
+          const first = selecallergens[0];
+          const second = selecallergens[1];
+
+          setPrimaryLineData(chartLineData[first?.allergen_name] || []);
+          setSecondaryLineData(chartLineData[second?.allergen_name] || []);
+
+          colours[0] = first?.chartColor || 'lightblue';
+          colours[1] = second?.chartColor || 'lightgreen';
+
+          setDataVisualizerLoader(false);
+        })
+        .then(response => {
+          setDataVisualizerLoader(false);
+        })
+        .catch(error => {
+          setDataVisualizerLoader(false);
+          console.log(error);
         });
-
-        // const allergenNames = Object.keys(chartLineData);
-
-        // setPrimaryLineData(chartLineData[allergenNames[0]] || []);
-        // setSecondaryLineData(chartLineData[allergenNames[1]] || []);    
-
-        //edited code
-        const first = selecallergens[0];
-        const second = selecallergens[1];
-
-        setPrimaryLineData(
-          chartLineData[first?.allergen_name] || []
-        );
-        setSecondaryLineData(
-          chartLineData[second?.allergen_name] || []
-        );
-
-        colours[0] = first?.chartColor || 'lightblue';
-        colours[1] = second?.chartColor || 'lightgreen';
-
-
-        setDataVisualizerLoader(false);
-      })
-      .then(response => {
-        setDataVisualizerLoader(false);
-      })
-      .catch(error => {
-        setDataVisualizerLoader(false);
-        console.log(error);
-      });
+    } else {
+      console.log("add city")
+    }
   };
 
   const addAllergens = item => {
@@ -339,7 +349,6 @@ const DataVisualizer = ({navigation}) => {
       .request(config)
       .then(response => {
         setPollenLoader(false);
-        // console.log(JSON.stringify(response.data));
         getSelectedAllergens();
       })
       .catch(error => {
@@ -366,7 +375,10 @@ const DataVisualizer = ({navigation}) => {
         console.log('allergens', response.data.allergens);
 
         //edited code
-              const coloredAllergens = assignColorsToAllergens(response.data.allergens, colours);
+        const coloredAllergens = assignColorsToAllergens(
+          response.data.allergens,
+          colours,
+        );
 
         // getDataVisualizer(response.data.allergens);
         // setTakingMedications(response.data.allergens);
@@ -475,14 +487,29 @@ const DataVisualizer = ({navigation}) => {
     setMedicationLoading(item.id, false);
   };
 
-
   const assignColorsToAllergens = (allergens, colors) => {
-  return allergens.map((item, index) => ({
-    ...item,
-    chartColor: colors[index % colors.length],
-  }));
-};
+    return allergens.map((item, index) => ({
+      ...item,
+      chartColor: colors[index % colors.length],
+    }));
+  };
 
+  const getLocation = async type => {
+    setType(type);
+    if (userData.email) {
+      const res = await GetAllLocation(userData.id);
+      console.log('res', res);
+
+      setAllCities(res.cities);
+    } else {
+      setAllCities();
+    }
+  };
+
+  const SelectLocation = async city => {
+    await AsyncStorage.setItem('isCity', JSON.stringify(city));
+    getSelectedAllergens()
+  };
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -501,373 +528,182 @@ const DataVisualizer = ({navigation}) => {
           setOpen={() => setOpen(true)}
         />
 
-    {
-      expireDate ? (
-
-      <>
-      
-        {DataVisualizerLoader == true ? (
-          <View style={{height:responsiveHeight(30), alignItems:'center', justifyContent:'center'}}>
-
-          <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-          </View>
-        ) : (
-          <View>
-            {MedicationnRecord?.length > 0 ? (
-              <View>
-                <ScrollView horizontal={true} style={{height:responsiveHeight(30)}}>
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      marginLeft: responsiveWidth(20),
-                      gap: 50,
-                      flexDirection: 'row',
-                    }}>
-                    {allSymtoms.map(item => {
-                      const emojiMap = {
-                        1: AppImages.Hello,
-                        2: AppImages.Mask,
-                        3: AppImages.Pain,
-                        4: AppImages.Star,
-                        5: AppImages.Bored,
-                      };
-
-                      return (
-                        <View>
-                          <Image
-                            source={
-                              item == 1
-                                ? emojiMap[1]
-                                : item == 2
-                                ? emojiMap[2]
-                                : item == 3
-                                ? emojiMap[3]
-                                : item == 4
-                                ? emojiMap[4]
-                                : item == 5
-                                ? emojiMap[5]
-                                : null
-                            }
-                            style={{
-                              height: 30,
-                              width: 30,
-                              resizeMode: 'contain',
-                            }}
-                          />
-                        </View>
-                      );
-                    })}
-                  </View>
-
-                  <BarChart
-                    data={MedicationnRecord || []}
-                    barWidth={10}
-                    frontColor="#E23131" // bar color
-                    showLine={
-                      PrimaryLineData.length > 0 || SecondaryLineData.length > 0
-                    }
-                    lineData={PrimaryLineData || []}
-                    lineData2={SecondaryLineData || []}
-                    lineConfig={{
-                      color: colours[0],
-                      thickness: 2,
-                      curved: false,
-                      dataPointsColor: colours[0],
-                      spacing: 70,
-                    }}
-                    lineConfig2={{
-                      color: colours[1],
-                      thickness: 2,
-                      curved: false,
-                      dataPointsColor: colours[1],
-                      spacing: 70,
-                    }}
-                    xAxisLabelTextStyle={{
-                      fontSize: 10, // 👈 smaller font size
-                      color: '#000', // optional, customize color
-                      fontWeight: '400', // optional
-                      labelWidth: 80,
-                    }}
-                    yAxisLabelTexts={['0', ' ', '2', ' ', '4', ' ', '6', ' ', '8']}
-
-                    barBorderRadius={2}
-                    isAnimated={true}
-                    noOfSections={8}
-                    spacing={40}
-                    formatYLabel={label => parseFloat(label).toFixed(0)}
-                    stepValue={1}
-                  />
-                </ScrollView>
-
-                <View
-                  style={{
-                    position: 'absolute',
-                    zIndex: 1,
-                    right: 0,
-                    height:responsiveHeight(30),
-                    gap: 30,
-                    
-                  }}>
-                  <AppText title={'Very High'} textSize={1.7} />
-                  <AppText title={'High'} textSize={1.7} />
-
-
-                    <AppText title={'Moderate'} textSize={1.7} />
-                    <AppText title={'Low'} textSize={1.7} />
-
-                </View>
-              </View>
-            ) : (
-              <AppText title={'No data available'} textSize={2} />
-            )}
+        {startDate && endDate && (
+          <View style={{marginTop: 20, marginBottom: 20}}>
+            <AppText
+              title={`${moment(startDate).format('MMM DD')} - ${moment(
+                endDate,
+              ).format('MMM DD')}`}
+              textSize={2}
+              textColor={AppColors.BLACK}
+              textAlignment={'center'}
+            />
           </View>
         )}
 
-      
-        <View
-          style={{
-            borderWidth: 1,
-            borderRadius: 10,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: 20,
-            backgroundColor: 'transparent',
-          }}>
-          <DatePicker
-            modal
-            open={open}
-            date={date}
-            mode="date"
-            maximumDate={new Date()}
-            onConfirm={selectedDate => {
-              setDate(selectedDate)
-              setOpen(false);
-              const today = moment().startOf('day');
-              const picked = moment(selectedDate).startOf('day');
-              const formattedDate = picked.format('YYYY-MM-DD');
-
-              setSelectedDate(formattedDate);
-              getMedicationRecords(formattedDate);
-            }}
-            onCancel={() => {
-              setOpen(false);
-            }}
-          />
-        </View>
-
-        <View>
-          <FlatList
-            data={takingMedications}
-            keyExtractor={item => item?.id?.toString()}
-            renderItem={({item, index}) => (
+        {expireDate ? (
+          <>
+            {DataVisualizerLoader == true ? (
               <View
                 style={{
-                  height: responsiveHeight(6),
-                  width: responsiveWidth(90),
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  borderColor: AppColors.LIGHTGRAY,
-                  marginTop: 5,
-                  backgroundColor: colours[index],
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
+                  height: responsiveHeight(30),
                   alignItems: 'center',
-                  paddingHorizontal: 20,
+                  justifyContent: 'center',
                 }}>
-                <AppText title={item.allergen_name} textSize={1.5} />
+                <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+              </View>
+            ) : (
+              <View>
+                {MedicationnRecord?.length > 0 ? (
+                  <View>
+                    <ScrollView
+                      horizontal={true}
+                      style={{height: responsiveHeight(30)}}>
+                      <View
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          marginLeft: responsiveWidth(20),
+                          gap: 50,
+                          flexDirection: 'row',
+                          zIndex: 100,
+                        }}>
+                        {allSymtoms.map(item => {
+                          const emojiMap = {
+                            1: AppImages.Hello,
+                            2: AppImages.Mask,
+                            3: AppImages.Pain,
+                            4: AppImages.Star,
+                            5: AppImages.Bored,
+                          };
 
-                {loadingItemId === item.id ? (
-                  <ActivityIndicator size="small" color={AppColors.LIGHTGRAY} />
+                          return (
+                            <View>
+                              <Image
+                                source={
+                                  item == 1
+                                    ? emojiMap[1]
+                                    : item == 2
+                                    ? emojiMap[2]
+                                    : item == 3
+                                    ? emojiMap[3]
+                                    : item == 4
+                                    ? emojiMap[4]
+                                    : item == 5
+                                    ? emojiMap[5]
+                                    : null
+                                }
+                                style={{
+                                  height: 30,
+                                  width: 30,
+                                  resizeMode: 'contain',
+                                }}
+                              />
+                            </View>
+                          );
+                        })}
+                      </View>
+
+                      <BarChart
+                        data={MedicationnRecord || []}
+                        barWidth={7}
+                        frontColor="#E23131" // bar color
+                        showLine={
+                          PrimaryLineData.length > 0 ||
+                          SecondaryLineData.length > 0
+                        }
+                        lineData={PrimaryLineData || []}
+                        lineData2={SecondaryLineData || []}
+                        lineConfig={{
+                          color: colours[0],
+                          thickness: 2,
+                          curved: false,
+                          dataPointsColor: colours[0],
+                          spacing: 80,
+                        }}
+                        lineConfig2={{
+                          color: colours[1],
+                          thickness: 2,
+                          curved: false,
+                          dataPointsColor: colours[1],
+                          spacing: 80,
+                        }}
+                        xAxisLabelTextStyle={{
+                          fontSize: 10, // 👈 smaller font size
+                          color: '#000', // optional, customize color
+                          fontWeight: '400', // optional
+                          labelWidth: 40,
+                        }}
+                        yAxisLabelTexts={[
+                          '0',
+                          ' ',
+                          '2',
+                          ' ',
+                          '4',
+                          ' ',
+                          '6',
+                          ' ',
+                          '8',
+                        ]}
+                        barBorderRadius={2}
+                        isAnimated={true}
+                        noOfSections={8}
+                        spacing={40}
+                        formatYLabel={label => parseFloat(label).toFixed(0)}
+                        stepValue={1}
+                      />
+                    </ScrollView>
+
+                    <View
+                      style={{
+                        position: 'absolute',
+                        zIndex: 1,
+                        right: 0,
+                        height: responsiveHeight(30),
+                        gap: 30,
+                      }}>
+                      <AppText title={'Very High'} textSize={1.5} />
+                      <AppText title={'High'} textSize={1.5} />
+
+                      <AppText title={'Moderate'} textSize={1.5} />
+                      <AppText title={'Low'} textSize={1.5} />
+                    </View>
+                  </View>
                 ) : (
-                  <TouchableOpacity onPress={() => deleteAllergens(item)}>
-                    <AntDesign
-                      name="minus"
-                      size={responsiveFontSize(2)}
-                      color={AppColors.LIGHTGRAY}
-                    />
-                  </TouchableOpacity>
+                  <AppText title={'No data available'} textSize={2} />
                 )}
               </View>
             )}
-          />
-        </View>
 
-        <View
-          style={{
-            marginTop: 20,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}>
-          <TouchableOpacity
-            onPress={() => getAllAllergens()}
-            style={{
-              height: responsiveHeight(5),
-              width: responsiveWidth(44),
-              backgroundColor:
-                type == 'allergens' ? AppColors.BTNCOLOURS : AppColors.WHITE,
-              borderRadius: 10,
-              borderWidth: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <AppText
-              title={'ALLERGENS'}
-              textColor={
-                type == 'allergens' ? AppColors.WHITE : AppColors.BLACK
-              }
-              textSize={2}
-              textFontWeight
+            <DatePicker
+              modal
+              open={open}
+              date={date}
+              mode="date"
+              maximumDate={new Date()}
+              onConfirm={selectedDate => {
+                setDate(selectedDate);
+                setOpen(false);
+                const today = moment().startOf('day');
+                const picked = moment(selectedDate).startOf('day');
+                const formattedDate = picked.format('YYYY-MM-DD');
+
+                setSelectedDate(formattedDate);
+                getMedicationRecords(formattedDate);
+              }}
+              onCancel={() => {
+                setOpen(false);
+              }}
             />
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => getMedicationApi()}
-            style={{
-              height: responsiveHeight(5),
-              width: responsiveWidth(44),
-              borderWidth: 1,
-              borderRadius: 10,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor:
-                type == 'medication' ? AppColors.BTNCOLOURS : AppColors.WHITE,
-            }}>
-            <AppText
-              title={'MEDICATIONS'}
-              textColor={
-                type == 'medication' ? AppColors.WHITE : AppColors.BLACK
-              }
-              textSize={2}
-              textFontWeight
-            />
-          </TouchableOpacity>
-        </View>
-
-        {pollenLoader && (
-          <View style={{marginTop: 30}}>
-            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-          </View>
-        )}
-        {type == 'medication' ? (
-          <View>
-            {/* <FlatList
-              data={medicationData}
-              contentContainerStyle={{marginTop: 20, paddingBottom: 100}}
-              renderItem={({item, index}) => {
-                return (
+            <View style={{gap:20}}>
+            <View>
+            <AppText title={"Allergens"} textSize={2} textFontWeight/>
+              <FlatList
+                data={takingMedications}
+                keyExtractor={item => item?.id?.toString()}
+                renderItem={({item, index}) => (
                   <View
-                    style={{
-                      borderWidth: 1,
-                      backgroundColor: item.frontColor,
-                      borderTopRightRadius: index == 0 ? 10 : 0,
-                      borderTopLeftRadius: index == 0 ? 10 : 0,
-                      borderBottomRightRadius:
-                        index == medicationData?.length - 1 ? 10 : 0,
-                      borderBottomLeftRadius:
-                        index == medicationData?.length - 1 ? 10 : 0,
-                      padding: 20,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      borderBottomWidth:
-                        index == medicationData?.length - 1 ? 1 : 0,
-                    }}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        gap: 10,
-                        alignItems: 'center',
-                      }}>
-
-                      <AppText
-                        title={item.name}
-                        textSize={2}
-                        textColor={AppColors.BLACK}
-                        textFontWeight
-                        textwidth={70}
-                      />
-                    </View>
-                  </View>
-                );
-              }}
-            /> */}
-
-            <FlatList
-              data={medicationData}
-              contentContainerStyle={{
-                gap: 10,
-                marginTop: 20,
-                marginBottom: 20,
-              }}
-              renderItem={({item}) => {
-                return (
-                  <View
-                    style={{
-                      borderWidth: 2.5,
-                      borderRadius: 10,
-                      borderColor: item.frontColor,
-                      height: responsiveHeight(6),
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      paddingHorizontal: 10,
-                      justifyContent: 'space-between',
-                    }}>
-                    <AppText
-                      title={item.name}
-                      textSize={1.6}
-                      textColor={AppColors.BLACK}
-                    />
-
-                    {medicationLoadingMap[item?.id] ? (
-                      <ActivityIndicator
-                        size={'small'}
-                        color={AppColors.BLACK}
-                      />
-                    ) : (
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 10,
-                        }}>
-                        <TouchableOpacity
-                          onPress={() => removeMedication(item)}>
-                          <AntDesign
-                            name={'minus'}
-                            size={responsiveFontSize(2)}
-                            color={AppColors.LIGHTGRAY}
-                          />
-                        </TouchableOpacity>
-
-                        <AppText
-                          title={item?.units || 0}
-                          textColor={AppColors.LIGHTGRAY}
-                          textSize={2.5}
-                        />
-
-                        <TouchableOpacity onPress={() => addMedication(item)}>
-                          <AntDesign
-                            name={'plus'}
-                            size={responsiveFontSize(2)}
-                            color={AppColors.LIGHTGRAY}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </View>
-                );
-              }}
-            />
-          </View>
-        ) : (
-          <View>
-            <FlatList
-              data={todayPollensData}
-              renderItem={({item}) => {
-                return (
-                  <TouchableOpacity
-                    onPress={() => addAllergens(item)}
                     style={{
                       height: responsiveHeight(6),
                       width: responsiveWidth(90),
@@ -875,27 +711,279 @@ const DataVisualizer = ({navigation}) => {
                       borderRadius: 10,
                       borderColor: AppColors.LIGHTGRAY,
                       marginTop: 5,
+                      backgroundColor: colours[index],
                       flexDirection: 'row',
-                      gap: 10,
+                      justifyContent: 'space-between',
                       alignItems: 'center',
                       paddingHorizontal: 20,
                     }}>
-                    <AntDesign
-                      name={'pluscircle'}
-                      size={responsiveFontSize(2.5)}
-                      color={AppColors.BTNCOLOURS}
-                    />
+                    <AppText title={item.allergen_name} textSize={1.5} />
 
-                    <AppText title={item.common_name} textSize={1.5} />
-                  </TouchableOpacity>
-                );
-              }}
-            />
-          </View>
-        )}
-        </>
-      ):(
-        <View
+                    {loadingItemId === item.id ? (
+                      <ActivityIndicator
+                        size="small"
+                        color={AppColors.LIGHTGRAY}
+                      />
+                    ) : (
+                      <TouchableOpacity onPress={() => deleteAllergens(item)}>
+                        <AntDesign
+                          name="minus"
+                          size={responsiveFontSize(2)}
+                          color={AppColors.LIGHTGRAY}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+              />
+              </View>
+
+                {
+                  pickedCity && (
+                    
+            <View style={{gap:10}}>
+              <AppText title={"City"} textSize={2} textFontWeight/>
+              <View style={{height:50, width:responsiveWidth(90), alignSelf:'center', backgroundColor:AppColors.PEACHCOLOUR, borderRadius:10, alignItems:'center', justifyContent:'space-between', flexDirection:'row', paddingHorizontal:20}}>
+                <AppText title={pickedCity?.city_name} textSize={2} textFontWeight textColor={AppColors.BLACK}/>
+                
+                   <TouchableOpacity onPress={async() => await AsyncStorage.removeItem('isCity')}>
+                        <AntDesign
+                          name="minus"
+                          size={responsiveFontSize(2)}
+                          color={AppColors.LIGHTGRAY}
+                        />
+                      </TouchableOpacity>
+
+              </View>
+            </View>
+                  )
+                }
+            </View>
+
+            <View>
+              <View
+                style={{
+                  marginTop: 20,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}>
+                <TouchableOpacity
+                  onPress={() => getAllAllergens()}
+                  style={{
+                    height: responsiveHeight(5),
+                    width: responsiveWidth(44),
+                    backgroundColor:
+                      type == 'allergens'
+                        ? AppColors.BTNCOLOURS
+                        : AppColors.WHITE,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <AppText
+                    title={'ALLERGENS'}
+                    textColor={
+                      type == 'allergens' ? AppColors.WHITE : AppColors.BLACK
+                    }
+                    textSize={2}
+                    textFontWeight
+                  />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => getMedicationApi()}
+                  style={{
+                    height: responsiveHeight(5),
+                    width: responsiveWidth(44),
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor:
+                      type == 'medication'
+                        ? AppColors.BTNCOLOURS
+                        : AppColors.WHITE,
+                  }}>
+                  <AppText
+                    title={'MEDICATIONS'}
+                    textColor={
+                      type == 'medication' ? AppColors.WHITE : AppColors.BLACK
+                    }
+                    textSize={2}
+                    textFontWeight
+                  />
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                onPress={() => getLocation('Add Location')}
+                style={{
+                  height: responsiveHeight(5),
+                  width: responsiveWidth(90),
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor:
+                    type == 'Add Location'
+                      ? AppColors.BTNCOLOURS
+                      : AppColors.WHITE,
+                  marginTop: 10,
+                }}>
+                <AppText
+                  title={'Add Location'}
+                  textColor={
+                    type == 'Add Location' ? AppColors.WHITE : AppColors.BLACK
+                  }
+                  textSize={2}
+                  textFontWeight
+                />
+              </TouchableOpacity>
+            </View>
+
+            {pollenLoader && (
+              <View style={{marginTop: 30}}>
+                <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+              </View>
+            )}
+            {type == 'medication' ? (
+              <View>
+                <FlatList
+                  data={medicationData}
+                  contentContainerStyle={{
+                    gap: 10,
+                    marginTop: 20,
+                    marginBottom: 20,
+                  }}
+                  renderItem={({item}) => {
+                    return (
+                      <View
+                        style={{
+                          borderWidth: 2.5,
+                          borderRadius: 10,
+                          borderColor: item.frontColor,
+                          height: responsiveHeight(6),
+                          alignItems: 'center',
+                          flexDirection: 'row',
+                          paddingHorizontal: 10,
+                          justifyContent: 'space-between',
+                        }}>
+                        <AppText
+                          title={item.name}
+                          textSize={1.6}
+                          textColor={AppColors.BLACK}
+                        />
+
+                        {medicationLoadingMap[item?.id] ? (
+                          <ActivityIndicator
+                            size={'small'}
+                            color={AppColors.BLACK}
+                          />
+                        ) : (
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              gap: 10,
+                            }}>
+                            <TouchableOpacity
+                              onPress={() => removeMedication(item)}>
+                              <AntDesign
+                                name={'minus'}
+                                size={responsiveFontSize(2)}
+                                color={AppColors.LIGHTGRAY}
+                              />
+                            </TouchableOpacity>
+
+                            <AppText
+                              title={item?.units || 0}
+                              textColor={AppColors.LIGHTGRAY}
+                              textSize={2.5}
+                            />
+
+                            <TouchableOpacity
+                              onPress={() => addMedication(item)}>
+                              <AntDesign
+                                name={'plus'}
+                                size={responsiveFontSize(2)}
+                                color={AppColors.LIGHTGRAY}
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  }}
+                />
+              </View>
+            ) : type == 'allergens' ? (
+              <View>
+                <FlatList
+                  data={todayPollensData}
+                  renderItem={({item}) => {
+                    return (
+                      <TouchableOpacity
+                        onPress={() => addAllergens(item)}
+                        style={{
+                          height: responsiveHeight(6),
+                          width: responsiveWidth(90),
+                          borderWidth: 1,
+                          borderRadius: 10,
+                          borderColor: AppColors.LIGHTGRAY,
+                          marginTop: 5,
+                          flexDirection: 'row',
+                          gap: 10,
+                          alignItems: 'center',
+                          paddingHorizontal: 20,
+                        }}>
+                        <AntDesign
+                          name={'pluscircle'}
+                          size={responsiveFontSize(2.5)}
+                          color={AppColors.BTNCOLOURS}
+                        />
+
+                        <AppText title={item.common_name} textSize={1.5} />
+                      </TouchableOpacity>
+                    );
+                  }}
+                />
+              </View>
+            ) : (
+              <View>
+                <FlatList
+                  data={allCities}
+                  renderItem={({item}) => {
+                    return (
+                      <TouchableOpacity
+                        onPress={() => SelectLocation(item)}
+                        style={{
+                          height: responsiveHeight(6),
+                          width: responsiveWidth(90),
+                          borderWidth: 1,
+                          borderRadius: 10,
+                          borderColor: AppColors.LIGHTGRAY,
+                          marginTop: 5,
+                          flexDirection: 'row',
+                          gap: 10,
+                          alignItems: 'center',
+                          paddingHorizontal: 20,
+                        }}>
+                        <AntDesign
+                          name={'pluscircle'}
+                          size={responsiveFontSize(2.5)}
+                          color={AppColors.BTNCOLOURS}
+                        />
+
+                        <AppText title={item.city_name} textSize={1.5} />
+                      </TouchableOpacity>
+                    );
+                  }}
+                />
+              </View>
+            )}
+          </>
+        ) : (
+          <View
             style={{height: responsiveHeight(30), justifyContent: 'center'}}>
             <SubscribeBar
               title="Subscribe Now to access data visualizer"
@@ -903,9 +991,7 @@ const DataVisualizer = ({navigation}) => {
               handlePress={() => navigation.navigate('Subscription')}
             />
           </View>
-      )
-    }
-        
+        )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -210,10 +210,9 @@ const Home = ({navigation}) => {
         };
 
         if (userData) {
-          console.log('userData...............', userData);
+
           const res = await AddCityApi(userData.id, city, Lat, Lng);
 
-          console.log('Response is ........ =====>', res);
 
           if (res.status) {
             console.log('Something went wrong', res.details);
@@ -479,6 +478,7 @@ const Home = ({navigation}) => {
                     showNextButton={false}
                     onSlideChange={index => getPollensData(AllCities, index)}
                     renderItem={({item, index}) => {
+                      console.log("item", item)
                       return (
                         <>
                           <View
@@ -495,20 +495,21 @@ const Home = ({navigation}) => {
                                 style={{marginTop: 6}}
                               />
                               <View>
-                                {pollenLoader == true ? (
+                                {/* {pollenLoader == true ? (
                                   <ActivityIndicator
                                     size={'small'}
                                     color={AppColors.BLACK}
                                   />
-                                ) : (
+                                ) : ( */}
                                   <AppText
                                     title={
-                                      pollenData?.user?.locations?.closest?.name
+                                      // pollenData?.user?.locations?.closest?.name
+                                      item.city_name
                                     }
                                     textSize={2.5}
                                     textFontWeight
                                   />
-                                )}
+                                {/* )} */}
                                 <AppText
                                   title={'Allergen Forecast'}
                                   textSize={2}
@@ -601,13 +602,19 @@ const Home = ({navigation}) => {
                             flexDirection: 'row',
                           }}
                           renderItem={({item}) => {
+
                             const index = todayPollensData?.current.findIndex(
                               p => p.scientific_name === item.name,
                             );
                             const todayPollenInAir = todayPollensData?.current;
 
+
+
+
                             return (
                               <View style={{gap: 10}}>
+                                
+                                
                                 <AppText
                                   title={item.common_name}
                                   textAlignment={'center'}
@@ -911,9 +918,12 @@ const Home = ({navigation}) => {
                       <FlatList
                         data={sortedPollenData}
                         renderItem={({item, index}) => {
-                          // console.log("TODAY", item)
+                          console.log("TODAY..............", item.type)
                           return (
+                            <View>
+                              
                             <PointPollenSpores PollenSporesArr={sortedPollenData} index={index} item={item} selected={selected}/>
+                            </View>
                           );
                         }}
                       />

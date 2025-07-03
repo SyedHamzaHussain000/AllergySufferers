@@ -182,7 +182,7 @@ const Symptom = ({navigation}) => {
       const data = response?.data?.symptoms || [];
 
       const labels = data.map(item =>
-        moment(item.date, 'MMM, DD YYYY').format('MMM D'),
+        moment(item.date, 'MMM, DD YYYY').format('D'),
       );
 
       const values = data.map(item => parseInt(item.symptom_level));

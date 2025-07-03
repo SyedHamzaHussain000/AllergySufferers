@@ -9,55 +9,27 @@ import BASE_URL from '../../utils/BASE_URL';
 import axios from 'axios';
 import {setSubscription} from '../../redux/Slices/AuthSlice';
 import moment from 'moment';
+import CheckSubscription from '../../global/CheckSubscription';
 
 const GetStarted = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
 
   const [subLoader, setSubLoader] = useState(false);
-  const checkLoginandPremium = () => {
+  const checkLoginandPremium = async() => {
     if (userData?.email) {
       setSubLoader(true);
-      let config = {
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/check_premium`,
-        headers: {},
-      };
+      
+      const checkSub = await CheckSubscription(userData.id)
+      if(checkSub.expiry){
 
-      axios
-        .request(config)
-        .then(response => {
-          console.log('Subscription data: ', response.data);
+        dispatch(setSubscription({isExpired: false, expireDate: checkSub?.expiry }))
+        navigation.navigate('Main');
+      }else{
+        dispatch(setSubscription({isExpired: true, expireDate: ""}))
+        navigation.navigate('Main');
+      }
 
-          setSubLoader(false);
-          const expiry = response?.data?.expiry;
-
-
-
-          if (response.data) {
-            const isExpired = moment().isAfter(
-              moment(expiry, 'YYYY-MM-DD'),
-            );
-
-            dispatch(
-              setSubscription({
-                isExpired: isExpired,
-                expiry: expiry,
-              }),
-            );
-
-
-            if (isExpired == false) {
-              navigation.navigate('Main');
-            } else {
-              navigation.navigate('Subscription');
-            }
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
     } else {
       navigation.navigate('Subscription');
     }

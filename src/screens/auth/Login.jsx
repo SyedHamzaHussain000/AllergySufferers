@@ -26,6 +26,8 @@ const userData = useSelector(state => state.auth.user)
     }
   },[userData])
 
+  // dispatch(setLoader(false))
+
   const LoginUser = () => {
     if(email === '' || password === ''){
       if(Platform.OS === 'android'){

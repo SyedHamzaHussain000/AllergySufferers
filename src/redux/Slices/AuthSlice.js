@@ -1,29 +1,31 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import axios from 'axios';
 import {signOut} from '../../screens/auth/SignInWithGoogle';
+import CheckSubscription from '../../global/CheckSubscription';
 
 const initialState = {
   user: null,
   showError: '',
   loader: false,
-  isExpired: true, 
-  expireDate: "",
-  SubscriptionType: "",
-  currentLocation : {
+  isExpired: true,
+  expireDate: '',
+  SubscriptionType: '',
+  currentLocation: {
     Lat: null,
-    Lng: null
-  }
-}
-
+    Lng: null,
+  },
+};
 
 export const CurrentLogin = createAsyncThunk(
   'user',
   async (config, {rejectWithValue}) => {
     try {
       const {data} = await axios.request(config);
-      console.log('............', data);
 
-      return data; // Return the login response data to the slice
+      const subData = await CheckSubscription(data.id);
+
+
+      return {data, subData}; // Return the login response data to the slice
     } catch (error) {
       // console.log('Error during login:', error);
       return rejectWithValue(error.response?.data || 'Login failed'); // Handle errors
@@ -38,46 +40,42 @@ export const AuthSlice = createSlice({
     setData: (state, action) => {
       // Redux Toolkit allows us to write "mutating" logic in reducers. It
       state.user = action.payload;
-
     },
     setLogout: state => {
-      
       state.user = null;
-      state.expireDate = ""
-      state.isExpired = true
-      state.currentLocation.Lat = null
-      state.currentLocation.Lng = null
-
+      state.expireDate = '';
+      state.isExpired = true;
+      state.currentLocation.Lat = null;
+      state.currentLocation.Lng = null;
     },
     setCurrentUserData: (state, action) => {
       state.user = action.payload;
     },
     setLoader: (state, action) => {
-      state.loader = action.payload
+      state.loader = action.payload;
     },
     setSubscription: (state, action) => {
-
-
-      state.isExpired = action.payload.isExpired
-      state.expireDate = action.payload.expireDate
-      state.SubscriptionType = action.payload.SubscriptionType
+      state.isExpired = action.payload.isExpired;
+      state.expireDate = action.payload.expireDate;
+      state.SubscriptionType = action.payload.SubscriptionType;
     },
     setCurrentLatLng: (state, action) => {
-      console.log("act", action.payload)
-      state.currentLocation.Lat = action.payload.Lat
-      state.currentLocation.Lng = action.payload.Lng
-    }
+      console.log('act', action.payload);
+      state.currentLocation.Lat = action.payload.Lat;
+      state.currentLocation.Lng = action.payload.Lng;
+    },
   },
   extraReducers: builder => {
     builder
       .addCase(CurrentLogin.fulfilled, (state, action) => {
-        
-        state.user = action.payload
+        state.user = action.payload.data;
         state.loader = false;
-        
+        state.expireDate = action?.payload?.subData?.expiry
+        if(action?.payload?.subData?.expiry){
+          state.isExpired = action?.payload?.subData?.false
+        }
       })
-      .addCase(CurrentLogin.pending, (state, action) => {
-      })
+      .addCase(CurrentLogin.pending, (state, action) => {})
       .addCase(CurrentLogin.rejected, (state, action) => {
         state.loader = false;
       });
@@ -91,7 +89,7 @@ export const {
   setLoader,
   setCurrentUserData,
   setSubscription,
-  setCurrentLatLng
+  setCurrentLatLng,
 } = AuthSlice.actions;
 
 export default AuthSlice.reducer;
