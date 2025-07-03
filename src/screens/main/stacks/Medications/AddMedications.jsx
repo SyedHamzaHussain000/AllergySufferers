@@ -6,6 +6,7 @@ import {
   TextInput,
   SafeAreaView,
   ScrollView,
+  Modal,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -34,6 +35,8 @@ const AddMedications = ({navigation}) => {
   const [MedicationLoader, setMedciationLoader] = useState(false);
 
   const [search, setSearch] = useState('');
+
+  const [addYourMedication, SetAddYourMedication] = useState(false);
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -66,6 +69,12 @@ const AddMedications = ({navigation}) => {
   };
 
   const AddMedicationActive = medicationdata => {
+    if (medicationdata.id === 6082) {
+      console.log('other', medicationdata);
+      SetAddYourMedication(true);
+      return;
+    }
+
     setMedciationLoader(true);
     let data = JSON.stringify({
       data: [medicationdata.id],
@@ -100,6 +109,7 @@ const AddMedications = ({navigation}) => {
       });
   };
 
+  const AddCustomMedication = () => {};
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={{padding: 20}}>
@@ -116,6 +126,38 @@ const AddMedications = ({navigation}) => {
         />
 
         {MedicationLoader && <LoaderMode />}
+
+        <Modal
+          visible={addYourMedication}
+          style={{padding: 20}}
+          animationType="fade">
+          <View style={{padding: 20}}>
+            <TouchableOpacity
+              style={{height: 30, width: 30}}
+              onPress={() => SetAddYourMedication(false)}>
+              <AppText title={'X'} textSize={3} />
+            </TouchableOpacity>
+            <AppText title={'Add Medication'} textSize={3} textFontWeight />
+
+            <TextInput
+              placeholder="Enter your medication name here"
+              style={{
+                borderWidth: 1,
+                borderRadius: 10,
+                paddingHorizontal: 10,
+                color: AppColors.BLACK,
+                marginTop: 20,
+              }}
+            />
+
+            <View style={{marginTop: 20}}>
+              <AppButton
+                title={'Add Medication'}
+                handlePress={() => AddCustomMedication()}
+              />
+            </View>
+          </View>
+        </Modal>
 
         <View style={{gap: 10}}>
           <AppTextInput

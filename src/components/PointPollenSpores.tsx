@@ -65,13 +65,13 @@ const PointPollenSpores = ({PollenSporesArr,index,item,selected, containerwidth}
                                         : 0,
                                   }}>
                                     <View >
-                                    {
+
                                       <View style={{marginBottom:10, flexDirection:'row', alignItems:'center', justifyContent:'space-between', width: selected == "Future" ? responsiveWidth(70) : responsiveWidth(80)}}>
                                         <AppText title={item.type} textSize={2} textFontWeight />
 
                                         <Image  source={item.type == "spore" ? AppImages.spores : AppImages.pollen} style={{height:40, width:40, resizeMode:'contain'}}/>
                                       </View>
-                                    }
+
                                     <View
                                       style={{
                                         flexDirection: 'row',
