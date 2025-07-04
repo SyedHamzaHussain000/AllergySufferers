@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   Modal,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -36,6 +37,8 @@ const AddMedications = ({navigation}) => {
 
   const [search, setSearch] = useState('');
 
+  const [customMecication, setCustomMedication] = useState("")
+  const [customMecicationLoader, setCustomMedicationLoader] = useState(false)
   const [addYourMedication, SetAddYourMedication] = useState(false);
 
   useEffect(() => {
@@ -109,7 +112,45 @@ const AddMedications = ({navigation}) => {
       });
   };
 
-  const AddCustomMedication = () => {};
+  const AddCustomMedication = () => {
+
+    if(customMecication == ""){
+     return  Alert.alert("Please type a medication name")
+    }
+
+    setCustomMedicationLoader(true)
+    
+
+    
+
+    let data = JSON.stringify({
+      custom_medication: customMecication,
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_medication_custom`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        Alert.alert(`${customMecication} Medication added`)
+        setCustomMedicationLoader(false)
+        getMedicationApi()
+      })
+      .catch(error => {
+        console.log(error);
+        setCustomMedicationLoader(false)
+        getMedicationApi()
+      });
+  };
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={{padding: 20}}>
@@ -148,12 +189,17 @@ const AddMedications = ({navigation}) => {
                 color: AppColors.BLACK,
                 marginTop: 20,
               }}
+              onChangeText={(txt)=>{
+                setCustomMedication(txt)
+              }}
+              value={customMecication}
             />
 
             <View style={{marginTop: 20}}>
               <AppButton
                 title={'Add Medication'}
                 handlePress={() => AddCustomMedication()}
+                isLoading={customMecicationLoader}
               />
             </View>
           </View>

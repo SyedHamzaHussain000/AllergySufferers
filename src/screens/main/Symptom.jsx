@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -211,7 +212,7 @@ const Symptom = ({navigation}) => {
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
-      <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
+      <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1,}}>
         <AppHeader
           heading="Symptom"
           Rightheading="Today"
@@ -220,7 +221,7 @@ const Symptom = ({navigation}) => {
           setOpen={() => setOpen(!open)}
         />
 
-        {
+        { 
           //start date
         }
         <DatePicker
@@ -248,7 +249,6 @@ const Symptom = ({navigation}) => {
         {
           //End date
         }
-
         <DatePicker
           modal
           open={endopen}
@@ -269,6 +269,7 @@ const Symptom = ({navigation}) => {
             setEndOpen(false);
           }}
         />
+        <ScrollView contentContainerStyle={{flexGrow:1, paddingBottom:50}} showsVerticalScrollIndicator={false}>
         {expireDate ? (
           <>
             <View>
@@ -279,7 +280,7 @@ const Symptom = ({navigation}) => {
                   data={mojis}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{gap: 5, marginTop: 20}}
+                  contentContainerStyle={{gap: 10, marginTop: 20}}
                   renderItem={({item}) => {
                     // console.log("emojis data", graphSlides[0])
                     return (
@@ -289,10 +290,10 @@ const Symptom = ({navigation}) => {
                           source={item.img}
                           style={{
                             height: responsiveHeight(
-                              item.id == systomsNumber ? 10 : 8,
+                              item.id == systomsNumber ? 8 : 6,
                             ),
                             width: responsiveHeight(
-                              item.id == systomsNumber ? 10 : 8,
+                              item.id == systomsNumber ? 9 : 7,
                             ),
                             resizeMode: 'contain',
                           }}
@@ -342,13 +343,14 @@ const Symptom = ({navigation}) => {
                         verticalLabelRotation={0}
                         chartConfig={chartConfig}
                         withShadow={false}
-                        withVerticalLines={true}
+                        withVerticalLines={false}
                         bezier
                         withHorizontalLabels={false}
                         segments={5}
                         yAxisInterval={5}
                         fromZero={true}
                         yAxisLabel="0"
+                        
                       />
 
                       <View
@@ -419,13 +421,14 @@ const Symptom = ({navigation}) => {
                 fontWeight: 'bold',
                 marginBottom: 5,
               }}>
-              Allergy tip #{randomTip?.id}
+              Allergy tip 
             </Text>
             <Text style={{fontSize: responsiveFontSize(1.8), color: '#333'}}>
               {randomTip?.tip}
             </Text>
           </View>
         )}
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

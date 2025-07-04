@@ -37,6 +37,7 @@ import AppButton from '../../components/AppButton';
 import {GetCurrentLocation} from '../../global/GetCurrentLocation';
 import {AddCityApi} from '../../global/AddCityApi';
 import PointPollenSpores from '../../components/PointPollenSpores';
+import GetLocation from '../../global/GetLocation';
 // import AddCityApi from '../../global/AddCityApi';
 
 const Home = ({navigation}) => {
@@ -110,9 +111,7 @@ const Home = ({navigation}) => {
         getActivePollens();
         getAllCities();
       } else {
-        setLoadCities(true);
-        const currentLatLng = await GetCurrentLocation();
-        getPollensDataLatLng(currentLatLng?.latitude, currentLatLng?.longitude);
+        
       }
     });
 
@@ -318,6 +317,9 @@ const Home = ({navigation}) => {
           setLoadCities(false);
         } else {
           const currentLatLng = await GetCurrentLocation();
+
+      
+
           getPollensDataLatLng(
             currentLatLng?.latitude,
             currentLatLng?.longitude,
