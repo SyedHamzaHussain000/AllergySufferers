@@ -410,6 +410,7 @@ const Symptom = ({navigation}) => {
             textSize={3}
             textColor={AppColors.BLACK}
             textFontWeight
+            textAlignment={'center'}
           />
         </View>
 

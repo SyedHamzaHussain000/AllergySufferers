@@ -509,7 +509,16 @@ const DataVisualizer = ({navigation}) => {
   const SelectLocation = async city => {
     await AsyncStorage.setItem('isCity', JSON.stringify(city));
     getSelectedAllergens()
-  };
+  }
+
+  const removeCity  = async () => {
+
+    console.log("remove citu")
+    await AsyncStorage.removeItem('isCity')
+    getSelectedAllergens()
+  }
+
+
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -746,7 +755,7 @@ const DataVisualizer = ({navigation}) => {
               <View style={{height:50, width:responsiveWidth(90), alignSelf:'center', backgroundColor:AppColors.PEACHCOLOUR, borderRadius:10, alignItems:'center', justifyContent:'space-between', flexDirection:'row', paddingHorizontal:20}}>
                 <AppText title={pickedCity?.city_name} textSize={2} textFontWeight textColor={AppColors.BLACK}/>
                 
-                   <TouchableOpacity onPress={async() => await AsyncStorage.removeItem('isCity')}>
+                   <TouchableOpacity onPress={() => removeCity()}>
                         <AntDesign
                           name="minus"
                           size={responsiveFontSize(2)}
