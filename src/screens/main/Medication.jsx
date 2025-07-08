@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
 import {
   responsiveFontSize,
@@ -46,8 +46,7 @@ const Medication = ({navigation}) => {
   const [open, setOpen] = useState(false);
 
   const [sliderScrollEnabled, setSliderScrollEnabled] = useState(false);
-const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const setMedicationLoading = (id, isLoading) => {
     setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
@@ -56,6 +55,11 @@ const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const getActiveMedication = async () => {
     setLoader(true);
     try {
+
+      let data = JSON.stringify({
+  "date": "2025-06-06"
+});
+
       const response = await axios.get(
         `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_medications_active`,
         {
@@ -64,7 +68,10 @@ const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
             Pragma: 'no-cache',
             Expires: '0',
           },
+          data : data
         },
+          
+
       );
       setAllMedication(response?.data?.data || []);
     } catch (error) {
@@ -173,10 +180,21 @@ const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const addMedication = async item => {
     setMedicationLoading(item.id, true);
+
+
+    const baseDate = moment(
+      selecteddate ? selecteddate : new Date(),
+      'YYYY-MM-DD',
+    );
+
     try {
+      const end = moment(baseDate).subtract(7, 'days');
+      const start = moment(baseDate);
+
       const data = JSON.stringify({
         medication_id: item.id,
-        date: selecteddate,
+        start_date: start.format('YYYY-MM-DD'),
+        end_date: end.format('YYYY-MM-DD'),
         units: 1,
       });
 
@@ -185,6 +203,9 @@ const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
         data,
         {headers: {'Content-Type': 'application/json'}},
       );
+
+      setMedicationLoader(false);
+      setMedicationLoading(item.id, false);
 
       await getActiveMedication();
       await generateMedicationSlides();
@@ -196,12 +217,22 @@ const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const removeMedication = async item => {
     setMedicationLoading(item.id, true);
+    const baseDate = moment(
+      selecteddate ? selecteddate : new Date(),
+      'YYYY-MM-DD',
+    );
+
     try {
+      const end = moment(baseDate).subtract(7, 'days');
+      const start = moment(baseDate);
+
       const data = JSON.stringify({
         medication_id: item.id,
-        date: moment().format('YYYY-MM-DD'),
+        start_date: start.format('YYYY-MM-DD'),
+        end_date: end.format('YYYY-MM-DD'),
         units: 1,
       });
+
 
       await axios.post(
         `${BASE_URL}/allergy_data/v1/user/${userData.id}/remove_medication_units`,
@@ -217,14 +248,22 @@ const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
     setMedicationLoading(item.id, false);
   };
 
-  useEffect(() => {
-    const nav = navigation.addListener('focus', () => {
-      getActiveMedication();
-      generateMedicationSlides();
-    });
+  // useEffect(() => {
+  //   const nav = navigation.addListener('focus', () => {
+  //     getActiveMedication();
+  //     generateMedicationSlides();
+  //   });
 
-    return nav;
-  }, [navigation]);
+  //   return nav;
+  // }, [navigation]);
+  useEffect(() => {
+  const nav = navigation.addListener('focus', () => {
+    Promise.all([getActiveMedication(), generateMedicationSlides()]);
+  });
+
+  return nav;
+}, [navigation]);
+
 
   useEffect(() => {
     if (sliderRef.current && MedicationnRecord.length > 0) {
@@ -241,6 +280,124 @@ const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
       return () => clearTimeout(timeout);
     }
   }, [sliderScrollEnabled]);
+
+
+  const memoizedMedicationList = useMemo(() => {
+  if (allMedication.length === 0) return null;
+
+  return (
+    <FlatList
+      data={allMedication}
+      contentContainerStyle={{
+        gap: 10,
+        marginTop: 20,
+        marginBottom: 20,
+      }}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({item}) => {
+        return (
+          <View
+            style={{
+              borderWidth: 2.5,
+              borderRadius: 10,
+              borderColor: item.frontColor,
+              height: responsiveHeight(6),
+              alignItems: 'center',
+              flexDirection: 'row',
+              paddingHorizontal: 10,
+              justifyContent: 'space-between',
+            }}>
+            <AppText
+              title={item.name}
+              textSize={1.6}
+              textColor={AppColors.BLACK}
+            />
+            {medicationLoadingMap[item?.id] ? (
+              <ActivityIndicator size={'small'} color={AppColors.BLACK} />
+            ) : (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 10,
+                }}>
+                <TouchableOpacity onPress={() => removeMedication(item)}>
+                  <AntDesign
+                    name={'minus'}
+                    size={responsiveFontSize(2)}
+                    color={AppColors.LIGHTGRAY}
+                  />
+                </TouchableOpacity>
+
+                <AppText
+                  title={item?.units || 0}
+                  textColor={AppColors.LIGHTGRAY}
+                  textSize={2.5}
+                />
+
+                <TouchableOpacity onPress={() => addMedication(item)}>
+                  <AntDesign
+                    name={'plus'}
+                    size={responsiveFontSize(2)}
+                    color={AppColors.LIGHTGRAY}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        );
+      }}
+    />
+  );
+}, [allMedication, medicationLoadingMap]); // Re-render only if data or loading state changes
+
+
+const memoizedSlider = useMemo(() => {
+  if (MedicationnRecord.length === 0) return null;
+
+  return (
+    <View style={{height: responsiveHeight(35)}}>
+      <AppIntroSlider
+        ref={sliderRef}
+        data={MedicationnRecord}
+        showNextButton={false}
+        showPrevButton={false}
+        showDoneButton={false}
+        nestedScrollEnabled={true}
+        scrollEnabled={true}
+        renderItem={({item}) => (
+          <View style={{alignItems: 'center'}}>
+            <Text style={{fontSize: 16}}>{item.title}</Text>
+            <BarChart
+              data={item.barData}
+              barWidth={7}
+              frontColor="#E23131"
+              showLine={false}
+              initialSpacing={0}
+              xAxisLabelTextStyle={{
+                fontSize: 10,
+                color: '#000',
+                fontWeight: '400',
+                width: 40,
+              }}
+              width={responsiveWidth(100)}
+              barBorderRadius={2}
+              isAnimated={true}
+              maxValue={8}
+              stepValue={1}
+              hideDataPoints={false}
+              spacing={5}
+              formatYLabel={(label) => parseFloat(label).toFixed(0)}
+            />
+          </View>
+        )}
+        dotStyle={{backgroundColor: '#ccc', marginTop: 50}}
+        activeDotStyle={{backgroundColor: AppColors.BLACK, marginTop: 50}}
+      />
+    </View>
+  );
+}, [MedicationnRecord]);
+
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
@@ -274,7 +431,10 @@ const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
         <ScrollView contentContainerStyle={{flexGrow: 1}}>
           {expireDate ? (
             <>
-              {allMedication.length > 0 ? (
+            {
+              memoizedMedicationList
+            }
+              {/* {allMedication.length > 0 ? (
                 <FlatList
                   data={allMedication}
                   contentContainerStyle={{
@@ -357,7 +517,9 @@ const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
                     }
                   />
                 </View>
-              )}
+              )} */}
+
+              
 
               {loader && (
                 <ActivityIndicator size={'large'} color={AppColors.BLACK} />
@@ -368,51 +530,54 @@ const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
                 )}
               </>
               {MedicationnRecord.length > 0 && (
-                <View style={{height: responsiveHeight(35)}}>
-                  <AppIntroSlider
-                    ref={sliderRef}
-                    data={MedicationnRecord}
-                    showNextButton={false}
-                    showPrevButton={false}
-                    showDoneButton={false}
-                    nestedScrollEnabled={true}
-                    scrollEnabled={true}
-                    
-                    renderItem={({item, index}) => (
-                      <View style={{alignItems: 'center'}}>
-                        <Text style={{fontSize: 16}}>{item.title}</Text>
-                       
-                          <BarChart
-                            data={item.barData}
-                            barWidth={7}
-                            frontColor="#E23131"
-                            showLine={false}
-                            initialSpacing={0}
-                            xAxisLabelTextStyle={{
-                              fontSize: 10,
-                              color: '#000',
-                              fontWeight: '400',
-                              width: 40,
-                            }}
-                            width={responsiveWidth(100)}
-                            
-                            barBorderRadius={2}
-                            isAnimated={true}
-                            maxValue={8}
-                            stepValue={1}
-                            hideDataPoints={false}
-                            spacing={5}
-                            formatYLabel={label => parseFloat(label).toFixed(0)}
-                          />
-                      </View>
-                    )}
-                    dotStyle={{backgroundColor: '#ccc', marginTop: 50}}
-                    activeDotStyle={{
-                      backgroundColor: AppColors.BLACK,
-                      marginTop: 50,
-                    }}
-                  />
-                </View>
+                <>
+                {
+                  memoizedSlider
+                }
+                </>
+                // <View style={{height: responsiveHeight(35)}}>
+                //   <AppIntroSlider
+                //     ref={sliderRef}
+                //     data={MedicationnRecord}
+                //     showNextButton={false}
+                //     showPrevButton={false}
+                //     showDoneButton={false}
+                //     nestedScrollEnabled={true}
+                //     scrollEnabled={true}
+                //     renderItem={({item, index}) => (
+                //       <View style={{alignItems: 'center'}}>
+                //         <Text style={{fontSize: 16}}>{item.title}</Text>
+
+                //         <BarChart
+                //           data={item.barData}
+                //           barWidth={7}
+                //           frontColor="#E23131"
+                //           showLine={false}
+                //           initialSpacing={0}
+                //           xAxisLabelTextStyle={{
+                //             fontSize: 10,
+                //             color: '#000',
+                //             fontWeight: '400',
+                //             width: 40,
+                //           }}
+                //           width={responsiveWidth(100)}
+                //           barBorderRadius={2}
+                //           isAnimated={true}
+                //           maxValue={8}
+                //           stepValue={1}
+                //           hideDataPoints={false}
+                //           spacing={5}
+                //           formatYLabel={label => parseFloat(label).toFixed(0)}
+                //         />
+                //       </View>
+                //     )}
+                //     dotStyle={{backgroundColor: '#ccc', marginTop: 50}}
+                //     activeDotStyle={{
+                //       backgroundColor: AppColors.BLACK,
+                //       marginTop: 50,
+                //     }}
+                //   />
+                // </View>
               )}
             </>
           ) : (

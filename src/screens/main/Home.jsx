@@ -39,6 +39,8 @@ import {AddCityApi} from '../../global/AddCityApi';
 import PointPollenSpores from '../../components/PointPollenSpores';
 import GetLocation from '../../global/GetLocation';
 // import AddCityApi from '../../global/AddCityApi';
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+
 
 const Home = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
@@ -49,6 +51,10 @@ const Home = ({navigation}) => {
 
     console.log("isExpiredRedux",isExpiredRedux)
     console.log("SubscriptionType",SubscriptionType)
+
+
+
+
 
   const slides = [
     {
@@ -102,14 +108,21 @@ const Home = ({navigation}) => {
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
   const [expandedFutureKey, setExpandedFutureKey] = useState(null);
 
+  const [myLocation, setMyLocation] = useState()
+
+
+  console.log("myLocation",myLocation)
+
 
   useEffect(() => {
     const nav = navigation.addListener('focus', async () => {
       if (hasFetchedOnce) return;
 
+      
       if (userData) {
         getActivePollens();
         getAllCities();
+        getCurrentLocation()
       } else {
         
       }
@@ -273,6 +286,19 @@ const Home = ({navigation}) => {
   };
 
 
+  const getCurrentLocation = async() => {
+    const gettingCurrentLatlng = await GetCurrentLocation()
+
+    // console.log("gettingCurrentLatlng",gettingCurrentLatlng)
+
+  
+    
+    
+    setMyLocation(gettingCurrentLatlng)
+    // return
+  }
+
+
   
 
   const getActivePollens = () => {
@@ -287,7 +313,7 @@ const Home = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log('resesdsadsajkkdasbhkk', response.data);
+        // console.log('resesdsadsajkkdasbhkk', response.data);
 
         setActivePollen(response.data.data);
         setActiveLoader(false);
@@ -318,7 +344,7 @@ const Home = ({navigation}) => {
         } else {
           const currentLatLng = await GetCurrentLocation();
 
-      
+          
 
           getPollensDataLatLng(
             currentLatLng?.latitude,
@@ -358,10 +384,12 @@ const Home = ({navigation}) => {
 });
 
 
+console.log("first",myLocation)
 
 
 
-  
+  // console.log("AllCities",AllCities[0].lat,"lng.....................",AllCities[0].lng)
+  // console.log("AllCities",AllCities[0].lat,"lng.....................",AllCities[0].lng)
 
 
   return (
@@ -490,12 +518,24 @@ const Home = ({navigation}) => {
                               alignItems: 'center',
                             }}>
                             <View style={{flexDirection: 'row', gap: 5}}>
-                              <FontAwesome6
-                                name={'location-dot'}
-                                size={responsiveFontSize(2)}
-                                color={AppColors.BLUE}
-                                style={{marginTop: 6}}
-                              />
+                              {
+                                item?.lat == myLocation.latitude && item?.lng == myLocation.longitude ? (
+                                  <FontAwesome6
+                                  name={'location-dot'}
+                                  size={responsiveFontSize(2)}
+                                  color={AppColors.BLUE}
+                                  style={{marginTop: 6}}
+                                  />
+                                )  :(
+                                  
+                                  <FontAwesome
+                                                              name={'map'}
+                                                              size={responsiveFontSize(2)}
+                                                              color={AppColors.BLUE}
+                                                              style={{marginTop: 6}}
+                                                              />
+                                )
+                                }
                               <View>
                                 {/* {pollenLoader == true ? (
                                   <ActivityIndicator
@@ -920,7 +960,7 @@ const Home = ({navigation}) => {
                       <FlatList
                         data={sortedPollenData}
                         renderItem={({item, index}) => {
-                          console.log("TODAY..............", item.type)
+                          // console.log("TODAY..............", item.type)
                           return (
                             <View>
                               
@@ -934,7 +974,6 @@ const Home = ({navigation}) => {
                         data={isfutureArray}
                         renderItem={({item, index}) => {
 
-                          console.log("Big future", item)
 
                           
                           const futurePollenAndSpores = item?.current?.sort((a, b) => {
