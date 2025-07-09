@@ -111,7 +111,6 @@ const Home = ({navigation}) => {
   const [myLocation, setMyLocation] = useState()
 
 
-  console.log("myLocation",myLocation)
 
 
   useEffect(() => {

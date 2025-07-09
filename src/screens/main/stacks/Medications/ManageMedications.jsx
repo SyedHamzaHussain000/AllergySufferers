@@ -34,6 +34,8 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import AppImages from '../../../../assets/images/AppImages';
+import moment from 'moment';
+import DatePicker from 'react-native-date-picker';
 // import { NestableScrollContainer, NestableDraggableFlatList } from "react-native-draggable-flatlist"
 
 const ManageMedications = ({navigation}) => {
@@ -44,6 +46,12 @@ const ManageMedications = ({navigation}) => {
 
   const [data3, setData3] = useState([1, 2, 3, 4]);
 
+  const [date, setDate] = useState(new Date());
+  const [selecteddate, setSelectedDate] = useState(
+    moment(new Date()).format('YYYY-MM-DD'),
+  );
+  const [open, setOpen] = useState(false);
+
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       getActiveMedication();
@@ -51,17 +59,30 @@ const ManageMedications = ({navigation}) => {
     return nav;
   }, [navigation]);
 
-  const getActiveMedication = () => {
+  useEffect(() => {
+    getActiveMedication();
+  }, [selecteddate]);
+
+  const getActiveMedication = formattedDate => {
+
+
     setLoader(true);
+
+    let data = JSON.stringify({
+      date: moment(formattedDate ? formattedDate : selecteddate).format(
+        'YYYY-MM-DD',
+      ),
+    });
+
     let config = {
-      method: 'get',
+      method: 'post',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications_active`,
       headers: {
-             'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-        Expires: '0',
+
+        'Content-Type': 'application/json',
       },
+      data: data,
     };
 
     axios
@@ -78,10 +99,12 @@ const ManageMedications = ({navigation}) => {
   };
 
   const deleteActiveMedication = medicationdata => {
-
     setLoader(true);
+
+
     let data = JSON.stringify({
-      data: medicationdata?.id,
+        "date": moment(selecteddate).format("YYYY-MM-DD"),
+         "data":medicationdata?.id
     });
 
     let config = {
@@ -106,104 +129,128 @@ const ManageMedications = ({navigation}) => {
   };
 
   return (
-    <SafeAreaView style={{flex:1}}>
-    <GestureHandlerRootView style={{flex: 1}}>
-      <View style={{padding: 20}}>
-        <AppHeader
-          heading="Manage Medications"
-          icon={
-            <Entypo
-              name={'location-pin'}
-              size={responsiveFontSize(2.5)}
-              color={AppColors.BTNCOLOURS}
-            />
-          }
-          goBack
-        />
-
-      
-
-        <View style={{gap: 10}}>
-          <AppText
-            textSize={'Active Medication'}
-            textColor={AppColors.BLACK}
-            textFontWeight
+    <SafeAreaView style={{flex: 1}}>
+      <GestureHandlerRootView style={{flex: 1}}>
+        <View style={{padding: 20}}>
+          <AppHeader
+            heading="Manage Medications"
+            icon={
+              <Entypo
+                name={'location-pin'}
+                size={responsiveFontSize(2.5)}
+                color={AppColors.BTNCOLOURS}
+              />
+            }
+            goBack
+            selecteddate={selecteddate}
+            Rightheading="Current Date"
+            setOpen={() => setOpen(true)}
           />
 
-          {loader && (
-            <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-          )}
+          <DatePicker
+            modal
+            open={open}
+            date={date}
+            mode="date"
+            maximumDate={new Date()}
+            onConfirm={selectedDate => {
+              setDate(selectedDate);
+              setOpen(false);
+              const picked = moment(selectedDate).startOf('day');
+              const formattedDate = picked.format('YYYY-MM-DD');
+              setSelectedDate(formattedDate);
+            }}
+            onCancel={() => {
+              setOpen(false);
+            }}
+          />
 
-          {activeMedication ? (
-            <NestableScrollContainer>
-              <NestableDraggableFlatList
-                data={activeMedication}
-                contentContainerStyle={{gap: 10}}
-                renderItem={({item, drag, isActive}) => {
-                  return (
-                    <TouchableOpacity onLongPress={drag}>
-                      <AppTextInput
-                        inputPlaceHolder={item.name}
-                        inputWidth={75}
-                        arrowDelete={
-                          <TouchableOpacity
-                            onPress={() =>
-                              Alert.alert(
-                                'Delete Medication',
-                                'Are you sure you want to delete this medication?',
-                                [
-                                  {
-                                    text: 'Cancel',
-                                    onPress: () =>
-                                      console.log('Cancel Pressed'),
-                                    style: 'cancel',
-                                  },
-                                  {
-                                    text: 'OK',
-                                    onPress: () => deleteActiveMedication(item),
-                                  },
-                                ],
-                                {cancelable: false},
-                              )
-                            }>
-                            <MaterialCommunityIcons
-                              name={'delete'}
-                              size={responsiveFontSize(2.5)}
-                              color={AppColors.LIGHTGRAY}
-                            />
-                          </TouchableOpacity>
-                        }
-                        rightLogo={
-                          <View style={{marginTop:4 }}>
-                          <Image source={AppImages.updown} style={{height:14, width:14, resizeMode:'contain'}}/>
-                          </View>
-                        }
-                      />
-                    </TouchableOpacity>
-                  );
-                }}
-                keyExtractor={(item, index) => index.toString()}
-                onDragEnd={({data}) => setActiveMedication(data)}
-                dragEnabled={true}
-                activationDistance={10}
-              />
-            </NestableScrollContainer>
-          ) : null}
+          <View style={{gap: 10}}>
+            <AppText
+              textSize={'Active Medication'}
+              textColor={AppColors.BLACK}
+              textFontWeight
+            />
 
-          {/* <AppTextInput inputPlaceHolder={"Advil Cold and Sinus"} inputWidth={75} rightLogo={<Octicons name={"arrow-switch"} size={responsiveFontSize(2)} color={AppColors.LIGHTGRAY} />}/>
-         <AppTextInput inputPlaceHolder={"A Generic Brand"} inputWidth={75} rightLogo={<Octicons name={"arrow-switch"} size={responsiveFontSize(2)} color={AppColors.LIGHTGRAY} />}/> */}
-        </View>
+            {loader && (
+              <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+            )}
+
+            {activeMedication ? (
+              <NestableScrollContainer>
+                <NestableDraggableFlatList
+                  data={activeMedication}
+                  contentContainerStyle={{gap: 10}}
+                  renderItem={({item, drag, isActive}) => {
+                    return (
+                      <TouchableOpacity onLongPress={drag}>
+                        <AppTextInput
+                          inputPlaceHolder={item.name}
+                          inputWidth={75}
+                          arrowDelete={
+                            <TouchableOpacity
+                              onPress={() =>
+                                Alert.alert(
+                                  'Delete Medication',
+                                  'Are you sure you want to delete this medication?',
+                                  [
+                                    {
+                                      text: 'Cancel',
+                                      onPress: () =>
+                                        console.log('Cancel Pressed'),
+                                      style: 'cancel',
+                                    },
+                                    {
+                                      text: 'OK',
+                                      onPress: () =>
+                                        deleteActiveMedication(item),
+                                    },
+                                  ],
+                                  {cancelable: false},
+                                )
+                              }>
+                              <MaterialCommunityIcons
+                                name={'delete'}
+                                size={responsiveFontSize(2.5)}
+                                color={AppColors.LIGHTGRAY}
+                              />
+                            </TouchableOpacity>
+                          }
+                          rightLogo={
+                            <View style={{marginTop: 4}}>
+                              <Image
+                                source={AppImages.updown}
+                                style={{
+                                  height: 14,
+                                  width: 14,
+                                  resizeMode: 'contain',
+                                }}
+                              />
+                            </View>
+                          }
+                        />
+                      </TouchableOpacity>
+                    );
+                  }}
+                  keyExtractor={(item, index) => index.toString()}
+                  onDragEnd={({data}) => setActiveMedication(data)}
+                  dragEnabled={true}
+                  activationDistance={10}
+                />
+              </NestableScrollContainer>
+            ) : null}
+          </View>
 
           <View style={{marginTop: 20, gap: 10}}>
-          <AppButton
-            title={'Add MEDICATION'}
-            bgColor={AppColors.BTNCOLOURS}
-            RightColour={AppColors.rightArrowCOlor}
-            handlePress={() => navigation.navigate('AddMedications')}
-          />
+            <AppButton
+              title={'Add MEDICATION'}
+              bgColor={AppColors.BTNCOLOURS}
+              RightColour={AppColors.rightArrowCOlor}
+              handlePress={() => navigation.navigate('AddMedications')}
+            />
+          </View>
         </View>
-      </View>
-    </GestureHandlerRootView>
+      </GestureHandlerRootView>
     </SafeAreaView>
   );
 };

@@ -11,8 +11,8 @@ type props = {
   icon?: any;
   goBack?: boolean;
   date?: string;
-  setOpen: (open: boolean) => void,
-  selecteddate?:any
+  setOpen: (open: boolean) => void;
+  selecteddate?: any;
 };
 
 const AppHeader = ({
@@ -23,7 +23,7 @@ const AppHeader = ({
   goBack,
   date,
   setOpen,
-  selecteddate
+  selecteddate,
 }: props) => {
   return (
     <View
@@ -32,9 +32,8 @@ const AppHeader = ({
         justifyContent: 'space-between',
         alignItems: 'center',
       }}>
-      <View >
+      <View>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-
           {goBack && (
             <View style={{marginRight: 10}}>
               <BackIcon />
@@ -52,24 +51,21 @@ const AppHeader = ({
         <AppText title={subheading} textColor={'#777777'} textSize={2} />
       </View>
 
-        <TouchableOpacity onPress={setOpen}>
-
-      <AppText
-        title={Rightheading}
-        textFontWeight
-        textSize={2}
-        textColor={AppColors.BLACK}
+      <TouchableOpacity onPress={setOpen}>
+        <AppText
+          title={Rightheading}
+          textFontWeight
+          textSize={2}
+          textColor={AppColors.BLACK}
         />
         {selecteddate && (
           <AppText
             title={selecteddate}
             textColor={AppColors.BLACK}
             textSize={1.5}
-
           />
         )}
-
-        </TouchableOpacity>
+      </TouchableOpacity>
     </View>
   );
 };

@@ -30,6 +30,11 @@ import axios from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import LoaderMode from '../../../../components/LoaderMode';
 import Toast from 'react-native-toast-message';
+import DatePicker from 'react-native-date-picker';
+import moment from 'moment';
+
+
+
 const AddMedications = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const [medicationData, setMedicationsData] = useState([]);
@@ -40,6 +45,15 @@ const AddMedications = ({navigation}) => {
   const [customMecication, setCustomMedication] = useState("")
   const [customMecicationLoader, setCustomMedicationLoader] = useState(false)
   const [addYourMedication, SetAddYourMedication] = useState(false);
+
+
+    const [date, setDate] = useState(new Date());
+    const [selecteddate, setSelectedDate] = useState(
+      moment(new Date()).format('YYYY-MM-DD'),
+    );
+      const [open, setOpen] = useState(false);
+    
+
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -71,46 +85,110 @@ const AddMedications = ({navigation}) => {
       });
   };
 
+  // const AddMedicationActive = medicationdata => {
+  //   if (medicationdata.id === 6082) {
+  //     console.log('other', medicationdata);
+  //     SetAddYourMedication(true);
+  //     return;
+  //   }
+
+    
+
+    
+
+  //   setMedciationLoader(true);
+  //   let data = JSON.stringify({
+  //     data: [medicationdata.id],
+  //   });
+
+  //   let config = {
+  //     method: 'post',
+  //     maxBodyLength: Infinity,
+  //     url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_medications`,
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Cache-Control': 'no-cache',
+  //       Pragma: 'no-cache',
+  //       Expires: '0',
+  //     },
+  //     data: data,
+  //   };
+
+  //   axios
+  //     .request(config)
+  //     .then(response => {
+  //       console.log(JSON.stringify(response.data));
+  //       setMedciationLoader(false);
+  //       Toast.show({
+  //         type: 'success',
+  //         text1: 'Medication added successfully',
+  //       });
+  //     })
+  //     .catch(error => {
+  //       setMedciationLoader(false);
+  //       console.log(error);
+  //     });
+  // };
+
   const AddMedicationActive = medicationdata => {
-    if (medicationdata.id === 6082) {
-      console.log('other', medicationdata);
-      SetAddYourMedication(true);
-      return;
-    }
+  if (medicationdata.id === 6082) {
+    SetAddYourMedication(true);
+    return;
+  }
 
-    setMedciationLoader(true);
-    let data = JSON.stringify({
-      data: [medicationdata.id],
-    });
-
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_medications`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-        Expires: '0',
+  // Show confirmation alert
+  Alert.alert(
+    "Confirm Medication",
+    `Are you sure you want to add "${medicationdata.name}" for the date ${selecteddate}?`,
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
       },
-      data: data,
-    };
+      {
+        text: "Confirm",
+        onPress: () => {
+          setMedciationLoader(true);
 
-    axios
-      .request(config)
-      .then(response => {
-        console.log(JSON.stringify(response.data));
-        setMedciationLoader(false);
-        Toast.show({
-          type: 'success',
-          text1: 'Medication added successfully',
-        });
-      })
-      .catch(error => {
-        setMedciationLoader(false);
-        console.log(error);
-      });
-  };
+          let data = JSON.stringify({
+            data: [medicationdata.id],
+            date: selecteddate, // <- Send selected date to API if needed
+          });
+
+          let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_medications`,
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache',
+              Pragma: 'no-cache',
+              Expires: '0',
+            },
+            data: data,
+          };
+
+          axios
+            .request(config)
+            .then(response => {
+              console.log(JSON.stringify(response.data));
+              setMedciationLoader(false);
+              Toast.show({
+                type: 'success',
+                text1: 'Medication added successfully',
+              });
+            })
+            .catch(error => {
+              setMedciationLoader(false);
+              console.log(error);
+            });
+        }
+      }
+    ]
+  );
+};
+
+
 
   const AddCustomMedication = () => {
 
@@ -119,7 +197,7 @@ const AddMedications = ({navigation}) => {
     }
 
     setCustomMedicationLoader(true)
-    
+
 
     
 
@@ -157,6 +235,7 @@ const AddMedications = ({navigation}) => {
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={{padding: 20}}>
+        <View style={{marginBottom:10}}>
         <AppHeader
           heading="Add Medication"
           icon={
@@ -167,7 +246,34 @@ const AddMedications = ({navigation}) => {
             />
           }
           goBack
+          selecteddate={selecteddate}
+          Rightheading="Current Date"
+          setOpen={()=> setOpen(true)}
+
         />
+        </View>
+
+          <DatePicker
+                  modal
+                  open={open}
+                  date={date}
+                  mode="date"
+                  maximumDate={new Date()}
+                  onConfirm={selectedDate => {
+                    setDate(selectedDate);
+                    setOpen(false);
+                    const picked = moment(selectedDate).startOf('day');
+                    const formattedDate = picked.format('YYYY-MM-DD');
+                    setSelectedDate(formattedDate);
+                    
+                  
+                  }}
+                  onCancel={() => {
+                    setOpen(false);
+                  }}
+                />
+
+                
 
         {MedicationLoader && <LoaderMode />}
 

@@ -91,6 +91,10 @@ const DataVisualizer = ({navigation}) => {
 
   useEffect(() => {
     getSelectedAllergens();
+
+    if(type == "medication"){
+      getMedicationApi()
+    }
   }, [selecteddate]);
 
   const setMedicationLoading = (id, isLoading) => {
@@ -124,15 +128,22 @@ const DataVisualizer = ({navigation}) => {
     setType('medication');
     setPollenLoader(true);
 
+
+       let data = JSON.stringify({
+          date: moment(selecteddate).format(
+            'YYYY-MM-DD',
+          ),
+        });
+    
+
     let config = {
-      method: 'get',
+      method: 'post',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications_active`,
       headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-        Expires: '0',
+        'Content-Type': 'application/json',
       },
+      data:data
     };
 
     axios
@@ -189,9 +200,9 @@ const DataVisualizer = ({navigation}) => {
             barData.push({
               value,
               label: formattedDate,
-              spacing: 2,
+              spacing: 0,
               frontColor: entry.frontColor,
-              labelWidth: 30,
+              labelWidth: 20,
             });
           } else {
             barData.push({
@@ -446,7 +457,9 @@ const DataVisualizer = ({navigation}) => {
     try {
       const data = JSON.stringify({
         medication_id: item.id,
-        date: selecteddate,
+        "active_id": item.active_id,
+        start_date: moment(selecteddate).format("YYYY-MM-DD"),
+        end_date: moment(selecteddate).subtract('days', 7).format("YYYY-MM-DD"),
         units: 1,
       });
 
@@ -466,10 +479,14 @@ const DataVisualizer = ({navigation}) => {
 
   const removeMedication = async item => {
     setMedicationLoading(item.id, true);
+
+    console.log("item",item)
     try {
       const data = JSON.stringify({
         medication_id: item.id,
-        date: moment().format('YYYY-MM-DD'),
+        "active_id": item.active_id,
+        start_date: moment(selecteddate).format("YYYY-MM-DD"),
+        end_date: moment(selecteddate).subtract('days', 7).format("YYYY-MM-DD"),
         units: 1,
       });
 
@@ -573,7 +590,7 @@ const DataVisualizer = ({navigation}) => {
                           position: 'absolute',
                           top: 0,
                           marginLeft: responsiveWidth(20),
-                          gap: 50,
+                          
                           flexDirection: 'row',
                           zIndex: 100,
                         }}>
@@ -587,7 +604,7 @@ const DataVisualizer = ({navigation}) => {
                           };
 
                           return (
-                            <View>
+                            <View style={{ width:responsiveWidth(13.5),}}>
                               <Image
                                 source={
                                   item == 1
@@ -628,20 +645,20 @@ const DataVisualizer = ({navigation}) => {
                           thickness: 2,
                           curved: false,
                           dataPointsColor: colours[0],
-                          spacing: 80,
+                          spacing: responsiveWidth(13),
                         }}
                         lineConfig2={{
                           color: colours[1],
                           thickness: 2,
                           curved: false,
                           dataPointsColor: colours[1],
-                          spacing: 80,
+                          spacing: responsiveWidth(13),
                         }}
                         xAxisLabelTextStyle={{
                           fontSize: 10, // 👈 smaller font size
                           color: '#000', // optional, customize color
                           fontWeight: '400', // optional
-                          labelWidth: 40,
+                          labelWidth: 20,
                         }}
                         yAxisLabelTexts={[
                           '0',
