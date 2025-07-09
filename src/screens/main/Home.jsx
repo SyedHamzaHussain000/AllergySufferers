@@ -384,7 +384,7 @@ const Home = ({navigation}) => {
 });
 
 
-console.log("first",myLocation)
+
 
 
 
@@ -519,7 +519,7 @@ console.log("first",myLocation)
                             }}>
                             <View style={{flexDirection: 'row', gap: 5}}>
                               {
-                                item?.lat == myLocation.latitude && item?.lng == myLocation.longitude ? (
+                                item?.lat == myLocation?.latitude && item?.lng == myLocation?.longitude ? (
                                   <FontAwesome6
                                   name={'location-dot'}
                                   size={responsiveFontSize(2)}
