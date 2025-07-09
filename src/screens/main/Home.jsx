@@ -408,6 +408,7 @@ const Home = ({navigation}) => {
         style={{
           height: responsiveHeight(100),
           width: responsiveWidth(100),
+          
         }}>
         {loadCities == true ? (
           <View
@@ -416,6 +417,7 @@ const Home = ({navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
               gap: 10,
+              
             }}>
             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
             {userData ? (
@@ -439,7 +441,8 @@ const Home = ({navigation}) => {
                   flexGrow: 1,
                   paddingBottom: 100,
                   padding: 20,
-                  marginTop: Platform.OS == 'ios' ? 30 : 0,
+                  marginTop:  30 ,
+
                 }}
                 showsVerticalScrollIndicator={false}>
                 <DatePicker

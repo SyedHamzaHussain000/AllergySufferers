@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity, Platform} from 'react-native';
 import React from 'react';
 import AppText from './AppTextComps/AppText';
 import AppColors from '../utils/AppColors';
@@ -31,6 +31,7 @@ const AppHeader = ({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        marginTop: Platform.OS == "android" ?  30 : 0
       }}>
       <View>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>

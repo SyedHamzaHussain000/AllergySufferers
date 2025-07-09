@@ -11,7 +11,7 @@ const ForcastExplaination = () => {
     <View >
         <View style={{padding:20, paddingBottom:0}}>
 
-      <AppHeader goBack={true} heading="Forcast Explaintation" />
+      <AppHeader goBack={true} heading="Forecast explanation" />
         </View>
 
 

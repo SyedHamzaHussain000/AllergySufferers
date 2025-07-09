@@ -86,7 +86,7 @@ function MyTabs() {
       }}>
       <Tab.Screen
         name="Forecast"
-        component={Home}
+        component={HomeWithSafeArea(Home)}
         options={{
           tabBarIcon: ({focused}) => {
             return (

@@ -6,6 +6,8 @@ import {
   ScrollView,
   Dimensions,
   ActivityIndicator,
+  StyleSheet,
+  useWindowDimensions,
 } from 'react-native';
 import React, {useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -16,14 +18,12 @@ import {
   responsiveWidth,
 } from '../../../../utils/Responsive_Dimensions';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import HTMLView from 'react-native-htmlview';
+// import HTMLView from 'react-native-htmlview';
 import BASE_URL from '../../../../utils/BASE_URL';
 import axios from 'axios';
-
+import RenderHtml from 'react-native-render-html';
 
 const PollenInfoForCad = () => {
-  
-
   const pollens = [
     {
       id: 1,
@@ -2736,21 +2736,20 @@ const PollenInfoForCad = () => {
       // <p class="p4"><span class="s1">Ustilaginales</span> commonly referred to as smuts can reach high counts, but allergenic properties are unknown. The season is from mid-April to mid-October with some very high counts.</p>
       // <p class="p8">&nbsp;</p>
       // <!-- Comments are visible in the HTML source only -->`,
-            bottom: true,
+      bottom: true,
     },
   ];
 
   const [isIndex, setIndex] = useState();
-  const [apiCallData, setApiCallData] = useState()
+  const [apiCallData, setApiCallData] = useState();
   const [loadingIndex, setLoadingIndex] = useState(null);
   const [expandedIndex, setExpandedIndex] = useState(null);
-
 
   const regex = /<br|\n|\r\s*\\?>/g;
 
   const contentWidth = Dimensions.get('window').width;
 
- const apiCall = (itemName, idx) => {
+  const apiCall = (itemName, idx) => {
     // If tapping the already expanded card, just collapse it
     if (expandedIndex === idx) {
       setExpandedIndex(null);
@@ -2760,19 +2759,21 @@ const PollenInfoForCad = () => {
     setLoadingIndex(idx);
     setApiCallData(null);
 
-    axios.post(
-      `${BASE_URL}/allergy_data/v1/user/127123/get_data`,
-      { name: itemName }
-    )
-    .then(response => {
-      setApiCallData(response.data.data);
-      setExpandedIndex(idx);
-    })
-    .catch(console.log)
-    .finally(() => {
-      setLoadingIndex(null);
-    });
+    axios
+      .post(`${BASE_URL}/allergy_data/v1/user/127123/get_data`, {
+        name: itemName,
+      })
+      .then(response => {
+        setApiCallData(response.data.data);
+        setExpandedIndex(idx);
+      })
+      .catch(console.log)
+      .finally(() => {
+        setLoadingIndex(null);
+      });
   };
+  const {width} = useWindowDimensions();
+
 
 
   return (
@@ -2787,13 +2788,13 @@ const PollenInfoForCad = () => {
         textSize={1.8}
       />
 
- <ScrollView contentContainerStyle={{ paddingBottom: 200 }}>
+      <ScrollView contentContainerStyle={{paddingBottom: 200}}>
         <FlatList
           data={pollens}
-          contentContainerStyle={{ marginTop: 20 }}
+          contentContainerStyle={{marginTop: 20}}
           keyExtractor={(_, i) => i.toString()}
-          renderItem={({ item, index }) => {
-            const isOpen    = index === expandedIndex;
+          renderItem={({item, index}) => {
+            const isOpen = index === expandedIndex;
             const isLoading = index === loadingIndex;
 
             return (
@@ -2805,13 +2806,13 @@ const PollenInfoForCad = () => {
                   borderRadius: 10,
                   padding: 20,
                   marginBottom: 10,
-                }}
-              >
-                <View style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
                 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
                   <AppText
                     title={item.name}
                     textSize={2}
@@ -2819,23 +2820,32 @@ const PollenInfoForCad = () => {
                     textFontWeight
                   />
 
-                  {isLoading
-                    ? <ActivityIndicator color={AppColors.BLUE} />
-                    : <AntDesign
-                        name={isOpen ? 'minuscircle' : 'pluscircle'}
-                        size={responsiveFontSize(2.5)}
-                        color={AppColors.BLUE}
-                      />
-                  }
+                  {isLoading ? (
+                    <ActivityIndicator color={AppColors.BLUE} />
+                  ) : (
+                    <AntDesign
+                      name={isOpen ? 'minuscircle' : 'pluscircle'}
+                      size={responsiveFontSize(2.5)}
+                      color={AppColors.BLUE}
+                    />
+                  )}
                 </View>
 
                 {isOpen && apiCallData?.html && !isLoading && (
-                  <View style={{ marginTop: 20 }}>
-                    <HTMLView
+                  <View style={{marginTop: 20}}>
+                    {/* <HTMLView
                       value={apiCallData.html.trim().replace(regex, '')}
-                      contentWidth={Dimensions.get('window').width}
-                      tagsStyles={tagsStyles}
-                    />
+                      contentWidth={responsiveWidth(100)}
+                          stylesheet={tagsStyles}
+
+                    /> */}
+
+<RenderHtml
+  contentWidth={width}
+  source={{html: apiCallData.html}}
+  tagsStyles={tagsStyles}
+/>
+
                   </View>
                 )}
               </TouchableOpacity>
@@ -2848,31 +2858,20 @@ const PollenInfoForCad = () => {
 };
 
 export default PollenInfoForCad;
-
-const tagsStyles = {
-  h1: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  h2: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  h4: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 20,
-  },
-  p: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 10,
-  },
-  span: {
-    fontWeight: 'bold',
-    color: '#000',
-  },
-};
+  const tagsStyles = {
+    p: {
+      marginBottom: 8,
+      fontSize: 16,
+      color: '#333',
+      lineHeight: 22,
+    },
+    strong: {
+      fontWeight: 'bold',
+      color: '#000',
+      fontSize: 16,
+    },
+    a: {
+      color: '#1e90ff',
+      textDecorationLine: 'underline',
+    },
+  };
