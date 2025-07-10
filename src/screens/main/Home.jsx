@@ -779,6 +779,7 @@ const Home = ({navigation}) => {
                     {selected == 'Past' ? (
                       <FlatList
                         data={ispastArray}
+inverted                        
                         renderItem={({item, index}) => {
                           return (
                             <View

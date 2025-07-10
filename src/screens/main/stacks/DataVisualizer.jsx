@@ -366,7 +366,7 @@ const DataVisualizer = ({navigation}) => {
         console.log(error);
         setPollenLoader(false);
       });
-  };
+  }
 
   const getSelectedAllergens = () => {
     let config = {

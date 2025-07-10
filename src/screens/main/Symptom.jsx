@@ -199,8 +199,8 @@ const Symptom = ({navigation}) => {
 
       slides.unshift({
         key: `${i}`,
-        title: `${moment(start).format('DD MMM')} - ${moment(end).format(
-          'DD MMM',
+        title: `${moment(start).format('DD MMMM')} - ${moment(end).format(
+          'DD MMMM',
         )}`,
         chartData,
       });
@@ -209,6 +209,8 @@ const Symptom = ({navigation}) => {
     setGraphSlides(slides);
     setLoader(false);
   };
+
+
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
@@ -320,7 +322,14 @@ const Symptom = ({navigation}) => {
                 activeDotStyle={{backgroundColor: AppColors.PRIMARY}}
                 dotStyle={{backgroundColor: AppColors.LIGHTGRAY}}
                 renderItem={({item}) => {
+
+
                   return (
+                    <>
+
+                    <View style={{marginTop:10}}>
+                    <AppText title={item.title} textSize={2} textColor={AppColors.BLACK} textFontWeight textAlignment={'center'}/>
+                    </View>
                     <View
                       style={{
                         padding: 10,
@@ -381,6 +390,7 @@ const Symptom = ({navigation}) => {
                         />
                       </View>
                     </View>
+                    </>
                   );
                 }}
               />

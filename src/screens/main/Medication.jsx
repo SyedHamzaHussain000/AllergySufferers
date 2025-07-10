@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   ScrollView,
+  Dimensions
 } from 'react-native';
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -364,6 +365,7 @@ const Medication = ({navigation}) => {
   const memoizedSlider = useMemo(() => {
     if (MedicationnRecord.length === 0) return null;
 
+const screenWidth = Dimensions.get('window').width;
     return (
       <View style={{height: responsiveHeight(35)}}>
         <AppIntroSlider
@@ -390,7 +392,7 @@ const Medication = ({navigation}) => {
                   width: 20,
 
                 }}
-                width={responsiveWidth(100)}
+                width={screenWidth * 0.9}
                 barBorderRadius={2}
                 isAnimated={true}
                 maxValue={8}

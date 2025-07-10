@@ -10,6 +10,7 @@ import {
 } from '../../utils/Responsive_Dimensions';
 import axios from 'axios';
 import BASE_URL from '../../utils/BASE_URL';
+import messaging from '@react-native-firebase/messaging'
 
 const CreateAccount = ({navigation}) => {
 
@@ -32,9 +33,11 @@ const CreateAccount = ({navigation}) => {
 
   console.log("ul", fullDob)
 
-  const SignUpUser = () => {
+  const SignUpUser = async() => {
 
     setLoader(true)
+
+    const token = await messaging().getToken();
 
     let data = JSON.stringify({
       full_name: userData.full_name,
@@ -44,7 +47,7 @@ const CreateAccount = ({navigation}) => {
       dob: fullDob,
       gender: userData.gender,
       phone: userData.phone,
-      fcm_token: "abcd",
+      fcm_token: token,
     })
 
     let config = {
