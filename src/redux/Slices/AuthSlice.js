@@ -21,13 +21,14 @@ export const CurrentLogin = createAsyncThunk(
   async (config, {rejectWithValue}) => {
     try {
       const {data} = await axios.request(config);
+      console.log('login response ====>',data)
 
       const subData = await CheckSubscription(data.id);
 
 
       return {data, subData}; // Return the login response data to the slice
     } catch (error) {
-      // console.log('Error during login:', error);
+      console.log('Error during login:', error);
       return rejectWithValue(error.response?.data || 'Login failed'); // Handle errors
     }
   },

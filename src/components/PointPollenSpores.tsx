@@ -66,18 +66,15 @@ const PointPollenSpores = ({PollenSporesArr,index,item,selected, containerwidth}
                                   }}>
                                     <View >
 
-                                      <View style={{marginBottom:10, flexDirection:'row', alignItems:'center', justifyContent:'space-between', width: selected == "Future" ? responsiveWidth(70) : responsiveWidth(80)}}>
-                                        <AppText title={item.type} textSize={2} textFontWeight />
-
-                                        <Image  source={item.type == "spore" ? AppImages.spores : AppImages.pollen} style={{height:40, width:40, resizeMode:'contain'}}/>
-                                      </View>
-
                                     <View
                                       style={{
                                         flexDirection: 'row',
                                         gap: 10,
                                         alignItems: 'center',
+                                        justifyContent:'space-between',
+                                        width:containerwidth ? responsiveWidth(70): responsiveWidth(80)
                                       }}>
+                                        <View style={{flexDirection:'row', alignItems:'center', gap:5}}>
                                       <View
                                         style={{
                                           height: 20,
@@ -103,7 +100,13 @@ const PointPollenSpores = ({PollenSporesArr,index,item,selected, containerwidth}
                                         textSize={2}
                                         textColor={AppColors.BLACK}
                                         textFontWeight
+                                        textwidth={40}
                                       />
+                                      </View>
+
+                                      <View>
+                                        <Image  source={item.type == "spore" ? AppImages.spores : AppImages.pollen} style={{height:40, width:40, resizeMode:'contain'}}/>
+                                      </View>
 
                                       
                                     </View>

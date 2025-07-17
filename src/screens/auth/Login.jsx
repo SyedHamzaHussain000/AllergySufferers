@@ -8,7 +8,7 @@ import BASE_URL from '../../utils/BASE_URL';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { CurrentLogin, setLoader } from '../../redux/Slices/AuthSlice';
-import messaging from '@react-native-firebase/messaging'
+import { getMessaging, getToken, registerDeviceForRemoteMessages } from '@react-native-firebase/messaging'
 const Login = ({navigation}) => {
 
   const [email, setEmail] = useState('')
@@ -38,9 +38,13 @@ const userData = useSelector(state => state.auth.user)
       }
       return
     }
-      await messaging().registerDeviceForRemoteMessages();
+      // await messaging().registerDeviceForRemoteMessages();
+      await registerDeviceForRemoteMessages(getMessaging());
 
-    const token = await messaging().getToken();
+    // const token = await messaging().getToken();
+    const token = await getToken(getMessaging())
+
+    // console.log('fcm token',token)
 
 
 

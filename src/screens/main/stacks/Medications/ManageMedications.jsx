@@ -133,14 +133,7 @@ const ManageMedications = ({navigation}) => {
       <GestureHandlerRootView style={{flex: 1}}>
         <View style={{padding: 20}}>
           <AppHeader
-            heading="Manage Medications"
-            icon={
-              <Entypo
-                name={'location-pin'}
-                size={responsiveFontSize(2.5)}
-                color={AppColors.BTNCOLOURS}
-              />
-            }
+            heading={`Manage ${'\n'}Medications`} 
             goBack
             selecteddate={selecteddate}
             Rightheading="Current Date"

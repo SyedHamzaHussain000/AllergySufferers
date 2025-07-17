@@ -33,11 +33,13 @@ import {
   PieChart,
   PopulationPyramid,
   RadarChart,
+  
+  
 } from 'react-native-gifted-charts';
 import AppImages from '../../../assets/images/AppImages';
 import SubscribeBar from '../../../components/SubscribeBar';
 import GetAllLocation from '../../../global/GetAllLocation';
-import {G} from 'react-native-svg';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DataVisualizer = ({navigation}) => {
@@ -78,6 +80,7 @@ const DataVisualizer = ({navigation}) => {
 
   const [allCities, setAllCities] = useState([]);
   const [pickedCity, setPickedCity] = useState();
+  const [AllDayNumber, setAllDayNumber] = useState([])
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -92,8 +95,8 @@ const DataVisualizer = ({navigation}) => {
   useEffect(() => {
     getSelectedAllergens();
 
-    if(type == "medication"){
-      getMedicationApi()
+    if (type == 'medication') {
+      getMedicationApi();
     }
   }, [selecteddate]);
 
@@ -128,13 +131,9 @@ const DataVisualizer = ({navigation}) => {
     setType('medication');
     setPollenLoader(true);
 
-
-       let data = JSON.stringify({
-          date: moment(selecteddate).format(
-            'YYYY-MM-DD',
-          ),
-        });
-    
+    let data = JSON.stringify({
+      date: moment(selecteddate).format('YYYY-MM-DD'),
+    });
 
     let config = {
       method: 'post',
@@ -143,7 +142,7 @@ const DataVisualizer = ({navigation}) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      data:data
+      data: data,
     };
 
     axios
@@ -158,98 +157,191 @@ const DataVisualizer = ({navigation}) => {
       });
   };
 
+  // const getMedicationRecords = ewformateddate => {
+  //   const end = moment(ewformateddate ? ewformateddate : new Date());
+  //   const start = moment(ewformateddate ? ewformateddate : new Date()).subtract(
+  //     6,
+  //     'days',
+  //   );
+
+  //   setStartDate(start);
+  //   setEndDate(end);
+
+  //   const data = JSON.stringify({
+  //     start_date: start.format('YYYY-MM-DD'),
+  //     end_date: end.format('YYYY-MM-DD'),
+  //   });
+
+  //   let config = {
+  //     method: 'post',
+  //     maxBodyLength: Infinity,
+  //     url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     data: data,
+  //   };
+
+  //   axios
+  //     .request(config)
+  //     .then(response => {
+  //       const allentriesArr = response.data.entries.items || [];
+
+  //       const seenDates = new Set();
+  //       const barData = [];
+
+  //       allentriesArr.forEach(entry => {
+  //         const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format('D');
+  //         const value = parseInt(entry.units) || 0;
+
+  //         if (!seenDates.has(entry.date)) {
+  //           seenDates.add(entry.date);
+  //           barData.push({
+  //             value,
+  //             label: formattedDate,
+  //             // spacing: 0,
+  //             frontColor: entry.frontColor,
+  //               labelWidth: 30, // ✅ Ensures each column takes 30px
+
+  //           });
+  //         } else {
+  //           barData.push({
+  //             value,
+  //             // spacing: 0,
+  //             frontColor: entry.frontColor,
+  //               labelWidth: 30, // ✅ Still assign width for alignment
+
+  //           });
+  //         }
+  //       });
+
+  //       for (let i = 0; i < barData.length - 1; i++) {
+  //         const current = barData[i];
+  //         const next = barData[i + 1];
+
+  //         if (!current.label && next.label && 'spacing' in current) {
+  //           delete current.spacing;
+  //         }
+  //       }
+
+  //       const lastItem = barData[barData.length - 1];
+  //       if (lastItem && !lastItem.label && 'spacing' in lastItem) {
+  //         delete lastItem.spacing;
+  //       }
+
+  //       for (let i = 0; i < barData.length; i++) {
+  //         const current = barData[i];
+  //         const next = barData[i + 1];
+
+  //         if (current.label && (!next || next.label)) {
+  //           // Insert a dummy
+  //           barData.splice(i + 1, 0, {
+  //             value: 0,
+  //             frontColor: 'transparent',
+  //           });
+  //         }
+  //       }
+
+  //       setMedicationnRecord(barData);
+  //     })
+  //     .catch(error => {
+  //       // setLoader(false)
+  //       console.log('what no found ?', error);
+  //     });
+  // };
+
+  const MAX_BARS_PER_DATE = 10;
+
   const getMedicationRecords = ewformateddate => {
-    const end = moment(ewformateddate ? ewformateddate : new Date());
-    const start = moment(ewformateddate ? ewformateddate : new Date()).subtract(
-      6,
-      'days',
-    );
+    const end = moment(ewformateddate || new Date());
+    const start = moment(ewformateddate || new Date()).subtract(6, 'days');
 
     setStartDate(start);
     setEndDate(end);
+
+
+    const dayNumbers = [];
+    let current = start.clone();
+
+    while (current.isSameOrBefore(end)) {
+      dayNumbers.push(current.date()); // e.g. returns 1, 2, 3, … for the day of the month
+      current.add(1, 'day');
+    }
+
+
+    setAllDayNumber(dayNumbers)
 
     const data = JSON.stringify({
       start_date: start.format('YYYY-MM-DD'),
       end_date: end.format('YYYY-MM-DD'),
     });
 
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: data,
-    };
-
     axios
-      .request(config)
+      .post(
+        `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+        data,
+        {headers: {'Content-Type': 'application/json'}},
+      )
       .then(response => {
         const allentriesArr = response.data.entries.items || [];
 
-        const seenDates = new Set();
-        const barData = [];
+        console.log("allentriesArr",start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'), )
+        const groupedByDate = {};
 
+        // Group all bars by date
         allentriesArr.forEach(entry => {
           const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format('D');
-          const value = parseInt(entry.units) || 0;
-
-          if (!seenDates.has(entry.date)) {
-            seenDates.add(entry.date);
-            barData.push({
-              value,
-              label: formattedDate,
-              spacing: 0,
-              frontColor: entry.frontColor,
-              labelWidth: 20,
-            });
-          } else {
-            barData.push({
-              value,
-              spacing: 0,
-              frontColor: entry.frontColor,
-            });
+          if (!groupedByDate[formattedDate]) {
+            groupedByDate[formattedDate] = [];
           }
+          groupedByDate[formattedDate].push({
+            value: parseInt(entry.units) || 0,
+            frontColor: entry.frontColor,
+          });
         });
 
-        for (let i = 0; i < barData.length - 1; i++) {
-          const current = barData[i];
-          const next = barData[i + 1];
+        const barData = [];
 
-          if (!current.label && next.label && 'spacing' in current) {
-            delete current.spacing;
-          }
-        }
+        Object.entries(groupedByDate).forEach(([dateLabel, bars]) => {
+          const group = [];
 
-        const lastItem = barData[barData.length - 1];
-        if (lastItem && !lastItem.label && 'spacing' in lastItem) {
-          delete lastItem.spacing;
-        }
+          bars.forEach((bar, index) => {
+            group.push({
+              value: bar.value,
+              frontColor: bar.frontColor,
+              label: index === 0 ? dateLabel : '',
+              // labelWidth: chartSpacing,
+              labelWidth: 20,
+              labelTextStyle: {color: 'gray'},
+              // spacing: 10,
+              spacing: responsiveWidth(1.25)
+            });
+          });
 
-        for (let i = 0; i < barData.length; i++) {
-          const current = barData[i];
-          const next = barData[i + 1];
-
-          if (current.label && (!next || next.label)) {
-            // Insert a dummy
-            barData.splice(i + 1, 0, {
+          // Add padding bars if less than MAX_BARS_PER_DATE
+          const paddingCount = MAX_BARS_PER_DATE - group.length;
+          for (let i = 0; i < paddingCount; i++) {
+            group.push({
               value: 0,
               frontColor: 'transparent',
+              // spacing: 10,
+              // labelWidth: chartSpacing,
+              spacing: responsiveWidth(1.25),
+              labelWidth: 20,
             });
           }
-        }
+
+          barData.push(...group);
+        });
 
         setMedicationnRecord(barData);
       })
       .catch(error => {
-        // setLoader(false)
-        console.log('what no found ?', error);
+        console.log('Error fetching medication records', error);
       });
   };
 
   const getDataVisualizer = async selecallergens => {
-
     if (!selecallergens || selecallergens.length === 0) {
       // no allergens selected, clear chart data
       setPrimaryLineData([]);
@@ -258,9 +350,9 @@ const DataVisualizer = ({navigation}) => {
     }
 
     const getCity = await AsyncStorage.getItem('isCity');
-    const parseCity = JSON.parse(getCity)
+    const parseCity = JSON.parse(getCity);
 
-    setPickedCity(parseCity)
+    setPickedCity(parseCity);
 
     if (getCity) {
       setDataVisualizerLoader(true);
@@ -291,6 +383,7 @@ const DataVisualizer = ({navigation}) => {
         .request(config)
         .then(response => {
           const apiData = response.data;
+          console.log('api data of symptoms', apiData);
           setAllSymtoms(apiData.symptom_level);
           const chartLineData = {};
           Object.keys(apiData).forEach(key => {
@@ -298,7 +391,6 @@ const DataVisualizer = ({navigation}) => {
               chartLineData[key] = apiData[key].map(val => ({value: val}));
             }
           });
-
 
           //edited code
           const first = selecallergens[0];
@@ -310,6 +402,8 @@ const DataVisualizer = ({navigation}) => {
           colours[0] = first?.chartColor || 'lightblue';
           colours[1] = second?.chartColor || 'lightgreen';
 
+          // ....................
+
           setDataVisualizerLoader(false);
         })
         .then(response => {
@@ -320,7 +414,7 @@ const DataVisualizer = ({navigation}) => {
           console.log(error);
         });
     } else {
-      console.log("add city")
+      console.log('add city');
     }
   };
 
@@ -366,7 +460,7 @@ const DataVisualizer = ({navigation}) => {
         console.log(error);
         setPollenLoader(false);
       });
-  }
+  };
 
   const getSelectedAllergens = () => {
     let config = {
@@ -457,9 +551,9 @@ const DataVisualizer = ({navigation}) => {
     try {
       const data = JSON.stringify({
         medication_id: item.id,
-        "active_id": item.active_id,
-        start_date: moment(selecteddate).format("YYYY-MM-DD"),
-        end_date: moment(selecteddate).subtract('days', 7).format("YYYY-MM-DD"),
+        active_id: item.active_id,
+        start_date: moment(selecteddate).format('YYYY-MM-DD'),
+        end_date: moment(selecteddate).subtract('days', 7).format('YYYY-MM-DD'),
         units: 1,
       });
 
@@ -480,13 +574,13 @@ const DataVisualizer = ({navigation}) => {
   const removeMedication = async item => {
     setMedicationLoading(item.id, true);
 
-    console.log("item",item)
+    console.log('item', item);
     try {
       const data = JSON.stringify({
         medication_id: item.id,
-        "active_id": item.active_id,
-        start_date: moment(selecteddate).format("YYYY-MM-DD"),
-        end_date: moment(selecteddate).subtract('days', 7).format("YYYY-MM-DD"),
+        active_id: item.active_id,
+        start_date: moment(selecteddate).format('YYYY-MM-DD'),
+        end_date: moment(selecteddate).subtract('days', 7).format('YYYY-MM-DD'),
         units: 1,
       });
 
@@ -525,17 +619,24 @@ const DataVisualizer = ({navigation}) => {
 
   const SelectLocation = async city => {
     await AsyncStorage.setItem('isCity', JSON.stringify(city));
-    getSelectedAllergens()
-  }
+    getSelectedAllergens();
+  };
 
-  const removeCity  = async () => {
+  const removeCity = async () => {
+    console.log('remove citu');
+    await AsyncStorage.removeItem('isCity');
+    getSelectedAllergens();
+  };
 
-    console.log("remove citu")
-    await AsyncStorage.removeItem('isCity')
-    getSelectedAllergens()
-  }
+  const chartSpacing = responsiveWidth(28); // You can tweak this value as needed
 
-
+  const emojiMap = {
+    1: AppImages.Hello,
+    2: AppImages.Mask,
+    3: AppImages.Pain,
+    4: AppImages.Star,
+    5: AppImages.Bored,
+  };
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -585,12 +686,12 @@ const DataVisualizer = ({navigation}) => {
                     <ScrollView
                       horizontal={true}
                       style={{height: responsiveHeight(30)}}>
-                      <View
+                      {/* <View
                         style={{
                           position: 'absolute',
                           top: 0,
                           marginLeft: responsiveWidth(20),
-                          
+
                           flexDirection: 'row',
                           zIndex: 100,
                         }}>
@@ -604,7 +705,7 @@ const DataVisualizer = ({navigation}) => {
                           };
 
                           return (
-                            <View style={{ width:responsiveWidth(13.5),}}>
+                            <View style={{width: responsiveWidth(13.5)}}>
                               <Image
                                 source={
                                   item == 1
@@ -619,6 +720,50 @@ const DataVisualizer = ({navigation}) => {
                                     ? emojiMap[5]
                                     : null
                                 }
+                                style={{
+                                  height: 30,
+                                  width: 30,
+                                  resizeMode: 'contain',
+                                }}
+                              />
+                            </View>
+                          );
+                        })}
+                      </View> */}
+                      <View
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          marginLeft: responsiveWidth(15),
+                          flexDirection: 'row',
+                          zIndex: 100,
+
+                        }}>
+                        {allSymtoms.map(item => {
+                          const emojiMap = {
+                            1: AppImages.Hello,
+                            2: AppImages.Mask,
+                            3: AppImages.Pain,
+                            4: AppImages.Star,
+                            5: AppImages.Bored,
+                          };
+
+                          return (
+                            // <View
+                            //   style={{
+                            //     width: chartSpacing,
+                            //     alignItems: 'center',
+                            //   }}>
+                            <View
+                              style={{
+                                width: responsiveWidth(30),
+
+                                alignItems: 'flex-start',
+                                // borderWidth:1, 
+
+                              }}>
+                              <Image
+                                source={emojiMap[1]}
                                 style={{
                                   height: 30,
                                   width: 30,
@@ -645,21 +790,18 @@ const DataVisualizer = ({navigation}) => {
                           thickness: 2,
                           curved: false,
                           dataPointsColor: colours[0],
-                          spacing: responsiveWidth(13),
+                          spacing: chartSpacing,
+                          initialSpacing: responsiveWidth(10),
                         }}
                         lineConfig2={{
                           color: colours[1],
                           thickness: 2,
                           curved: false,
                           dataPointsColor: colours[1],
-                          spacing: responsiveWidth(13),
+                          spacing: chartSpacing,
+                          initialSpacing: responsiveWidth(10),
                         }}
-                        xAxisLabelTextStyle={{
-                          fontSize: 10, // 👈 smaller font size
-                          color: '#000', // optional, customize color
-                          fontWeight: '400', // optional
-                          labelWidth: 20,
-                        }}
+                        // xAxisIndicesWidth={responsiveWidth(28)}
                         yAxisLabelTexts={[
                           '0',
                           ' ',
@@ -671,13 +813,30 @@ const DataVisualizer = ({navigation}) => {
                           ' ',
                           '8',
                         ]}
+                        xAxisLabelTextStyle={{
+                          
+                        }}
                         barBorderRadius={2}
                         isAnimated={true}
                         noOfSections={8}
-                        spacing={40}
+                        spacing={responsiveWidth(7.5)}
                         formatYLabel={label => parseFloat(label).toFixed(0)}
                         stepValue={1}
                       />
+
+                      <View style={{flexDirection:'row', position:'absolute', zIndex:100, bottom:0, marginLeft:responsiveWidth(17.5),}}>
+                        
+                        {
+
+                          AllDayNumber?.map((item)=>{
+                            return(
+                              <View style={{backgroundColor:'white', width:responsiveWidth(30),}}>
+                                <AppText title={item} textSize={2}/>
+                              </View>
+                            )
+                          })
+                        }
+                      </View>
                     </ScrollView>
 
                     <View
@@ -686,9 +845,9 @@ const DataVisualizer = ({navigation}) => {
                         zIndex: 1,
                         right: 0,
                         height: responsiveHeight(30),
-                        gap: 30,
+                        gap: 25,
                       }}>
-                      <AppText title={'Very High'} textSize={1.5} />
+                      <AppText title={'Very \nHigh'} textSize={1.5} />
                       <AppText title={'High'} textSize={1.5} />
 
                       <AppText title={'Moderate'} textSize={1.5} />
@@ -722,68 +881,80 @@ const DataVisualizer = ({navigation}) => {
               }}
             />
 
-            <View style={{gap:20}}>
-            <View>
-            <AppText title={"Allergens"} textSize={2} textFontWeight/>
-              <FlatList
-                data={takingMedications}
-                keyExtractor={item => item?.id?.toString()}
-                renderItem={({item, index}) => (
+            <View style={{gap: 20}}>
+              <View>
+                <AppText title={'Allergens'} textSize={2} textFontWeight />
+                <FlatList
+                  data={takingMedications}
+                  keyExtractor={item => item?.id?.toString()}
+                  renderItem={({item, index}) => (
+                    <View
+                      style={{
+                        height: responsiveHeight(6),
+                        width: responsiveWidth(90),
+                        borderWidth: 1,
+                        borderRadius: 10,
+                        borderColor: AppColors.LIGHTGRAY,
+                        marginTop: 5,
+                        backgroundColor: colours[index],
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        paddingHorizontal: 20,
+                      }}>
+                      <AppText title={item.allergen_name} textSize={1.5} />
+
+                      {loadingItemId === item.id ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={AppColors.LIGHTGRAY}
+                        />
+                      ) : (
+                        <TouchableOpacity onPress={() => deleteAllergens(item)}>
+                          <AntDesign
+                            name="minus"
+                            size={responsiveFontSize(2)}
+                            color={AppColors.LIGHTGRAY}
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  )}
+                />
+              </View>
+
+              {pickedCity && (
+                <View style={{gap: 10}}>
+                  <AppText title={'City'} textSize={2} textFontWeight />
                   <View
                     style={{
-                      height: responsiveHeight(6),
+                      height: 50,
                       width: responsiveWidth(90),
-                      borderWidth: 1,
+                      alignSelf: 'center',
+                      backgroundColor: AppColors.PEACHCOLOUR,
                       borderRadius: 10,
-                      borderColor: AppColors.LIGHTGRAY,
-                      marginTop: 5,
-                      backgroundColor: colours[index],
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
                       alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexDirection: 'row',
                       paddingHorizontal: 20,
                     }}>
-                    <AppText title={item.allergen_name} textSize={1.5} />
+                    <AppText
+                      title={pickedCity?.city_name}
+                      textSize={2}
+                      textFontWeight
+                      textColor={AppColors.BLACK}
+                    />
 
-                    {loadingItemId === item.id ? (
-                      <ActivityIndicator
-                        size="small"
+                    <TouchableOpacity onPress={() => removeCity()}>
+                      <AntDesign
+                        name="minus"
+                        size={responsiveFontSize(2)}
                         color={AppColors.LIGHTGRAY}
                       />
-                    ) : (
-                      <TouchableOpacity onPress={() => deleteAllergens(item)}>
-                        <AntDesign
-                          name="minus"
-                          size={responsiveFontSize(2)}
-                          color={AppColors.LIGHTGRAY}
-                        />
-                      </TouchableOpacity>
-                    )}
+                    </TouchableOpacity>
                   </View>
-                )}
-              />
-              </View>
-
-                {
-                  pickedCity && (
-                    
-            <View style={{gap:10}}>
-              <AppText title={"City"} textSize={2} textFontWeight/>
-              <View style={{height:50, width:responsiveWidth(90), alignSelf:'center', backgroundColor:AppColors.PEACHCOLOUR, borderRadius:10, alignItems:'center', justifyContent:'space-between', flexDirection:'row', paddingHorizontal:20}}>
-                <AppText title={pickedCity?.city_name} textSize={2} textFontWeight textColor={AppColors.BLACK}/>
-                
-                   <TouchableOpacity onPress={() => removeCity()}>
-                        <AntDesign
-                          name="minus"
-                          size={responsiveFontSize(2)}
-                          color={AppColors.LIGHTGRAY}
-                        />
-                      </TouchableOpacity>
-
-              </View>
-            </View>
-                  )
-                }
+                </View>
+              )}
             </View>
 
             <View>
@@ -967,7 +1138,6 @@ const DataVisualizer = ({navigation}) => {
                           size={responsiveFontSize(2.5)}
                           color={AppColors.BTNCOLOURS}
                         />
-
                         <AppText title={item.common_name} textSize={1.5} />
                       </TouchableOpacity>
                     );

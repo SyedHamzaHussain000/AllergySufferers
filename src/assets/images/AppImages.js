@@ -26,6 +26,7 @@ export default AppImages = {
   Medication: require('./Medication.png'),
   SYMPTOMS: require('./SYMPTOMS.png'),
   More: require('./More.png'),
+  visualizer: require('./visualizer.png'),
   updown: require('./up-down.png'),
 
   spores: require('./spore.png'),

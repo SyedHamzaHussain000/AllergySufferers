@@ -282,12 +282,12 @@ const Symptom = ({navigation}) => {
                   data={mojis}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{gap: 10, marginTop: 20}}
+                  contentContainerStyle={{gap: 10, marginTop: 20, backgroundColor:AppColors.WHITE}}
                   renderItem={({item}) => {
                     // console.log("emojis data", graphSlides[0])
                     return (
                       <TouchableOpacity
-                        onPress={() => setApiSymtomsData(item.id)}>
+                        onPress={() => setApiSymtomsData(item.id)} style={{backgroundColor:AppColors.WHITE}}>
                         <Image
                           source={item.img}
                           style={{

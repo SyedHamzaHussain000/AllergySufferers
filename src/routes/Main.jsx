@@ -128,6 +128,22 @@ function MyTabs() {
           },
         }}
       />
+
+       <Tab.Screen
+        name="DataVisualizer"
+        component={DataVisualizer}
+        options={{
+          tabBarIcon: () => {
+            return (
+              <Image
+                source={AppImages.visualizer}
+                style={{height: 30, width: 30}}
+              />
+            );
+          },
+        }}
+      />
+
       <Tab.Screen
         name="More"
         component={settingTabScreen}

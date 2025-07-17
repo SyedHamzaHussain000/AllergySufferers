@@ -53,6 +53,8 @@ const Medication = ({navigation}) => {
     setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
   };
 
+  // console.log(userData.id)
+
 
   useEffect(()=>{
       getActiveMedication()
@@ -360,7 +362,7 @@ const Medication = ({navigation}) => {
         }}
       />
     );
-  }, [allMedication, medicationLoadingMap]); // Re-render only if data or loading state changes
+  }, [allMedication, medicationLoadingMap]); 
 
   const memoizedSlider = useMemo(() => {
     if (MedicationnRecord.length === 0) return null;
@@ -390,7 +392,6 @@ const screenWidth = Dimensions.get('window').width;
                   color: '#000',
                   fontWeight: '400',
                   width: 20,
-
                 }}
                 width={screenWidth * 0.9}
                 barBorderRadius={2}
