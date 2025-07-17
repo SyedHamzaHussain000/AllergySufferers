@@ -27,6 +27,7 @@ import moment from 'moment';
 import DatePicker from 'react-native-date-picker';
 import AppIntroSlider from 'react-native-app-intro-slider';
 import SubscribeBar from '../../components/SubscribeBar';
+import { ApiCallWithUserId } from '../../global/ApiCall';
 
 const Medication = ({navigation}) => {
   const sliderRef = useRef(null);
@@ -93,108 +94,402 @@ const Medication = ({navigation}) => {
     setLoader(false);
   };
 
-  const generateMedicationSlides = async selectedDate => {
-    setMedicationLoader(true);
-    const slides = [];
+  // const generateMedicationSlides = async selectedDate => {
+  //   setMedicationLoader(true);
+
+  //       const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
+
+  //       console.log("medicationData", MedicationData.active_date)
+
+  //   const slides = [];
+  //   const baseDate = moment(
+  //     selectedDate ? selectedDate : new Date(),
+  //     'YYYY-MM-DD',
+  //   );
+
+  //   try {
+  //     for (let i = 0; i < 3; i++) {
+  //       const end = moment(baseDate).subtract(i * 7, 'days');
+  //       const start = moment(baseDate).subtract(i * 7 + 6, 'days');
+
+  //       const payload = JSON.stringify({
+  //         start_date: start.format('YYYY-MM-DD'),
+  //         end_date: end.format('YYYY-MM-DD'),
+  //       });
+
+  //       const response = await axios.post(
+  //         `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+  //         payload,
+  //         {
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             'Cache-Control': 'no-cache',
+  //             Pragma: 'no-cache',
+  //             Expires: '0',
+  //           },
+  //         },
+  //       );
+
+  //       const entries = response?.data?.entries?.items || [];
+  //       const seenDates = new Set();
+  //       const barData = [];
+
+  //       entries.forEach(entry => {
+  //         const formattedLabel = moment(entry.date, 'MMMM, DD YYYY').format(
+  //           'D',
+  //         );
+  //         const value = parseInt(entry.units) || 0;
+
+  //         if (!seenDates.has(entry.date)) {
+  //           seenDates.add(entry.date);
+  //           barData.push({
+  //             value,
+  //             label: formattedLabel,
+  //             spacing: 0,
+  //             frontColor: entry.frontColor || '#E23131',
+  //             labelWidth: 0,
+  //           });
+  //         } else {
+  //           barData.push({
+  //             value,
+  //             spacing: 0,
+  //             frontColor: entry.frontColor || '#E23131',
+  //           });
+  //         }
+  //       });
+
+  //       for (let i = 0; i < barData.length - 1; i++) {
+  //         const current = barData[i];
+  //         const next = barData[i + 1];
+  //         if (!current.label && next.label && 'spacing' in current) {
+  //           delete current.spacing;
+  //         }
+  //       }
+
+  //       const lastItem = barData[barData.length - 1];
+  //       if (lastItem && !lastItem.label && 'spacing' in lastItem) {
+  //         delete lastItem.spacing;
+  //       }
+
+  //       for (let i = 0; i < barData.length; i++) {
+  //         const current = barData[i];
+  //         const next = barData[i + 1];
+  //         if (current.label && (!next || next.label)) {
+  //           barData.splice(i + 1, 0, {
+  //             value: 0,
+  //             frontColor: 'transparent',
+  //           });
+  //         }
+  //       }
+
+  //       slides.unshift({
+  //         key: `${i}`,
+  //         title: `${start.format('DD MMM')} - ${end.format('DD MMM')}`,
+  //         barData,
+  //       });
+  //     }
+
+  //     setMedicationnRecord(slides);
+  //     setMedicationLoader(false);
+  //   } catch (error) {
+  //     setMedicationLoader(false);
+  //     console.log('generateMedicationSlides error:', error);
+  //   }
+  // };
+
+
+const generateMedicationSlides = async selectedDate => {
+  setMedicationLoader(true);
+
+  try {
+    // Step 1: Fetch active date
+    const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
+    const activeDateStr = MedicationData?.active_date;
+    console.log("Active Date:", activeDateStr);
+
+    if (!activeDateStr) {
+      setMedicationLoader(false);
+      console.warn("No active_date returned from API.");
+      return;
+    }
+
+    const activeDate = moment(activeDateStr, 'YYYY-MM-DD');
     const baseDate = moment(
       selectedDate ? selectedDate : new Date(),
       'YYYY-MM-DD',
     );
+    
+    // Step 2: Calculate number of weeks between baseDate and activeDate
+    const diffInDays = baseDate.diff(activeDate, 'days');
+    const numberOfWeeks = Math.ceil((diffInDays + 1) / 7); // +1 to include current day
 
-    try {
-      for (let i = 0; i < 3; i++) {
-        const end = moment(baseDate).subtract(i * 7, 'days');
-        const start = moment(baseDate).subtract(i * 7 + 6, 'days');
+    const slides = [];
 
-        const payload = JSON.stringify({
-          start_date: start.format('YYYY-MM-DD'),
-          end_date: end.format('YYYY-MM-DD'),
-        });
+    for (let i = 0; i < numberOfWeeks; i++) {
+      const end = moment(baseDate).subtract(i * 7, 'days');
+      const start = moment(baseDate).subtract(i * 7 + 6, 'days');
 
-        const response = await axios.post(
-          `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
-          payload,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache',
-              Pragma: 'no-cache',
-              Expires: '0',
-            },
+      const payload = JSON.stringify({
+        start_date: start.format('YYYY-MM-DD'),
+        end_date: end.format('YYYY-MM-DD'),
+      });
+
+      const response = await axios.post(
+        `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            Pragma: 'no-cache',
+            Expires: '0',
           },
-        );
+        },
+      );
 
-        const entries = response?.data?.entries?.items || [];
-        const seenDates = new Set();
-        const barData = [];
+      const entries = response?.data?.entries?.items || [];
+      const seenDates = new Set();
+      const barData = [];
 
-        entries.forEach(entry => {
-          const formattedLabel = moment(entry.date, 'MMMM, DD YYYY').format(
-            'D',
-          );
-          const value = parseInt(entry.units) || 0;
+      entries.forEach(entry => {
+        const formattedLabel = moment(entry.date, 'MMMM, DD YYYY').format('D');
+        const value = parseInt(entry.units) || 0;
 
-          if (!seenDates.has(entry.date)) {
-            seenDates.add(entry.date);
-            barData.push({
-              value,
-              label: formattedLabel,
-              spacing: 0,
-              frontColor: entry.frontColor || '#E23131',
-              labelWidth: 0,
-            });
-          } else {
-            barData.push({
-              value,
-              spacing: 0,
-              frontColor: entry.frontColor || '#E23131',
-            });
-          }
-        });
-
-        for (let i = 0; i < barData.length - 1; i++) {
-          const current = barData[i];
-          const next = barData[i + 1];
-          if (!current.label && next.label && 'spacing' in current) {
-            delete current.spacing;
-          }
+        if (!seenDates.has(entry.date)) {
+          seenDates.add(entry.date);
+          barData.push({
+            value,
+            label: formattedLabel,
+            spacing: 0,
+            frontColor: entry.frontColor || '#E23131',
+            labelWidth: 0,
+          });
+        } else {
+          barData.push({
+            value,
+            spacing: 0,
+            frontColor: entry.frontColor || '#E23131',
+          });
         }
+      });
 
-        const lastItem = barData[barData.length - 1];
-        if (lastItem && !lastItem.label && 'spacing' in lastItem) {
-          delete lastItem.spacing;
+      for (let i = 0; i < barData.length - 1; i++) {
+        const current = barData[i];
+        const next = barData[i + 1];
+        if (!current.label && next.label && 'spacing' in current) {
+          delete current.spacing;
         }
-
-        for (let i = 0; i < barData.length; i++) {
-          const current = barData[i];
-          const next = barData[i + 1];
-          if (current.label && (!next || next.label)) {
-            barData.splice(i + 1, 0, {
-              value: 0,
-              frontColor: 'transparent',
-            });
-          }
-        }
-
-        slides.unshift({
-          key: `${i}`,
-          title: `${start.format('DD MMM')} - ${end.format('DD MMM')}`,
-          barData,
-        });
       }
 
-      setMedicationnRecord(slides);
-      setMedicationLoader(false);
-    } catch (error) {
-      setMedicationLoader(false);
-      console.log('generateMedicationSlides error:', error);
+      const lastItem = barData[barData.length - 1];
+      if (lastItem && !lastItem.label && 'spacing' in lastItem) {
+        delete lastItem.spacing;
+      }
+
+      for (let i = 0; i < barData.length; i++) {
+        const current = barData[i];
+        const next = barData[i + 1];
+        if (current.label && (!next || next.label)) {
+          barData.splice(i + 1, 0, {
+            value: 0,
+            frontColor: 'transparent',
+          });
+        }
+      }
+
+      slides.unshift({
+        key: `${i}`,
+        title: `${start.format('DD MMM')} - ${end.format('DD MMM')}`,
+        barData,
+      });
     }
-  };
+
+    setMedicationnRecord(slides);
+    setMedicationLoader(false);
+  } catch (error) {
+    setMedicationLoader(false);
+    console.log('generateMedicationSlides error:', error);
+  }
+};
+
+
+
+
+// const generateMedicationSlides = async selectedDate => {
+//   setMedicationLoader(true);
+
+//   try {
+//     const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
+//     const end = moment(selectedDate || new Date(), 'YYYY-MM-DD');
+//     const start = moment(MedicationData.active_date);
+
+//     const payload = JSON.stringify({
+//       start_date: start.format('YYYY-MM-DD'),
+//       end_date: end.format('YYYY-MM-DD'),
+//     });
+
+//     const response = await axios.post(
+//       `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+//       payload,
+//       {
+//         headers: {
+//           'Content-Type': 'application/json',
+//           'Cache-Control': 'no-cache',
+//           Pragma: 'no-cache',
+//           Expires: '0',
+//         },
+//       }
+//     );
+
+//     const entries = response?.data?.entries?.items || [];
+
+//     // Sort entries by date ascending
+//     const sortedEntries = [...entries].sort((a, b) =>
+//       moment(a.raw_date).diff(moment(b.raw_date))
+//     );
+
+//     const slides = [];
+//     for (let i = 0; i < sortedEntries.length; i += 7) {
+//       const chunk = sortedEntries.slice(i, i + 7);
+
+//       const barData = chunk.map(entry => ({
+//         value: parseInt(entry.units) || 0,
+//         label: moment(entry.raw_date).format('D'),
+//         spacing: 0,
+//         frontColor: entry.frontColor || '#E23131',
+//         labelWidth: 0,
+//       }));
+
+//       // Optionally insert transparent bars between labeled bars
+//       for (let j = 0; j < barData.length; j++) {
+//         const current = barData[j];
+//         const next = barData[j + 1];
+//         if (current.label && (!next || next.label)) {
+//           barData.splice(j + 1, 0, {
+//             value: 0,
+//             frontColor: 'transparent',
+//           });
+//         }
+//       }
+
+//       slides.push({
+//         key: `${i}`,
+//         title: `${moment(chunk[0].raw_date).format('DD MMM')} - ${moment(chunk[chunk.length - 1].raw_date).format('DD MMM')}`,
+//         barData,
+//       });
+//     }
+
+    
+//     setMedicationnRecord(slides);
+//   } catch (error) {
+//     console.log('generateMedicationSlides error:', error);
+//   } finally {
+//     setMedicationLoader(false);
+//   }
+// };
+
+
+//   const generateMedicationSlides = async selectedDate => {
+//   setMedicationLoader(true);
+
+//   try {
+//     const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
+//     const end = moment(selectedDate || new Date(), 'YYYY-MM-DD');
+//     const start = moment(MedicationData.active_date);
+
+//     const payload = JSON.stringify({
+//       start_date: start.format('YYYY-MM-DD'),
+//       end_date: end.format('YYYY-MM-DD'),
+//     });
+
+//     const response = await axios.post(
+//       `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+//       payload,
+//       {
+//         headers: {
+//           'Content-Type': 'application/json',
+//           'Cache-Control': 'no-cache',
+//           Pragma: 'no-cache',
+//           Expires: '0',
+//         },
+//       }
+//     );
+
+//     const entries = response?.data?.entries?.items || [];
+
+//     // Group entries by date
+//     const groupedByDate = {};
+//     entries.forEach(entry => {
+//       const dateKey = moment(entry.raw_date).format('YYYY-MM-DD');
+//       if (!groupedByDate[dateKey]) {
+//         groupedByDate[dateKey] = [];
+//       }
+//       groupedByDate[dateKey].push(entry);
+//     });
+
+
+    
+
+//     // Create one bar per entry, but only label once per date
+//     const mergedEntries = Object.entries(groupedByDate).map(([date, records]) => {
+//       return records.map((entry, index) => ({
+//         value: parseInt(entry.units) || 0,
+//         label: index === 0 ? moment(date).format('D') : undefined, // label only once per date
+//         spacing: 0,
+//         frontColor: entry.frontColor || '#E23131',
+//         raw_date: date,
+//       }));
+//     }).flat();
+
+
+    
+
+//     // Sort by raw_date ascending
+//     const sortedEntries = mergedEntries.sort((a, b) =>
+//       moment(a.raw_date).diff(moment(b.raw_date))
+//     );
+
+//     // Chunk into 7-day groups (not by actual date range but 7 bars at a time)
+//     const slides = [];
+//     for (let i = 0; i < sortedEntries.length; i += 7) {
+//       const chunk = sortedEntries.slice(i, i + 7);
+
+//       // Insert transparent bars for spacing between labeled bars
+//       for (let j = 0; j < chunk.length; j++) {
+//         const current = chunk[j];
+//         const next = chunk[j + 1];
+//         if (current.label && (!next || next.label)) {
+//           chunk.splice(j + 1, 0, {
+//             value: 0,
+//             frontColor: 'transparent',
+//           });
+//         }
+//       }
+
+//       const titleStart = chunk.find(item => item.raw_date)?.raw_date;
+//       const titleEnd = chunk.slice().reverse().find(item => item.raw_date)?.raw_date;
+
+//       slides.push({
+//         key: `${i}`,
+//         title: `${moment(titleStart).format('DD MMM')} - ${moment(titleEnd).format('DD MMM')}`,
+//         barData: chunk,
+//       });
+//     }
+
+//     setMedicationnRecord(slides);
+//   } catch (error) {
+//     console.log('generateMedicationSlides error:', error);
+//   } finally {
+//     setMedicationLoader(false);
+//   }
+// };
+
+
 
   const addMedication = async item => {
     setMedicationLoading(item.id, true);
 
-    console.log("item",item)
+    // console.log("item",item)
 
     const baseDate = moment(
       selecteddate ? selecteddate : new Date(),
@@ -370,6 +665,7 @@ const Medication = ({navigation}) => {
 const screenWidth = Dimensions.get('window').width;
     return (
       <View style={{height: responsiveHeight(35)}}>
+
         <AppIntroSlider
           ref={sliderRef}
           data={MedicationnRecord}
@@ -380,6 +676,9 @@ const screenWidth = Dimensions.get('window').width;
           scrollEnabled={true}
           renderItem={({item}) => (
             <View style={{alignItems: 'center'}}>
+              {
+                console.log("first", item)
+              }
               <Text style={{fontSize: 16}}>{item.title}</Text>
               <BarChart
                 data={item.barData}

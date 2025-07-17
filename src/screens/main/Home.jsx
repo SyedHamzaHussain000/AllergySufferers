@@ -365,7 +365,7 @@ const Home = ({navigation}) => {
     let sporesHeaderAdded = false;
 
     sortedPollenData.forEach((item, index) => {
-      console.log('foreaching', item, index);
+      // console.log('foreaching', item, index);
 
       if (item.type === 'pollen' && !pollenHeaderAdded) {
         Headings.push({type: 'header', title: 'Pollen', index: index});

@@ -9,7 +9,6 @@ const Stack = createStackNavigator();
 const Routes = () => {
 
 const data = useSelector(state => state.auth.user)
-console.log("data", data)
 
   return (
     <Stack.Navigator initialRouteName='Auth'  screenOptions={{headerShown:false}}>

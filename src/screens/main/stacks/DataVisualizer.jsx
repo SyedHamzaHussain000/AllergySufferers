@@ -763,7 +763,7 @@ const DataVisualizer = ({navigation}) => {
 
                               }}>
                               <Image
-                                source={emojiMap[1]}
+                                source={emojiMap[item]}
                                 style={{
                                   height: 30,
                                   width: 30,
