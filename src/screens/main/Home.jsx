@@ -372,7 +372,7 @@ const Home = ({navigation}) => {
         pollenHeaderAdded = true;
       }
 
-      if (item.type === 'spores' && !sporesHeaderAdded) {
+      if (item.type === 'spore' && !sporesHeaderAdded) {
         Headings.push({type: 'header', title: 'Spores', index: index});
         sporesHeaderAdded = true;
       }
@@ -948,6 +948,7 @@ const Home = ({navigation}) => {
                         data={sortedPollenData}
                         contentContainerStyle={{paddingBottom: 50}}
                         renderItem={({item, index}) => {
+                          console.log('setting data ===>',sortedPollenData)
                           const pollenHeaderIndex = settingData.find(
                             h => h.title === 'Pollen',
                           )?.index;
@@ -956,7 +957,7 @@ const Home = ({navigation}) => {
                           )?.index;
 
                           return (
-                            <View style={{gap: 5}}>
+                            <View style={{gap: 8}}>
                               {index === pollenHeaderIndex && (
                                 <AppText
                                   title="Pollen"
@@ -969,6 +970,7 @@ const Home = ({navigation}) => {
                                 <AppText
                                   title="Spores"
                                   textSize={2}
+                                  marginTop={2}
                                   textFontWeight
                                 />
                               )}
@@ -1003,7 +1005,7 @@ const Home = ({navigation}) => {
                             );
                           const sporesHeaderIndex =
                             futurePollenAndSpores.findIndex(
-                              i => i.type === 'spores',
+                              i => i.type === 'spore',
                             );
 
                           return (
@@ -1150,6 +1152,7 @@ const Home = ({navigation}) => {
                                             <AppText
                                               title="Spores"
                                               textSize={2}
+                                              marginTop={2}
                                               textFontWeight
                                             />
                                           )}

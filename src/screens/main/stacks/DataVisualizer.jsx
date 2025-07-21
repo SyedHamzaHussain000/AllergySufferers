@@ -33,14 +33,13 @@ import {
   PieChart,
   PopulationPyramid,
   RadarChart,
-  
-  
 } from 'react-native-gifted-charts';
 import AppImages from '../../../assets/images/AppImages';
 import SubscribeBar from '../../../components/SubscribeBar';
 import GetAllLocation from '../../../global/GetAllLocation';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {ApiCallWithUserId} from '../../../global/ApiCall';
 
 const DataVisualizer = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
@@ -58,7 +57,7 @@ const DataVisualizer = ({navigation}) => {
 
   const [date, setDate] = useState(new Date());
   const [selecteddate, setSelectedDate] = useState(
-    moment(new Date()).format('YYYY-MM-DD'),
+    moment().local().format('YYYY-MM-DD'),
   );
 
   const colours = ['lightblue', 'lightgreen'];
@@ -80,7 +79,8 @@ const DataVisualizer = ({navigation}) => {
 
   const [allCities, setAllCities] = useState([]);
   const [pickedCity, setPickedCity] = useState();
-  const [AllDayNumber, setAllDayNumber] = useState([])
+  const [AllDayNumber, setAllDayNumber] = useState([]);
+  const [activeDate, setActiveDate] = useState(null);
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -106,6 +106,7 @@ const DataVisualizer = ({navigation}) => {
 
   const getAllAllergens = () => {
     setType('allergens');
+    setActiveDate(null);
     setPollenLoader(true);
 
     let config = {
@@ -147,9 +148,19 @@ const DataVisualizer = ({navigation}) => {
 
     axios
       .request(config)
-      .then(response => {
+      .then(async response => {
         setMedicationsData(response?.data?.data);
         setPollenLoader(false);
+        const MedicationData = await ApiCallWithUserId(
+          'post',
+          'get_active_date',
+          userData?.id,
+        );
+        const activeDateStr = MedicationData?.active_date
+          ? MedicationData?.active_date
+          : moment(new Date()).format('YYYY-MM-DD');
+        setActiveDate(new Date(activeDateStr));
+        // console.log("Active Date:", activeDateStr);
       })
       .catch(error => {
         setPollenLoader(false);
@@ -259,7 +270,6 @@ const DataVisualizer = ({navigation}) => {
     setStartDate(start);
     setEndDate(end);
 
-
     const dayNumbers = [];
     let current = start.clone();
 
@@ -268,8 +278,7 @@ const DataVisualizer = ({navigation}) => {
       current.add(1, 'day');
     }
 
-
-    setAllDayNumber(dayNumbers)
+    setAllDayNumber(dayNumbers);
 
     const data = JSON.stringify({
       start_date: start.format('YYYY-MM-DD'),
@@ -285,7 +294,11 @@ const DataVisualizer = ({navigation}) => {
       .then(response => {
         const allentriesArr = response.data.entries.items || [];
 
-        console.log("allentriesArr",start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'), )
+        console.log(
+          'allentriesArr',
+          start.format('YYYY-MM-DD'),
+          end.format('YYYY-MM-DD'),
+        );
         const groupedByDate = {};
 
         // Group all bars by date
@@ -314,7 +327,7 @@ const DataVisualizer = ({navigation}) => {
               labelWidth: 20,
               labelTextStyle: {color: 'gray'},
               // spacing: 10,
-              spacing: responsiveWidth(1.25)
+              spacing: responsiveWidth(1.25),
             });
           });
 
@@ -463,6 +476,7 @@ const DataVisualizer = ({navigation}) => {
   };
 
   const getSelectedAllergens = () => {
+    // setActiveDate(null)
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -737,7 +751,6 @@ const DataVisualizer = ({navigation}) => {
                           marginLeft: responsiveWidth(15),
                           flexDirection: 'row',
                           zIndex: 100,
-
                         }}>
                         {allSymtoms.map(item => {
                           const emojiMap = {
@@ -759,8 +772,7 @@ const DataVisualizer = ({navigation}) => {
                                 width: responsiveWidth(30),
 
                                 alignItems: 'flex-start',
-                                // borderWidth:1, 
-
+                                // borderWidth:1,
                               }}>
                               <Image
                                 source={emojiMap[item]}
@@ -783,6 +795,7 @@ const DataVisualizer = ({navigation}) => {
                           PrimaryLineData.length > 0 ||
                           SecondaryLineData.length > 0
                         }
+                        // xAxisLabelTexts={[]}
                         lineData={PrimaryLineData || []}
                         lineData2={SecondaryLineData || []}
                         lineConfig={{
@@ -791,6 +804,7 @@ const DataVisualizer = ({navigation}) => {
                           curved: false,
                           dataPointsColor: colours[0],
                           spacing: chartSpacing,
+                          // textColor: 'red',
                           initialSpacing: responsiveWidth(10),
                         }}
                         lineConfig2={{
@@ -813,17 +827,19 @@ const DataVisualizer = ({navigation}) => {
                           ' ',
                           '8',
                         ]}
-                        xAxisLabelTextStyle={{
-                          
-                        }}
+                        // hideXAxisText={true}
+                        // xAxisLabelTexts={[]} // extra safety
+                        // xAxisLabelTextStyle={{
+                        //   color: 'transparent',
+                        //   fontSize: 0,
+                        // }}
                         barBorderRadius={2}
                         isAnimated={true}
                         noOfSections={8}
                         spacing={responsiveWidth(7.5)}
                         formatYLabel={label => parseFloat(label).toFixed(0)}
                         stepValue={1}
-                      />
-
+                      /> 
                       <View style={{flexDirection:'row', position:'absolute', zIndex:100, bottom:0, marginLeft:responsiveWidth(17.5),}}>
                         
                         {
@@ -836,7 +852,7 @@ const DataVisualizer = ({navigation}) => {
                             )
                           })
                         }
-                      </View>
+                      </View> 
                     </ScrollView>
 
                     <View
@@ -865,6 +881,7 @@ const DataVisualizer = ({navigation}) => {
               open={open}
               date={date}
               mode="date"
+              minimumDate={activeDate && activeDate}
               maximumDate={new Date()}
               onConfirm={selectedDate => {
                 setDate(selectedDate);

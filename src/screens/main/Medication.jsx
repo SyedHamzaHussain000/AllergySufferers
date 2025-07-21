@@ -40,10 +40,11 @@ const Medication = ({navigation}) => {
   const [medicationLoadingMap, setMedicationLoadingMap] = useState({});
   const [loader, setLoader] = useState(false);
   const [Medicationloader, setMedicationLoader] = useState(false);
+  const [activeDate,setActiveDate] = useState(null)
 
   const [date, setDate] = useState(new Date());
   const [selecteddate, setSelectedDate] = useState(
-    moment(new Date()).format('YYYY-MM-DD'),
+    moment().local().format('YYYY-MM-DD'),
   );
   const [open, setOpen] = useState(false);
 
@@ -204,16 +205,21 @@ const generateMedicationSlides = async selectedDate => {
   try {
     // Step 1: Fetch active date
     const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
-    const activeDateStr = MedicationData?.active_date;
+    const activeDateStr = MedicationData?.active_date ? MedicationData?.active_date : moment(new Date()).format("YYYY-MM-DD");
     console.log("Active Date:", activeDateStr);
-
+    // let newDate = new Date(activeDateStr)
+    // console.log('objkrct date',new Date())
+    
+    
     if (!activeDateStr) {
       setMedicationLoader(false);
       console.warn("No active_date returned from API.");
       return;
     }
+    setActiveDate(new Date(activeDateStr))
 
     const activeDate = moment(activeDateStr, 'YYYY-MM-DD');
+    // setActiveDate(activeDate)
     const baseDate = moment(
       selectedDate ? selectedDate : new Date(),
       'YYYY-MM-DD',
@@ -710,6 +716,8 @@ const screenWidth = Dimensions.get('window').width;
     );
   }, [MedicationnRecord]);
 
+  console.log('activeDate',activeDate)
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
@@ -726,6 +734,7 @@ const screenWidth = Dimensions.get('window').width;
           open={open}
           date={date}
           mode="date"
+          minimumDate={!activeDate ? new Date() : activeDate}
           maximumDate={new Date()}
           onConfirm={selectedDate => {
             setDate(selectedDate);

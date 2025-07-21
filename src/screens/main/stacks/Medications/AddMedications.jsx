@@ -9,7 +9,7 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {act, useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
 import {
@@ -32,6 +32,7 @@ import LoaderMode from '../../../../components/LoaderMode';
 import Toast from 'react-native-toast-message';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
+import { ApiCallWithUserId } from '../../../../global/ApiCall';
 
 const AddMedications = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
@@ -43,10 +44,11 @@ const AddMedications = ({navigation}) => {
   const [customMecication, setCustomMedication] = useState('');
   const [customMecicationLoader, setCustomMedicationLoader] = useState(false);
   const [addYourMedication, SetAddYourMedication] = useState(false);
+  const [activeDate,setActiveDate] = useState(null)
 
   const [date, setDate] = useState(new Date());
   const [selecteddate, setSelectedDate] = useState(
-    moment(new Date()).format('YYYY-MM-DD'),
+    moment().local().format('YYYY-MM-DD'),
   );
   const [open, setOpen] = useState(false);
 
@@ -70,11 +72,14 @@ const AddMedications = ({navigation}) => {
 
     axios
       .request(config)
-      .then(response => {
+      .then(async response => {
         console.log(JSON.stringify(response.data));
 
         setMedicationsData(response.data.data);
         setMedciationLoader(false);
+        const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
+                    const activeDateStr = MedicationData?.active_date ? MedicationData?.active_date : moment(new Date()).format("YYYY-MM-DD");
+                    setActiveDate(new Date(activeDateStr))
       })
       .catch(error => {
         console.log(error);
@@ -242,6 +247,7 @@ const AddMedications = ({navigation}) => {
           open={open}
           date={date}
           mode="date"
+          minimumDate={activeDate ? activeDate : new Date()}
           maximumDate={new Date()}
           onConfirm={selectedDate => {
             setDate(selectedDate);

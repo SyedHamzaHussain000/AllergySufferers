@@ -14,7 +14,8 @@ type textProps = {
   textFontWeight?: boolean;
   textAlignment?: any;
   textwidth?: any;
-  textHeight?:any
+  textHeight?:any,
+  marginTop?: any,
 };
 
 const AppText = ({
@@ -24,7 +25,8 @@ const AppText = ({
   textFontWeight,
   textAlignment,
   textwidth,
-  textHeight
+  textHeight,
+  marginTop,
 }: textProps) => {
   return (
     <Text
@@ -37,8 +39,8 @@ const AppText = ({
         color: textColor ? textColor : AppColors.BLACK,
         textAlign: textAlignment ? textAlignment : null,
         alignSelf: textAlignment ? textAlignment : null,
-        height: textHeight ? responsiveHeight(textHeight): null 
-        
+        height: textHeight ? responsiveHeight(textHeight): null, 
+        marginTop: responsiveHeight(marginTop),
       }}>
       {title}
     </Text>

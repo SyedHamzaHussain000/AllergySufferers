@@ -36,6 +36,7 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import AppImages from '../../../../assets/images/AppImages';
 import moment from 'moment';
 import DatePicker from 'react-native-date-picker';
+import { ApiCallWithUserId } from '../../../../global/ApiCall';
 // import { NestableScrollContainer, NestableDraggableFlatList } from "react-native-draggable-flatlist"
 
 const ManageMedications = ({navigation}) => {
@@ -47,8 +48,9 @@ const ManageMedications = ({navigation}) => {
   const [data3, setData3] = useState([1, 2, 3, 4]);
 
   const [date, setDate] = useState(new Date());
+  const [activeDate,setActiveDate] = useState(null)
   const [selecteddate, setSelectedDate] = useState(
-    moment(new Date()).format('YYYY-MM-DD'),
+    moment().local().format('YYYY-MM-DD'),
   );
   const [open, setOpen] = useState(false);
 
@@ -87,10 +89,13 @@ const ManageMedications = ({navigation}) => {
 
     axios
       .request(config)
-      .then(response => {
+      .then(async response => {
         console.log(JSON.stringify(response.data));
         setLoader(false);
         setActiveMedication(response.data.data);
+        const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
+                    const activeDateStr = MedicationData?.active_date ? MedicationData?.active_date : moment(new Date()).format("YYYY-MM-DD");
+                    setActiveDate(new Date(activeDateStr))
       })
       .catch(error => {
         console.log(error);
@@ -145,6 +150,7 @@ const ManageMedications = ({navigation}) => {
             open={open}
             date={date}
             mode="date"
+            minimumDate={activeDate ? activeDate : new Date()}
             maximumDate={new Date()}
             onConfirm={selectedDate => {
               setDate(selectedDate);
