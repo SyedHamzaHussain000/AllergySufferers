@@ -25,7 +25,7 @@ import SocialAuthButton from '../../../../components/SocialAuthButton';
 import AppTextInput from '../../../../components/AppTextInput';
 import Octicons from 'react-native-vector-icons/Octicons';
 import BASE_URL from '../../../../utils/BASE_URL';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
 import {
   NestableScrollContainer,
@@ -37,10 +37,13 @@ import AppImages from '../../../../assets/images/AppImages';
 import moment from 'moment';
 import DatePicker from 'react-native-date-picker';
 import { ApiCallWithUserId } from '../../../../global/ApiCall';
+import { deleteActiveMedication, removeCurrentActiveMedication } from '../../../../redux/Slices/AuthSlice';
 // import { NestableScrollContainer, NestableDraggableFlatList } from "react-native-draggable-flatlist"
 
 const ManageMedications = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
+const dispatch = useDispatch()
+  const allActiveMedicationRedux = useSelector(state => state.auth.MyCurrentMeds)
 
   const [activeMedication, setActiveMedication] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -90,7 +93,7 @@ const ManageMedications = ({navigation}) => {
     axios
       .request(config)
       .then(async response => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         setLoader(false);
         setActiveMedication(response.data.data);
         const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
@@ -103,35 +106,45 @@ const ManageMedications = ({navigation}) => {
       });
   };
 
-  const deleteActiveMedication = medicationdata => {
-    setLoader(true);
+  // const deleteActiveMedication = medicationdata => {
+  //   setLoader(true);
 
 
-    let data = JSON.stringify({
-        "date": moment(selecteddate).format("YYYY-MM-DD"),
-         "data":medicationdata?.id
-    });
+  //   let data = JSON.stringify({
+  //       "date": moment(selecteddate).format("YYYY-MM-DD"),
+  //        "data":medicationdata?.id
+  //   });
 
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/delete_medication`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: data,
-    };
+  //   let config = {
+  //     method: 'post',
+  //     maxBodyLength: Infinity,
+  //     url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/delete_medication`,
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     data: data,
+  //   };
 
-    axios
-      .request(config)
-      .then(response => {
-        console.log(JSON.stringify(response.data));
-        getActiveMedication();
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  };
+  //   axios
+  //     .request(config)
+  //     .then(response => {
+  //       console.log(JSON.stringify(response.data));
+  //       getActiveMedication();
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //     });
+  // };
+
+
+  const deleteActiveMedicationRedux = medData => {
+    
+    // dispatch( deleteActiveMedication(medData))
+    dispatch(removeCurrentActiveMedication(medData))
+  }
+
+
+  console.log("allActiveMedicationRedux",allActiveMedicationRedux)
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -171,14 +184,14 @@ const ManageMedications = ({navigation}) => {
               textFontWeight
             />
 
-            {loader && (
+            {/* {loader && (
               <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-            )}
+            )} */}
 
-            {activeMedication ? (
+            {allActiveMedicationRedux ? (
               <NestableScrollContainer>
                 <NestableDraggableFlatList
-                  data={activeMedication}
+                  data={allActiveMedicationRedux}
                   contentContainerStyle={{gap: 10}}
                   renderItem={({item, drag, isActive}) => {
                     return (
@@ -202,7 +215,7 @@ const ManageMedications = ({navigation}) => {
                                     {
                                       text: 'OK',
                                       onPress: () =>
-                                        deleteActiveMedication(item),
+                                        deleteActiveMedicationRedux(item),
                                     },
                                   ],
                                   {cancelable: false},

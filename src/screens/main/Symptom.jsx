@@ -208,21 +208,22 @@ const Symptom = ({navigation}) => {
 
     setGraphSlides(slides);
     setLoader(false);
-  };
-
+  }
 
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
-      <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1,}}>
+      <View style={{ backgroundColor: AppColors.WHITE, flex: 1, }}>
+        <View style={{paddingHorizontal:20}}>
         <AppHeader
           heading="Symptom"
           Rightheading="Today"
           subheading="Tracker"
           selecteddate={selecteddate}
           setOpen={() => setOpen(!open)}
-        />
+          />
 
+          </View>
         { 
           //start date
         }
@@ -274,7 +275,7 @@ const Symptom = ({navigation}) => {
         <ScrollView contentContainerStyle={{flexGrow:1, paddingBottom:50}} showsVerticalScrollIndicator={false}>
         {expireDate ? (
           <>
-            <View>
+            <View style={{padding:20}}>
               {loader ? (
                 <ActivityIndicator size={'large'} color={AppColors.BLACK} />
               ) : (
@@ -312,6 +313,8 @@ const Symptom = ({navigation}) => {
                 />
               )}
             </View>
+            
+
             <View style={{height: responsiveHeight(45)}}>
               <AppIntroSlider
                 ref={sliderRef}
@@ -321,6 +324,7 @@ const Symptom = ({navigation}) => {
                 showPrevButton={false}
                 activeDotStyle={{backgroundColor: AppColors.PRIMARY}}
                 dotStyle={{backgroundColor: AppColors.LIGHTGRAY}}
+                style={{width:responsiveWidth(90), alignSelf:'center',}}
                 renderItem={({item}) => {
 
 
@@ -407,6 +411,7 @@ const Symptom = ({navigation}) => {
           </View>
         )}
 
+        <View style={{paddingHorizontal:20}}>
         <View style={{marginTop: 0}}>
           <AppButton
             title={'Go TO DATA VISUALIZER'}
@@ -439,6 +444,7 @@ const Symptom = ({navigation}) => {
             </Text>
           </View>
         )}
+        </View>
         </ScrollView>
       </View>
     </SafeAreaView>

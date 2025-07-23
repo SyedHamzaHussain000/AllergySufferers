@@ -718,6 +718,10 @@ const screenWidth = Dimensions.get('window').width;
 
   console.log('activeDate',activeDate)
 
+
+
+
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>

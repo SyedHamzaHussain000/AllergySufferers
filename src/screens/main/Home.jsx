@@ -948,7 +948,7 @@ const Home = ({navigation}) => {
                         data={sortedPollenData}
                         contentContainerStyle={{paddingBottom: 50}}
                         renderItem={({item, index}) => {
-                          console.log('setting data ===>',sortedPollenData)
+                          // console.log('setting data ===>',sortedPollenData)
                           const pollenHeaderIndex = settingData.find(
                             h => h.title === 'Pollen',
                           )?.index;

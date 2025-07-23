@@ -2,6 +2,7 @@ import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import axios from 'axios';
 import {signOut} from '../../screens/auth/SignInWithGoogle';
 import CheckSubscription from '../../global/CheckSubscription';
+import moment from 'moment';
 
 const initialState = {
   user: null,
@@ -14,6 +15,9 @@ const initialState = {
     Lat: null,
     Lng: null,
   },
+  ActiveMedications: [],
+  MyCurrentMeds: [],
+  reduxmedicationRecords: [],
 };
 
 export const CurrentLogin = createAsyncThunk(
@@ -21,10 +25,9 @@ export const CurrentLogin = createAsyncThunk(
   async (config, {rejectWithValue}) => {
     try {
       const {data} = await axios.request(config);
-      console.log('login response ====>',data)
+      console.log('login response ====>', data);
 
       const subData = await CheckSubscription(data.id);
-
 
       return {data, subData}; // Return the login response data to the slice
     } catch (error) {
@@ -65,15 +68,81 @@ export const AuthSlice = createSlice({
       state.currentLocation.Lat = action.payload.Lat;
       state.currentLocation.Lng = action.payload.Lng;
     },
+    setCurrentActiveMedication: (state, action) => {
+      const newMed = action.payload;
+
+      // Ensure it's always an array
+      if (!Array.isArray(state.MyCurrentMeds)) {
+        state.MyCurrentMeds = [];
+      }
+
+      const exists = state.MyCurrentMeds.some(med => med.id === newMed.id);
+
+      if (!exists) {
+        state.MyCurrentMeds.push(newMed);
+      }
+    },
+    removeCurrentActiveMedication: (state, action) => {
+      const newMed = action.payload;
+      const exist = state.MyCurrentMeds.some(med => med.id === newMed.id);
+
+      if (exist) {
+        state.MyCurrentMeds.pop(newMed);
+      }
+    },
+
+    setActiveMedication: (state, action) => {
+
+      console.log("action payload", action.payload)
+      state.ActiveMedications = action.payload
+    
+    },
+    deleteActiveMedication: (state, action) => {
+      const newMed = action.payload;
+
+      const exists = state.ActiveMedications.some(
+        med => med.id === newMed.id && med.date === newMed.date,
+      );
+      if (exists) {
+        state.ActiveMedications.pop(newMed);
+
+      }
+    },
+    addUnitToActiveMedicaton: (state, action) => {
+      const newMed = action.payload;
+
+
+      
+      const indexof = state.ActiveMedications.findIndex(
+        med => med.id === newMed.id && med.date === newMed.date
+      );
+      if (indexof !== -1) {
+        state.ActiveMedications[indexof].units += 1;
+      }
+    },
+    removeUnitToActiveMedicaton: (state, action) => {
+      const newMed = action.payload;
+
+      const indexof = state.ActiveMedications.findIndex(
+        med => med.id === newMed.id && med.date === newMed.date,
+      );
+
+      if (indexof !== -1) {
+        if (state.ActiveMedications[indexof].units != 0) {
+          state.ActiveMedications[indexof].units -= 1;
+        }
+      }
+    },
   },
+
   extraReducers: builder => {
     builder
       .addCase(CurrentLogin.fulfilled, (state, action) => {
         state.user = action.payload.data;
         state.loader = false;
-        state.expireDate = action?.payload?.subData?.expiry
-        if(action?.payload?.subData?.expiry){
-          state.isExpired = action?.payload?.subData?.false
+        state.expireDate = action?.payload?.subData?.expiry;
+        if (action?.payload?.subData?.expiry) {
+          state.isExpired = action?.payload?.subData?.false;
         }
       })
       .addCase(CurrentLogin.pending, (state, action) => {})
@@ -91,6 +160,13 @@ export const {
   setCurrentUserData,
   setSubscription,
   setCurrentLatLng,
+  setActiveMedication,
+  deleteActiveMedication,
+  addUnitToActiveMedicaton,
+  removeUnitToActiveMedicaton,
+
+  setCurrentActiveMedication,
+  removeCurrentActiveMedication,
 } = AuthSlice.actions;
 
 export default AuthSlice.reducer;

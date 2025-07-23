@@ -25,7 +25,7 @@ import SocialAuthButton from '../../../../components/SocialAuthButton';
 import AppTextInput from '../../../../components/AppTextInput';
 import Octicons from 'react-native-vector-icons/Octicons';
 import BASE_URL from '../../../../utils/BASE_URL';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import LoaderMode from '../../../../components/LoaderMode';
@@ -33,9 +33,13 @@ import Toast from 'react-native-toast-message';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 import { ApiCallWithUserId } from '../../../../global/ApiCall';
+import { setActiveMedication, setCurrentActiveMedication } from '../../../../redux/Slices/AuthSlice';
 
 const AddMedications = ({navigation}) => {
+  const dispatch = useDispatch()
   const userData = useSelector(state => state.auth.user);
+
+  
   const [medicationData, setMedicationsData] = useState([]);
   const [MedicationLoader, setMedciationLoader] = useState(false);
 
@@ -229,6 +233,17 @@ const AddMedications = ({navigation}) => {
         // getMedicationApi();
       });
   };
+
+  // local functionality
+  const AddMedicationActiveToLocal = (medData) => {
+
+    // dispatch(setActiveMedication(medData))
+    dispatch(setCurrentActiveMedication(medData))
+
+  }
+
+
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={{padding: 20}}>
@@ -319,7 +334,7 @@ const AddMedications = ({navigation}) => {
                   .map((item, index) => {
                     return (
                       <TouchableOpacity
-                        onPress={() => AddMedicationActive(item)}
+                        onPress={() => AddMedicationActiveToLocal(item)}
                         style={{
                           borderWidth: 1,
                           borderTopRightRadius: index == 0 ? 10 : 0,

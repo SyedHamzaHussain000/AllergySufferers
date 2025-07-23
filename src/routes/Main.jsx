@@ -29,6 +29,7 @@ import HelpScreen from '../screens/main/stacks/Help/HelpScreen';
 import Notification from '../screens/main/stacks/notification/Notification';
 import Subscription from '../screens/main/subscription/Subscription';
 import ForcastExplaination from '../screens/main/stacks/forcastexplaination/ForcastExplaination';
+import MedicationSample from '../screens/main/MedicationSample';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const Main = () => {
@@ -114,9 +115,24 @@ function MyTabs() {
           },
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Medication"
         component={Medication}
+        options={{
+          tabBarIcon: () => {
+            return (
+              <Image
+                source={AppImages.Medication}
+                style={{height: 30, width: 30}}
+              />
+            );
+          },
+        }}
+      /> */}
+
+       <Tab.Screen
+        name="Medication"
+        component={MedicationSample}
         options={{
           tabBarIcon: () => {
             return (
