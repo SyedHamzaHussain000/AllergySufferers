@@ -37,13 +37,17 @@ import AppImages from '../../../../assets/images/AppImages';
 import moment from 'moment';
 import DatePicker from 'react-native-date-picker';
 import { ApiCallWithUserId } from '../../../../global/ApiCall';
-import { deleteActiveMedication, removeCurrentActiveMedication } from '../../../../redux/Slices/AuthSlice';
+import { deleteActiveMedication, removeCurrentActiveMedication } from '../../../../redux/Slices/MedicationSlice';
 // import { NestableScrollContainer, NestableDraggableFlatList } from "react-native-draggable-flatlist"
 
 const ManageMedications = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
 const dispatch = useDispatch()
-  const allActiveMedicationRedux = useSelector(state => state.auth.MyCurrentMeds)
+  const allActiveMedicationRedux = useSelector(state => state.medications.MyCurrentMeds)
+  const ActiveMedications = useSelector(
+      state => state.medications.ActiveMedications,
+    );
+
 
   const [activeMedication, setActiveMedication] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -59,52 +63,52 @@ const dispatch = useDispatch()
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
-      getActiveMedication();
+      // getActiveMedication();
     });
     return nav;
   }, [navigation]);
 
   useEffect(() => {
-    getActiveMedication();
+    // getActiveMedication();
   }, [selecteddate]);
 
-  const getActiveMedication = formattedDate => {
+  // const getActiveMedication = formattedDate => {
 
 
-    setLoader(true);
+  //   setLoader(true);
 
-    let data = JSON.stringify({
-      date: moment(formattedDate ? formattedDate : selecteddate).format(
-        'YYYY-MM-DD',
-      ),
-    });
+  //   let data = JSON.stringify({
+  //     date: moment(formattedDate ? formattedDate : selecteddate).format(
+  //       'YYYY-MM-DD',
+  //     ),
+  //   });
 
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications_active`,
-      headers: {
+  //   let config = {
+  //     method: 'post',
+  //     maxBodyLength: Infinity,
+  //     url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications_active`,
+  //     headers: {
 
-        'Content-Type': 'application/json',
-      },
-      data: data,
-    };
+  //       'Content-Type': 'application/json',
+  //     },
+  //     data: data,
+  //   };
 
-    axios
-      .request(config)
-      .then(async response => {
-        // console.log(JSON.stringify(response.data));
-        setLoader(false);
-        setActiveMedication(response.data.data);
-        const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
-                    const activeDateStr = MedicationData?.active_date ? MedicationData?.active_date : moment(new Date()).format("YYYY-MM-DD");
-                    setActiveDate(new Date(activeDateStr))
-      })
-      .catch(error => {
-        console.log(error);
-        setLoader(false);
-      });
-  };
+  //   axios
+  //     .request(config)
+  //     .then(async response => {
+  //       // console.log(JSON.stringify(response.data));
+  //       setLoader(false);
+  //       setActiveMedication(response.data.data);
+  //       const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
+  //                   const activeDateStr = MedicationData?.active_date ? MedicationData?.active_date : moment(new Date()).format("YYYY-MM-DD");
+  //                   setActiveDate(new Date(activeDateStr))
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //       setLoader(false);
+  //     });
+  // };
 
   // const deleteActiveMedication = medicationdata => {
   //   setLoader(true);
@@ -144,7 +148,7 @@ const dispatch = useDispatch()
   }
 
 
-  console.log("allActiveMedicationRedux",allActiveMedicationRedux)
+
 
   return (
     <SafeAreaView style={{flex: 1}}>

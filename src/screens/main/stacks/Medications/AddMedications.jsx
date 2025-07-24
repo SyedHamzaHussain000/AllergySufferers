@@ -33,7 +33,7 @@ import Toast from 'react-native-toast-message';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 import { ApiCallWithUserId } from '../../../../global/ApiCall';
-import { setActiveMedication, setCurrentActiveMedication } from '../../../../redux/Slices/AuthSlice';
+import { setActiveMedication, setCurrentActiveMedication } from '../../../../redux/Slices/MedicationSlice';
 
 const AddMedications = ({navigation}) => {
   const dispatch = useDispatch()
@@ -232,14 +232,15 @@ const AddMedications = ({navigation}) => {
         Alert.alert('Some problem occured')
         // getMedicationApi();
       });
-  };
+  }
 
   // local functionality
   const AddMedicationActiveToLocal = (medData) => {
-
-    // dispatch(setActiveMedication(medData))
     dispatch(setCurrentActiveMedication(medData))
-
+    Toast.show({
+      type:'success',
+      text1:"Medication added in your daily intake"
+    })
   }
 
 

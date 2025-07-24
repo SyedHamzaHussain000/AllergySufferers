@@ -9,7 +9,7 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
 import {
   responsiveFontSize,
@@ -33,7 +33,8 @@ import {
   addUnitToActiveMedicaton,
   removeUnitToActiveMedicaton,
   setActiveMedication,
-} from '../../redux/Slices/AuthSlice';
+} from '../../redux/Slices/MedicationSlice';
+import {useFocusEffect} from '@react-navigation/native';
 
 const MedicationSample = ({navigation}) => {
   const sliderRef = useRef(null);
@@ -42,13 +43,17 @@ const MedicationSample = ({navigation}) => {
 
   const expireDate = useSelector(state => state.auth.expireDate);
   const allActiveMedicationRedux = useSelector(
-    state => state.auth.ActiveMedications,
+    state => state.medications.ActiveMedications,
   );
-  const allMyCurrentMeds = useSelector(state => state.auth.MyCurrentMeds);
 
-  const filtering = allActiveMedicationRedux.filter(
-    med => med.date == '2025-07-24',
+  
+  const allMyCurrentMeds = useSelector(
+    state => state.medications.MyCurrentMeds,
   );
+
+  // console.log("called ?????????????? first time ????????????????",allActiveMedicationRedux)
+
+  // console.log("allActiveMedicationRedux",allActiveMedicationRedux)
 
   const [allMedication, setAllMedication] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
@@ -56,6 +61,8 @@ const MedicationSample = ({navigation}) => {
   const [loader, setLoader] = useState(false);
   const [Medicationloader, setMedicationLoader] = useState(false);
   const [activeDate, setActiveDate] = useState(null);
+
+  // console.log("MedicationnRecord",MedicationnRecord)
 
   const [date, setDate] = useState(new Date());
   const [selecteddate, setSelectedDate] = useState(
@@ -71,33 +78,54 @@ const MedicationSample = ({navigation}) => {
   };
 
   useEffect(() => {
-    // getActiveMedication();
-    // setAllMedicationToRedux();
-    generateMedicationSlides(selecteddate);
+    generateMedicationSlides(selecteddate, allActiveMedicationRedux);
   }, [selecteddate, allActiveMedicationRedux]);
 
   //old static
-  useEffect(() => {
-    const nav = navigation.addListener('focus', () => {
-      setAllMedicationToRedux();
-      // generateMedicationSlides();
-    });
-    return nav;
-  }, []);
+  // useEffect(() => {
+  //   const nav = navigation.addListener('focus', () => {
+  //     setAllMedicationToRedux();
+  //   });
+  //   return nav;
+  // }, [allMyCurrentMeds,allActiveMedicationRedux]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (allMyCurrentMeds && allMyCurrentMeds.length > 0) {
+        setAllMedicationToRedux();
+      }
+
+      // Alert.alert("runninnng use focus")
+    }, [allMyCurrentMeds, allActiveMedicationRedux]),
+  );
 
   const setAllMedicationToRedux = async () => {
-
+    
+    console.log('allActiveMedicationRedux new call ?', allActiveMedicationRedux);
+    // return
     const currentDate = moment().format('YYYY-MM-DD');
 
+    
+    setLoader(true);
+    
     if (allActiveMedicationRedux.length > 0) {
+      
       const allergenLastDate =
-        allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date;
+      allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date;
+
+
+      // Alert.alert("currentDate",currentDate,  )
 
       if (allergenLastDate == currentDate) {
-        
-        
+
+        setLoader(false);
       } else {
-        const dateArray = generateDateRangeArray(allergenLastDate, currentDate);
+
+        // Alert.alert("runnig the medication alert")
+        const dateArray = skipLastDateAndReturnDateRangeArray(
+          allergenLastDate,
+          currentDate,
+        );
 
         const toAdd = [];
 
@@ -114,11 +142,12 @@ const MedicationSample = ({navigation}) => {
         const mergeDates = [...allActiveMedicationRedux, ...toAdd];
 
         dispatch(setActiveMedication(mergeDates));
+        setLoader(false);
       }
-
     } else {
-      console.log('in else');
-      const activeDateStr = allActiveMedicationRedux?.[0]?.date || moment(new Date()).format('YYYY-MM-DD');
+
+
+      const activeDateStr = moment(new Date()).format('YYYY-MM-DD');
       const dateArray = generateDateRangeArray(activeDateStr, currentDate);
 
       const toAdd = [];
@@ -127,38 +156,26 @@ const MedicationSample = ({navigation}) => {
         allMyCurrentMeds.forEach(med => {
           toAdd.push({
             ...med,
-            date: date,
+            date: activeDateStr,
             units: 0,
           });
         });
       });
 
-      // console.log('toAdd', toAdd);
+      // console.log("toAdd",toAdd,"allMyCurrentMeds..", allMyCurrentMeds)
+
       dispatch(setActiveMedication(toAdd));
-      // generateMedicationSlides(selecteddate);
+      setLoader(false);
     }
   };
 
-  const stucture = [
-    {value: 0, label: '22', spacing: 0, frontColor: '#6C2777', labelWidth: 0},
-    {value: 0, spacing: 0, frontColor: '#FADD42'},
-    {value: 0, spacing: 0, frontColor: '#875AFB'},
-    {value: 0, frontColor: '#731D14'},
-     {value: 0, label: '23', spacing: 0, frontColor: '#6C2777', labelWidth: 0},
-    {value: 0, spacing: 0, frontColor: '#FADD42'},
-    {value: 0, spacing: 0, frontColor: '#875AFB'},
-    {value: 0, frontColor: '#731D14'},
-  ];
-
-
-
-
-  const generateMedicationSlides = selectedDate => {
+  const generateMedicationSlides = (selectedDate,allActiveMedicationRedux )=> {
     setMedicationLoader(true);
     if (allActiveMedicationRedux?.length == 0) {
+      setMedicationLoader(false);
+      setMedicationnRecord([]);
       return;
     }
-
 
     try {
       const activeDateStr =
@@ -250,6 +267,7 @@ const MedicationSample = ({navigation}) => {
       }
 
       setMedicationnRecord(slides);
+      // dispatch(setActiveMedication(allActiveMedicationRedux));
       setMedicationLoader(false);
     } catch (error) {
       setMedicationLoader(false);
@@ -271,16 +289,26 @@ const MedicationSample = ({navigation}) => {
     return dateArray;
   };
 
+  const skipLastDateAndReturnDateRangeArray = (startDateStr, endDateStr) => {
+    const startDate = moment(startDateStr, 'YYYY-MM-DD').add(1, 'day'); // ⬅️ Skip start date
+    const endDate = moment(endDateStr, 'YYYY-MM-DD');
+
+    const dateArray = [];
+
+    while (startDate.isSameOrBefore(endDate)) {
+      dateArray.push(startDate.format('YYYY-MM-DD'));
+      startDate.add(1, 'day');
+    }
+
+    return dateArray;
+  };
+
   const addMedication = async item => {
     dispatch(addUnitToActiveMedicaton(item));
-
-    // generateMedicationSlides(); // Update graph only
   };
 
   const removeMedication = async item => {
     dispatch(removeUnitToActiveMedicaton(item));
-
-    //  generateMedicationSlides(); // Update graph only
   };
 
   useEffect(() => {
@@ -300,7 +328,6 @@ const MedicationSample = ({navigation}) => {
   }, [sliderScrollEnabled]);
 
   const memoizedMedicationList = () => {
-    // useMemo(() => {
     if (allActiveMedicationRedux.length === 0) return null;
 
     const filteredMedication = allActiveMedicationRedux.filter(
@@ -372,11 +399,10 @@ const MedicationSample = ({navigation}) => {
       />
     );
   };
-  // }, [allActiveMedicationRedux, medicationLoadingMap, selecteddate]);
 
   const memoizedSlider = () => {
     // useMemo(() => {
-    // if (MedicationnRecord.length === 0) return null;
+    if (MedicationnRecord.length === 0) return null;
 
     const screenWidth = Dimensions.get('window').width;
     return (
@@ -422,7 +448,6 @@ const MedicationSample = ({navigation}) => {
       </View>
     );
   };
-  // }, [MedicationnRecord]);
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>

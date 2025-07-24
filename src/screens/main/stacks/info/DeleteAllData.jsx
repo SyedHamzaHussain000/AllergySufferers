@@ -1,4 +1,4 @@
-import {View, Text} from 'react-native';
+import {View, Text, Alert} from 'react-native';
 import React, {useState} from 'react';
 import AppText from '../../../../components/AppTextComps/AppText';
 import AppColors from '../../../../utils/AppColors';
@@ -9,13 +9,17 @@ import {
 } from '../../../../utils/Responsive_Dimensions';
 import AppButton from '../../../../components/AppButton';
 import BASE_URL from '../../../../utils/BASE_URL';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
+import { deleteAllData } from '../../../../redux/Slices/AuthSlice';
+import { persistor } from '../../../../redux/store';
 
 const DeleteAllData = () => {
   const data = useSelector(state => state.auth.user);
   const [loader, setLoader] = useState(false);
+
+  const dispatch = useDispatch()
 
   const DeleteAllData = () => {
     setLoader(true);
@@ -29,13 +33,18 @@ const DeleteAllData = () => {
 
     axios
       .request(config)
-      .then(response => {
+      .then(async response => {
         console.log(JSON.stringify(response.data));
+        dispatch(deleteAllData())
+          await persistor.purge(); // 2. clear persisted storage
+  await persistor.flush(); // 3. force-flush queued writes
+
         setLoader(false);
+
         Toast.show({
-          type:"success",
-          text1:"All user data deleted"
-        })
+          type: 'success',
+          text1: 'All user data deleted',
+        });
       })
       .catch(error => {
         console.log(error);
@@ -55,7 +64,21 @@ const DeleteAllData = () => {
         <AppButton
           title={'Yes, delete my data'}
           RightColour={AppColors.rightArrowCOlor}
-          handlePress={() => DeleteAllData()}
+          handlePress={() =>
+            Alert.alert(
+              'Confirm Delete',
+              'This will permanently delete all your data. Are you sure you want to delete all your data? ',
+              [
+                {text: 'Cancel', style: 'cancel'},
+                {
+                  text: 'Yes',
+                  onPress: () => DeleteAllData(),
+                  style: 'destructive',
+                },
+              ],
+              {cancelable: true},
+            )
+          }
           isLoading={loader}
         />
 

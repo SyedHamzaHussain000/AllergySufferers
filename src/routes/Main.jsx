@@ -30,6 +30,7 @@ import Notification from '../screens/main/stacks/notification/Notification';
 import Subscription from '../screens/main/subscription/Subscription';
 import ForcastExplaination from '../screens/main/stacks/forcastexplaination/ForcastExplaination';
 import MedicationSample from '../screens/main/MedicationSample';
+import DatavisualizerSample from '../screens/main/stacks/DatavisualizerSample';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const Main = () => {
@@ -58,7 +59,7 @@ const Main = () => {
       />
       <Stack.Screen
         name="DataVisualizer"
-        component={HomeWithSafeArea(DataVisualizer)}
+        component={HomeWithSafeArea(DatavisualizerSample)}
       />
       <Stack.Screen
         name="ForcastExplaination"
@@ -147,7 +148,7 @@ function MyTabs() {
 
        <Tab.Screen
         name="DataVisualizer"
-        component={DataVisualizer}
+        component={DatavisualizerSample}
         options={{
           tabBarIcon: () => {
             return (
