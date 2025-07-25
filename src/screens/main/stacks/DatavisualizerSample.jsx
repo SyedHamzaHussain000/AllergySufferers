@@ -663,11 +663,11 @@ const DatavisualizerSample = ({navigation}) => {
                         }}>
                         {allSymtoms.map(item => {
                           const emojiMap = {
-                            1: AppImages.Hello,
-                            2: AppImages.Mask,
-                            3: AppImages.Pain,
-                            4: AppImages.Star,
-                            5: AppImages.Bored,
+                            1: AppImages.Mask,
+                            2: AppImages.Pain,
+                            3: AppImages.Bored,
+                            4: AppImages.Hello,
+                            5: AppImages.Star,
                           };
 
                           return (
