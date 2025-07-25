@@ -45,7 +45,7 @@ const Symptom = ({navigation}) => {
   //start date states
   const [open, setOpen] = useState(false);
   const [selecteddate, setSelectedDate] = useState(
-    moment().subtract(5, 'days').format('YYYY-MM-DD'),
+    moment().format('YYYY-MM-DD'),
   );
 
   const [date, setDate] = useState(new Date());

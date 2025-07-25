@@ -281,7 +281,7 @@ const DatavisualizerSample = ({navigation}) => {
   const getMedicationRecords = (ewformateddate,allActiveMedicationRedux) => {
 
 
-  const end = moment(ewformateddate || new Date());
+  const end = moment(new Date());
   const start = moment(allActiveMedicationRedux[0].date || new Date())
 
   setStartDate(start);
@@ -647,56 +647,12 @@ const DatavisualizerSample = ({navigation}) => {
                 <ActivityIndicator size={'large'} color={AppColors.BLACK} />
               </View>
             ) : (
-              <View>
+              <View style={{height: responsiveHeight(30)}}>
                 {MedicationnRecord?.length > 0 ? (
-                  <View>
+                  <View > 
                     <ScrollView
                       horizontal={true}
-                      style={{height: responsiveHeight(30)}}>
-                      {/* <View
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          marginLeft: responsiveWidth(20),
-
-                          flexDirection: 'row',
-                          zIndex: 100,
-                        }}>
-                        {allSymtoms.map(item => {
-                          const emojiMap = {
-                            1: AppImages.Hello,
-                            2: AppImages.Mask,
-                            3: AppImages.Pain,
-                            4: AppImages.Star,
-                            5: AppImages.Bored,
-                          };
-
-                          return (
-                            <View style={{width: responsiveWidth(13.5)}}>
-                              <Image
-                                source={
-                                  item == 1
-                                    ? emojiMap[1]
-                                    : item == 2
-                                    ? emojiMap[2]
-                                    : item == 3
-                                    ? emojiMap[3]
-                                    : item == 4
-                                    ? emojiMap[4]
-                                    : item == 5
-                                    ? emojiMap[5]
-                                    : null
-                                }
-                                style={{
-                                  height: 30,
-                                  width: 30,
-                                  resizeMode: 'contain',
-                                }}
-                              />
-                            </View>
-                          );
-                        })}
-                      </View> */}
+                      >
                       <View
                         style={{
                           position: 'absolute',
@@ -793,12 +749,23 @@ const DatavisualizerSample = ({navigation}) => {
                         formatYLabel={label => parseFloat(label).toFixed(0)}
                         stepValue={1}
                       />
-                      {/* <View
+
+                       <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 10,
+                          bottom: -4,
+                          backgroundColor:AppColors.WHITE,
+                          width:responsiveWidth(100),
+                          height:responsiveHeight(2)
+                        }}/>
+                        
+                      <View
                         style={{
                           flexDirection: 'row',
                           position: 'absolute',
                           zIndex: 100,
-                          bottom: 0,
+                          bottom: -4,
                           marginLeft: responsiveWidth(17.5),
                         }}>
                         {AllDayNumber?.map(item => {
@@ -812,7 +779,7 @@ const DatavisualizerSample = ({navigation}) => {
                             </View>
                           );
                         })}
-                      </View> */}
+                      </View>
                     </ScrollView>
 
                     <View

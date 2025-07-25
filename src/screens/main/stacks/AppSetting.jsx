@@ -7,6 +7,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 import AppColors from '../../../utils/AppColors';
 import { useDispatch } from 'react-redux';
 import { setLogout } from '../../../redux/Slices/AuthSlice';
+import { deleteAllData } from '../../../redux/Slices/MedicationSlice';
 const AppSetting = ({navigation}) => {
 
   const dispatch = useDispatch()
@@ -15,8 +16,14 @@ const AppSetting = ({navigation}) => {
     {id: 2, name: 'Pollen and Spores types', onPress: ()=> navigation.navigate("ManagePollens")},
     {id: 3, name: 'Medications', onPress: ()=> navigation.navigate("ManageMedications")},
     {id: 4, name: 'Push Notifications', onPress: ()=> navigation.navigate("Notification") },
-    {id: 5, name: 'Logout',bottom: true, onPress: ()=>  {dispatch(setLogout()), navigation.navigate("Auth")}},
+    {id: 5, name: 'Logout',bottom: true, onPress: ()=>  logoutFunction()},
   ];
+
+  const logoutFunction = () => {
+    dispatch(setLogout())
+    dispatch(deleteAllData())
+    navigation.navigate("Auth")
+  }
   
   
   return (
