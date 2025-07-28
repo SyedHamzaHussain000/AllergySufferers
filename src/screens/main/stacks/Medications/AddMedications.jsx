@@ -32,14 +32,17 @@ import LoaderMode from '../../../../components/LoaderMode';
 import Toast from 'react-native-toast-message';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
-import { ApiCallWithUserId } from '../../../../global/ApiCall';
-import { setActiveMedication, setCurrentActiveMedication } from '../../../../redux/Slices/MedicationSlice';
+import {ApiCallWithUserId} from '../../../../global/ApiCall';
+import {
+  setActiveMedication,
+  setCurrentActiveMedication,
+  UpdateMedicationListOnEveryDate,
+} from '../../../../redux/Slices/MedicationSlice';
 
 const AddMedications = ({navigation}) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const userData = useSelector(state => state.auth.user);
 
-  
   const [medicationData, setMedicationsData] = useState([]);
   const [MedicationLoader, setMedciationLoader] = useState(false);
 
@@ -48,7 +51,7 @@ const AddMedications = ({navigation}) => {
   const [customMecication, setCustomMedication] = useState('');
   const [customMecicationLoader, setCustomMedicationLoader] = useState(false);
   const [addYourMedication, SetAddYourMedication] = useState(false);
-  const [activeDate,setActiveDate] = useState(null)
+  const [activeDate, setActiveDate] = useState(null);
 
   const [date, setDate] = useState(new Date());
   const [selecteddate, setSelectedDate] = useState(
@@ -81,9 +84,15 @@ const AddMedications = ({navigation}) => {
 
         setMedicationsData(response.data.data);
         setMedciationLoader(false);
-        const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
-                    const activeDateStr = MedicationData?.active_date ? MedicationData?.active_date : moment(new Date()).format("YYYY-MM-DD");
-                    setActiveDate(new Date(activeDateStr))
+        const MedicationData = await ApiCallWithUserId(
+          'post',
+          'get_active_date',
+          userData?.id,
+        );
+        const activeDateStr = MedicationData?.active_date
+          ? MedicationData?.active_date
+          : moment(new Date()).format('YYYY-MM-DD');
+        setActiveDate(new Date(activeDateStr));
       })
       .catch(error => {
         console.log(error);
@@ -191,6 +200,7 @@ const AddMedications = ({navigation}) => {
   };
 
   const AddCustomMedication = () => {
+
     if (customMecication == '') {
       return Alert.alert('Please type a medication name');
     }
@@ -199,7 +209,7 @@ const AddMedications = ({navigation}) => {
 
     let data = JSON.stringify({
       custom_medication: customMecication,
-      date: selecteddate
+      date: selecteddate,
     });
 
     let config = {
@@ -215,35 +225,47 @@ const AddMedications = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log('what just happened',JSON.stringify(response.data));
+        console.log('what just happened', JSON.stringify(response.data));
         setCustomMedicationLoader(false);
         SetAddYourMedication(false);
         getMedicationApi();
-        setCustomMedication('')
+        setCustomMedication('');
         Toast.show({
-                type: 'success',
-                text1: 'Custom medication added to your list.',
-              });
+          type: 'success',
+          text1: 'Custom medication added to your list.',
+        });
       })
       .catch(error => {
-        console.log('error adding custom medication',error);
+        console.log('error adding custom medication', error);
         setCustomMedicationLoader(false);
         // SetAddYourMedication(false);
-        Alert.alert('Some problem occured')
+        Alert.alert('Some problem occured');
         // getMedicationApi();
       });
-  }
+  };
 
   // local functionality
-  const AddMedicationActiveToLocal = (medData) => {
-    dispatch(setCurrentActiveMedication(medData))
+  const AddMedicationActiveToLocal = medData => {
+
+    AddMedicationToPreviousDates(medData)
+
+
+    if (medData.id === 6082) {
+      AddMedicationActive(medData);
+      return;
+    }
+
+    dispatch(setCurrentActiveMedication(medData));
     Toast.show({
-      type:'success',
-      text1:"Medication added in your daily intake"
-    })
+      type: 'success',
+      text1: 'Medication added in your daily intake',
+    });
+  };
+
+
+  const AddMedicationToPreviousDates = (medData) => {
+    dispatch(UpdateMedicationListOnEveryDate(medData))
   }
-
-
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -252,9 +274,6 @@ const AddMedications = ({navigation}) => {
           <AppHeader
             heading={`Add ${'\n'}Medications`}
             goBack
-            selecteddate={selecteddate}
-            Rightheading="Current Date"
-            setOpen={() => setOpen(true)}
           />
         </View>
 
@@ -323,7 +342,11 @@ const AddMedications = ({navigation}) => {
             onChangeText={text => setSearch(text)}
           />
 
-          <ScrollView contentContainerStyle={{flexGrow: 1,paddingBottom: responsiveHeight(50)}}>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingBottom: responsiveHeight(50),
+            }}>
             {medicationData?.length > 0 ? (
               <>
                 {medicationData

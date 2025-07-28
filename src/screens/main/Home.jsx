@@ -437,7 +437,7 @@ const Home = ({navigation}) => {
                   marginTop: 30,
                 }}
                 showsVerticalScrollIndicator={false}>
-                <DatePicker
+                {/* <DatePicker
                   modal
                   open={open}
                   date={date}
@@ -448,35 +448,36 @@ const Home = ({navigation}) => {
                     const picked = moment(selectedDate).startOf('day');
                     const formattedDate = picked.format('YYYY-MM-DD');
 
-                    if (picked.isAfter(today)) {
-                      if (FuturePollenData?.[formattedDate]?.label) {
-                        console.log('formated', formattedDate);
-                        setFutureDate(formattedDate);
-                        setSelected('Future');
-                      } else {
-                        Alert.alert(
-                          'No Forecast Available',
-                          'We couldn’t find any allergen forecast data for the selected date. Please try another day.',
-                        );
-                      }
-                    } else if (picked.isBefore(today)) {
-                      if (PastPollenData?.[formattedDate]?.label) {
-                        setPastDate(formattedDate);
-                        setSelected('Past');
-                      } else {
-                        Alert.alert(
-                          'Unavailable Date',
-                          'Data is only available for the past 7 days. Please select a more recent date.',
-                        );
-                      }
-                    } else {
-                      setSelected('Today');
-                    }
+                     setSelected('Today');
+                    // if (picked.isAfter(today)) {
+                    //   if (FuturePollenData?.[formattedDate]?.label) {
+                    //     console.log('formated', formattedDate);
+                    //     setFutureDate(formattedDate);
+                    //     setSelected('Future');
+                    //   } else {
+                    //     Alert.alert(
+                    //       'No Forecast Available',
+                    //       'We couldn’t find any allergen forecast data for the selected date. Please try another day.',
+                    //     );
+                    //   }
+                    // } else if (picked.isBefore(today)) {
+                    //   if (PastPollenData?.[formattedDate]?.label) {
+                    //     setPastDate(formattedDate);
+                    //     setSelected('Past');
+                    //   } else {
+                    //     Alert.alert(
+                    //       'Unavailable Date',
+                    //       'Data is only available for the past 7 days. Please select a more recent date.',
+                    //     );
+                    //   }
+                    // } else {
+                    //   setSelected('Today');
+                    // }
                   }}
                   onCancel={() => {
                     setOpen(false);
                   }}
-                />
+                /> */}
                 <Ionicons
                   name={'notifications-outline'}
                   size={responsiveFontSize(3)}
@@ -551,7 +552,7 @@ const Home = ({navigation}) => {
                               </View>
                             </View>
 
-                            <TouchableOpacity onPress={() => setOpen(true)}>
+                            <View>
                               <AppText
                                 title={'Today'}
                                 textFontWeight
@@ -565,17 +566,12 @@ const Home = ({navigation}) => {
                               ) : (
                                 <AppText
                                   title={
-                                    selected == 'Past'
-                                      ? PastPollenData?.[PastDate]?.date_label
-                                      : selected == 'Future'
-                                      ? FuturePollenData?.[FutureDate]
-                                          ?.date_label
-                                      : pollenData?.today?.text
+                                    pollenData?.today?.text
                                   }
                                   textColor={'#777777'}
                                 />
                               )}
-                            </TouchableOpacity>
+                            </View>
                           </View>
 
                           <View

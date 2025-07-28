@@ -51,7 +51,7 @@ const MedicationSample = ({navigation}) => {
     state => state.medications.MyCurrentMeds,
   );
 
-  console.log("called ?????????????? first time ????????????????",allActiveMedicationRedux)
+  
 
   // console.log("allActiveMedicationRedux",allActiveMedicationRedux)
 
@@ -81,6 +81,10 @@ const MedicationSample = ({navigation}) => {
     generateMedicationSlides(selecteddate, allActiveMedicationRedux);
   }, [selecteddate, allActiveMedicationRedux]);
 
+
+
+
+
   //old static
   // useEffect(() => {
   //   const nav = navigation.addListener('focus', () => {
@@ -96,12 +100,12 @@ const MedicationSample = ({navigation}) => {
       }
 
       // Alert.alert("runninnng use focus")
-    }, [allMyCurrentMeds, allActiveMedicationRedux]),
+    }, [allActiveMedicationRedux.length]),
   );
 
   const setAllMedicationToRedux = async () => {
     
-    console.log('allActiveMedicationRedux new call ?', allActiveMedicationRedux);
+    // console.log('allActiveMedicationRedux new call ?', allActiveMedicationRedux);
     // return
     const currentDate = moment().format('YYYY-MM-DD');
 
@@ -170,10 +174,11 @@ const MedicationSample = ({navigation}) => {
   };
 
   const generateMedicationSlides = (selectedDate,allActiveMedicationRedux )=> {
+
     setMedicationLoader(true);
     if (allActiveMedicationRedux?.length == 0) {
       setMedicationLoader(false);
-      setMedicationnRecord([]);
+      // setMedicationnRecord([]);
       return;
     }
 
@@ -181,6 +186,8 @@ const MedicationSample = ({navigation}) => {
       const activeDateStr =
         allActiveMedicationRedux?.[0]?.date ||
         moment(new Date()).format('YYYY-MM-DD');
+
+        console.log("activeDateStr", activeDateStr)
 
       setActiveDate(new Date(activeDateStr));
 
@@ -265,6 +272,8 @@ const MedicationSample = ({navigation}) => {
           barData,
         });
       }
+
+      console.log("slides .....", slides)
 
       setMedicationnRecord(slides);
       // dispatch(setActiveMedication(allActiveMedicationRedux));
@@ -473,7 +482,7 @@ const MedicationSample = ({navigation}) => {
             const picked = moment(selectedDate).startOf('day');
             const formattedDate = picked.format('YYYY-MM-DD');
             setSelectedDate(formattedDate);
-            generateMedicationSlides(formattedDate);
+            // generateMedicationSlides(formattedDate);
           }}
           onCancel={() => {
             setOpen(false);

@@ -36,18 +36,25 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import AppImages from '../../../../assets/images/AppImages';
 import moment from 'moment';
 import DatePicker from 'react-native-date-picker';
-import { ApiCallWithUserId } from '../../../../global/ApiCall';
-import { deleteActiveMedication, removeCurrentActiveMedication } from '../../../../redux/Slices/MedicationSlice';
+import {ApiCallWithUserId} from '../../../../global/ApiCall';
+import {
+  deleteActiveMedication,
+  removeCurrentActiveMedication,
+  RemoveUpdateMedicationListOnEveryDate,
+} from '../../../../redux/Slices/MedicationSlice';
 // import { NestableScrollContainer, NestableDraggableFlatList } from "react-native-draggable-flatlist"
 
 const ManageMedications = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
-const dispatch = useDispatch()
-  const allActiveMedicationRedux = useSelector(state => state.medications.MyCurrentMeds)
+  const dispatch = useDispatch();
+  const allActiveMedicationRedux = useSelector(
+    state => state.medications.MyCurrentMeds,
+  );
   const ActiveMedications = useSelector(
-      state => state.medications.ActiveMedications,
-    );
+    state => state.medications.ActiveMedications,
+  );
 
+  console.log('ActiveMedications,,,,,,,,,,,', ActiveMedications);
 
   const [activeMedication, setActiveMedication] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -55,7 +62,7 @@ const dispatch = useDispatch()
   const [data3, setData3] = useState([1, 2, 3, 4]);
 
   const [date, setDate] = useState(new Date());
-  const [activeDate,setActiveDate] = useState(null)
+  const [activeDate, setActiveDate] = useState(null);
   const [selecteddate, setSelectedDate] = useState(
     moment().local().format('YYYY-MM-DD'),
   );
@@ -73,7 +80,6 @@ const dispatch = useDispatch()
   }, [selecteddate]);
 
   // const getActiveMedication = formattedDate => {
-
 
   //   setLoader(true);
 
@@ -113,7 +119,6 @@ const dispatch = useDispatch()
   // const deleteActiveMedication = medicationdata => {
   //   setLoader(true);
 
-
   //   let data = JSON.stringify({
   //       "date": moment(selecteddate).format("YYYY-MM-DD"),
   //        "data":medicationdata?.id
@@ -140,26 +145,20 @@ const dispatch = useDispatch()
   //     });
   // };
 
-
   const deleteActiveMedicationRedux = medData => {
-    
     // dispatch( deleteActiveMedication(medData))
-    dispatch(removeCurrentActiveMedication(medData))
-  }
-
-
-
+    dispatch(RemoveUpdateMedicationListOnEveryDate(medData));
+    dispatch(removeCurrentActiveMedication(medData));
+  };
 
   return (
     <SafeAreaView style={{flex: 1}}>
       <GestureHandlerRootView style={{flex: 1}}>
         <View style={{padding: 20}}>
           <AppHeader
-            heading={`Manage ${'\n'}Medications`} 
+            heading={`Manage ${'\n'}Medications`}
             goBack
-            selecteddate={selecteddate}
-            Rightheading="Current Date"
-            setOpen={() => setOpen(true)}
+            
           />
 
           <DatePicker
