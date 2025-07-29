@@ -44,6 +44,9 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 const Home = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
 
+
+  console.log("userData",userData)
+
   const isExpiredRedux = useSelector(state => state.auth.isExpired);
   const expireDate = useSelector(state => state.auth.expireDate);
   const SubscriptionType = useSelector(state => state.auth.SubscriptionType);
@@ -110,6 +113,7 @@ const Home = ({navigation}) => {
       // if (hasFetchedOnce) return;
 
       if (userData) {
+        
         getActivePollens();
         getAllCities();
         getCurrentLocation();
@@ -383,9 +387,6 @@ const Home = ({navigation}) => {
   };
 
   const settingData = SettingHeaders();
-
-  // console.log("AllCities",AllCities[0].lat,"lng.....................",AllCities[0].lng)
-  // console.log("AllCities",AllCities[0].lat,"lng.....................",AllCities[0].lng)
 
   return (
     <>
