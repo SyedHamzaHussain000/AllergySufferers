@@ -107,13 +107,14 @@ const Home = ({navigation}) => {
 
   useEffect(() => {
     const nav = navigation.addListener('focus', async () => {
-      if (hasFetchedOnce) return;
+      // if (hasFetchedOnce) return;
 
       if (userData) {
         getActivePollens();
         getAllCities();
         getCurrentLocation();
       } else {
+
       }
     });
 

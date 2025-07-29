@@ -808,8 +808,8 @@ const DatavisualizerSample = ({navigation}) => {
               open={open}
               date={date}
               mode="date"
-
-              minimumDate={allActiveMedicationRedux[0]?.date ? new Date(allActiveMedicationRedux[0]?.date) :  new Date() }
+            minimumDate={allActiveMedicationRedux.length > 0 ? moment(allActiveMedicationRedux[0]?.date).local() : moment().local()}
+              // minimumDate={allActiveMedicationRedux[0]?.date ? new Date(allActiveMedicationRedux[0]?.date) :  new Date() }
                 maximumDate={new Date()}
               onConfirm={selectedDate => {
                 setDate(selectedDate);

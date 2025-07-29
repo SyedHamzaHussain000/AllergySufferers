@@ -247,13 +247,13 @@ const AddMedications = ({navigation}) => {
   // local functionality
   const AddMedicationActiveToLocal = medData => {
 
-    AddMedicationToPreviousDates(medData)
-
-
+    
+    
     if (medData.id === 6082) {
       AddMedicationActive(medData);
       return;
     }
+    AddMedicationToPreviousDates(medData)
 
     dispatch(setCurrentActiveMedication(medData));
     Toast.show({

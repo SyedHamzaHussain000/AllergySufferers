@@ -54,8 +54,6 @@ const ManageMedications = ({navigation}) => {
     state => state.medications.ActiveMedications,
   );
 
-  console.log('ActiveMedications,,,,,,,,,,,', ActiveMedications);
-
   const [activeMedication, setActiveMedication] = useState([]);
   const [loader, setLoader] = useState(false);
 
