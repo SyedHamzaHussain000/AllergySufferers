@@ -158,13 +158,30 @@ const MedicationSample = ({navigation}) => {
     }
   };
 
-  const generateMedicationSlides = (selectedDate, allActiveMedicationRedux) => {
+  const generateMedicationSlides = async(selectedDate, allActiveMedicationRedux) => {
     setMedicationLoader(true);
     if (allActiveMedicationRedux?.length == 0) {
       setMedicationLoader(false);
       // setMedicationnRecord([]);
+
+      // const getActiveMedicationData = await ApiCallWithUserId()
       return;
     }
+
+    const AllActiveArray = []
+
+    allActiveMedicationRedux.forEach((res)=>{
+      AllActiveArray.push({
+        date: res.date,
+        units: res.units,
+        medication_id: res.id
+      })
+    })
+
+    const setallActiveMedicationReduxInApi = await ApiCallWithUserId("post", "update_medication_units", userData.id, {data:AllActiveArray} )
+
+
+
 
     try {
       const activeDateStr =

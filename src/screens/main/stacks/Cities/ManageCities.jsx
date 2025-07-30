@@ -33,6 +33,7 @@ import {
 } from 'react-native-draggable-flatlist';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AppImages from '../../../../assets/images/AppImages';
+import Toast from 'react-native-toast-message';
 
 const ManageCities = ({navigation}) => {
   const userdata = useSelector(state => state.auth.user);
@@ -50,6 +51,14 @@ const ManageCities = ({navigation}) => {
   }, [navigation]);
 
   const getAllCities = () => {
+
+    if(activeMedication.length == 5){
+      Toast.show({
+        type:'error',
+        text1:"You can only add upto 5 cities"
+      })
+      return
+    }
     setLoader(true);
     let config = {
       method: 'get',
