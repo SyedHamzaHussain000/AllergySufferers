@@ -1,4 +1,4 @@
-import {View, Text} from 'react-native';
+import {View, Text, Alert} from 'react-native';
 import React, {useState} from 'react';
 import BackgroundScreen from '../../components/AppTextComps/BackgroundScreen';
 import AppText from '../../components/AppTextComps/AppText';
@@ -10,21 +10,48 @@ import axios from 'axios';
 import {setSubscription} from '../../redux/Slices/AuthSlice';
 import moment from 'moment';
 import CheckSubscription from '../../global/CheckSubscription';
+import { GetCurrentLocation } from '../../global/GetCurrentLocation';
+import { GetCityName } from '../../global/GetCityName';
+import Geocoder from 'react-native-geocoding';
+import { setAddCity } from '../../redux/Slices/MedicationSlice';
 
 const GetStarted = ({navigation}) => {
+    const allMyCity = useSelector(state => state?.medications?.allMyCity);
+  
+    Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
+
   const userData = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
+
+  const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
 
   const [subLoader, setSubLoader] = useState(false);
   const checkLoginandPremium = async() => {
     if (userData?.email) {
+
+
+
       setSubLoader(true);
       
       const checkSub = await CheckSubscription(userData.id)
       if(checkSub.expiry){
 
         dispatch(setSubscription({isExpired: false, expireDate: checkSub?.expiry }))
-        navigation.navigate('Main');
+
+        // navigation.navigate('Main');
+        if(allMyCity?.length > 0){
+
+          if(allMyCity[0]?.currentLocation){
+            navigation.navigate('Main');
+            return
+          }else{
+            getCurrentLocation()
+          }
+        }else{
+            getCurrentLocation()
+        }
+        
+        
       }else{
         dispatch(setSubscription({isExpired: true, expireDate: ""}))
         navigation.navigate('Main');
@@ -34,6 +61,34 @@ const GetStarted = ({navigation}) => {
       navigation.navigate('Subscription');
     }
   };
+
+
+
+    const getCurrentLocation = async () => {
+      // console.log('----------------------------');
+      setFechingCurrentLocation(true);
+      const gettingCurrentLatlng = await GetCurrentLocation();
+  
+      // Alert.alert("gettingCurrentLatlng",)
+      // console.log('triple H', gettingCurrentLatlng);
+  
+      const getCityName = await GetCityName(
+        gettingCurrentLatlng.latitude,
+        gettingCurrentLatlng.longitude,
+      );
+
+      dispatch(setAddCity({
+        lat: JSON.stringify(gettingCurrentLatlng?.latitude),
+        lng: JSON.stringify(gettingCurrentLatlng?.longitude),
+        city_name: getCityName,
+        currentLocation: true
+      }))
+      setSubLoader(false)
+      navigation.navigate('Main');
+      // setMyLocation(gettingCurrentLatlng);
+      // return
+    };
+  
 
   return (
     <BackgroundScreen>
@@ -45,7 +100,14 @@ const GetStarted = ({navigation}) => {
             textSize={4}
             textFontWeight
           />
+          {
+          fetchingCurrentLocation && (
+            <AppText title={"Fetching current location please wait..."} textSize={2} textColor={AppColors.WHITE}/>
+          )
+        }
         </View>
+
+        
 
         <AppButton
           bgColor={AppColors.WHITE}

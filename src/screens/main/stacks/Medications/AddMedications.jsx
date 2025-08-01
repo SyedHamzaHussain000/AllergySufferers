@@ -187,6 +187,8 @@ const AddMedications = ({navigation}) => {
                 Toast.show({
                   type: 'success',
                   text1: 'Medication added successfully',
+                  position:'bottom',
+      visibilityTime:800
                 });
               })
               .catch(error => {
@@ -233,6 +235,8 @@ const AddMedications = ({navigation}) => {
         Toast.show({
           type: 'success',
           text1: 'Custom medication added to your list.',
+          position:'bottom',
+      visibilityTime:800
         });
       })
       .catch(error => {
@@ -259,6 +263,8 @@ const AddMedications = ({navigation}) => {
     Toast.show({
       type: 'success',
       text1: 'Medication added in your daily intake',
+      position:'bottom',
+      visibilityTime:800
     });
   };
 

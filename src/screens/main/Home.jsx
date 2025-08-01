@@ -10,7 +10,7 @@ import {
   Animated,
   Alert,
 } from 'react-native';
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   responsiveFontSize,
@@ -34,18 +34,16 @@ import moment from 'moment';
 import AppIntroSlider from 'react-native-app-intro-slider';
 import * as Animatable from 'react-native-animatable';
 import AppButton from '../../components/AppButton';
-import {GetCurrentLocation} from '../../global/GetCurrentLocation';
-import {AddCityApi} from '../../global/AddCityApi';
 import PointPollenSpores from '../../components/PointPollenSpores';
-import GetLocation from '../../global/GetLocation';
 // import AddCityApi from '../../global/AddCityApi';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
 const Home = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
+  const AllCities = useSelector(state => state?.medications?.allMyCity);
 
-
-  console.log("userData",userData)
+  // console.log('userData', userData);
 
   const isExpiredRedux = useSelector(state => state.auth.isExpired);
   const expireDate = useSelector(state => state.auth.expireDate);
@@ -100,7 +98,7 @@ const Home = ({navigation}) => {
   const [ispastArray, setIsPastArray] = useState([]);
   const [isfutureArray, setIsFutureArray] = useState([]);
 
-  const [AllCities, setAllCities] = useState([]);
+  // const [AllCities, setAllCities] = useState([]);
   const [loadCities, setLoadCities] = useState(false);
 
   const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
@@ -108,22 +106,31 @@ const Home = ({navigation}) => {
 
   const [myLocation, setMyLocation] = useState();
 
+  const [message, setMessage] = useState("")
+
+  // console.log('allcities', AllCities);
   useEffect(() => {
     const nav = navigation.addListener('focus', async () => {
       // if (hasFetchedOnce) return;
 
       if (userData) {
-        
         getActivePollens();
-        getAllCities();
-        getCurrentLocation();
+        // getAllCities();
+        // getCurrentLocation();
       } else {
-
       }
     });
 
     return nav;
   }, [navigation, hasFetchedOnce, userData]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (AllCities && AllCities.length > 0) {
+        getPollensData(AllCities, 0);
+      }
+    }, [AllCities]),
+  );
 
   const getPollensData = (allcities, newindex) => {
     setPollenLoader(true);
@@ -153,84 +160,20 @@ const Home = ({navigation}) => {
         const today = response?.data?.forecast?.[city]?.today;
         const future = response?.data?.forecast?.[city]?.future;
 
-        const pastArray = Object.entries(past).map(([date, data]) => ({
-          key: date,
-          ...data,
-        }));
+        if (!today) {
+          // Alert.alert("today us undefined")
+          setPastPollenData();
+          setTodayPollensData();
+          setFuturePollenData();
+          setIsPastArray([]);
+          setIsFutureArray([]);
+          setPollenLoader(false);
+          setLoadCities(false);
+          setMessage(`No data found in ${allcities[newindex ? newindex : 0]?.city_name}. Please try another city.`)
 
-        const futureArray = Object.entries(future).map(([date, data]) => ({
-          key: date,
-          ...data,
-        }));
-
-        setPollenData(response.data);
-
-        setPastPollenData(past);
-        setTodayPollensData(today);
-        setFuturePollenData(future);
-
-        setIsPastArray(pastArray);
-        setIsFutureArray(futureArray);
-
-        setPollenLoader(false);
-        setLoadCities(false);
-        setHasFetchedOnce(true);
-      })
-      .catch(error => {
-        console.log(error);
-        setPollenLoader(false);
-      });
-  };
-
-  const getPollensDataLatLng = (Lat, Lng) => {
-    setPollenLoader(true);
-    setLoadCities(true);
-    let data = new FormData();
-    data.append('lat', Lat);
-    data.append('lng', Lng);
-    // data.append('email', userData?.email);
-
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/get_allergy_data`,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      data: data,
-    };
-
-    axios
-      .request(config)
-      .then(async response => {
-        const res = response.data;
-
-        const city = res?.user?.locations?.closest?.name;
-
-        console.log('city', city);
-        const newCityObj = {
-          id: 1,
-          lat: Lat,
-          lng: Lng,
-          city_name: city,
-        };
-
-        if (userData) {
-          const res = await AddCityApi(userData.id, city, Lat, Lng);
-
-          if (res.status) {
-            console.log('Something went wrong', res.details);
-            return getAllCities();
-          } else {
-            console.log('City added successfully', res);
-          }
+          return;
         }
-
-        setAllCities([newCityObj]);
-
-        const past = response?.data?.forecast?.[city]?.past;
-        const today = response?.data?.forecast?.[city]?.today;
-        const future = response?.data?.forecast?.[city]?.future;
+        setMessage("")
 
         const pastArray = Object.entries(past).map(([date, data]) => ({
           key: date,
@@ -258,9 +201,87 @@ const Home = ({navigation}) => {
       .catch(error => {
         console.log(error);
         setPollenLoader(false);
-        setLoadCities(false);
       });
   };
+
+  // const getPollensDataLatLng = (Lat, Lng) => {
+  //   setPollenLoader(true);
+  //   setLoadCities(true);
+  //   let data = new FormData();
+  //   data.append('lat', Lat);
+  //   data.append('lng', Lng);
+  //   // data.append('email', userData?.email);
+
+  //   let config = {
+  //     method: 'post',
+  //     maxBodyLength: Infinity,
+  //     url: `${BASE_URL}/allergy_data/v1/user/get_allergy_data`,
+  //     headers: {
+  //       'Content-Type': 'multipart/form-data',
+  //     },
+  //     data: data,
+  //   };
+
+  //   axios
+  //     .request(config)
+  //     .then(async response => {
+  //       const res = response.data;
+
+  //       const city = res?.user?.locations?.closest?.name;
+
+  //       const newCityObj = {
+  //         id: 1,
+  //         lat: Lat,
+  //         lng: Lng,
+  //         city_name: city,
+  //       };
+
+  //       if (userData) {
+  //         const res = await AddCityApi(userData.id, city, Lat, Lng);
+
+  //         if (res.status) {
+  //           console.log('Something went wrong', res.details);
+  //           return getAllCities();
+  //         } else {
+  //           console.log('City added successfully', res);
+  //         }
+  //       }
+
+  //       setAllCities([newCityObj]);
+
+  //       const past = response?.data?.forecast?.[city]?.past;
+  //       const today = response?.data?.forecast?.[city]?.today;
+  //       const future = response?.data?.forecast?.[city]?.future;
+
+  //       const pastArray = Object.entries(past).map(([date, data]) => ({
+  //         key: date,
+  //         ...data,
+  //       }));
+
+  //       const futureArray = Object.entries(future).map(([date, data]) => ({
+  //         key: date,
+  //         ...data,
+  //       }));
+
+  //       setPollenData(response.data);
+
+  //       setPastPollenData(past);
+  //       setTodayPollensData(today);
+  //       setFuturePollenData(future);
+
+  //       setIsPastArray(pastArray);
+  //       setIsFutureArray(futureArray);
+
+  //       setPollenLoader(false);
+  //       setLoadCities(false);
+  //       setHasFetchedOnce(true);
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //       setPollenLoader(false);
+  //       setLoadCities(false);
+  //     });
+  // };
 
   const getThBgColour = level => {
     switch (level) {
@@ -277,14 +298,61 @@ const Home = ({navigation}) => {
     }
   };
 
-  const getCurrentLocation = async () => {
-    const gettingCurrentLatlng = await GetCurrentLocation();
+  // const getCurrentLocation = async () => {
+  //   console.log('----------------------------');
+  //   const gettingCurrentLatlng = await GetCurrentLocation();
 
-    // console.log("gettingCurrentLatlng",gettingCurrentLatlng)
+  //   // Alert.alert("gettingCurrentLatlng",)
+  //   // console.log('triple H', gettingCurrentLatlng);
 
-    setMyLocation(gettingCurrentLatlng);
-    // return
-  };
+  //   const getCityName = await GetCityName(
+  //     gettingCurrentLatlng.latitude,
+  //     gettingCurrentLatlng.longitude,
+  //   );
+  //   Alert.alert('getCityName', getCityName);
+  //   console.log('Lat lng name', gettingCurrentLatlng, getCityName);
+
+  //   if (AllCities.length > 0) {
+  //     const existingCity = AllCities.find(
+  //       item => item.city_name.toLowerCase() === getCityName.toLowerCase(),
+  //     );
+
+  //     if (!existingCity) {
+  //       setAllCities([
+  //         {
+  //           id: Date.now(), // unique id
+  //           lat: gettingCurrentLatlng.latitude,
+  //           lng: gettingCurrentLatlng.longitude,
+  //           city_name: getCityName,
+  //         },
+  //         ...AllCities,
+  //       ]);
+  //     } else {
+  //       console.log('City already exists, no update needed.');
+  //     }
+  //   } else {
+  //     setAllCities([
+  //       {
+  //         id: 1,
+  //         lat: gettingCurrentLatlng.latitude,
+  //         lng: gettingCurrentLatlng.longitude,
+  //         city_name: getCityName,
+  //       },
+  //     ]);
+  //   }
+  //   getPollensData([
+  //         {
+  //           id: 1, // unique id
+  //           lat: gettingCurrentLatlng.latitude,
+  //           lng: gettingCurrentLatlng.longitude,
+  //           city_name: getCityName,
+  //         },
+  //         ...AllCities,
+  //       ], 0)
+
+  //   // setMyLocation(gettingCurrentLatlng);
+  //   // return
+  // };
 
   const getActivePollens = () => {
     setActiveLoader(true);
@@ -298,7 +366,6 @@ const Home = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-
         setActivePollen(response.data.data);
         setActiveLoader(false);
       })
@@ -308,38 +375,48 @@ const Home = ({navigation}) => {
       });
   };
 
-  const getAllCities = () => {
-    setLoadCities(true);
-    let config = {
-      method: 'get',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_cities`,
-      headers: {},
-    };
+  // const getAllCities = () => {
+  //   setLoadCities(true);
+  //   let config = {
+  //     method: 'get',
+  //     maxBodyLength: Infinity,
+  //     url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_cities`,
+  //     headers: {},
+  //   };
 
-    axios
-      .request(config)
-      .then(async response => {
-        console.log(JSON.stringify(response.data));
-        setAllCities(response.data.cities);
-        if (response?.data?.cities?.length > 0) {
-          getPollensData(response.data.cities, 0);
-          setLoadCities(false);
-        } else {
-          const currentLatLng = await GetCurrentLocation();
+  //   axios
+  //     .request(config)
+  //     .then(async response => {
+  //       console.log(JSON.stringify(response.data));
+  //       setAllCities(response.data.cities);
+  //       console.log('response.data.cities', response.data.cities);
+  //       if (response?.data?.cities?.length > 0) {
+  //         // const currentLatLng = await GetCurrentLocation();
 
-          getPollensDataLatLng(
-            currentLatLng?.latitude,
-            currentLatLng?.longitude,
-          );
-        }
-      })
-      .catch(error => {
-        console.log(error);
-        setLoadCities(false);
-        setPollenLoader(false);
-      });
-  };
+  //         // console.log("currentLatLng????",currentLatLng)
+  //         // if(currentLatLng){
+  //         //   Alert.alert("Current lat lng")
+  //         // getPollensData([...response.data.cities, {id:1, lat:currentLatLng.latitude, lng:currentLatLng.longitude }], 0);
+  //         // }else{
+  //         getPollensData(response.data.cities, 0);
+  //         // }
+
+  //         setLoadCities(false);
+  //       } else {
+  //         const currentLatLng = await GetCurrentLocation();
+
+  //         getPollensDataLatLng(
+  //           currentLatLng?.latitude,
+  //           currentLatLng?.longitude,
+  //         );
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //       setLoadCities(false);
+  //       setPollenLoader(false);
+  //     });
+  // };
 
   //   const PollenCurrentTodayData = todayPollensData?.current?.filter(
   //   (item, index, self) =>
@@ -434,7 +511,7 @@ const Home = ({navigation}) => {
                 nestedScrollEnabled
                 contentContainerStyle={{
                   flexGrow: 1,
-                  paddingBottom: 100,
+                  paddingBottom: responsiveHeight(15),
                   padding: 20,
                   marginTop: 30,
                 }}
@@ -514,8 +591,7 @@ const Home = ({navigation}) => {
                               alignItems: 'center',
                             }}>
                             <View style={{flexDirection: 'row', gap: 5}}>
-                              {item?.lat == myLocation?.latitude &&
-                              item?.lng == myLocation?.longitude ? (
+                              {item?.currentLocation ? (
                                 <FontAwesome6
                                   name={'location-dot'}
                                   size={responsiveFontSize(2)}
@@ -567,9 +643,7 @@ const Home = ({navigation}) => {
                                 />
                               ) : (
                                 <AppText
-                                  title={
-                                    pollenData?.today?.text
-                                  }
+                                  title={pollenData?.today?.text}
                                   textColor={'#777777'}
                                 />
                               )}
@@ -757,6 +831,10 @@ const Home = ({navigation}) => {
                   <ActivityIndicator size={'large'} color={AppColors.BLACK} />
                 ) : (
                   <>
+                  {
+                    message &&
+                    <AppText title={message} textSize={2} textColor={AppColors.BLACK} textAlignment={'center'} marginTop={10}/>
+                  }
                     {selected == 'Past' ? (
                       <FlatList
                         data={ispastArray}
@@ -764,6 +842,25 @@ const Home = ({navigation}) => {
                         inverted
                         renderItem={({item, index}) => {
                           console.log('past index', index, ispastArray.length);
+
+                          const pastPollenAndSpores = item?.current?.sort(
+                            (a, b) => {
+                              if (a.type !== b.type) {
+                                return a.type === 'pollen' ? -1 : 1;
+                              }
+                              return b.level - a.level;
+                            },
+                          );
+
+                          const pastpollenHeaderIndex =
+                            pastPollenAndSpores.findIndex(
+                              i => i.type === 'pollen',
+                            );
+                          const sporesHeaderIndex =
+                            pastPollenAndSpores.findIndex(
+                              i => i.type === 'spore',
+                            );
+
                           return (
                             <View
                               style={{
@@ -780,7 +877,7 @@ const Home = ({navigation}) => {
                                 justifyContent: 'space-between',
                                 borderBottomWidth: index == 0 ? 1 : 0,
                               }}>
-                              <View
+                              {/* <View
                                 style={{
                                   flexDirection: 'row',
                                   gap: 10,
@@ -812,9 +909,67 @@ const Home = ({navigation}) => {
                                   textColor={AppColors.BLACK}
                                   textFontWeight
                                 />
-                              </View>
+                              </View> */}
 
-                              <ScrollView
+                              <TouchableOpacity
+                                onPress={() => {
+                                  if (expandedFutureKey === item.key) {
+                                    setExpandedFutureKey(null); // Collapse if already expanded
+                                  } else {
+                                    setExpandedFutureKey(item.key); // Expand only this one
+                                  }
+                                }}
+                                style={{
+                                  flexDirection: 'row',
+                                  gap: 10,
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  width: responsiveWidth(80),
+                                }}>
+                                <View
+                                  style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    gap: 5,
+                                  }}>
+                                  <View
+                                    style={{
+                                      height: 20,
+                                      width: 20,
+                                      borderRadius: 200,
+                                      borderWidth: 1,
+                                      borderColor: getThBgColour(item?.label),
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                    }}>
+                                    <View
+                                      style={{
+                                        height: 15,
+                                        width: 15,
+                                        borderRadius: 200,
+                                        backgroundColor: getThBgColour(
+                                          item?.label,
+                                        ),
+                                      }}
+                                    />
+                                  </View>
+
+                                  <AppText
+                                    title={item.key}
+                                    textSize={2}
+                                    textColor={AppColors.BLACK}
+                                    textFontWeight
+                                  />
+                                </View>
+
+                                <AntDesign
+                                  name={'plus'}
+                                  size={responsiveFontSize(3)}
+                                  color={AppColors.BLACK}
+                                />
+                              </TouchableOpacity>
+
+                              {/* <ScrollView
                                 horizontal
                                 style={{
                                   flexDirection: 'row',
@@ -936,7 +1091,98 @@ const Home = ({navigation}) => {
                                     TempreaturePriorityFontSize={1.6}
                                   />
                                 </View>
+                              </ScrollView> */}
+
+                              <ScrollView
+                                horizontal
+                                contentContainerStyle={{
+                                  gap: 10,
+                                  marginTop: 20,
+                                }}>
+                                {activePollen?.map(newItem => {
+                                  const indexes = item.current.findIndex(
+                                    active =>
+                                      active.name == newItem.common_name,
+                                  );
+
+                                  return (
+                                    <View
+                                      style={{gap: 10, alignItems: 'center'}}>
+                                      <AppText
+                                        title={newItem.common_name}
+                                        textAlignment={'center'}
+                                        textSize={1.5}
+                                        textColor={AppColors.BLACK}
+                                        textFontWeight
+                                        textwidth={40}
+                                        textHeight={5}
+                                      />
+
+                                      <SpeedoMeter
+                                        imgWeight={30}
+                                        imgHeight={10}
+                                        speedometerWidth={30}
+                                        imageTop={-10}
+                                        TextBottom={
+                                          item?.current[indexes]?.level == 1
+                                            ? 'Low'
+                                            : item?.current[indexes]?.level == 2
+                                            ? 'Moderate'
+                                            : item?.current[indexes]?.level == 3
+                                            ? 'High'
+                                            : item?.current[indexes]?.level == 4
+                                            ? 'Very High'
+                                            : 'None'
+                                        }
+                                        isPollenorSpores={
+                                          item?.current[index]?.type
+                                        }
+                                        TempreaturePriorityFontSize={1.6}
+                                      />
+                                    </View>
+                                  );
+                                })}
                               </ScrollView>
+
+                              {expandedFutureKey === item.key && (
+                                <View style={{marginTop: 20}}>
+                                  <FlatList
+                                    data={pastPollenAndSpores}
+                                    renderItem={({item, index}) => {
+                                      return (
+                                        <View style={{gap: 5}}>
+                                          {index === pastpollenHeaderIndex && (
+                                            <AppText
+                                              title="Pollen"
+                                              textSize={2}
+                                              textFontWeight
+                                            />
+                                          )}
+
+                                          {index === sporesHeaderIndex && (
+                                            <AppText
+                                              title="Spores"
+                                              textSize={2}
+                                              marginTop={2}
+                                              textFontWeight
+                                            />
+                                          )}
+
+                                          <PointPollenSpores
+                                            PollenSporesArr={
+                                              pastPollenAndSpores
+                                            }
+                                            index={index}
+                                            item={item}
+                                            selected={selected}
+                                            containerwidth={responsiveWidth(80)}
+                                          />
+                                        </View>
+                                      );
+                                    }}
+                                  />
+                                </View>
+                              )}
                             </View>
                           );
                         }}

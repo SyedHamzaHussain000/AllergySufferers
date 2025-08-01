@@ -5,6 +5,7 @@ import moment from 'moment';
 const initialState = {
   ActiveMedications: [],
   MyCurrentMeds: [],
+  allMyCity: [],
 };
 
 const MedicationSlice = createSlice({
@@ -50,7 +51,7 @@ const MedicationSlice = createSlice({
       const allMedRecords = state.ActiveMedications;
       const newMed = action.payload;
 
-      console.log("newMed",newMed)
+      console.log('newMed', newMed);
 
       const existMed = allMedRecords.find(
         med => med.id == newMed.id && med.date == curretDate,
@@ -93,6 +94,53 @@ const MedicationSlice = createSlice({
       state.ActiveMedications = [];
       state.MyCurrentMeds = [];
     },
+
+    //add city flow
+    // setAddCity: (state, action) => {
+    //   const newCity = action.payload;
+
+    //   // console.log("state.allMyCity",state.allMyCity)
+    //   // Ensure it's initialized — this is optional if your initialState is correct
+    //   if (!Array.isArray(state.allMyCity)) {
+    //     state.allMyCity = [];
+    //   }
+
+    //   const exists = state.allMyCity.find(
+    //     city => city.city_name === newCity.city_name,
+    //   );
+    //   if (!exists) {
+    //     state.allMyCity.push(newCity);
+    //     console.log('City added:', newCity);
+    //   } else {
+    //     console.log('City already exists, no update needed.');
+    //   }
+    // },
+    setAddCity: (state, action) => {
+      const newCity = action.payload;
+
+      if (!Array.isArray(state.allMyCity)) {
+        state.allMyCity = [];
+      }
+
+      // Remove the city if it's already in the list
+      state.allMyCity = state.allMyCity.filter(
+        city => city.city_name !== newCity.city_name,
+      );
+
+      // Always insert at the top (index 0)
+      state.allMyCity.unshift(newCity);
+
+      console.log('City added at top:', newCity);
+      console.log('Updated city list:', state.allMyCity);
+    },
+
+    setRemoveCity: (state, action) => {
+      const cityToRemove = action.payload;
+      state.allMyCity = state.allMyCity.filter(
+        city => city.city_name !== cityToRemove.city_name,
+      );
+      console.log('City removed successfully');
+    },
   },
 });
 
@@ -106,6 +154,10 @@ export const {
   deleteAllData,
   UpdateMedicationListOnEveryDate,
   RemoveUpdateMedicationListOnEveryDate,
+
+  //add city
+  setAddCity,
+  setRemoveCity,
 } = MedicationSlice.actions;
 
 export default MedicationSlice.reducer;

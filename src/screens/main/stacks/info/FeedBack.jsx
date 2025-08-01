@@ -1,4 +1,4 @@
-import {View, Text, TextInput, ToastAndroid, ScrollView, SafeAreaView} from 'react-native';
+import {View, Text, TextInput, ToastAndroid, ScrollView, SafeAreaView, KeyboardAvoidingView} from 'react-native';
 import React, {useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
@@ -63,7 +63,8 @@ const FeedBack = () => {
 
   return (
     <SafeAreaView style={{flex:1}}>
-    <ScrollView contentContainerStyle={{flexGrow:1, padding: 20}}>
+      <KeyboardAvoidingView behavior='position' style={{flex:1}}>
+    <ScrollView contentContainerStyle={{flexGrow:1, padding: 20, paddingBottom:20}}>
       <AppHeader heading="Aerobiology" subheading="Feedback" goBack={true} />
 
       <View style={{gap: 10, marginTop: 20}}>
@@ -165,7 +166,8 @@ const FeedBack = () => {
         />
       </View>
     </ScrollView>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
+     </SafeAreaView>
   );
 };
 

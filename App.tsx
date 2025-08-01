@@ -48,7 +48,7 @@ import { store } from './src/redux/store';
 import Toast from 'react-native-toast-message';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
-import { Platform } from 'react-native';
+import { Platform, SafeAreaView } from 'react-native';
 
 const App = () => {
   useEffect(() => {
@@ -87,12 +87,14 @@ const App = () => {
   }, []);
 
   return (
+
     <Provider store={store}>
       <NavigationContainer>
         <Routes />
         <Toast />
       </NavigationContainer>
     </Provider>
+    
   );
 };
 

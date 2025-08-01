@@ -329,7 +329,7 @@ const DatavisualizerSample = ({navigation}) => {
         label: index === 0 ? date : '',
         labelWidth: 20,
         labelTextStyle: { color: 'gray' },
-        spacing: responsiveWidth(1.25),
+        spacing: responsiveWidth(0.5),
       });
     });
 
@@ -605,6 +605,9 @@ const DatavisualizerSample = ({navigation}) => {
     5: AppImages.Bored,
   };
 
+
+ 
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView
@@ -695,18 +698,25 @@ const DatavisualizerSample = ({navigation}) => {
                           );
                         })}
                       </View>
+                       {
+                          console.log("PrimaryLineData",PrimaryLineData)
+                        }
 
                       <BarChart
                         data={MedicationnRecord || []}
                         barWidth={7}
                         frontColor="#E23131" // bar color
                         showLine={
+                          // true
                           PrimaryLineData.length > 0 ||
                           SecondaryLineData.length > 0
+                          
                         }
+                       
                         // xAxisLabelTexts={[]}
                         lineData={PrimaryLineData || []}
                         lineData2={SecondaryLineData || []}
+                 
                         lineConfig={{
                           color: colours[0],
                           thickness: 2,

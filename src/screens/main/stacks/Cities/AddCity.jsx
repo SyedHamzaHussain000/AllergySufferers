@@ -21,17 +21,46 @@ import AppButton from '../../../../components/AppButton';
 import SocialAuthButton from '../../../../components/SocialAuthButton';
 import GooglePlacesTextInput from 'react-native-google-places-textinput';
 import BASE_URL from '../../../../utils/BASE_URL';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
+import { setAddCity } from '../../../../redux/Slices/MedicationSlice';
+import Toast from 'react-native-toast-message';
 
 const AddCity = ({navigation}) => {
+  const dispatch = useDispatch()
   const userdata = useSelector(state => state.auth.user);
+  const allMyCity = useSelector(state => state?.medications?.allMyCity);
 
   const [detail, setDetil] = useState();
   const [cityLoader, setCityLoader] = useState(false);
 
   const addNewCity = () => {
+    
+
+    if(allMyCity.length == 5){
+
+      alert('You can only add 5 cities');
+      return
+    }
     setCityLoader(true);
+    if(detail){
+
+      dispatch(setAddCity({
+        lat: JSON.stringify(detail?.location?.latitude),
+        lng: JSON.stringify(detail?.location?.longitude),
+        city_name: detail?.displayName?.text,
+      }))
+
+      Toast.show({
+        type: 'success',
+        text1: 'City added successfully',
+        position:'bottom'
+      })
+      // setCityLoader(false);
+    }
+    // setCityLoader(false);
+
+
     if (detail) {
       let data = JSON.stringify({
         data: {

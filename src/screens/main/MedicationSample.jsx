@@ -50,15 +50,19 @@ const MedicationSample = ({navigation}) => {
 
   const allMyCurrentMeds = useSelector(
     state => state.medications.MyCurrentMeds,
-  )
+  );
 
   const [allMedication, setAllMedication] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
   const [medicationLoadingMap, setMedicationLoadingMap] = useState({});
   const [loader, setLoader] = useState(false);
   const [Medicationloader, setMedicationLoader] = useState(false);
-  const [activeDate, setActiveDate] = useState(allActiveMedicationRedux.length > 0 ? new Date( allActiveMedicationRedux[0].date) : new Date() );
-  
+  const [activeDate, setActiveDate] = useState(
+    allActiveMedicationRedux.length > 0
+      ? new Date(allActiveMedicationRedux[0].date)
+      : new Date(),
+  );
+
   const canadianDate = moment.tz('2025-07-28', 'YYYY-MM-DD', 'America/Toronto');
 
   const [date, setDate] = useState(new Date());
@@ -158,30 +162,23 @@ const MedicationSample = ({navigation}) => {
     }
   };
 
-  const generateMedicationSlides = async(selectedDate, allActiveMedicationRedux) => {
+  const generateMedicationSlides = async (
+    selectedDate,
+    allActiveMedicationRedux,
+  ) => {
     setMedicationLoader(true);
     if (allActiveMedicationRedux?.length == 0) {
       setMedicationLoader(false);
       // setMedicationnRecord([]);
 
-      // const getActiveMedicationData = await ApiCallWithUserId()
+      const getActiveMedicationData = await ApiCallWithUserId(
+        'post',
+        'get_medication_records',
+        userData?.id,
+      );
+
       return;
     }
-
-    const AllActiveArray = []
-
-    allActiveMedicationRedux.forEach((res)=>{
-      AllActiveArray.push({
-        date: res.date,
-        units: res.units,
-        medication_id: res.id
-      })
-    })
-
-    const setallActiveMedicationReduxInApi = await ApiCallWithUserId("post", "update_medication_units", userData.id, {data:AllActiveArray} )
-
-
-
 
     try {
       const activeDateStr =
@@ -203,133 +200,113 @@ const MedicationSample = ({navigation}) => {
       const slides = [];
 
       for (let i = 0; i < numberOfWeeks; i++) {
-  let end = moment(baseDate).subtract(i * 7, 'days');
-  let start = moment(baseDate).subtract(i * 7 + 6, 'days');
+        let end = moment(baseDate).subtract(i * 7, 'days');
+        let start = moment(baseDate).subtract(i * 7 + 6, 'days');
 
-  // 🔹 Ensure start never goes before activeDate
-  if (start.isBefore(activeDate)) {
-    start = activeDate.clone();
-  }
+        // 🔹 Ensure start never goes before activeDate
+        if (start.isBefore(activeDate)) {
+          start = activeDate.clone();
+        }
 
-  // Filter medications for the current week
-  const entries = allActiveMedicationRedux.filter(item => {
-    const itemDate = moment(item.date, 'YYYY-MM-DD');
-    return itemDate.isBetween(
-      start.clone().subtract(1, 'day'),
-      end.clone().add(1, 'day'),
-    );
-  });
+        // Filter medications for the current week
+        const entries = allActiveMedicationRedux.filter(item => {
+          const itemDate = moment(item.date, 'YYYY-MM-DD');
+          return itemDate.isBetween(
+            start.clone().subtract(1, 'day'),
+            end.clone().add(1, 'day'),
+          );
+        });
 
-  const seenDates = new Set();
-  const barData = [];
+        // const seenDates = new Set();
+        // const barData = [];
 
-  entries.forEach(entry => {
-    const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
-    const value = parseInt(entry.units) || 0;
+        // entries.forEach(entry => {
+        //   const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
+        //   const value = parseInt(entry.units) || 0;
 
-    if (!seenDates.has(entry.date)) {
-      seenDates.add(entry.date);
-      barData.push({
-        value,
-        label: formattedLabel,
-        spacing: 0,
-        frontColor: entry.frontColor || '#E23131',
-        labelWidth: 0,
+        //   if (!seenDates.has(entry.date)) {
+        //     seenDates.add(entry.date);
+        //     barData.push({
+        //       value,
+        //       label: formattedLabel,
+        //       spacing: 0,
+        //       frontColor: entry.frontColor || '#E23131',
+        //       labelWidth: 0,
+        //     });
+        //   } else {
+        //     barData.push({
+        //       value,
+        //       spacing: 0,
+        //       frontColor: entry.frontColor || '#E23131',
+        //       labelWidth: 0,
+        //     });
+        //   }
+        // });
+        const seenDates = new Set();
+        const barData = [];
+
+        // group by date
+        const grouped = {};
+        entries.forEach(entry => {
+          if (!grouped[entry.date]) {
+            grouped[entry.date] = [];
+          }
+          grouped[entry.date].push(entry);
+        });
+
+        // now process each group
+        Object.keys(grouped).forEach(date => {
+          const group = grouped[date];
+          group.forEach((entry, idx) => {
+            const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
+            const value = parseInt(entry.units) || 0;
+            const isLast = idx === group.length - 1; // ✅ last of this date
+
+            barData.push({
+              value,
+              label: idx === 0 ? formattedLabel : undefined, // only first one shows label
+              spacing: isLast ? responsiveWidth(2.5) : 0, // ✅ spacing only for last of this date
+              frontColor: entry.frontColor || '#E23131',
+              labelWidth: 0,
+            });
+          });
+        });
+
+        slides.unshift({
+          key: `${i}`,
+          // 🔹 If start and end are same → show single day
+          title: start.isSame(end, 'day')
+            ? start.format('DD MMM')
+            : `${start.format('DD MMM')} - ${end.format('DD MMM')}`,
+          barData,
+        });
+      }
+
+      const AllActiveArray = [];
+
+      allActiveMedicationRedux.forEach(res => {
+        console.log('Res', res);
+        AllActiveArray.push({
+          date: res.date,
+          units: res.units,
+          medication_id: res.id,
+        });
       });
-    } else {
-      barData.push({
-        value,
-        spacing: 0,
-        frontColor: entry.frontColor || '#E23131',
-      });
-    }
-  });
 
-  slides.unshift({
-    key: `${i}`,
-    // 🔹 If start and end are same → show single day
-    title: start.isSame(end, 'day')
-      ? start.format('DD MMM')
-      : `${start.format('DD MMM')} - ${end.format('DD MMM')}`,
-    barData,
-  });
-}
-
-
-      // for (let i = 0; i < numberOfWeeks; i++) {
-      //   const end = moment(baseDate).subtract(i * 7, 'days');
-      //   const start = moment(baseDate).subtract(i * 7 + 6, 'days');
-
-      //   // Filter medications for the current week
-      //   const entries = allActiveMedicationRedux.filter(item => {
-      //     const itemDate = moment(item.date, 'YYYY-MM-DD');
-      //     return itemDate.isBetween(
-      //       start.clone().subtract(1, 'day'),
-      //       end.clone().add(1, 'day'),
-      //     );
-      //   });
-
-      //   const seenDates = new Set();
-      //   const barData = [];
-
-      //   entries.forEach(entry => {
-      //     const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
-      //     const value = parseInt(entry.units) || 0;
-
-      //     if (!seenDates.has(entry.date)) {
-      //       seenDates.add(entry.date);
-      //       barData.push({
-      //         value,
-      //         label: formattedLabel,
-      //         spacing: 0,
-      //         frontColor: entry.frontColor || '#E23131',
-      //         labelWidth: 0,
-      //       });
-      //     } else {
-      //       barData.push({
-      //         value,
-      //         spacing: 0,
-      //         frontColor: entry.frontColor || '#E23131',
-      //       });
-      //     }
-      //   });
-
-      //   // Adjust spacing and add transparent bars
-      //   for (let i = 0; i < barData.length - 1; i++) {
-      //     const current = barData[i];
-      //     const next = barData[i + 1];
-      //     if (!current.label && next.label && 'spacing' in current) {
-      //       delete current.spacing;
-      //     }
-      //   }
-
-      //   const lastItem = barData[barData.length - 1];
-      //   if (lastItem && !lastItem.label && 'spacing' in lastItem) {
-      //     delete lastItem.spacing;
-      //   }
-
-      //   for (let i = 0; i < barData.length; i++) {
-      //     const current = barData[i];
-      //     const next = barData[i + 1];
-      //     if (current.label && (!next || next.label)) {
-      //       barData.splice(i + 1, 0, {
-      //         value: 0,
-      //         frontColor: 'transparent',
-      //       });
-      //     }
-      //   }
-
-      //   slides.unshift({
-      //     key: `${i}`,
-      //     title: `${start.format('DD MMM')} - ${end.format('DD MMM')}`,
-      //     barData,
-      //   });
-      // }
-
-      console.log('slides .....', slides);
+      console.log('slides', slides);
 
       setMedicationnRecord(slides);
-      // dispatch(setActiveMedication(allActiveMedicationRedux));
+      const setallActiveMedicationReduxInApi = await ApiCallWithUserId(
+        'post',
+        'update_medication_units',
+        userData.id,
+        {data: AllActiveArray},
+      );
+
+      console.log(
+        'setallActiveMedicationReduxInApi .....',
+        setallActiveMedicationReduxInApi,
+      );
       setMedicationLoader(false);
     } catch (error) {
       setMedicationLoader(false);
@@ -511,9 +488,6 @@ const MedicationSample = ({navigation}) => {
     );
   };
 
-
-
-
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
@@ -524,7 +498,6 @@ const MedicationSample = ({navigation}) => {
           selecteddate={selecteddate}
           setOpen={() => setOpen(true)}
         />
-        
 
         <DatePicker
           modal
@@ -532,7 +505,11 @@ const MedicationSample = ({navigation}) => {
           date={date}
           mode="date"
           // minimumDate={!activeDate ? new Date() : activeDate}
-          minimumDate={allActiveMedicationRedux.length > 0 ? moment(allActiveMedicationRedux[0]?.date).local() : moment().local()}
+          minimumDate={
+            allActiveMedicationRedux.length > 0
+              ? moment(allActiveMedicationRedux[0]?.date).local()
+              : moment().local()
+          }
           maximumDate={new Date()}
           onConfirm={selectedDate => {
             setDate(selectedDate);

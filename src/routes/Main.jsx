@@ -1,4 +1,4 @@
-import {View, Text, Image, StyleSheet, SafeAreaView} from 'react-native';
+import {View, Text, Image, StyleSheet, Platform, StatusBar, SafeAreaView} from 'react-native';
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -31,6 +31,10 @@ import Subscription from '../screens/main/subscription/Subscription';
 import ForcastExplaination from '../screens/main/stacks/forcastexplaination/ForcastExplaination';
 import MedicationSample from '../screens/main/MedicationSample';
 import DatavisualizerSample from '../screens/main/stacks/DatavisualizerSample';
+import { responsiveHeight } from '../utils/Responsive_Dimensions';
+// import { SafeAreaView } from "react-native-safe-area-context";
+
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const Main = () => {
@@ -77,14 +81,22 @@ const Main = () => {
 
 function MyTabs() {
   return (
+    // <SafeAreaView style={{flex:1}}>
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+      
         tabBarStyle: {
           backgroundColor: AppColors.BTNCOLOURS,
-          height: 70,
+          height: responsiveHeight(12),
           paddingTop: 10,
+          position:'absolute',
+          
+          bottom: 0,
+          zIndex:100
         },
+
+       
       }}>
       <Tab.Screen
         name="Forecast"
@@ -173,13 +185,15 @@ function MyTabs() {
         }}
       />
     </Tab.Navigator>
+    // </SafeAreaView>
   );
 }
 
 // If needed, wrap MyTabs too:
 const HomeWithSafeArea = Component => props => {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView  style={styles.safeArea}>
+      {/* <StatusBar barStyle={"light-content"}/> */}
       <Component {...props} />
     </SafeAreaView>
   );
@@ -236,6 +250,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff', // or AppColors.BACKGROUND
+    color:AppColors.BLACK
   },
 });
 
