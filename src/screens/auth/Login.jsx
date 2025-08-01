@@ -1,4 +1,4 @@
-import {View, Text, ScrollView, TouchableOpacity, Alert, ToastAndroid, Platform, } from 'react-native';
+import {View, Text, ScrollView, TouchableOpacity, Alert, ToastAndroid, Platform, PermissionsAndroid, } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import AppColors from '../../utils/AppColors';
 import AppText from '../../components/AppTextComps/AppText';
@@ -64,6 +64,16 @@ const userData = useSelector(state => state.auth.user)
       },
       data: data,
     };
+      if(Platform.OS == "android"){
+               await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+                {
+                  title: 'Allergy Sufferers',
+                  message: 'Allergy sufferers want to access your location',
+                },
+              );
+    
+            }
 
     dispatch(CurrentLogin(config))
 

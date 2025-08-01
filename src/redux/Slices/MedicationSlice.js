@@ -96,43 +96,64 @@ const MedicationSlice = createSlice({
     },
 
     //add city flow
-    // setAddCity: (state, action) => {
-    //   const newCity = action.payload;
-
-    //   // console.log("state.allMyCity",state.allMyCity)
-    //   // Ensure it's initialized — this is optional if your initialState is correct
-    //   if (!Array.isArray(state.allMyCity)) {
-    //     state.allMyCity = [];
-    //   }
-
-    //   const exists = state.allMyCity.find(
-    //     city => city.city_name === newCity.city_name,
-    //   );
-    //   if (!exists) {
-    //     state.allMyCity.push(newCity);
-    //     console.log('City added:', newCity);
-    //   } else {
-    //     console.log('City already exists, no update needed.');
-    //   }
-    // },
     setAddCity: (state, action) => {
       const newCity = action.payload;
 
+      // console.log("state.allMyCity",state.allMyCity)
+      // Ensure it's initialized — this is optional if your initialState is correct
       if (!Array.isArray(state.allMyCity)) {
         state.allMyCity = [];
       }
 
-      // Remove the city if it's already in the list
-      state.allMyCity = state.allMyCity.filter(
-        city => city.city_name !== newCity.city_name,
+      const exists = state.allMyCity.find(
+        city => city.city_name === newCity.city_name,
       );
-
-      // Always insert at the top (index 0)
-      state.allMyCity.unshift(newCity);
-
-      console.log('City added at top:', newCity);
-      console.log('Updated city list:', state.allMyCity);
+      if (!exists) {
+        state.allMyCity.push(newCity);
+        console.log('City added:', newCity);
+      } else {
+        console.log('City already exists, no update needed.');
+      }
     },
+//   setAddCity: (state, action) => {
+//   const newCity = action.payload;
+
+//   if (!Array.isArray(state.allMyCity)) {
+//     state.allMyCity = [];
+//   }
+
+//   const isCurrent = newCity.isCurrentLocation;
+
+//   // Remove the city if it's already in the list (by name)
+//   state.allMyCity = state.allMyCity.filter(
+//     city => city.city_name !== newCity.city_name
+//   );
+
+//   if (isCurrent) {
+//     // Remove any existing current location
+//     state.allMyCity = state.allMyCity.filter(
+//       city => !city.isCurrentLocation
+//     );
+
+//     // Add current location at top
+//     state.allMyCity.unshift({ ...newCity, isCurrentLocation: true });
+//   } else {
+//     // Add user-added city AFTER current location (if it exists), or at top if not
+//     const currentIndex = state.allMyCity.findIndex(c => c.isCurrentLocation);
+
+//     if (currentIndex !== -1) {
+//       state.allMyCity.splice(currentIndex + 1, 0, {
+//         ...newCity,
+//         isCurrentLocation: false,
+//       });
+//     } else {
+//       state.allMyCity.unshift({ ...newCity, isCurrentLocation: false });
+//     }
+//   }
+
+//   console.log('Updated city list:', state.allMyCity);
+// },
+
 
     setRemoveCity: (state, action) => {
       const cityToRemove = action.payload;

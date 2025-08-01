@@ -1,4 +1,4 @@
-import {View, Text, Alert} from 'react-native';
+import {View, Text, Alert, Platform, PermissionsAndroid} from 'react-native';
 import React, {useState} from 'react';
 import BackgroundScreen from '../../components/AppTextComps/BackgroundScreen';
 import AppText from '../../components/AppTextComps/AppText';
@@ -18,8 +18,6 @@ import { setAddCity } from '../../redux/Slices/MedicationSlice';
 const GetStarted = ({navigation}) => {
     const allMyCity = useSelector(state => state?.medications?.allMyCity);
   
-    Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
-
   const userData = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
 
@@ -38,18 +36,29 @@ const GetStarted = ({navigation}) => {
 
         dispatch(setSubscription({isExpired: false, expireDate: checkSub?.expiry }))
 
-        // navigation.navigate('Main');
-        if(allMyCity?.length > 0){
+        if(Platform.OS == "android"){
+           await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              title: 'Allergy Sufferers',
+              message: 'Allergy sufferers want to access your location',
+            },
+          );
 
-          if(allMyCity[0]?.currentLocation){
-            navigation.navigate('Main');
-            return
-          }else{
-            getCurrentLocation()
-          }
-        }else{
-            getCurrentLocation()
         }
+
+        navigation.navigate('Main');
+        // if(allMyCity?.length > 0){
+
+        //   if(allMyCity[0]?.currentLocation){
+        //     navigation.navigate('Main');
+        //     return
+        //   }else{
+        //     getCurrentLocation()
+        //   }
+        // }else{
+        //     getCurrentLocation()
+        // }
         
         
       }else{
@@ -64,30 +73,30 @@ const GetStarted = ({navigation}) => {
 
 
 
-    const getCurrentLocation = async () => {
-      // console.log('----------------------------');
-      setFechingCurrentLocation(true);
-      const gettingCurrentLatlng = await GetCurrentLocation();
+    // const getCurrentLocation = async () => {
+    //   // console.log('----------------------------');
+    //   setFechingCurrentLocation(true);
+    //   const gettingCurrentLatlng = await GetCurrentLocation();
   
-      // Alert.alert("gettingCurrentLatlng",)
-      // console.log('triple H', gettingCurrentLatlng);
+    //   // Alert.alert("gettingCurrentLatlng",)
+    //   console.log('triple H', gettingCurrentLatlng);
   
-      const getCityName = await GetCityName(
-        gettingCurrentLatlng.latitude,
-        gettingCurrentLatlng.longitude,
-      );
+    //   const getCityName = await GetCityName(
+    //     gettingCurrentLatlng.latitude,
+    //     gettingCurrentLatlng.longitude,
+    //   );
 
-      dispatch(setAddCity({
-        lat: JSON.stringify(gettingCurrentLatlng?.latitude),
-        lng: JSON.stringify(gettingCurrentLatlng?.longitude),
-        city_name: getCityName,
-        currentLocation: true
-      }))
-      setSubLoader(false)
-      navigation.navigate('Main');
-      // setMyLocation(gettingCurrentLatlng);
-      // return
-    };
+    //   dispatch(setAddCity({
+    //     lat: JSON.stringify(gettingCurrentLatlng?.latitude),
+    //     lng: JSON.stringify(gettingCurrentLatlng?.longitude),
+    //     city_name: getCityName,
+    //     currentLocation: true
+    //   }))
+    //   setSubLoader(false)
+      
+    //   // setMyLocation(gettingCurrentLatlng);
+    //   // return
+    // };
   
 
   return (

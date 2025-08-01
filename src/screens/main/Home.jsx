@@ -21,11 +21,12 @@ import AppColors from '../../utils/AppColors';
 import AppText from '../../components/AppTextComps/AppText';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
 import AppImages from '../../assets/images/AppImages';
 import SpeedoMeter from '../../components/SpeedoMeter';
 import SelectionButton from '../../components/SelectionButton';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
 import BASE_URL from '../../utils/BASE_URL';
 import DatePicker from 'react-native-date-picker';
@@ -38,12 +39,19 @@ import PointPollenSpores from '../../components/PointPollenSpores';
 // import AddCityApi from '../../global/AddCityApi';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {GetCurrentLocation} from '../../global/GetCurrentLocation';
+import {GetCityName} from '../../global/GetCityName';
+import {setAddCity} from '../../redux/Slices/MedicationSlice';
+import Geocoder from 'react-native-geocoding';
 
 const Home = ({navigation}) => {
+  Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
+
+  const dispatch = useDispatch();
   const userData = useSelector(state => state.auth.user);
   const AllCities = useSelector(state => state?.medications?.allMyCity);
 
-  // console.log('userData', userData);
+  console.log('userData', AllCities);
 
   const isExpiredRedux = useSelector(state => state.auth.isExpired);
   const expireDate = useSelector(state => state.auth.expireDate);
@@ -51,6 +59,7 @@ const Home = ({navigation}) => {
 
   console.log('isExpiredRedux', isExpiredRedux);
   console.log('SubscriptionType', SubscriptionType);
+  const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
 
   const slides = [
     {
@@ -106,7 +115,7 @@ const Home = ({navigation}) => {
 
   const [myLocation, setMyLocation] = useState();
 
-  const [message, setMessage] = useState("")
+  const [message, setMessage] = useState('');
 
   // console.log('allcities', AllCities);
   useEffect(() => {
@@ -169,11 +178,15 @@ const Home = ({navigation}) => {
           setIsFutureArray([]);
           setPollenLoader(false);
           setLoadCities(false);
-          setMessage(`No data found in ${allcities[newindex ? newindex : 0]?.city_name}. Please try another city.`)
+          setMessage(
+            `No data found in ${
+              allcities[newindex ? newindex : 0]?.city_name
+            }. Please try another city.`,
+          );
 
           return;
         }
-        setMessage("")
+        setMessage('');
 
         const pastArray = Object.entries(past).map(([date, data]) => ({
           key: date,
@@ -204,84 +217,29 @@ const Home = ({navigation}) => {
       });
   };
 
-  // const getPollensDataLatLng = (Lat, Lng) => {
-  //   setPollenLoader(true);
-  //   setLoadCities(true);
-  //   let data = new FormData();
-  //   data.append('lat', Lat);
-  //   data.append('lng', Lng);
-  //   // data.append('email', userData?.email);
+  const getCurrentLocation = async () => {
+    // console.log('----------------------------');
+    setFechingCurrentLocation(true);
+    const gettingCurrentLatlng = await GetCurrentLocation();
 
-  //   let config = {
-  //     method: 'post',
-  //     maxBodyLength: Infinity,
-  //     url: `${BASE_URL}/allergy_data/v1/user/get_allergy_data`,
-  //     headers: {
-  //       'Content-Type': 'multipart/form-data',
-  //     },
-  //     data: data,
-  //   };
+    // Alert.alert("gettingCurrentLatlng",)
 
-  //   axios
-  //     .request(config)
-  //     .then(async response => {
-  //       const res = response.data;
+    const getCityName = await GetCityName(
+      gettingCurrentLatlng.latitude,
+      gettingCurrentLatlng.longitude,
+    );
 
-  //       const city = res?.user?.locations?.closest?.name;
+    dispatch(
+      setAddCity({
+        lat: JSON.stringify(gettingCurrentLatlng?.latitude),
+        lng: JSON.stringify(gettingCurrentLatlng?.longitude),
+        city_name: getCityName,
+        currentLocation: true,
+      }),
+    );
 
-  //       const newCityObj = {
-  //         id: 1,
-  //         lat: Lat,
-  //         lng: Lng,
-  //         city_name: city,
-  //       };
-
-  //       if (userData) {
-  //         const res = await AddCityApi(userData.id, city, Lat, Lng);
-
-  //         if (res.status) {
-  //           console.log('Something went wrong', res.details);
-  //           return getAllCities();
-  //         } else {
-  //           console.log('City added successfully', res);
-  //         }
-  //       }
-
-  //       setAllCities([newCityObj]);
-
-  //       const past = response?.data?.forecast?.[city]?.past;
-  //       const today = response?.data?.forecast?.[city]?.today;
-  //       const future = response?.data?.forecast?.[city]?.future;
-
-  //       const pastArray = Object.entries(past).map(([date, data]) => ({
-  //         key: date,
-  //         ...data,
-  //       }));
-
-  //       const futureArray = Object.entries(future).map(([date, data]) => ({
-  //         key: date,
-  //         ...data,
-  //       }));
-
-  //       setPollenData(response.data);
-
-  //       setPastPollenData(past);
-  //       setTodayPollensData(today);
-  //       setFuturePollenData(future);
-
-  //       setIsPastArray(pastArray);
-  //       setIsFutureArray(futureArray);
-
-  //       setPollenLoader(false);
-  //       setLoadCities(false);
-  //       setHasFetchedOnce(true);
-  //     })
-  //     .catch(error => {
-  //       console.log(error);
-  //       setPollenLoader(false);
-  //       setLoadCities(false);
-  //     });
-  // };
+    setFechingCurrentLocation(false);
+  };
 
   const getThBgColour = level => {
     switch (level) {
@@ -375,53 +333,7 @@ const Home = ({navigation}) => {
       });
   };
 
-  // const getAllCities = () => {
-  //   setLoadCities(true);
-  //   let config = {
-  //     method: 'get',
-  //     maxBodyLength: Infinity,
-  //     url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_cities`,
-  //     headers: {},
-  //   };
-
-  //   axios
-  //     .request(config)
-  //     .then(async response => {
-  //       console.log(JSON.stringify(response.data));
-  //       setAllCities(response.data.cities);
-  //       console.log('response.data.cities', response.data.cities);
-  //       if (response?.data?.cities?.length > 0) {
-  //         // const currentLatLng = await GetCurrentLocation();
-
-  //         // console.log("currentLatLng????",currentLatLng)
-  //         // if(currentLatLng){
-  //         //   Alert.alert("Current lat lng")
-  //         // getPollensData([...response.data.cities, {id:1, lat:currentLatLng.latitude, lng:currentLatLng.longitude }], 0);
-  //         // }else{
-  //         getPollensData(response.data.cities, 0);
-  //         // }
-
-  //         setLoadCities(false);
-  //       } else {
-  //         const currentLatLng = await GetCurrentLocation();
-
-  //         getPollensDataLatLng(
-  //           currentLatLng?.latitude,
-  //           currentLatLng?.longitude,
-  //         );
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.log(error);
-  //       setLoadCities(false);
-  //       setPollenLoader(false);
-  //     });
-  // };
-
-  //   const PollenCurrentTodayData = todayPollensData?.current?.filter(
-  //   (item, index, self) =>
-  //     index === self.findIndex((t) => t.name === item.name)
-  // );
+  
 
   const PollenCurrentTodayData = useMemo(() => {
     if (!todayPollensData?.current) return [];
@@ -516,60 +428,51 @@ const Home = ({navigation}) => {
                   marginTop: 30,
                 }}
                 showsVerticalScrollIndicator={false}>
-                {/* <DatePicker
-                  modal
-                  open={open}
-                  date={date}
-                  mode="date"
-                  onConfirm={selectedDate => {
-                    setOpen(false);
-                    const today = moment().startOf('day');
-                    const picked = moment(selectedDate).startOf('day');
-                    const formattedDate = picked.format('YYYY-MM-DD');
 
-                     setSelected('Today');
-                    // if (picked.isAfter(today)) {
-                    //   if (FuturePollenData?.[formattedDate]?.label) {
-                    //     console.log('formated', formattedDate);
-                    //     setFutureDate(formattedDate);
-                    //     setSelected('Future');
-                    //   } else {
-                    //     Alert.alert(
-                    //       'No Forecast Available',
-                    //       'We couldn’t find any allergen forecast data for the selected date. Please try another day.',
-                    //     );
-                    //   }
-                    // } else if (picked.isBefore(today)) {
-                    //   if (PastPollenData?.[formattedDate]?.label) {
-                    //     setPastDate(formattedDate);
-                    //     setSelected('Past');
-                    //   } else {
-                    //     Alert.alert(
-                    //       'Unavailable Date',
-                    //       'Data is only available for the past 7 days. Please select a more recent date.',
-                    //     );
-                    //   }
-                    // } else {
-                    //   setSelected('Today');
-                    // }
-                  }}
-                  onCancel={() => {
-                    setOpen(false);
-                  }}
-                /> */}
-                <Ionicons
-                  name={'notifications-outline'}
-                  size={responsiveFontSize(3)}
-                  color={AppColors.BLUE}
-                  style={{alignSelf: 'flex-end'}}
-                />
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginBottom: 10,
+                  }}>
+                  <TouchableOpacity
+                    onPress={() => getCurrentLocation()}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 5,
+                    }}>
+                    <FontAwesome6
+                      name={'location-crosshairs'}
+                      size={responsiveFontSize(2)}
+                      color={AppColors.BLUE}
+                    />
+                    <AppText
+                      title={'Fetch current location'}
+                      textSize={1.7}
+                      textColor={AppColors.BLUE}
+                    />
+                  </TouchableOpacity>
+
+                  <Ionicons
+                    name={'notifications-outline'}
+                    size={responsiveFontSize(3)}
+                    color={AppColors.BLUE}
+                    style={{alignSelf: 'flex-end'}}
+                  />
+                </View>
                 {loadCities == true ? (
                   <>
                     <ActivityIndicator size={'large'} color={AppColors.BLACK} />
                   </>
                 ) : (
                   <AppIntroSlider
-                    data={AllCities}
+                    data={[...AllCities].sort((a, b) => {
+                      return (
+                        (b.currentLocation || b.isCurrentLocation ? 1 : 0) -
+                        (a.currentLocation || a.isCurrentLocation ? 1 : 0)
+                      );
+                    })}
                     activeDotStyle={{
                       backgroundColor: AppColors.BLUE,
                       marginTop: 20,
@@ -607,12 +510,6 @@ const Home = ({navigation}) => {
                                 />
                               )}
                               <View>
-                                {/* {pollenLoader == true ? (
-                                    <ActivityIndicator
-                                      size={'small'}
-                                      color={AppColors.BLACK}
-                                    />
-                                  ) : ( */}
                                 <AppText
                                   title={
                                     // pollenData?.user?.locations?.closest?.name
@@ -831,10 +728,15 @@ const Home = ({navigation}) => {
                   <ActivityIndicator size={'large'} color={AppColors.BLACK} />
                 ) : (
                   <>
-                  {
-                    message &&
-                    <AppText title={message} textSize={2} textColor={AppColors.BLACK} textAlignment={'center'} marginTop={10}/>
-                  }
+                    {message && (
+                      <AppText
+                        title={message}
+                        textSize={2}
+                        textColor={AppColors.BLACK}
+                        textAlignment={'center'}
+                        marginTop={10}
+                      />
+                    )}
                     {selected == 'Past' ? (
                       <FlatList
                         data={ispastArray}
@@ -1444,6 +1346,24 @@ const Home = ({navigation}) => {
                   textSize={2}
                   handlePress={() => navigation.navigate('AddCity')}
                 />
+
+                <AppButton
+                  textColor={AppColors.WHITE}
+                  textFontWeight
+                  title={'Get Current Location'}
+                  textSize={2}
+                  isLoading={fetchingCurrentLocation}
+                  loadingColour={AppColors.WHITE}
+                  handlePress={() => getCurrentLocation()}
+                />
+                {fetchingCurrentLocation && (
+                  <AppText
+                    title={'Fetching current location please wait...'}
+                    textSize={2}
+                    textColor={AppColors.BLACK}
+                    textAlignment={'center'}
+                  />
+                )}
               </View>
             )}
           </>
