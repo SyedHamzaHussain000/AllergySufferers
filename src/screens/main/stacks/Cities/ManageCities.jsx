@@ -90,9 +90,9 @@ const ManageCities = ({navigation}) => {
 
   const deleteActiveMedication = item => {
 
-    dispatch(setRemoveCity(item))
-    return
     setLoader(true);
+    dispatch(setRemoveCity(item))
+
     let data = JSON.stringify({
       city_id: item.id,
     });

@@ -80,15 +80,8 @@ const MedicationSample = ({navigation}) => {
 
   useEffect(() => {
     generateMedicationSlides(selecteddate, allActiveMedicationRedux);
+     SaveMedicationDataInApi()
   }, [selecteddate, allActiveMedicationRedux]);
-
-  //old static
-  // useEffect(() => {
-  //   const nav = navigation.addListener('focus', () => {
-  //     setAllMedicationToRedux();
-  //   });
-  //   return nav;
-  // }, [allMyCurrentMeds,allActiveMedicationRedux]);
 
   useFocusEffect(
     useCallback(() => {
@@ -99,6 +92,49 @@ const MedicationSample = ({navigation}) => {
       // Alert.alert("runninnng use focus")
     }, [allMyCurrentMeds, allActiveMedicationRedux.length]),
   );
+
+  const SaveMedicationDataInApi = async()=>{
+    // Alert.alert("Userdata", userData.id)
+
+    if(allActiveMedicationRedux.length == 0){
+      const getActiveMedicationData = await ApiCallWithUserId(
+        'post',
+        'get_medication_records',
+        userData?.id,
+      )
+
+      console.log("getActiveMedicationData",getActiveMedicationData.entries.items)
+
+      dispatch(setActiveMedication(getActiveMedicationData.entries.items))
+      return
+    }
+
+
+
+       const AllActiveArray = [];
+
+      allActiveMedicationRedux.forEach(res => {
+        console.log('Res', res);
+        AllActiveArray.push({
+          date: res.date,
+          units: res.units,
+          medication_id: res.id,
+        });
+      });
+
+      
+        const setallActiveMedicationReduxInApi = await ApiCallWithUserId(
+        'post',
+        'update_medication_units',
+        userData.id,
+        {data: AllActiveArray},
+      );
+
+      console.log(
+        'setallActiveMedicationReduxInApi .....',
+        setallActiveMedicationReduxInApi,
+      );
+  }
 
   const setAllMedicationToRedux = async () => {
     // console.log('allActiveMedicationRedux new call ?', allActiveMedicationRedux);
@@ -170,12 +206,6 @@ const MedicationSample = ({navigation}) => {
     if (allActiveMedicationRedux?.length == 0) {
       setMedicationLoader(false);
       // setMedicationnRecord([]);
-
-      const getActiveMedicationData = await ApiCallWithUserId(
-        'post',
-        'get_medication_records',
-        userData?.id,
-      );
 
       return;
     }
@@ -282,31 +312,12 @@ const MedicationSample = ({navigation}) => {
         });
       }
 
-      const AllActiveArray = [];
+   
 
-      allActiveMedicationRedux.forEach(res => {
-        console.log('Res', res);
-        AllActiveArray.push({
-          date: res.date,
-          units: res.units,
-          medication_id: res.id,
-        });
-      });
 
-      console.log('slides', slides);
 
       setMedicationnRecord(slides);
-      const setallActiveMedicationReduxInApi = await ApiCallWithUserId(
-        'post',
-        'update_medication_units',
-        userData.id,
-        {data: AllActiveArray},
-      );
-
-      console.log(
-        'setallActiveMedicationReduxInApi .....',
-        setallActiveMedicationReduxInApi,
-      );
+    
       setMedicationLoader(false);
     } catch (error) {
       setMedicationLoader(false);

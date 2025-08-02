@@ -14,6 +14,7 @@ import { GetCurrentLocation } from '../../global/GetCurrentLocation';
 import { GetCityName } from '../../global/GetCityName';
 import Geocoder from 'react-native-geocoding';
 import { setAddCity } from '../../redux/Slices/MedicationSlice';
+import GetAllLocation from '../../global/GetAllLocation';
 
 const GetStarted = ({navigation}) => {
     const allMyCity = useSelector(state => state?.medications?.allMyCity);
@@ -32,10 +33,14 @@ const GetStarted = ({navigation}) => {
       setSubLoader(true);
       
       const checkSub = await CheckSubscription(userData.id)
+
+      
+
       if(checkSub.expiry){
 
         dispatch(setSubscription({isExpired: false, expireDate: checkSub?.expiry }))
-
+        
+        
         if(Platform.OS == "android"){
            await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -48,18 +53,6 @@ const GetStarted = ({navigation}) => {
         }
 
         navigation.navigate('Main');
-        // if(allMyCity?.length > 0){
-
-        //   if(allMyCity[0]?.currentLocation){
-        //     navigation.navigate('Main');
-        //     return
-        //   }else{
-        //     getCurrentLocation()
-        //   }
-        // }else{
-        //     getCurrentLocation()
-        // }
-        
         
       }else{
         dispatch(setSubscription({isExpired: true, expireDate: ""}))

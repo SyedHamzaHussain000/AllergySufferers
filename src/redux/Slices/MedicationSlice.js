@@ -115,46 +115,12 @@ const MedicationSlice = createSlice({
         console.log('City already exists, no update needed.');
       }
     },
-//   setAddCity: (state, action) => {
-//   const newCity = action.payload;
+    setAllCityFromApi: (state, action) => {
+      const newCity = action.payload;
 
-//   if (!Array.isArray(state.allMyCity)) {
-//     state.allMyCity = [];
-//   }
+      state.allMyCity = newCity;
 
-//   const isCurrent = newCity.isCurrentLocation;
-
-//   // Remove the city if it's already in the list (by name)
-//   state.allMyCity = state.allMyCity.filter(
-//     city => city.city_name !== newCity.city_name
-//   );
-
-//   if (isCurrent) {
-//     // Remove any existing current location
-//     state.allMyCity = state.allMyCity.filter(
-//       city => !city.isCurrentLocation
-//     );
-
-//     // Add current location at top
-//     state.allMyCity.unshift({ ...newCity, isCurrentLocation: true });
-//   } else {
-//     // Add user-added city AFTER current location (if it exists), or at top if not
-//     const currentIndex = state.allMyCity.findIndex(c => c.isCurrentLocation);
-
-//     if (currentIndex !== -1) {
-//       state.allMyCity.splice(currentIndex + 1, 0, {
-//         ...newCity,
-//         isCurrentLocation: false,
-//       });
-//     } else {
-//       state.allMyCity.unshift({ ...newCity, isCurrentLocation: false });
-//     }
-//   }
-
-//   console.log('Updated city list:', state.allMyCity);
-// },
-
-
+    },
     setRemoveCity: (state, action) => {
       const cityToRemove = action.payload;
       state.allMyCity = state.allMyCity.filter(
@@ -178,6 +144,7 @@ export const {
 
   //add city
   setAddCity,
+  setAllCityFromApi,
   setRemoveCity,
 } = MedicationSlice.actions;
 

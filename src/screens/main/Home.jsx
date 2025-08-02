@@ -41,8 +41,9 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {GetCurrentLocation} from '../../global/GetCurrentLocation';
 import {GetCityName} from '../../global/GetCityName';
-import {setAddCity} from '../../redux/Slices/MedicationSlice';
+import {setAddCity, setAllCityFromApi} from '../../redux/Slices/MedicationSlice';
 import Geocoder from 'react-native-geocoding';
+import GetAllLocation from '../../global/GetAllLocation';
 
 const Home = ({navigation}) => {
   Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
@@ -51,14 +52,13 @@ const Home = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const AllCities = useSelector(state => state?.medications?.allMyCity);
 
-  console.log('userData', AllCities);
+  // console.log('userData', AllCities);
 
   const isExpiredRedux = useSelector(state => state.auth.isExpired);
   const expireDate = useSelector(state => state.auth.expireDate);
   const SubscriptionType = useSelector(state => state.auth.SubscriptionType);
 
-  console.log('isExpiredRedux', isExpiredRedux);
-  console.log('SubscriptionType', SubscriptionType);
+
   const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
 
   const slides = [
@@ -124,6 +124,7 @@ const Home = ({navigation}) => {
 
       if (userData) {
         getActivePollens();
+        GetLocationFromApi()
         // getAllCities();
         // getCurrentLocation();
       } else {
@@ -134,12 +135,21 @@ const Home = ({navigation}) => {
   }, [navigation, hasFetchedOnce, userData]);
 
   useFocusEffect(
-    useCallback(() => {
+    useCallback(async () => {
       if (AllCities && AllCities.length > 0) {
         getPollensData(AllCities, 0);
       }
     }, [AllCities]),
   );
+
+  const GetLocationFromApi = async () => {
+    if(AllCities.length == 0){
+      const getLocationFromApi = await GetAllLocation(userData.id);
+      // Alert.alert("fetching from current lat lng")
+      dispatch(setAllCityFromApi(getLocationFromApi.cities))
+
+    }
+  }
 
   const getPollensData = (allcities, newindex) => {
     setPollenLoader(true);
@@ -222,8 +232,6 @@ const Home = ({navigation}) => {
     setFechingCurrentLocation(true);
     const gettingCurrentLatlng = await GetCurrentLocation();
 
-    // Alert.alert("gettingCurrentLatlng",)
-
     const getCityName = await GetCityName(
       gettingCurrentLatlng.latitude,
       gettingCurrentLatlng.longitude,
@@ -256,62 +264,6 @@ const Home = ({navigation}) => {
     }
   };
 
-  // const getCurrentLocation = async () => {
-  //   console.log('----------------------------');
-  //   const gettingCurrentLatlng = await GetCurrentLocation();
-
-  //   // Alert.alert("gettingCurrentLatlng",)
-  //   // console.log('triple H', gettingCurrentLatlng);
-
-  //   const getCityName = await GetCityName(
-  //     gettingCurrentLatlng.latitude,
-  //     gettingCurrentLatlng.longitude,
-  //   );
-  //   Alert.alert('getCityName', getCityName);
-  //   console.log('Lat lng name', gettingCurrentLatlng, getCityName);
-
-  //   if (AllCities.length > 0) {
-  //     const existingCity = AllCities.find(
-  //       item => item.city_name.toLowerCase() === getCityName.toLowerCase(),
-  //     );
-
-  //     if (!existingCity) {
-  //       setAllCities([
-  //         {
-  //           id: Date.now(), // unique id
-  //           lat: gettingCurrentLatlng.latitude,
-  //           lng: gettingCurrentLatlng.longitude,
-  //           city_name: getCityName,
-  //         },
-  //         ...AllCities,
-  //       ]);
-  //     } else {
-  //       console.log('City already exists, no update needed.');
-  //     }
-  //   } else {
-  //     setAllCities([
-  //       {
-  //         id: 1,
-  //         lat: gettingCurrentLatlng.latitude,
-  //         lng: gettingCurrentLatlng.longitude,
-  //         city_name: getCityName,
-  //       },
-  //     ]);
-  //   }
-  //   getPollensData([
-  //         {
-  //           id: 1, // unique id
-  //           lat: gettingCurrentLatlng.latitude,
-  //           lng: gettingCurrentLatlng.longitude,
-  //           city_name: getCityName,
-  //         },
-  //         ...AllCities,
-  //       ], 0)
-
-  //   // setMyLocation(gettingCurrentLatlng);
-  //   // return
-  // };
-
   const getActivePollens = () => {
     setActiveLoader(true);
     let config = {
@@ -332,8 +284,6 @@ const Home = ({navigation}) => {
         setActiveLoader(false);
       });
   };
-
-  
 
   const PollenCurrentTodayData = useMemo(() => {
     if (!todayPollensData?.current) return [];
@@ -428,7 +378,6 @@ const Home = ({navigation}) => {
                   marginTop: 30,
                 }}
                 showsVerticalScrollIndicator={false}>
-
                 <View
                   style={{
                     flexDirection: 'row',
@@ -442,11 +391,18 @@ const Home = ({navigation}) => {
                       alignItems: 'center',
                       gap: 5,
                     }}>
-                    <FontAwesome6
-                      name={'location-crosshairs'}
-                      size={responsiveFontSize(2)}
-                      color={AppColors.BLUE}
-                    />
+                    {fetchingCurrentLocation == true ? (
+                      <ActivityIndicator
+                        size={'small'}
+                        color={AppColors.BLUE}
+                      />
+                    ) : (
+                      <FontAwesome6
+                        name={'location-crosshairs'}
+                        size={responsiveFontSize(2)}
+                        color={AppColors.BLUE}
+                      />
+                    )}
                     <AppText
                       title={'Fetch current location'}
                       textSize={1.7}
@@ -743,7 +699,7 @@ const Home = ({navigation}) => {
                         contentContainerStyle={{paddingTop: 100}}
                         inverted
                         renderItem={({item, index}) => {
-                          console.log('past index', index, ispastArray.length);
+                          // console.log('past index', index, ispastArray.length);
 
                           const pastPollenAndSpores = item?.current?.sort(
                             (a, b) => {
