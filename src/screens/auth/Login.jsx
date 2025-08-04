@@ -1,59 +1,67 @@
-import {View, Text, ScrollView, TouchableOpacity, Alert, ToastAndroid, Platform, PermissionsAndroid, } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ToastAndroid,
+  Platform,
+  PermissionsAndroid,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import AppColors from '../../utils/AppColors';
 import AppText from '../../components/AppTextComps/AppText';
 import AppTextInput from '../../components/AppTextInput';
 import AppButton from '../../components/AppButton';
 import BASE_URL from '../../utils/BASE_URL';
 import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
-import { CurrentLogin, setLoader } from '../../redux/Slices/AuthSlice';
-import { getMessaging, getToken, registerDeviceForRemoteMessages } from '@react-native-firebase/messaging'
+import {useDispatch, useSelector} from 'react-redux';
+import {CurrentLogin, setLoader} from '../../redux/Slices/AuthSlice';
+import {
+  getMessaging,
+  getToken,
+  registerDeviceForRemoteMessages,
+} from '@react-native-firebase/messaging';
 const Login = ({navigation}) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const loading = useSelector(state => state.auth.loader);
+  const userData = useSelector(state => state.auth.user);
 
+  const dispatch = useDispatch();
 
-  const loading = useSelector(state => state.auth.loader)
-const userData = useSelector(state => state.auth.user)
-
-  const dispatch = useDispatch()
-
-  useEffect(()=>{
-    if(userData?.email){
-      navigation.navigate("Main")
+  useEffect(() => {
+    if (userData?.email) {
+      navigation.navigate('Main');
     }
-  },[userData])
+  }, [userData]);
 
   // dispatch(setLoader(false))
 
-  const LoginUser = async() => {
-    if(email === '' || password === ''){
-      if(Platform.OS === 'android'){
-
-        ToastAndroid.show('Please fill all fields', ToastAndroid.SHORT)
-      }else{
-        Alert.prompt('Please fill all fields')
+  const LoginUser = async () => {
+    if (email === '' || password === '') {
+      if (Platform.OS === 'android') {
+        ToastAndroid.show('Please fill all fields', ToastAndroid.SHORT);
+      } else {
+        Alert.prompt('Please fill all fields');
       }
-      return
+      return;
     }
-      // await messaging().registerDeviceForRemoteMessages();
-      await registerDeviceForRemoteMessages(getMessaging());
-
+    // await messaging().registerDeviceForRemoteMessages();
+    await registerDeviceForRemoteMessages(getMessaging());
+    
     // const token = await messaging().getToken();
-    const token = await getToken(getMessaging())
+    const token = await getToken(getMessaging());
+    console.log("token")
 
-    // console.log('fcm token',token)
+    console.log('fcm token',token)
 
-
-
-    dispatch(setLoader(true))
+    dispatch(setLoader(true));
     let data = new FormData();
     data.append('email', email);
     data.append('password', password);
-    data.append('fcm_token', token)
-
+    data.append('fcm_token', token);
 
     let config = {
       method: 'post',
@@ -64,21 +72,18 @@ const userData = useSelector(state => state.auth.user)
       },
       data: data,
     };
-      if(Platform.OS == "android"){
-               await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-                {
-                  title: 'Allergy Sufferers',
-                  message: 'Allergy sufferers want to access your location',
-                },
-              );
-    
-            }
+    if (Platform.OS == 'android') {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Allergy Sufferers',
+          message: 'Allergy sufferers want to access your location',
+        },
+      );
+    }
 
-    dispatch(CurrentLogin(config))
-
+    dispatch(CurrentLogin(config));
   };
-
 
   return (
     <View
@@ -95,7 +100,7 @@ const userData = useSelector(state => state.auth.user)
           alignItems: 'center',
           justifyContent: 'center',
           gap: 20,
-          padding:20
+          padding: 20,
         }}>
         <AppText
           title={'Allergy Sufferers'}
@@ -110,7 +115,6 @@ const userData = useSelector(state => state.auth.user)
             textColor={AppColors.BLACK}
             textSize={2.5}
             textFontWeight
-            
           />
           <AppText
             title={'Let’s login for explore continues'}
@@ -123,7 +127,7 @@ const userData = useSelector(state => state.auth.user)
           <AppTextInput
             title="Email Address"
             inputPlaceHolder={'Enter email'}
-            onChangeText={(txt)=> setEmail(txt) }
+            onChangeText={txt => setEmail(txt)}
             value={email}
             textInput={true}
           />
@@ -131,10 +135,10 @@ const userData = useSelector(state => state.auth.user)
             <AppTextInput
               title="Password"
               inputPlaceHolder={'Enter password'}
-              onChangeText={(txt)=> setPassword(txt) }
-            value={password}
-            secure={true}
-            textInput={true}
+              onChangeText={txt => setPassword(txt)}
+              value={password}
+              secure={true}
+              textInput={true}
             />
             <TouchableOpacity
               onPress={() => navigation.navigate('ForgetPassword')}>

@@ -54,6 +54,13 @@ const Home = ({navigation}) => {
 
   // console.log('userData', AllCities);
 
+  const sortCities = [...AllCities].sort((a, b) => {
+                      return (
+                        (b.currentLocation || b.isCurrentLocation ? 1 : 0) -
+                        (a.currentLocation || a.isCurrentLocation ? 1 : 0)
+                      );
+                    })
+
   const isExpiredRedux = useSelector(state => state.auth.isExpired);
   const expireDate = useSelector(state => state.auth.expireDate);
   const SubscriptionType = useSelector(state => state.auth.SubscriptionType);
@@ -119,7 +126,7 @@ const Home = ({navigation}) => {
 
   // console.log('allcities', AllCities);
   useEffect(() => {
-    const nav = navigation.addListener('focus', async () => {
+    const nav = navigation.addListener('focus', () => {
       // if (hasFetchedOnce) return;
 
       if (userData) {
@@ -135,14 +142,15 @@ const Home = ({navigation}) => {
   }, [navigation, hasFetchedOnce, userData]);
 
   useFocusEffect(
-    useCallback(async () => {
+    useCallback(() => {
       if (AllCities && AllCities.length > 0) {
-        getPollensData(AllCities, 0);
+        getPollensData(sortCities, 0);
       }
     }, [AllCities]),
   );
 
   const GetLocationFromApi = async () => {
+    // console.log("AllCities.........",AllCities)
     if(AllCities.length == 0){
       const getLocationFromApi = await GetAllLocation(userData.id);
       // Alert.alert("fetching from current lat lng")
@@ -152,6 +160,8 @@ const Home = ({navigation}) => {
   }
 
   const getPollensData = (allcities, newindex) => {
+
+      // console.log("allcities[newindex ? newindex : 0]",allcities[newindex ? newindex : 0])
     setPollenLoader(true);
     let data = new FormData();
     data.append('lat', allcities[newindex ? newindex : 0]?.lat);
@@ -232,10 +242,14 @@ const Home = ({navigation}) => {
     setFechingCurrentLocation(true);
     const gettingCurrentLatlng = await GetCurrentLocation();
 
+
     const getCityName = await GetCityName(
       gettingCurrentLatlng.latitude,
       gettingCurrentLatlng.longitude,
     );
+
+    console.log("getCityName",getCityName)
+    setFechingCurrentLocation(false);
 
     dispatch(
       setAddCity({
@@ -326,6 +340,8 @@ const Home = ({navigation}) => {
   };
 
   const settingData = SettingHeaders();
+
+
 
   return (
     <>
@@ -423,12 +439,7 @@ const Home = ({navigation}) => {
                   </>
                 ) : (
                   <AppIntroSlider
-                    data={[...AllCities].sort((a, b) => {
-                      return (
-                        (b.currentLocation || b.isCurrentLocation ? 1 : 0) -
-                        (a.currentLocation || a.isCurrentLocation ? 1 : 0)
-                      );
-                    })}
+                    data={sortCities}
                     activeDotStyle={{
                       backgroundColor: AppColors.BLUE,
                       marginTop: 20,
@@ -439,7 +450,7 @@ const Home = ({navigation}) => {
                     }}
                     showDoneButton={false}
                     showNextButton={false}
-                    onSlideChange={index => getPollensData(AllCities, index)}
+                    onSlideChange={index => getPollensData(sortCities, index)}
                     renderItem={({item, index}) => {
                       return (
                         <>

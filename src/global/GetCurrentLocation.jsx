@@ -1,4 +1,6 @@
-import Geolocation from '@react-native-community/geolocation';
+// import Geolocation from '@react-native-community/geolocation';
+import Geolocation from 'react-native-geolocation-service';
+
 import {PermissionsAndroid, Platform} from 'react-native';
 
 export const GetCurrentLocation = async () => {
@@ -24,7 +26,8 @@ export const GetCurrentLocation = async () => {
             });
           },
           err => reject(err),
-          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+          // {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+          {enableHighAccuracy: true, timeout: 12000, maximumAge: 30000, showLocationDialog: true}
         );
       });
     } else {
@@ -33,6 +36,7 @@ export const GetCurrentLocation = async () => {
       }
     }
   } catch (error) {
+    console.log("Error", error)
     return Promise.reject(error);
   }
 };

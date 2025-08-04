@@ -200,9 +200,11 @@ export const CurrentLogin = createAsyncThunk(
   async (config, { rejectWithValue }) => {
     try {
       const { data } = await axios.request(config);
+      
       const subData = await CheckSubscription(data.id);
       return { data, subData };
     } catch (error) {
+      console.log('Error during login:', error);
       return rejectWithValue(error.response?.data || 'Login failed');
     }
   },

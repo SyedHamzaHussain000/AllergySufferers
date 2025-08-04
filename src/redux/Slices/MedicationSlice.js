@@ -1,6 +1,7 @@
 // MedicationSlice.js
 import {createSlice} from '@reduxjs/toolkit';
 import moment from 'moment';
+import {Alert} from 'react-native';
 
 const initialState = {
   ActiveMedications: [],
@@ -96,30 +97,65 @@ const MedicationSlice = createSlice({
     },
 
     //add city flow
+    // setAddCity: (state, action) => {
+    //   const newCity = action.payload;
+
+    //   console.log("newCity",newCity)
+
+    //   // Alert.alert("...........")
+
+    //   // console.log("state.allMyCity",state.allMyCity)
+    //   // Ensure it's initialized — this is optional if your initialState is correct
+    //   if (!Array.isArray(state.allMyCity)) {
+    //     state.allMyCity = [];
+    //   }
+
+    //   const exists = state.allMyCity.find(
+    //     city => city.city_name === newCity.city_name,
+    //   );
+    //   if (!exists) {
+    //     state.allMyCity.push(newCity);
+    //     console.log('City added:', newCity);
+    //   } else {
+    //     console.log('City already exists, no update needed.');
+    //   }
+    // },
+
     setAddCity: (state, action) => {
       const newCity = action.payload;
 
-      // console.log("state.allMyCity",state.allMyCity)
-      // Ensure it's initialized — this is optional if your initialState is correct
       if (!Array.isArray(state.allMyCity)) {
         state.allMyCity = [];
       }
 
-      const exists = state.allMyCity.find(
-        city => city.city_name === newCity.city_name,
-      );
-      if (!exists) {
+      if (newCity.currentLocation === true) {
+        // ✅ Remove old current location
+        state.allMyCity = state.allMyCity.filter(
+          city => city.currentLocation !== true,
+        );
+
+        // ✅ Always add the new current location
         state.allMyCity.push(newCity);
-        console.log('City added:', newCity);
+        console.log('New current location set:', newCity);
       } else {
-        console.log('City already exists, no update needed.');
+        // ✅ Normal city logic (avoid duplicate by city_name)
+        const exists = state.allMyCity.find(
+          city => city.city_name === newCity.city_name,
+        );
+
+        if (!exists) {
+          state.allMyCity.push(newCity);
+          console.log('City added:', newCity);
+        } else {
+          console.log('City already exists, no update needed.');
+        }
       }
     },
+
     setAllCityFromApi: (state, action) => {
       const newCity = action.payload;
 
       state.allMyCity = newCity;
-
     },
     setRemoveCity: (state, action) => {
       const cityToRemove = action.payload;

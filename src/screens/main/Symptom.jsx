@@ -82,20 +82,6 @@ const Symptom = ({navigation}) => {
     },
   };
 
-  const symtomsArrayData = [
-    {
-      labels: [],
-      datasets: [
-        {data: []},
-        {
-          data: [5], // min
-        },
-        {
-          data: [5], // max
-        },
-      ],
-    },
-  ];
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
