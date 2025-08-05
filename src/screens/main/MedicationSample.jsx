@@ -35,6 +35,7 @@ import {
   addUnitToActiveMedicaton,
   removeUnitToActiveMedicaton,
   setActiveMedication,
+  setAllMedicationFromApi,
 } from '../../redux/Slices/MedicationSlice';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -52,7 +53,8 @@ const MedicationSample = ({navigation}) => {
     state => state.medications.MyCurrentMeds,
   );
 
-  const [allMedication, setAllMedication] = useState([]);
+  console.log("allActiveMedicationRedux",allActiveMedicationRedux)
+
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
   const [medicationLoadingMap, setMedicationLoadingMap] = useState({});
   const [loader, setLoader] = useState(false);
@@ -63,10 +65,6 @@ const MedicationSample = ({navigation}) => {
       : new Date(),
   );
 
-  console.log('MedicationnRecord', MedicationnRecord);
-
-  const canadianDate = moment.tz('2025-07-28', 'YYYY-MM-DD', 'America/Toronto');
-
   const [date, setDate] = useState(new Date());
   const [selecteddate, setSelectedDate] = useState(
     moment().local().format('YYYY-MM-DD'),
@@ -74,32 +72,23 @@ const MedicationSample = ({navigation}) => {
   const [open, setOpen] = useState(false);
 
   const [sliderScrollEnabled, setSliderScrollEnabled] = useState(false);
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-
-  const setMedicationLoading = (id, isLoading) => {
-    setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
-  };
-
-  useEffect(()=>{
-    // const nav = navigation.addListener('focus', () => {
-
-    //   if (allActiveMedicationRedux.length === 0) {
-        // console.log("allActiveMedicationRedux",allActiveMedicationRedux.length)
-        
-    //   }
-    // })
-
-    // return nav
-  },[navigation, allActiveMedicationRedux.length]);
+  const [savingDataLoader, setSavingDataLoader] = useState(false);
 
   useEffect(() => {
     generateMedicationSlides(selecteddate, allActiveMedicationRedux);
-    SaveMedicationDataInApi(allActiveMedicationRedux)
-    // console.log("allActiveMedicationRedux.length",allActiveMedicationRedux.length)
-    // if(allActiveMedicationRedux.length == 0){
-    // }
-   
   }, [selecteddate, allActiveMedicationRedux]);
+
+  useEffect(() => {
+    // const nav = navigation.addListener('focus', () => {
+      getApiDataAndSaveToRedux(allActiveMedicationRedux);
+      // getMedApiDataAndSaveToRedux();
+    // });
+    // return nav;
+  }, [allActiveMedicationRedux]);
+
+  useEffect(()=>{
+    getMedApiDataAndSaveToRedux(allMyCurrentMeds)
+  },[ allMyCurrentMeds])
 
   useFocusEffect(
     useCallback(() => {
@@ -111,61 +100,65 @@ const MedicationSample = ({navigation}) => {
     }, [allMyCurrentMeds, allActiveMedicationRedux]),
   );
 
-  const SaveMedicationDataInApi = async (allActiveMedicationRedux) => {
+  const getMedApiDataAndSaveToRedux = async () => {
 
-    // Alert.alert("Userdata", userData.id)
-    // return
-    // Alert.alert("allActiveMedicationRedux of lenth:", allActiveMedicationRedux.length)
+    if(allMyCurrentMeds.length > 0){
+      return
+    }
+    const response = await ApiCallWithUserId(
+      'post',
+      'get_medications_active',
+      userData?.id,
+    );
+
+    if (response?.data?.length > 0) {
+      // console.log('get_medications_active....', response?.data);
+      dispatch(setAllMedicationFromApi(response?.data));
+    }
+  };
 
 
-    if (allActiveMedicationRedux.length == 0) {
+  const getApiDataAndSaveToRedux = async () => {
+    if (allActiveMedicationRedux.length === 0) {
+
+      // Alert.alert("called allActiveMedicationRedux")
       const getActiveMedicationData = await ApiCallWithUserId(
         'post',
         'get_medication_records',
         userData?.id,
       );
 
-      console.log(
-        'getActiveMedicationData',
-        getActiveMedicationData.entries.items,
-      );
-
-      if(getActiveMedicationData?.entries?.items?.length > 0){
+      if (getActiveMedicationData?.entries?.items?.length > 0) {
         dispatch(setActiveMedication(getActiveMedicationData.entries.items));
-        return;
-      }else{
-        return
       }
+      return;
     }
+  };
 
-    if(allActiveMedicationRedux.length == 0){
-      return
+  const SaveMedicationDataInApi = async allActiveMedicationRedux => {
+    setSavingDataLoader(true);
+    const AllActiveArray = allActiveMedicationRedux.map(res => ({
+      date: res.date,
+      units: res.units,
+      medication_id: res.id,
+    }));
+
+    // console.log("AllActiveArray", AllActiveArray);
+    if (AllActiveArray) {
+      const dataSaved = await ApiCallWithUserId(
+        'post',
+        'update_medication_units',
+        userData.id,
+        {data: AllActiveArray},
+      );
+      setSavingDataLoader(false);
+      console.log('dataSaved', dataSaved);
+    } else {
+      setSavingDataLoader(false);
     }
-    const AllActiveArray = [];
-
-    allActiveMedicationRedux.forEach(res => {
-      // console.log('Res', res);
-      AllActiveArray.push({
-        date: res.date,
-        units: res.units,
-        medication_id: res.id,
-      });
-    });
-
-    const dataSaved = await ApiCallWithUserId(
-      'post',
-      'update_medication_units',
-      userData.id,
-      {data: AllActiveArray},
-    );
-
-    console.log("dataSaved", dataSaved)
   };
 
   const setAllMedicationToRedux = async () => {
-    // console.log('allActiveMedicationRedux new call ?', allActiveMedicationRedux);
-    // return
-    // console.log("caling")
     const currentDate = moment().format('YYYY-MM-DD');
 
     setLoader(true);
@@ -233,12 +226,9 @@ const MedicationSample = ({navigation}) => {
     selectedDate,
     allActiveMedicationRedux,
   ) => {
-
     setMedicationLoader(true);
     if (allActiveMedicationRedux?.length == 0) {
       setMedicationLoader(false);
-      // setMedicationnRecord([]);
-
       return;
     }
 
@@ -326,30 +316,13 @@ const MedicationSample = ({navigation}) => {
 
             barData.push({
               value,
-                ...(idx === 0 && { label: formattedLabel }), // 👈 sirf idx==0 pe hi label add hoga
+              ...(idx === 0 && {label: formattedLabel}), // 👈 sirf idx==0 pe hi label add hoga
               spacing: isLast ? responsiveWidth(2.5) : 0, // ✅ spacing only for last of this date
               frontColor: entry.frontColor || '#E23131',
               labelWidth: 0,
             });
           });
         });
-
-        // Object.keys(grouped).forEach((date, dateIdx, arr) => {
-        //   const group = grouped[date];
-        //   const formattedLabel = moment(date, 'YYYY-MM-DD').format('D');
-
-        //   group.forEach((entry, idx) => {
-        //     const value = parseInt(entry.units) || 0;
-
-        //     barData.push({
-        //       value,
-        //       ...(idx === 0 && {label: formattedLabel}), // sirf first item of day gets label
-        //       spacing: idx === group.length - 1 ? responsiveWidth(2.5) : 0, // ✅ only last in group
-        //       frontColor: entry.frontColor || '#E23131',
-        //       labelWidth: 0,
-        //     });
-        //   });
-        // });
 
         slides.unshift({
           key: `${i}`,
@@ -400,10 +373,12 @@ const MedicationSample = ({navigation}) => {
 
   const addMedication = async item => {
     dispatch(addUnitToActiveMedicaton(item));
+    SaveMedicationDataInApi(allActiveMedicationRedux);
   };
 
   const removeMedication = async item => {
     dispatch(removeUnitToActiveMedicaton(item));
+    SaveMedicationDataInApi(allActiveMedicationRedux);
   };
 
   useEffect(() => {
@@ -581,6 +556,9 @@ const MedicationSample = ({navigation}) => {
         />
 
         <ScrollView contentContainerStyle={{flexGrow: 1}}>
+          {savingDataLoader && (
+            <ActivityIndicator size={'small'} color={AppColors.BLACK} />
+          )}
           {expireDate ? (
             <>
               {memoizedMedicationList()}

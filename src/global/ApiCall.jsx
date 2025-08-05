@@ -18,8 +18,6 @@ export const ApiCall = async(method, endpoint, data) => {
             data : data
         };  
             const res = await axios(config); // ✅ use axios or axios.request
-
-
         return res
     
     } catch (error) {
@@ -30,9 +28,7 @@ export const ApiCall = async(method, endpoint, data) => {
 
 export const ApiCallWithUserId = async(method, endpoint, userId,data) => {
 
-
    try {
-
        let config = {
         method: method,
         url: `${BASE_URL}/allergy_data/v1/user/${userId}/${endpoint}`,

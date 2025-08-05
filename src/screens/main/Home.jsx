@@ -141,6 +141,9 @@ const Home = ({navigation}) => {
     return nav;
   }, [navigation, hasFetchedOnce, userData]);
 
+  
+
+
   useFocusEffect(
     useCallback(() => {
       if (AllCities && AllCities.length > 0) {

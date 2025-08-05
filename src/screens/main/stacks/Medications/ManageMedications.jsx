@@ -42,6 +42,7 @@ import {
   removeCurrentActiveMedication,
   RemoveUpdateMedicationListOnEveryDate,
 } from '../../../../redux/Slices/MedicationSlice';
+import Toast from 'react-native-toast-message';
 // import { NestableScrollContainer, NestableDraggableFlatList } from "react-native-draggable-flatlist"
 
 const ManageMedications = ({navigation}) => {
@@ -68,85 +69,37 @@ const ManageMedications = ({navigation}) => {
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
-      // getActiveMedication();
+      getActiveMedication();
     });
     return nav;
   }, [navigation]);
 
-  useEffect(() => {
-    // getActiveMedication();
-  }, [selecteddate]);
+  const getActiveMedication = async() => {
 
-  // const getActiveMedication = formattedDate => {
+    setLoader(true);
 
-  //   setLoader(true);
+    
+  };
 
-  //   let data = JSON.stringify({
-  //     date: moment(formattedDate ? formattedDate : selecteddate).format(
-  //       'YYYY-MM-DD',
-  //     ),
-  //   });
 
-  //   let config = {
-  //     method: 'post',
-  //     maxBodyLength: Infinity,
-  //     url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications_active`,
-  //     headers: {
-
-  //       'Content-Type': 'application/json',
-  //     },
-  //     data: data,
-  //   };
-
-  //   axios
-  //     .request(config)
-  //     .then(async response => {
-  //       // console.log(JSON.stringify(response.data));
-  //       setLoader(false);
-  //       setActiveMedication(response.data.data);
-  //       const MedicationData = await ApiCallWithUserId("post", "get_active_date", userData?.id);
-  //                   const activeDateStr = MedicationData?.active_date ? MedicationData?.active_date : moment(new Date()).format("YYYY-MM-DD");
-  //                   setActiveDate(new Date(activeDateStr))
-  //     })
-  //     .catch(error => {
-  //       console.log(error);
-  //       setLoader(false);
-  //     });
-  // };
-
-  // const deleteActiveMedication = medicationdata => {
-  //   setLoader(true);
-
-  //   let data = JSON.stringify({
-  //       "date": moment(selecteddate).format("YYYY-MM-DD"),
-  //        "data":medicationdata?.id
-  //   });
-
-  //   let config = {
-  //     method: 'post',
-  //     maxBodyLength: Infinity,
-  //     url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/delete_medication`,
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     data: data,
-  //   };
-
-  //   axios
-  //     .request(config)
-  //     .then(response => {
-  //       console.log(JSON.stringify(response.data));
-  //       getActiveMedication();
-  //     })
-  //     .catch(error => {
-  //       console.log(error);
-  //     });
-  // };
-
-  const deleteActiveMedicationRedux = medData => {
+  const deleteActiveMedicationRedux = async medData => {
     // dispatch( deleteActiveMedication(medData))
+    
+    // return
     dispatch(RemoveUpdateMedicationListOnEveryDate(medData));
     dispatch(removeCurrentActiveMedication(medData));
+    
+    const deleteMed = await ApiCallWithUserId('post', 'delete_medication', userData?.id, {"data":medData.id})
+    
+    console.log("deleteMed : ",deleteMed)
+    Toast.show({
+      type:'success',
+      text1: 'Medication Deleted',
+      position: 'bottom',
+      visibilityTime: 800,
+    })
+    // console.log("deleteMed", medData.id)
+    // return
   };
 
   return (

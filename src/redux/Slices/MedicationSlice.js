@@ -47,6 +47,11 @@ const MedicationSlice = createSlice({
         state.MyCurrentMeds.push(newMed);
       }
     },
+    setAllMedicationFromApi: (state, action) => {
+      // Alert.alert("sadasdas redux")
+      const newMed = action.payload;
+      state.MyCurrentMeds = newMed;
+    },
     UpdateMedicationListOnEveryDate: (state, action) => {
       const curretDate = moment(new Date()).format('YYYY-MM-DD');
       const allMedRecords = state.ActiveMedications;
@@ -73,9 +78,10 @@ const MedicationSlice = createSlice({
       const curretDate = moment(new Date()).format('YYYY-MM-DD');
       const medToRemove = action.payload;
 
+      
       // Find index of the matching medication
       const index = state.ActiveMedications.findIndex(
-        med => med.id === medToRemove.id && med.date === curretDate,
+        med =>  med.id === medToRemove.id && med.date === curretDate,
       );
 
       if (index !== -1) {
@@ -87,6 +93,7 @@ const MedicationSlice = createSlice({
     },
     removeCurrentActiveMedication: (state, action) => {
       const newMed = action.payload;
+
       state.MyCurrentMeds = state.MyCurrentMeds.filter(
         med => med.id !== newMed.id,
       );
@@ -173,6 +180,7 @@ export const {
   addUnitToActiveMedicaton,
   removeUnitToActiveMedicaton,
   setCurrentActiveMedication,
+  setAllMedicationFromApi,
   removeCurrentActiveMedication,
   deleteAllData,
   UpdateMedicationListOnEveryDate,

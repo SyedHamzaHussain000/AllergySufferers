@@ -13,8 +13,9 @@ import CheckSubscription from '../../global/CheckSubscription';
 import { GetCurrentLocation } from '../../global/GetCurrentLocation';
 import { GetCityName } from '../../global/GetCityName';
 import Geocoder from 'react-native-geocoding';
-import { setAddCity } from '../../redux/Slices/MedicationSlice';
+import { setAddCity, setAllMedicationFromApi } from '../../redux/Slices/MedicationSlice';
 import GetAllLocation from '../../global/GetAllLocation';
+import { ApiCallWithUserId } from '../../global/ApiCall';
 
 const GetStarted = ({navigation}) => {
     const allMyCity = useSelector(state => state?.medications?.allMyCity);
@@ -25,6 +26,7 @@ const GetStarted = ({navigation}) => {
   const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
 
   const [subLoader, setSubLoader] = useState(false);
+  
   const checkLoginandPremium = async() => {
     if (userData?.email) {
 
@@ -51,6 +53,15 @@ const GetStarted = ({navigation}) => {
           );
 
         }
+
+        const response = await ApiCallWithUserId('post', 'get_medications_active', userData?.id, )
+
+        if(response?.data?.length > 0){
+          console.log("get_medications_active....",response?.data)
+
+          dispatch(setAllMedicationFromApi(response?.data))
+        }
+        setSubLoader(false);
 
         navigation.navigate('Main');
         

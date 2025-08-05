@@ -197,6 +197,7 @@ const Symptom = ({navigation}) => {
   }
 
 
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <View style={{ backgroundColor: AppColors.WHITE, flex: 1, }}>
@@ -258,7 +259,7 @@ const Symptom = ({navigation}) => {
             setEndOpen(false);
           }}
         />
-        <ScrollView contentContainerStyle={{flexGrow:1, paddingBottom:50}} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{flexGrow:1, paddingBottom:150}} showsVerticalScrollIndicator={false}>
         {expireDate ? (
           <>
             <View style={{padding:20}}>

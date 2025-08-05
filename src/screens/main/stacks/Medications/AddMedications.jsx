@@ -42,7 +42,9 @@ import {
 const AddMedications = ({navigation}) => {
   const dispatch = useDispatch();
   const userData = useSelector(state => state.auth.user);
-
+  const allActiveMedicationRedux = useSelector(
+    state => state.medications.MyCurrentMeds,
+  );
   const [medicationData, setMedicationsData] = useState([]);
   const [MedicationLoader, setMedciationLoader] = useState(false);
 
@@ -249,13 +251,23 @@ const AddMedications = ({navigation}) => {
   };
 
   // local functionality
-  const AddMedicationActiveToLocal = medData => {
+   const AddMedicationActiveToLocal  = async (medData) => {
 
     
     
     if (medData.id === 6082) {
       AddMedicationActive(medData);
       return;
+    }
+
+    if(allActiveMedicationRedux.length == 8 ){
+      Toast.show({
+        type: 'error',
+        text1: 'You can only add 8 medications at a time',
+        position:'bottom',
+        visibilityTime:800
+      });
+      return
     }
     AddMedicationToPreviousDates(medData)
 
@@ -266,6 +278,8 @@ const AddMedications = ({navigation}) => {
       position:'bottom',
       visibilityTime:800
     });
+
+     await ApiCallWithUserId("post", "set_medications", userData?.id,{"data": [medData.id]} )
   };
 
 
