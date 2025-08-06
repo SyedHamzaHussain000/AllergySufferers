@@ -1,4 +1,4 @@
-import {View, Text, Image, StyleSheet, Platform, StatusBar, SafeAreaView} from 'react-native';
+import {View, Text, Image, StyleSheet, Platform, StatusBar, } from 'react-native';
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -32,7 +32,7 @@ import ForcastExplaination from '../screens/main/stacks/forcastexplaination/Forc
 import MedicationSample from '../screens/main/MedicationSample';
 import DatavisualizerSample from '../screens/main/stacks/DatavisualizerSample';
 import { responsiveHeight } from '../utils/Responsive_Dimensions';
-// import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 
 const Stack = createStackNavigator();
@@ -80,6 +80,8 @@ const Main = () => {
 };
 
 function MyTabs() {
+
+      const insets = useSafeAreaInsets();
   return (
     // <SafeAreaView style={{flex:1}}>
     <Tab.Navigator
@@ -88,9 +90,10 @@ function MyTabs() {
       
         tabBarStyle: {
           backgroundColor: AppColors.BTNCOLOURS,
-          height: responsiveHeight(12),
+          height: responsiveHeight(13),
           paddingTop: 10,
           position:'absolute',
+          // paddingBottom: insets.bottom + 80 ,
           
           bottom: 0,
           zIndex:100
@@ -191,8 +194,10 @@ function MyTabs() {
 
 // If needed, wrap MyTabs too:
 const HomeWithSafeArea = Component => props => {
+
+
   return (
-    <SafeAreaView  style={styles.safeArea}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' ,        }} edges={['bottom', 'top']}>  
       {/* <StatusBar barStyle={"light-content"}/> */}
       <Component {...props} />
     </SafeAreaView>

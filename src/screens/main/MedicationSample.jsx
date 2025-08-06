@@ -45,6 +45,8 @@ const MedicationSample = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
 
   const expireDate = useSelector(state => state.auth.expireDate);
+
+
   const allActiveMedicationRedux = useSelector(
     state => state.medications.ActiveMedications,
   );
@@ -53,7 +55,7 @@ const MedicationSample = ({navigation}) => {
     state => state.medications.MyCurrentMeds,
   );
 
-  console.log("allActiveMedicationRedux",allActiveMedicationRedux)
+  // console.log("allActiveMedicationRedux",allActiveMedicationRedux)
 
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
   const [medicationLoadingMap, setMedicationLoadingMap] = useState({});
@@ -111,6 +113,8 @@ const MedicationSample = ({navigation}) => {
       userData?.id,
     );
 
+    console.log("response,,,,,,,,,,,,,,,,,,,,,,,",response)
+
     if (response?.data?.length > 0) {
       // console.log('get_medications_active....', response?.data);
       dispatch(setAllMedicationFromApi(response?.data));
@@ -120,6 +124,7 @@ const MedicationSample = ({navigation}) => {
 
   const getApiDataAndSaveToRedux = async () => {
     if (allActiveMedicationRedux.length === 0) {
+      setSavingDataLoader(true);
 
       // Alert.alert("called allActiveMedicationRedux")
       const getActiveMedicationData = await ApiCallWithUserId(
@@ -130,6 +135,9 @@ const MedicationSample = ({navigation}) => {
 
       if (getActiveMedicationData?.entries?.items?.length > 0) {
         dispatch(setActiveMedication(getActiveMedicationData.entries.items));
+        setSavingDataLoader(false);
+      }else{
+        setSavingDataLoader(false);
       }
       return;
     }
@@ -182,8 +190,9 @@ const MedicationSample = ({navigation}) => {
         const toAdd = [];
 
         dateArray.forEach(date => {
+
           allMyCurrentMeds.forEach(med => {
-            console.log('date', date, med);
+
             toAdd.push({
               ...med,
               date: date,
@@ -555,7 +564,7 @@ const MedicationSample = ({navigation}) => {
           }}
         />
 
-        <ScrollView contentContainerStyle={{flexGrow: 1}}>
+        <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom:200}}>
           {savingDataLoader && (
             <ActivityIndicator size={'small'} color={AppColors.BLACK} />
           )}

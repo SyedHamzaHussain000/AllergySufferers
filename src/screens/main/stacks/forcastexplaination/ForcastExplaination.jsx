@@ -8,7 +8,7 @@ const ForcastExplaination = () => {
   const screenHeigh = Dimensions.get('screen').height;
 
   return (
-    <View>
+    <View style={{padding:0 , margin:0}}>
       <View style={{padding: 20, paddingBottom: 0}}>
         <AppHeader goBack={true} heading="Forecast explanation" />
       </View>
@@ -30,10 +30,13 @@ const ForcastExplaination = () => {
         onPressLink={uri => {
           console.log(`Link pressed: ${uri}`);
         }}
-        style={{height: screenHeigh, width: screenWidth, fontsize: 20}}
+        style={{height: screenHeigh, width: Dimensions.get('window').width, }}
+              // style={{flex:1, width:Dimensions.get('window').width}}
+              
         spacing={0}
-        scale={1}
-        fitPolicy={2}
+        scale={1.2}
+        fitPolicy={0}
+        
         trustAllCerts={false}
       />
     </View>

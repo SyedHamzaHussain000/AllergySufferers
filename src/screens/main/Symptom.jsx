@@ -55,7 +55,7 @@ const Symptom = ({navigation}) => {
 
   const [loader, setLoader] = useState(false);
 
-  console.log('endDate', endDate, 'startDate', selecteddate);
+  // console.log('endDate', endDate, 'startDate', selecteddate);
 
   const userData = useSelector(state => state?.auth?.user);
   const [graphSlides, setGraphSlides] = useState([]);
@@ -389,7 +389,7 @@ const Symptom = ({navigation}) => {
           </>
         ) : (
           <View
-            style={{height: responsiveHeight(30), justifyContent: 'center'}}>
+            style={{height: responsiveHeight(30), justifyContent: 'center', padding:20}}>
             <SubscribeBar
               title="Subscribe Now to Track Your Symptoms"
               title2={'Unlock Full Access to Symptoms Tracking'}

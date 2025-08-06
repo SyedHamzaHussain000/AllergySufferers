@@ -279,7 +279,9 @@ const AddMedications = ({navigation}) => {
       visibilityTime:800
     });
 
-     await ApiCallWithUserId("post", "set_medications", userData?.id,{"data": [medData.id]} )
+    const medicationUpdate =  await ApiCallWithUserId("post", "set_medications", userData?.id,{"data": [medData.id]} )
+
+    console.log("medicationUpdate",medicationUpdate)
   };
 
 

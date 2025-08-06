@@ -12,7 +12,7 @@ const TermsCondition = () => {
       <h1>Terms & Conditions</h1>
       <h1>Allergy Sufferers User Agreement</h1>
       <span>Terms and Conditions (“Terms”)</span>
-      <p>Last updated: 2017-04-05</p>
+      <p>Last updated: August 05 2025</p>
 
       <p>Please read these Terms and conditions (“Terms”, “Terms and Conditions”) carefully before using the http://Allergy Sufferers.ca website and the Allergy Sufferers mobile application (the “Service”) operated by 1048361 Ontario Ltd. a.k.a. Aerobiology Research (“us”, “we”. or “our”).</p>
       <p>Your access to and use of the Service is conditioned
@@ -22,7 +22,7 @@ on your acceptance of and compliance with these Terms. These Terms apply to all 
       <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material we will try to provide at least 30 days’ notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.</p>
 
       <h2>Contact Us</h2>
-      <p>If you have any questions about these Terms, please Contact us.</p>
+      <p>If you have any questions about these Terms and Conditions, please contact us at apps@aerobiology.ca.</p>
     `,
   };
 

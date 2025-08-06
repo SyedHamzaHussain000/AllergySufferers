@@ -30,7 +30,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
 import BASE_URL from '../../utils/BASE_URL';
 import DatePicker from 'react-native-date-picker';
-import {SafeAreaView} from 'react-native-safe-area-context';
+// import {SafeAreaView} from 'react-native-safe-area-context';
 import moment from 'moment';
 import AppIntroSlider from 'react-native-app-intro-slider';
 import * as Animatable from 'react-native-animatable';
@@ -44,13 +44,15 @@ import {GetCityName} from '../../global/GetCityName';
 import {setAddCity, setAllCityFromApi} from '../../redux/Slices/MedicationSlice';
 import Geocoder from 'react-native-geocoding';
 import GetAllLocation from '../../global/GetAllLocation';
-
+import SubscribeBar from '../../components/SubscribeBar';
+import {SafeAreaView, SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context'
 const Home = ({navigation}) => {
   Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
 
   const dispatch = useDispatch();
   const userData = useSelector(state => state.auth.user);
   const AllCities = useSelector(state => state?.medications?.allMyCity);
+
 
   // console.log('userData', AllCities);
 
@@ -64,6 +66,8 @@ const Home = ({navigation}) => {
   const isExpiredRedux = useSelector(state => state.auth.isExpired);
   const expireDate = useSelector(state => state.auth.expireDate);
   const SubscriptionType = useSelector(state => state.auth.SubscriptionType);
+
+  console.log("expireDate",expireDate)
 
 
   const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
@@ -344,9 +348,13 @@ const Home = ({navigation}) => {
 
   const settingData = SettingHeaders();
 
+  
 
 
   return (
+    <SafeAreaProvider>
+            <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }} edges={['bottom', 'top']}>
+
     <>
       <LinearGradient
         colors={[
@@ -708,357 +716,373 @@ const Home = ({navigation}) => {
                       />
                     )}
                     {selected == 'Past' ? (
-                      <FlatList
-                        data={ispastArray}
-                        contentContainerStyle={{paddingTop: 100}}
-                        inverted
-                        renderItem={({item, index}) => {
-                          // console.log('past index', index, ispastArray.length);
+                      <>
+                      {
+                        expireDate ? (
 
-                          const pastPollenAndSpores = item?.current?.sort(
-                            (a, b) => {
-                              if (a.type !== b.type) {
-                                return a.type === 'pollen' ? -1 : 1;
-                              }
-                              return b.level - a.level;
-                            },
-                          );
-
-                          const pastpollenHeaderIndex =
-                            pastPollenAndSpores.findIndex(
-                              i => i.type === 'pollen',
-                            );
-                          const sporesHeaderIndex =
-                            pastPollenAndSpores.findIndex(
-                              i => i.type === 'spore',
-                            );
-
-                          return (
-                            <View
-                              style={{
-                                borderWidth: 1,
-                                borderTopRightRadius:
-                                  index == ispastArray?.length - 1 ? 10 : 0,
-                                borderTopLeftRadius:
-                                  index == ispastArray?.length - 1 ? 10 : 0,
-                                borderBottomRightRadius: index == 0 ? 10 : 0,
-                                borderBottomLeftRadius: index == 0 ? 10 : 0,
-                                padding: 20,
-
-                                alignItems: 'flex-start',
-                                justifyContent: 'space-between',
-                                borderBottomWidth: index == 0 ? 1 : 0,
-                              }}>
-                              {/* <View
-                                style={{
-                                  flexDirection: 'row',
-                                  gap: 10,
-                                  alignItems: 'center',
-                                }}>
-                                <View
-                                  style={{
-                                    height: 20,
-                                    width: 20,
-                                    borderRadius: 200,
-                                    borderWidth: 1,
-                                    borderColor: '#4C9E00',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                  }}>
-                                  <View
-                                    style={{
-                                      height: 15,
-                                      width: 15,
-                                      borderRadius: 200,
-                                      backgroundColor: '#4C9E00',
-                                    }}
-                                  />
-                                </View>
-
-                                <AppText
-                                  title={item.key}
-                                  textSize={2}
-                                  textColor={AppColors.BLACK}
-                                  textFontWeight
-                                />
-                              </View> */}
-
-                              <TouchableOpacity
-                                onPress={() => {
-                                  if (expandedFutureKey === item.key) {
-                                    setExpandedFutureKey(null); // Collapse if already expanded
-                                  } else {
-                                    setExpandedFutureKey(item.key); // Expand only this one
+                          <FlatList
+                            data={ispastArray}
+                            contentContainerStyle={{paddingTop: 100}}
+                            inverted
+                            renderItem={({item, index}) => {
+                              // console.log('past index', index, ispastArray.length);
+    
+                              const pastPollenAndSpores = item?.current?.sort(
+                                (a, b) => {
+                                  if (a.type !== b.type) {
+                                    return a.type === 'pollen' ? -1 : 1;
                                   }
-                                }}
-                                style={{
-                                  flexDirection: 'row',
-                                  gap: 10,
-                                  alignItems: 'center',
-                                  justifyContent: 'space-between',
-                                  width: responsiveWidth(80),
-                                }}>
+                                  return b.level - a.level;
+                                },
+                              );
+    
+                              const pastpollenHeaderIndex =
+                                pastPollenAndSpores.findIndex(
+                                  i => i.type === 'pollen',
+                                );
+                              const sporesHeaderIndex =
+                                pastPollenAndSpores.findIndex(
+                                  i => i.type === 'spore',
+                                );
+    
+                              return (
                                 <View
                                   style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    gap: 5,
+                                    borderWidth: 1,
+                                    borderTopRightRadius:
+                                      index == ispastArray?.length - 1 ? 10 : 0,
+                                    borderTopLeftRadius:
+                                      index == ispastArray?.length - 1 ? 10 : 0,
+                                    borderBottomRightRadius: index == 0 ? 10 : 0,
+                                    borderBottomLeftRadius: index == 0 ? 10 : 0,
+                                    padding: 20,
+    
+                                    alignItems: 'flex-start',
+                                    justifyContent: 'space-between',
+                                    borderBottomWidth: index == 0 ? 1 : 0,
                                   }}>
-                                  <View
+                                  {/* <View
                                     style={{
-                                      height: 20,
-                                      width: 20,
-                                      borderRadius: 200,
-                                      borderWidth: 1,
-                                      borderColor: getThBgColour(item?.label),
+                                      flexDirection: 'row',
+                                      gap: 10,
                                       alignItems: 'center',
-                                      justifyContent: 'center',
                                     }}>
                                     <View
                                       style={{
-                                        height: 15,
-                                        width: 15,
+                                        height: 20,
+                                        width: 20,
                                         borderRadius: 200,
-                                        backgroundColor: getThBgColour(
-                                          item?.label,
-                                        ),
-                                      }}
+                                        borderWidth: 1,
+                                        borderColor: '#4C9E00',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                      }}>
+                                      <View
+                                        style={{
+                                          height: 15,
+                                          width: 15,
+                                          borderRadius: 200,
+                                          backgroundColor: '#4C9E00',
+                                        }}
+                                      />
+                                    </View>
+    
+                                    <AppText
+                                      title={item.key}
+                                      textSize={2}
+                                      textColor={AppColors.BLACK}
+                                      textFontWeight
                                     />
-                                  </View>
-
-                                  <AppText
-                                    title={item.key}
-                                    textSize={2}
-                                    textColor={AppColors.BLACK}
-                                    textFontWeight
-                                  />
-                                </View>
-
-                                <AntDesign
-                                  name={'plus'}
-                                  size={responsiveFontSize(3)}
-                                  color={AppColors.BLACK}
-                                />
-                              </TouchableOpacity>
-
-                              {/* <ScrollView
-                                horizontal
-                                style={{
-                                  flexDirection: 'row',
-                                  marginTop: 20,
-                                  rowGap: 20,
-                                }}>
-                                <View style={{gap: 10}}>
-                                  <AppText
-                                    title={'Total Spores'}
-                                    textAlignment={'center'}
-                                    textSize={1.5}
-                                    textColor={AppColors.BLACK}
-                                    textFontWeight
-                                  />
-
-                                  <SpeedoMeter
-                                    imgWeight={30}
-                                    imgHeight={10}
-                                    speedometerWidth={30}
-                                    imageTop={-10}
-                                    TextBottom={
-                                      item.total_spores == 1
-                                        ? 'Low'
-                                        : item.total_spores == 2
-                                        ? 'Moderate'
-                                        : item.total_spores == 3
-                                        ? 'High'
-                                        : item.total_spores == 4
-                                        ? 'Very High'
-                                        : 'Low'
-                                    }
-                                    TempreaturePriorityFontSize={1.6}
-                                  />
-                                </View>
-
-                                <View style={{gap: 10, marginLeft: 20}}>
-                                  <AppText
-                                    title={'Total Trees'}
-                                    textAlignment={'center'}
-                                    textSize={1.5}
-                                    textColor={AppColors.BLACK}
-                                    textFontWeight
-                                  />
-
-                                  <SpeedoMeter
-                                    imgWeight={30}
-                                    imgHeight={10}
-                                    speedometerWidth={30}
-                                    imageTop={-10}
-                                    TextBottom={
-                                      item.total_trees == 1
-                                        ? 'Low'
-                                        : item.total_trees == 2
-                                        ? 'Moderate'
-                                        : item.total_trees == 3
-                                        ? 'High'
-                                        : item.total_trees == 4
-                                        ? 'Very High'
-                                        : 'Low'
-                                    }
-                                    TempreaturePriorityFontSize={1.6}
-                                  />
-                                </View>
-
-                                <View style={{gap: 10, marginLeft: 20}}>
-                                  <AppText
-                                    title={'Total Grasses'}
-                                    textAlignment={'center'}
-                                    textSize={1.5}
-                                    textColor={AppColors.BLACK}
-                                    textFontWeight
-                                  />
-
-                                  <SpeedoMeter
-                                    imgWeight={30}
-                                    imgHeight={10}
-                                    speedometerWidth={30}
-                                    imageTop={-10}
-                                    TextBottom={
-                                      item.total_grasses == 1
-                                        ? 'Low'
-                                        : item.total_grasses == 2
-                                        ? 'Moderate'
-                                        : item.total_grasses == 3
-                                        ? 'High'
-                                        : item.total_grasses == 4
-                                        ? 'Very High'
-                                        : 'Low'
-                                    }
-                                    TempreaturePriorityFontSize={1.6}
-                                  />
-                                </View>
-
-                                <View style={{gap: 10, marginLeft: 20}}>
-                                  <AppText
-                                    title={'Total Weeds'}
-                                    textAlignment={'center'}
-                                    textSize={1.5}
-                                    textColor={AppColors.BLACK}
-                                    textFontWeight
-                                  />
-
-                                  <SpeedoMeter
-                                    imgWeight={30}
-                                    imgHeight={10}
-                                    speedometerWidth={30}
-                                    imageTop={-10}
-                                    TextBottom={
-                                      item.total_weeds == 1
-                                        ? 'Low'
-                                        : item.total_weeds == 2
-                                        ? 'Moderate'
-                                        : item.total_weeds == 3
-                                        ? 'High'
-                                        : item.total_weeds == 4
-                                        ? 'Very High'
-                                        : 'Low'
-                                    }
-                                    TempreaturePriorityFontSize={1.6}
-                                  />
-                                </View>
-                              </ScrollView> */}
-
-                              <ScrollView
-                                horizontal
-                                contentContainerStyle={{
-                                  gap: 10,
-                                  marginTop: 20,
-                                }}>
-                                {activePollen?.map(newItem => {
-                                  const indexes = item.current.findIndex(
-                                    active =>
-                                      active.name == newItem.common_name,
-                                  );
-
-                                  return (
+                                  </View> */}
+    
+                                  <TouchableOpacity
+                                    onPress={() => {
+                                      if (expandedFutureKey === item.key) {
+                                        setExpandedFutureKey(null); // Collapse if already expanded
+                                      } else {
+                                        setExpandedFutureKey(item.key); // Expand only this one
+                                      }
+                                    }}
+                                    style={{
+                                      flexDirection: 'row',
+                                      gap: 10,
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      width: responsiveWidth(80),
+                                    }}>
                                     <View
-                                      style={{gap: 10, alignItems: 'center'}}>
+                                      style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        gap: 5,
+                                      }}>
+                                      <View
+                                        style={{
+                                          height: 20,
+                                          width: 20,
+                                          borderRadius: 200,
+                                          borderWidth: 1,
+                                          borderColor: getThBgColour(item?.label),
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                        }}>
+                                        <View
+                                          style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderRadius: 200,
+                                            backgroundColor: getThBgColour(
+                                              item?.label,
+                                            ),
+                                          }}
+                                        />
+                                      </View>
+    
                                       <AppText
-                                        title={newItem.common_name}
+                                        title={item.key}
+                                        textSize={2}
+                                        textColor={AppColors.BLACK}
+                                        textFontWeight
+                                      />
+                                    </View>
+    
+                                    <AntDesign
+                                      name={'plus'}
+                                      size={responsiveFontSize(3)}
+                                      color={AppColors.BLACK}
+                                    />
+                                  </TouchableOpacity>
+    
+                                  {/* <ScrollView
+                                    horizontal
+                                    style={{
+                                      flexDirection: 'row',
+                                      marginTop: 20,
+                                      rowGap: 20,
+                                    }}>
+                                    <View style={{gap: 10}}>
+                                      <AppText
+                                        title={'Total Spores'}
                                         textAlignment={'center'}
                                         textSize={1.5}
                                         textColor={AppColors.BLACK}
                                         textFontWeight
-                                        textwidth={40}
-                                        textHeight={5}
                                       />
-
+    
                                       <SpeedoMeter
                                         imgWeight={30}
                                         imgHeight={10}
                                         speedometerWidth={30}
                                         imageTop={-10}
                                         TextBottom={
-                                          item?.current[indexes]?.level == 1
+                                          item.total_spores == 1
                                             ? 'Low'
-                                            : item?.current[indexes]?.level == 2
+                                            : item.total_spores == 2
                                             ? 'Moderate'
-                                            : item?.current[indexes]?.level == 3
+                                            : item.total_spores == 3
                                             ? 'High'
-                                            : item?.current[indexes]?.level == 4
+                                            : item.total_spores == 4
                                             ? 'Very High'
-                                            : 'None'
-                                        }
-                                        isPollenorSpores={
-                                          item?.current[index]?.type
+                                            : 'Low'
                                         }
                                         TempreaturePriorityFontSize={1.6}
                                       />
                                     </View>
-                                  );
-                                })}
-                              </ScrollView>
-
-                              {expandedFutureKey === item.key && (
-                                <View style={{marginTop: 20}}>
-                                  <FlatList
-                                    data={pastPollenAndSpores}
-                                    renderItem={({item, index}) => {
+    
+                                    <View style={{gap: 10, marginLeft: 20}}>
+                                      <AppText
+                                        title={'Total Trees'}
+                                        textAlignment={'center'}
+                                        textSize={1.5}
+                                        textColor={AppColors.BLACK}
+                                        textFontWeight
+                                      />
+    
+                                      <SpeedoMeter
+                                        imgWeight={30}
+                                        imgHeight={10}
+                                        speedometerWidth={30}
+                                        imageTop={-10}
+                                        TextBottom={
+                                          item.total_trees == 1
+                                            ? 'Low'
+                                            : item.total_trees == 2
+                                            ? 'Moderate'
+                                            : item.total_trees == 3
+                                            ? 'High'
+                                            : item.total_trees == 4
+                                            ? 'Very High'
+                                            : 'Low'
+                                        }
+                                        TempreaturePriorityFontSize={1.6}
+                                      />
+                                    </View>
+    
+                                    <View style={{gap: 10, marginLeft: 20}}>
+                                      <AppText
+                                        title={'Total Grasses'}
+                                        textAlignment={'center'}
+                                        textSize={1.5}
+                                        textColor={AppColors.BLACK}
+                                        textFontWeight
+                                      />
+    
+                                      <SpeedoMeter
+                                        imgWeight={30}
+                                        imgHeight={10}
+                                        speedometerWidth={30}
+                                        imageTop={-10}
+                                        TextBottom={
+                                          item.total_grasses == 1
+                                            ? 'Low'
+                                            : item.total_grasses == 2
+                                            ? 'Moderate'
+                                            : item.total_grasses == 3
+                                            ? 'High'
+                                            : item.total_grasses == 4
+                                            ? 'Very High'
+                                            : 'Low'
+                                        }
+                                        TempreaturePriorityFontSize={1.6}
+                                      />
+                                    </View>
+    
+                                    <View style={{gap: 10, marginLeft: 20}}>
+                                      <AppText
+                                        title={'Total Weeds'}
+                                        textAlignment={'center'}
+                                        textSize={1.5}
+                                        textColor={AppColors.BLACK}
+                                        textFontWeight
+                                      />
+    
+                                      <SpeedoMeter
+                                        imgWeight={30}
+                                        imgHeight={10}
+                                        speedometerWidth={30}
+                                        imageTop={-10}
+                                        TextBottom={
+                                          item.total_weeds == 1
+                                            ? 'Low'
+                                            : item.total_weeds == 2
+                                            ? 'Moderate'
+                                            : item.total_weeds == 3
+                                            ? 'High'
+                                            : item.total_weeds == 4
+                                            ? 'Very High'
+                                            : 'Low'
+                                        }
+                                        TempreaturePriorityFontSize={1.6}
+                                      />
+                                    </View>
+                                  </ScrollView> */}
+    
+                                  <ScrollView
+                                    horizontal
+                                    contentContainerStyle={{
+                                      gap: 10,
+                                      marginTop: 20,
+                                    }}>
+                                    {activePollen?.map(newItem => {
+                                      const indexes = item.current.findIndex(
+                                        active =>
+                                          active.name == newItem.common_name,
+                                      );
+    
                                       return (
-                                        <View style={{gap: 5}}>
-                                          {index === pastpollenHeaderIndex && (
-                                            <AppText
-                                              title="Pollen"
-                                              textSize={2}
-                                              textFontWeight
-                                            />
-                                          )}
-
-                                          {index === sporesHeaderIndex && (
-                                            <AppText
-                                              title="Spores"
-                                              textSize={2}
-                                              marginTop={2}
-                                              textFontWeight
-                                            />
-                                          )}
-
-                                          <PointPollenSpores
-                                            PollenSporesArr={
-                                              pastPollenAndSpores
+                                        <View
+                                          style={{gap: 10, alignItems: 'center'}}>
+                                          <AppText
+                                            title={newItem.common_name}
+                                            textAlignment={'center'}
+                                            textSize={1.5}
+                                            textColor={AppColors.BLACK}
+                                            textFontWeight
+                                            textwidth={40}
+                                            textHeight={5}
+                                          />
+    
+                                          <SpeedoMeter
+                                            imgWeight={30}
+                                            imgHeight={10}
+                                            speedometerWidth={30}
+                                            imageTop={-10}
+                                            TextBottom={
+                                              item?.current[indexes]?.level == 1
+                                                ? 'Low'
+                                                : item?.current[indexes]?.level == 2
+                                                ? 'Moderate'
+                                                : item?.current[indexes]?.level == 3
+                                                ? 'High'
+                                                : item?.current[indexes]?.level == 4
+                                                ? 'Very High'
+                                                : 'None'
                                             }
-                                            index={index}
-                                            item={item}
-                                            selected={selected}
-                                            containerwidth={responsiveWidth(80)}
+                                            isPollenorSpores={
+                                              item?.current[index]?.type
+                                            }
+                                            TempreaturePriorityFontSize={1.6}
                                           />
                                         </View>
                                       );
-                                    }}
-                                  />
+                                    })}
+                                  </ScrollView>
+    
+                                  {expandedFutureKey === item.key && (
+                                    <View style={{marginTop: 20}}>
+                                      <FlatList
+                                        data={pastPollenAndSpores}
+                                        renderItem={({item, index}) => {
+                                          return (
+                                            <View style={{gap: 5}}>
+                                              {index === pastpollenHeaderIndex && (
+                                                <AppText
+                                                  title="Pollen"
+                                                  textSize={2}
+                                                  textFontWeight
+                                                />
+                                              )}
+    
+                                              {index === sporesHeaderIndex && (
+                                                <AppText
+                                                  title="Spores"
+                                                  textSize={2}
+                                                  marginTop={2}
+                                                  textFontWeight
+                                                />
+                                              )}
+    
+                                              <PointPollenSpores
+                                                PollenSporesArr={
+                                                  pastPollenAndSpores
+                                                }
+                                                index={index}
+                                                item={item}
+                                                selected={selected}
+                                                containerwidth={responsiveWidth(80)}
+                                              />
+                                            </View>
+                                          );
+                                        }}
+                                      />
+                                    </View>
+                                  )}
                                 </View>
-                              )}
-                            </View>
-                          );
-                        }}
-                      />
+                              );
+                            }}
+                          />
+                        ):(
+                             <View
+              style={{height: responsiveHeight(30), justifyContent: 'center', }}>
+              <SubscribeBar
+                title="Subscribe Now to look at the past data"
+                title2={'Unlock Full Access to past data'}
+                handlePress={() => navigation.navigate('Subscription')}
+              />
+            </View>
+                        )
+                      }
+                      </>
                     ) : selected == 'Today' ? (
                       <FlatList
                         data={sortedPollenData}
@@ -1102,6 +1126,7 @@ const Home = ({navigation}) => {
                         }}
                       />
                     ) : selected == 'Future' ? (
+                      
                       <FlatList
                         data={isfutureArray}
                         contentContainerStyle={{paddingBottom: 50}}
@@ -1340,6 +1365,8 @@ const Home = ({navigation}) => {
         )}
       </LinearGradient>
     </>
+    </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 

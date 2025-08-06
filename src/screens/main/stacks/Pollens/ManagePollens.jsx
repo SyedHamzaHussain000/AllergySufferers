@@ -40,6 +40,8 @@ const ManagePollens = ({navigation}) => {
 
   const [Loader, setLoader] = useState(false);
 
+  // console.log("myPollens",myPollens)
+
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       getAllPollens();
@@ -118,10 +120,11 @@ const ManagePollens = ({navigation}) => {
                 data={myPollens}
                 contentContainerStyle={{gap: 10}}
                 renderItem={({item, drag, isActive}) => {
+                  // console.log("item", item)
                   return (
                     <TouchableOpacity onLongPress={drag}>
                       <AppTextInput
-                        inputPlaceHolder={item.name}
+                        inputPlaceHolder={item.common_name}
                         inputWidth={75}
                         arrowDelete={
                           <TouchableOpacity

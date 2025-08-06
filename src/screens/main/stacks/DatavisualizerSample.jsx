@@ -40,18 +40,25 @@ import GetAllLocation from '../../../global/GetAllLocation';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ApiCallWithUserId} from '../../../global/ApiCall';
-import { addUnitToActiveMedicaton, removeUnitToActiveMedicaton } from '../../../redux/Slices/MedicationSlice';
-import { useFocusEffect } from '@react-navigation/native';
+import {
+  addUnitToActiveMedicaton,
+  removeUnitToActiveMedicaton,
+  setActiveCity,
+} from '../../../redux/Slices/MedicationSlice';
+import {useFocusEffect} from '@react-navigation/native';
 
 const DatavisualizerSample = ({navigation}) => {
-
-    const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const screenWidth = Dimensions.get('window').width;
   const userData = useSelector(state => state.auth.user);
   const expireDate = useSelector(state => state.auth.expireDate);
   const allActiveMedicationRedux = useSelector(
     state => state.medications.ActiveMedications,
   );
+  const AllCities = useSelector(state => state?.medications?.allMyCity);
+  const activeCity = useSelector(state => state?.medications?.ActiveCity);
+
+  console.log("activeCity",activeCity)
 
   const [type, setType] = useState('allergens');
   const [medicationData, setMedicationsData] = useState();
@@ -59,7 +66,7 @@ const DatavisualizerSample = ({navigation}) => {
   const [takingMedications, setTakingMedications] = useState([]);
   const [todayPollensData, setTodayPollensData] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
-  
+
   const [pollenLoader, setPollenLoader] = useState(false);
 
   const [date, setDate] = useState(new Date());
@@ -89,29 +96,32 @@ const DatavisualizerSample = ({navigation}) => {
   const [AllDayNumber, setAllDayNumber] = useState([]);
   const [activeDate, setActiveDate] = useState(null);
 
+
+  // console.log("allCities",AllCities[0])
+
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       getAllAllergens();
-        
+
       getSelectedAllergens();
     });
 
     return nav;
   }, [navigation]);
 
-  useEffect(()=>{
-    if(allActiveMedicationRedux.length > 0){
-        getMedicationRecords(selecteddate, allActiveMedicationRedux);
+  useEffect(() => {
+    if (allActiveMedicationRedux.length > 0) {
+      getMedicationRecords(selecteddate, allActiveMedicationRedux);
     }
-  },[allActiveMedicationRedux])
+  }, [allActiveMedicationRedux]);
 
   useEffect(() => {
-    getSelectedAllergens();
+    getSelectedAllergens(allCities);
 
     if (type == 'medication') {
       getMedicationApi();
     }
-  }, [selecteddate]);
+  }, [selecteddate, allCities]);
 
   const setMedicationLoading = (id, isLoading) => {
     setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
@@ -181,176 +191,78 @@ const DatavisualizerSample = ({navigation}) => {
       });
   };
 
+  const MAX_BARS_PER_DATE = 10;
 
-    const MAX_BARS_PER_DATE = 10;
+  const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
+    const end = moment(new Date());
+    const start = moment(allActiveMedicationRedux[0].date || new Date());
 
+    setStartDate(start);
+    setEndDate(end);
 
-    // const getMedicationRecords = ewformateddate => {
-    //   const end = moment(ewformateddate || new Date());
-    //   const start = moment(ewformateddate || new Date()).subtract(6, 'days');
-  
-    //   setStartDate(start);
-    //   setEndDate(end);
-  
-    //   const dayNumbers = [];
-    //   let current = start.clone();
-  
-    //   while (current.isSameOrBefore(end)) {
-    //     dayNumbers.push(current.date()); // e.g. returns 1, 2, 3, … for the day of the month
-    //     current.add(1, 'day');
-    //   }
-  
-    //   setAllDayNumber(dayNumbers);
-  
-    //   const data = JSON.stringify({
-    //     start_date: start.format('YYYY-MM-DD'),
-    //     end_date: end.format('YYYY-MM-DD'),
-    //   });
-  
-    //   axios
-    //     .post(
-    //       `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
-    //       data,
-    //       {headers: {'Content-Type': 'application/json'}},
-    //     )
-    //     .then(response => {
-    //       const allentriesArr = response.data.entries.items || [];
-  
-    //       console.log(
-    //         'allentriesArr',
-    //         start.format('YYYY-MM-DD'),
-    //         end.format('YYYY-MM-DD'),
-    //       );
-    //       const groupedByDate = {};
-  
-    //       // Group all bars by date
-    //       allentriesArr.forEach(entry => {
-    //         const formattedDate = moment(entry.date, 'MMMM, DD YYYY').format('D');
-    //         if (!groupedByDate[formattedDate]) {
-    //           groupedByDate[formattedDate] = [];
-    //         }
-    //         groupedByDate[formattedDate].push({
-    //           value: parseInt(entry.units) || 0,
-    //           frontColor: entry.frontColor,
-    //         });
-    //       });
-  
-    //       const barData = [];
-  
-    //       Object.entries(groupedByDate).forEach(([dateLabel, bars]) => {
-    //         const group = [];
-  
-    //         bars.forEach((bar, index) => {
-    //           group.push({
-    //             value: bar.value,
-    //             frontColor: bar.frontColor,
-    //             label: index === 0 ? dateLabel : '',
-    //             // labelWidth: chartSpacing,
-    //             labelWidth: 20,
-    //             labelTextStyle: {color: 'gray'},
-    //             // spacing: 10,
-    //             spacing: responsiveWidth(1.25),
-    //           });
-    //         });
-  
-    //         // Add padding bars if less than MAX_BARS_PER_DATE
-    //         const paddingCount = MAX_BARS_PER_DATE - group.length;
-    //         for (let i = 0; i < paddingCount; i++) {
-    //           group.push({
-    //             value: 0,
-    //             frontColor: 'transparent',
-    //             // spacing: 10,
-    //             // labelWidth: chartSpacing,
-    //             spacing: responsiveWidth(1.25),
-    //             labelWidth: 20,
-    //           });
-    //         }
-  
-    //         barData.push(...group);
-    //       });
-  
-    //       setMedicationnRecord(barData);
-    //     })
-    //     .catch(error => {
-    //       console.log('Error fetching medication records', error);
-    //     });
-    // };
+    const dayNumbers = [];
+    let current = start.clone();
 
-//   const MAX_BARS_PER_DATE = 10;
-
-  const getMedicationRecords = (ewformateddate,allActiveMedicationRedux) => {
-
-
-  const end = moment(new Date());
-  const start = moment(allActiveMedicationRedux[0].date || new Date())
-
-  setStartDate(start);
-  setEndDate(end);
-
-  const dayNumbers = [];
-  let current = start.clone();
-
-  while (current.isSameOrBefore(end)) {
-    dayNumbers.push(current.date());
-    current.add(1, 'day');
-  }
-
-  setAllDayNumber(dayNumbers);
-
-  // ✅ Data from Redux instead of API
-//   const allentriesArr = allActiveMedicationRedux || [];
-
-  const groupedByDate = {};
-
-  allActiveMedicationRedux.forEach(entry => {
-
-    const formattedDate = moment(entry.date).format('D'); // ✅ outputs just "25", "27", etc.
-    if (!groupedByDate[formattedDate]) {
-      groupedByDate[formattedDate] = [];
+    while (current.isSameOrBefore(end)) {
+      dayNumbers.push(current.date());
+      current.add(1, 'day');
     }
-    groupedByDate[formattedDate].push({
-      value: parseInt(entry.units) || 0,
-      frontColor: entry.frontColor,
-    });
-  });
 
-  const barData = [];
+    setAllDayNumber(dayNumbers);
 
-  Object.entries(groupedByDate).forEach(([date, bars]) => {
+    // ✅ Data from Redux instead of API
+    //   const allentriesArr = allActiveMedicationRedux || [];
 
+    const groupedByDate = {};
 
-
-    const group = [];
-
-    bars.forEach((bar, index) => {
-      group.push({
-        value: bar.value,
-        frontColor: bar.frontColor,
-        label: index === 0 ? date : '',
-        labelWidth: 20,
-        labelTextStyle: { color: 'gray' },
-        spacing: responsiveWidth(0.5),
+    allActiveMedicationRedux.forEach(entry => {
+      const formattedDate = moment(entry.date).format('D'); // ✅ outputs just "25", "27", etc.
+      if (!groupedByDate[formattedDate]) {
+        groupedByDate[formattedDate] = [];
+      }
+      groupedByDate[formattedDate].push({
+        value: parseInt(entry.units) || 0,
+        frontColor: entry.frontColor,
       });
     });
 
-    const paddingCount = MAX_BARS_PER_DATE - group.length;
-    for (let i = 0; i < paddingCount; i++) {
-      group.push({
-        value: 0,
-        frontColor: 'transparent',
-        spacing: responsiveWidth(1.25),
-        labelWidth: 20,
+    const barData = [];
+
+    Object.entries(groupedByDate).forEach(([date, bars]) => {
+      const group = [];
+
+      bars.forEach((bar, index) => {
+        group.push({
+          value: bar.value,
+          frontColor: bar.frontColor,
+          label: index === 0 ? date : '',
+          labelWidth: 20,
+          labelTextStyle: {color: 'gray'},
+          spacing: responsiveWidth(0.5),
+        });
       });
-    }
 
-    barData.push(...group);
-  });
+      const paddingCount = MAX_BARS_PER_DATE - group.length;
+      for (let i = 0; i < paddingCount; i++) {
+        group.push({
+          value: 0,
+          frontColor: 'transparent',
+          spacing: responsiveWidth(1.25),
+          labelWidth: 20,
+        });
+      }
 
-  setMedicationnRecord(barData);
-};
+      barData.push(...group);
+    });
 
+    setMedicationnRecord(barData);
+  };
 
-  const getDataVisualizer = async selecallergens => {
+  const getDataVisualizer = async (selecallergens, city) => {
+
+    dispatch(setActiveCity(city ? city : AllCities[0]));
+
+    console.log("city",city)
     if (!selecallergens || selecallergens.length === 0) {
       // no allergens selected, clear chart data
       setPrimaryLineData([]);
@@ -358,12 +270,12 @@ const DatavisualizerSample = ({navigation}) => {
       return;
     }
 
-    const getCity = await AsyncStorage.getItem('isCity');
-    const parseCity = JSON.parse(getCity);
+    // const getCity = await AsyncStorage.getItem('isCity');
+    // const parseCity = JSON.parse(getCity);
 
-    setPickedCity(parseCity);
+    setPickedCity(AllCities[0]);
 
-    if (getCity) {
+    // if (getCity) {
       setDataVisualizerLoader(true);
       const allergenParams = selecallergens
         .map(
@@ -373,13 +285,14 @@ const DatavisualizerSample = ({navigation}) => {
         .join('&');
       // console.log('selecteddate', selecteddate, 'allergenParams', allergenParams);
 
-      const dateis = moment(allActiveMedicationRedux[0]?.date).format('YYYY-MM-DD');
-
+      const dateis = moment(allActiveMedicationRedux[0]?.date).format(
+        'YYYY-MM-DD',
+      );
 
       const config = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=${parseCity?.lat}&lng=${parseCity?.lng}&start_date=${dateis}&${allergenParams}`,
+        url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=${city ? city?.lat : AllCities[0]?.lat}&lng=${ city ? city?.lng :AllCities[0]?.lng}&start_date=${dateis}&${allergenParams}`,
         headers: {
           'Cache-Control': 'no-cache',
           Pragma: 'no-cache',
@@ -421,9 +334,9 @@ const DatavisualizerSample = ({navigation}) => {
           setDataVisualizerLoader(false);
           console.log(error);
         });
-    } else {
-      console.log('add city');
-    }
+    // } else {
+    //   console.log('add city');
+    // }
   };
 
   const addAllergens = item => {
@@ -470,8 +383,10 @@ const DatavisualizerSample = ({navigation}) => {
       });
   };
 
-  const getSelectedAllergens = () => {
+  const getSelectedAllergens = (city) => {
     // setActiveDate(null)
+
+    
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -498,7 +413,7 @@ const DatavisualizerSample = ({navigation}) => {
         // setTakingMedications(response.data.allergens);
 
         //edited code
-        getDataVisualizer(coloredAllergens);
+        getDataVisualizer(coloredAllergens, city);
         setTakingMedications(coloredAllergens);
       })
       .catch(error => {
@@ -556,8 +471,6 @@ const DatavisualizerSample = ({navigation}) => {
   };
 
   const addMedication = async item => {
-
-
     dispatch(addUnitToActiveMedicaton(item));
   };
 
@@ -574,24 +487,28 @@ const DatavisualizerSample = ({navigation}) => {
 
   const getLocation = async type => {
     setType(type);
-    if (userData.email) {
-      const res = await GetAllLocation(userData.id);
-      console.log('res', res);
 
-      setAllCities(res.cities);
-    } else {
-      setAllCities();
-    }
+    
+    // if (userData.email) {
+    //   const res = await GetAllLocation(userData.id);
+    //   console.log('res', res);
+
+    //   setAllCities(res.cities);
+    // } else {
+    //   setAllCities();
+    // }
   };
 
   const SelectLocation = async city => {
-    await AsyncStorage.setItem('isCity', JSON.stringify(city));
-    getSelectedAllergens();
+    // await AsyncStorage.setItem('isCity', JSON.stringify(city));
+    dispatch(setActiveCity(city))
+    getSelectedAllergens(city);
   };
 
   const removeCity = async () => {
-    console.log('remove citu');
-    await AsyncStorage.removeItem('isCity');
+    // console.log('remove citu');
+    // await AsyncStorage.removeItem('isCity');
+    dispatch(setActiveCity(null))
     getSelectedAllergens();
   };
 
@@ -605,9 +522,6 @@ const DatavisualizerSample = ({navigation}) => {
     5: AppImages.Bored,
   };
 
-
- 
-
   return (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView
@@ -615,6 +529,7 @@ const DatavisualizerSample = ({navigation}) => {
           padding: 20,
           flexGrow: 1,
           backgroundColor: AppColors.WHITE,
+          paddingBottom: 200,
         }}>
         <AppHeader
           heading="Data Visualizer"
@@ -652,10 +567,8 @@ const DatavisualizerSample = ({navigation}) => {
             ) : (
               <View style={{height: responsiveHeight(30)}}>
                 {MedicationnRecord?.length > 0 ? (
-                  <View > 
-                    <ScrollView
-                      horizontal={true}
-                      >
+                  <View>
+                    <ScrollView horizontal={true}>
                       <View
                         style={{
                           position: 'absolute',
@@ -698,9 +611,7 @@ const DatavisualizerSample = ({navigation}) => {
                           );
                         })}
                       </View>
-                       {
-                          console.log("PrimaryLineData",PrimaryLineData)
-                        }
+                      {console.log('PrimaryLineData', PrimaryLineData)}
 
                       <BarChart
                         data={MedicationnRecord || []}
@@ -710,13 +621,10 @@ const DatavisualizerSample = ({navigation}) => {
                           // true
                           PrimaryLineData.length > 0 ||
                           SecondaryLineData.length > 0
-                          
                         }
-                       
                         // xAxisLabelTexts={[]}
                         lineData={PrimaryLineData || []}
                         lineData2={SecondaryLineData || []}
-                 
                         lineConfig={{
                           color: colours[0],
                           thickness: 2,
@@ -760,16 +668,17 @@ const DatavisualizerSample = ({navigation}) => {
                         stepValue={1}
                       />
 
-                       <View
+                      <View
                         style={{
                           position: 'absolute',
                           zIndex: 10,
                           bottom: -4,
-                          backgroundColor:AppColors.WHITE,
-                          width:responsiveWidth(100),
-                          height:responsiveHeight(2)
-                        }}/>
-                        
+                          backgroundColor: AppColors.WHITE,
+                          width: responsiveWidth(100),
+                          height: responsiveHeight(2),
+                        }}
+                      />
+
                       <View
                         style={{
                           flexDirection: 'row',
@@ -818,9 +727,13 @@ const DatavisualizerSample = ({navigation}) => {
               open={open}
               date={date}
               mode="date"
-            minimumDate={allActiveMedicationRedux.length > 0 ? moment(allActiveMedicationRedux[0]?.date).local() : moment().local()}
+              minimumDate={
+                allActiveMedicationRedux.length > 0
+                  ? moment(allActiveMedicationRedux[0]?.date).local()
+                  : moment().local()
+              }
               // minimumDate={allActiveMedicationRedux[0]?.date ? new Date(allActiveMedicationRedux[0]?.date) :  new Date() }
-                maximumDate={new Date()}
+              maximumDate={new Date()}
               onConfirm={selectedDate => {
                 setDate(selectedDate);
                 setOpen(false);
@@ -878,7 +791,7 @@ const DatavisualizerSample = ({navigation}) => {
                 />
               </View>
 
-              {pickedCity && (
+              {activeCity && (
                 <View style={{gap: 10}}>
                   <AppText title={'City'} textSize={2} textFontWeight />
                   <View
@@ -894,19 +807,19 @@ const DatavisualizerSample = ({navigation}) => {
                       paddingHorizontal: 20,
                     }}>
                     <AppText
-                      title={pickedCity?.city_name}
+                      title={activeCity?.city_name ? activeCity?.city_name : AllCities[0]?.city_name}
                       textSize={2}
                       textFontWeight
                       textColor={AppColors.BLACK}
                     />
 
-                    <TouchableOpacity onPress={() => removeCity()}>
+                    {/* <TouchableOpacity onPress={() => removeCity()}>
                       <AntDesign
                         name="minus"
                         size={responsiveFontSize(2)}
                         color={AppColors.LIGHTGRAY}
                       />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                   </View>
                 </View>
               )}
@@ -983,7 +896,7 @@ const DatavisualizerSample = ({navigation}) => {
                   marginTop: 10,
                 }}>
                 <AppText
-                  title={'Add Location'}
+                  title={'Change Location'}
                   textColor={
                     type == 'Add Location' ? AppColors.WHITE : AppColors.BLACK
                   }
@@ -1104,7 +1017,7 @@ const DatavisualizerSample = ({navigation}) => {
             ) : (
               <View>
                 <FlatList
-                  data={allCities}
+                  data={AllCities}
                   renderItem={({item}) => {
                     return (
                       <TouchableOpacity

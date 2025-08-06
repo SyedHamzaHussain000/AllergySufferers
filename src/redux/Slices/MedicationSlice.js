@@ -7,6 +7,7 @@ const initialState = {
   ActiveMedications: [],
   MyCurrentMeds: [],
   allMyCity: [],
+  ActiveCity: null,
 };
 
 const MedicationSlice = createSlice({
@@ -78,11 +79,16 @@ const MedicationSlice = createSlice({
       const curretDate = moment(new Date()).format('YYYY-MM-DD');
       const medToRemove = action.payload;
 
+
+
       
       // Find index of the matching medication
       const index = state.ActiveMedications.findIndex(
-        med =>  med.id === medToRemove.id && med.date === curretDate,
+        med =>  med.id == medToRemove.id && med.date == curretDate,
       );
+     
+      // console.log("medToRemove",index, state.ActiveMedications)
+      // return
 
       if (index !== -1) {
         state.ActiveMedications.splice(index, 1); // remove 1 element at index
@@ -93,6 +99,7 @@ const MedicationSlice = createSlice({
     },
     removeCurrentActiveMedication: (state, action) => {
       const newMed = action.payload;
+
 
       state.MyCurrentMeds = state.MyCurrentMeds.filter(
         med => med.id !== newMed.id,
@@ -171,6 +178,9 @@ const MedicationSlice = createSlice({
       );
       console.log('City removed successfully');
     },
+    setActiveCity: (state, action) => {
+      state.ActiveCity = action.payload
+    }
   },
 });
 
@@ -190,6 +200,7 @@ export const {
   setAddCity,
   setAllCityFromApi,
   setRemoveCity,
+  setActiveCity
 } = MedicationSlice.actions;
 
 export default MedicationSlice.reducer;

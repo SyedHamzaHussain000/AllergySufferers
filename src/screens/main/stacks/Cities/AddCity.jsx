@@ -37,11 +37,12 @@ const AddCity = ({navigation}) => {
   const addNewCity = () => {
     
 
-    if(allMyCity.length == 5){
+    if(allMyCity.length == 5 || allMyCity.length > 5){
 
       alert('You can only add 5 cities');
       return
     }
+    
     setCityLoader(true);
     if(detail){
 

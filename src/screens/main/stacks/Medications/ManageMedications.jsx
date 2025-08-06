@@ -67,19 +67,6 @@ const ManageMedications = ({navigation}) => {
   );
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const nav = navigation.addListener('focus', () => {
-      getActiveMedication();
-    });
-    return nav;
-  }, [navigation]);
-
-  const getActiveMedication = async() => {
-
-    setLoader(true);
-
-    
-  };
 
 
   const deleteActiveMedicationRedux = async medData => {
@@ -88,6 +75,8 @@ const ManageMedications = ({navigation}) => {
     // return
     dispatch(RemoveUpdateMedicationListOnEveryDate(medData));
     dispatch(removeCurrentActiveMedication(medData));
+
+    // return
     
     const deleteMed = await ApiCallWithUserId('post', 'delete_medication', userData?.id, {"data":medData.id})
     
