@@ -550,7 +550,7 @@ const MedicationSample = ({navigation}) => {
               ? moment(allActiveMedicationRedux[0]?.date).local()
               : moment().local()
           }
-          maximumDate={new Date()}
+          maximumDate={new Date(moment().local())}
           onConfirm={selectedDate => {
             setDate(selectedDate);
             setOpen(false);

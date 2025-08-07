@@ -34,6 +34,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
 import AppImages from '../../../../assets/images/AppImages';
+import {ApiCallWithUserId} from '../../../../global/ApiCall';
 const ManagePollens = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const [myPollens, setMyPollens] = useState([]);
@@ -49,6 +50,22 @@ const ManagePollens = ({navigation}) => {
 
     return nav;
   }, [navigation]);
+
+  useEffect(() => {
+    sortPollens();
+  }, [myPollens]);
+
+  const sortPollens = async () => {
+    // setLoader(true);
+    const sortPollens = await ApiCallWithUserId(
+      'post',
+      'sort_pollens',
+      userData.id,
+      {data: myPollens},
+    );
+    // setLoader(false);
+    console.log('sortPollens', sortPollens);
+  };
 
   const getAllPollens = () => {
     setLoader(true);
@@ -72,8 +89,8 @@ const ManagePollens = ({navigation}) => {
       });
   };
 
-  const deletePolles = (item) => {
-    setLoader(true)
+  const deletePolles = item => {
+    setLoader(true);
 
     let data = JSON.stringify({
       data: item.id,
@@ -93,23 +110,18 @@ const ManagePollens = ({navigation}) => {
       .request(config)
       .then(response => {
         console.log(JSON.stringify(response.data));
-        getAllPollens()
+        getAllPollens();
       })
       .catch(error => {
         console.log(error);
-            setLoader(false)
-
+        setLoader(false);
       });
   };
   return (
     <SafeAreaView style={{flex: 1}}>
       <GestureHandlerRootView style={{flex: 1}}>
         <View style={{padding: 20}}>
-          <AppHeader
-            heading="Manage pollen and spores"
-            
-            goBack
-          />
+          <AppHeader heading="Manage pollen and spores" goBack />
           {Loader == true ? (
             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
           ) : null}
@@ -155,9 +167,16 @@ const ManagePollens = ({navigation}) => {
                           </TouchableOpacity>
                         }
                         rightLogo={
-                          <View style={{marginTop:4 }}>
-                                                    <Image source={AppImages.updown} style={{height:14, width:14, resizeMode:'contain'}}/>
-                                                    </View>
+                          <View style={{marginTop: 4}}>
+                            <Image
+                              source={AppImages.updown}
+                              style={{
+                                height: 14,
+                                width: 14,
+                                resizeMode: 'contain',
+                              }}
+                            />
+                          </View>
                         }
                       />
                     </TouchableOpacity>
