@@ -8,6 +8,7 @@ import {
   Alert,
   SafeAreaView,
   Image,
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -55,7 +56,7 @@ const ManageMedications = ({navigation}) => {
     state => state.medications.ActiveMedications,
   );
 
-  const [activeMedication, setActiveMedication] = useState([]);
+  const [activeMedication, setActiveMedication] = useState(allActiveMedicationRedux);
   const [loader, setLoader] = useState(false);
 
   const [data3, setData3] = useState([1, 2, 3, 4]);
@@ -93,6 +94,9 @@ const ManageMedications = ({navigation}) => {
 
   return (
     <SafeAreaView style={{flex: 1}}>
+      <ScrollView contentContainerStyle={{flexGrow:1, paddingBottom:200}}>
+        <View>
+
       <GestureHandlerRootView style={{flex: 1}}>
         <View style={{padding: 20}}>
           <AppHeader
@@ -131,10 +135,10 @@ const ManageMedications = ({navigation}) => {
               <ActivityIndicator size={'large'} color={AppColors.BLACK} />
             )} */}
 
-            {allActiveMedicationRedux ? (
+            {activeMedication ? (
               <NestableScrollContainer>
                 <NestableDraggableFlatList
-                  data={allActiveMedicationRedux}
+                  data={activeMedication}
                   contentContainerStyle={{gap: 10}}
                   renderItem={({item, drag, isActive}) => {
                     return (
@@ -206,6 +210,9 @@ const ManageMedications = ({navigation}) => {
           </View>
         </View>
       </GestureHandlerRootView>
+      </View>
+
+      </ScrollView>
     </SafeAreaView>
   );
 };

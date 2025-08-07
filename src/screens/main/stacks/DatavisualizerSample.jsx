@@ -116,12 +116,12 @@ const DatavisualizerSample = ({navigation}) => {
   }, [allActiveMedicationRedux]);
 
   useEffect(() => {
-    getSelectedAllergens(allCities);
+    getSelectedAllergens();
 
     if (type == 'medication') {
       getMedicationApi();
     }
-  }, [selecteddate, allCities]);
+  }, [selecteddate]);
 
   const setMedicationLoading = (id, isLoading) => {
     setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
@@ -148,6 +148,7 @@ const DatavisualizerSample = ({navigation}) => {
       })
       .catch(error => {
         console.log(error);
+        setPollenLoader(false);
       });
   };
 
@@ -262,7 +263,7 @@ const DatavisualizerSample = ({navigation}) => {
 
     dispatch(setActiveCity(city ? city : AllCities[0]));
 
-    console.log("city",city)
+    // console.log("city",city)
     if (!selecallergens || selecallergens.length === 0) {
       // no allergens selected, clear chart data
       setPrimaryLineData([]);
@@ -611,7 +612,7 @@ const DatavisualizerSample = ({navigation}) => {
                           );
                         })}
                       </View>
-                      {console.log('PrimaryLineData', PrimaryLineData)}
+
 
                       <BarChart
                         data={MedicationnRecord || []}
@@ -672,7 +673,7 @@ const DatavisualizerSample = ({navigation}) => {
                         style={{
                           position: 'absolute',
                           zIndex: 10,
-                          bottom: -4,
+                          bottom: -5,
                           backgroundColor: AppColors.WHITE,
                           width: responsiveWidth(100),
                           height: responsiveHeight(2),
@@ -684,7 +685,7 @@ const DatavisualizerSample = ({navigation}) => {
                           flexDirection: 'row',
                           position: 'absolute',
                           zIndex: 100,
-                          bottom: -4,
+                          bottom: -5,
                           marginLeft: responsiveWidth(17.5),
                         }}>
                         {AllDayNumber?.map(item => {
@@ -733,7 +734,7 @@ const DatavisualizerSample = ({navigation}) => {
                   : moment().local()
               }
               // minimumDate={allActiveMedicationRedux[0]?.date ? new Date(allActiveMedicationRedux[0]?.date) :  new Date() }
-              maximumDate={new Date()}
+              maximumDate={new Date(moment().local())}
               onConfirm={selectedDate => {
                 setDate(selectedDate);
                 setOpen(false);
@@ -813,13 +814,6 @@ const DatavisualizerSample = ({navigation}) => {
                       textColor={AppColors.BLACK}
                     />
 
-                    {/* <TouchableOpacity onPress={() => removeCity()}>
-                      <AntDesign
-                        name="minus"
-                        size={responsiveFontSize(2)}
-                        color={AppColors.LIGHTGRAY}
-                      />
-                    </TouchableOpacity> */}
                   </View>
                 </View>
               )}
@@ -986,8 +980,10 @@ const DatavisualizerSample = ({navigation}) => {
             ) : type == 'allergens' ? (
               <View>
                 <FlatList
-                  data={todayPollensData}
+                  data={todayPollensData?.sort((a, b) => a.common_name.localeCompare(b.common_name))}
+
                   renderItem={({item}) => {
+                      console.log("type of",item )
                     return (
                       <TouchableOpacity
                         onPress={() => addAllergens(item)}

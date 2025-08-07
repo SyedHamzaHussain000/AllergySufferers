@@ -55,7 +55,7 @@ on your acceptance of and compliance with these Terms. These Terms apply to all 
   };
 
   return (
-    <ScrollView contentContainerStyle={{flexGrow:1, padding:20}}>
+    <ScrollView contentContainerStyle={{flexGrow:1, padding:20, paddingBottom:200}}>
       <AppHeader goBack/>
       <RenderHtml
         contentWidth={responsiveWidth(100)}

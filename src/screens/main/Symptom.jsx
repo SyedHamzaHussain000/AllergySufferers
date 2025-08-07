@@ -48,7 +48,7 @@ const Symptom = ({navigation}) => {
     moment().format('YYYY-MM-DD'),
   );
 
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(new Date(moment().local()));
   //start date states
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const [endopen, setEndOpen] = useState(false);
@@ -219,7 +219,7 @@ const Symptom = ({navigation}) => {
           open={open}
           date={date}
           mode="date"
-          maximumDate={new Date()}
+          maximumDate={new Date(moment().local())}
           onConfirm={selectedDate => {
             setDate(selectedDate);
             setOpen(false);

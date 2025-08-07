@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -122,7 +123,7 @@ const ManageCities = ({navigation}) => {
 
   return (
     <SafeAreaView style={{flex: 1}}>
-      <View style={{padding: 20}}>
+      <ScrollView contentContainerStyle={{padding: 20, paddingBottom:200}}>
         <AppHeader
           heading="Manage City"
           icon={
@@ -221,7 +222,7 @@ const ManageCities = ({navigation}) => {
           />
           {/* <AppButton title={'Manage push notifications'} bgColor={AppColors.BTNCOLOURS} RightColour={AppColors.rightArrowCOlor}  /> */}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
