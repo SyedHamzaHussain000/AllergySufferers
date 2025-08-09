@@ -1,4 +1,4 @@
-import {View, Text, ScrollView, TextInput, TouchableOpacity} from 'react-native';
+import {View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform} from 'react-native';
 import React, { useState } from 'react';
 import AppColors from '../../utils/AppColors';
 import AppText from '../../components/AppTextComps/AppText';
@@ -76,6 +76,7 @@ const CreateAccount = ({navigation}) => {
 
 
   return (
+    <KeyboardAvoidingView behavior={Platform.OS == "ios" ? 'padding': 'position'} style={{flex:1}}>
     <View
       style={{
         flex: 1,
@@ -213,6 +214,7 @@ const CreateAccount = ({navigation}) => {
         </View>
       </ScrollView>
     </View>
+    </KeyboardAvoidingView>
   );
 };
 

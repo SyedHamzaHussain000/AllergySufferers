@@ -22,7 +22,9 @@ on your acceptance of and compliance with these Terms. These Terms apply to all 
       <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material we will try to provide at least 30 days’ notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.</p>
 
       <h2>Contact Us</h2>
-      <p>If you have any questions about these Terms and Conditions, please contact us at apps@aerobiology.ca.</p>
+      <p>If you have any questions about these Terms and Conditions, please contact us at  
+        <a href="mailto:apps@aerobiology.ca">apps@aerobiology.ca</a>
+      </p>
     `,
   };
 
@@ -52,6 +54,10 @@ on your acceptance of and compliance with these Terms. These Terms apply to all 
       fontWeight: 'bold',
       color: '#000',
     },
+    a:{
+      fontWeight: 'bold',
+      color: 'blue',
+    }
   };
 
   return (

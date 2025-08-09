@@ -167,7 +167,7 @@ const Home = ({navigation}) => {
   }
 
   const getPollensData = (allcities, newindex) => {
-
+    console.log("allcities",allcities)
       // console.log("allcities[newindex ? newindex : 0]",allcities[newindex ? newindex : 0])
     setPollenLoader(true);
     let data = new FormData();
@@ -352,9 +352,6 @@ const Home = ({navigation}) => {
 
 
   return (
-    <SafeAreaProvider>
-            <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }} edges={['bottom', 'top']}>
-
     <>
       <LinearGradient
         colors={[
@@ -1365,8 +1362,8 @@ const Home = ({navigation}) => {
         )}
       </LinearGradient>
     </>
-    </SafeAreaView>
-    </SafeAreaProvider>
+
+
   );
 };
 

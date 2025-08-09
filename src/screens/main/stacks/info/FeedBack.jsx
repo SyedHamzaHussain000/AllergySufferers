@@ -1,4 +1,4 @@
-import {View, Text, TextInput, ToastAndroid, ScrollView, SafeAreaView, KeyboardAvoidingView} from 'react-native';
+import {View, Text, TextInput, ToastAndroid, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard} from 'react-native';
 import React, {useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
@@ -63,11 +63,12 @@ const FeedBack = () => {
 
   return (
     <SafeAreaView style={{flex:1}}>
-      <KeyboardAvoidingView behavior='position' style={{flex:1}}>
-    <ScrollView contentContainerStyle={{flexGrow:1, padding: 20, paddingBottom:20}}>
+      <KeyboardAvoidingView behavior={Platform.OS == "ios" ?'padding': 'position'} style={{flex:1}}>
+        <TouchableOpacity activeOpacity={1} onPress={()=> Keyboard.dismiss()}>
+    <ScrollView  contentContainerStyle={{flexGrow:1, padding: 20, paddingBottom:20}}>
       <AppHeader heading="Aerobiology" subheading="Feedback" goBack={true} />
 
-      <View style={{gap: 10, marginTop: 20}}>
+      <View  style={{gap: 10, marginTop: 20}}>
         <AppText
           title={
             'Please complete the form below and a member of our team will reach out to you as soon as possible.'
@@ -146,11 +147,13 @@ const FeedBack = () => {
               borderWidth: 1,
               borderRadius: 10,
               borderColor: AppColors.LIGHTGRAY,
-              paddingHorizontal: 10,
+              // paddingHorizontal: 10,
               height: responsiveHeight(20),
               textAlign:'left',
-              textAlignVertical: 'top'
+              textAlignVertical: 'top',
+              padding:10
             }}
+            multiline={true}
             onChangeText={text =>
               setFeedBackData({...feedBackData, message: text})
             }
@@ -166,6 +169,7 @@ const FeedBack = () => {
         />
       </View>
     </ScrollView>
+    </TouchableOpacity>
     </KeyboardAvoidingView>
      </SafeAreaView>
   );

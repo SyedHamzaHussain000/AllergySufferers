@@ -7,6 +7,8 @@ import {
   ToastAndroid,
   Platform,
   PermissionsAndroid,
+  Keyboard,
+  KeyboardAvoidingView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppColors from '../../utils/AppColors';
@@ -86,6 +88,7 @@ const Login = ({navigation}) => {
   };
 
   return (
+    <KeyboardAvoidingView behavior={Platform.OS == "ios" ? 'padding': 'position'} style={{flex:1}}>
     <View
       style={{
         flex: 1,
@@ -166,6 +169,7 @@ const Login = ({navigation}) => {
         </View>
       </ScrollView>
     </View>
+    </KeyboardAvoidingView>
   );
 };
 

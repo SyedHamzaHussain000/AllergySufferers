@@ -51,17 +51,17 @@ const ManagePollens = ({navigation}) => {
     return nav;
   }, [navigation]);
 
-  useEffect(() => {
-    sortPollens();
-  }, [myPollens]);
+  // useEffect(() => {
+  //   sortPollens();
+  // }, [myPollens]);
 
-  const sortPollens = async () => {
+  const sortPollens = async (data) => {
     // setLoader(true);
     const sortPollens = await ApiCallWithUserId(
       'post',
       'sort_pollens',
       userData.id,
-      {data: myPollens},
+      {data: data},
     );
     // setLoader(false);
     console.log('sortPollens', sortPollens);
@@ -183,7 +183,7 @@ const ManagePollens = ({navigation}) => {
                   );
                 }}
                 keyExtractor={(item, index) => index.toString()}
-                onDragEnd={({data}) => setMyPollens(data)}
+                onDragEnd={({data}) => {sortPollens(data), setMyPollens(data)}}
                 dragEnabled={true}
                 activationDistance={10}
               />

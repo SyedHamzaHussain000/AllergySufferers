@@ -8,6 +8,7 @@ import {
   ScrollView,
   Dimensions,
   Alert,
+  StatusBar,
 } from 'react-native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -406,6 +407,7 @@ const MedicationSample = ({navigation}) => {
     }
   }, [sliderScrollEnabled]);
 
+
   const memoizedMedicationList = () => {
     if (allActiveMedicationRedux.length === 0) return null;
 
@@ -530,6 +532,7 @@ const MedicationSample = ({navigation}) => {
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
+      <StatusBar  barStyle={'dark-content'}/>
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
         <AppHeader
           heading="Medication"

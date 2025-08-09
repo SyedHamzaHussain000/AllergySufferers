@@ -1,4 +1,4 @@
-import {View, Text, FlatList, ScrollView, TouchableOpacity, SafeAreaView} from 'react-native';
+import {View, Text, FlatList, ScrollView, TouchableOpacity, SafeAreaView, StatusBar} from 'react-native';
 import React from 'react';
 import AppHeader from '../../components/AppHeader';
 import AppText from '../../components/AppTextComps/AppText';
@@ -22,7 +22,8 @@ const More = ({navigation}) => {
   ];
 
   return (
-    <SafeAreaView style={{flex:1}}> 
+    <SafeAreaView style={{flex:1}}>
+      <StatusBar  barStyle={'dark-content'}/> 
     <View style={{padding: 20}}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <AppHeader heading="More" icon={<Entypo name={"location-pin"} size={responsiveFontSize(2.5)} color={AppColors.BTNCOLOURS}/>}/>

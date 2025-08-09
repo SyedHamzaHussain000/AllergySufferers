@@ -1,4 +1,4 @@
-import {View, Text, Image, StyleSheet, Platform, StatusBar, } from 'react-native';
+import {View, Text, Image, StyleSheet, Platform, StatusBar, SafeAreaView } from 'react-native';
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -32,11 +32,13 @@ import ForcastExplaination from '../screens/main/stacks/forcastexplaination/Forc
 import MedicationSample from '../screens/main/MedicationSample';
 import DatavisualizerSample from '../screens/main/stacks/DatavisualizerSample';
 import { responsiveHeight } from '../utils/Responsive_Dimensions';
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+// import { SafeAreaView, useSafeAreaInsets } from "react-SafeAreaViewnative-safe-area-context";
 
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+
+
 const Main = () => {
   return (
     <Stack.Navigator
@@ -81,7 +83,7 @@ const Main = () => {
 
 function MyTabs() {
 
-      const insets = useSafeAreaInsets();
+  // const insets = useSafeAreaInsets();
   return (
     // <SafeAreaView style={{flex:1}}>
     <Tab.Navigator
@@ -103,7 +105,7 @@ function MyTabs() {
       }}>
       <Tab.Screen
         name="Forecast"
-        component={HomeWithSafeArea(Home)}
+        component={Home}
         options={{
           tabBarIcon: ({focused}) => {
             return (
@@ -178,7 +180,7 @@ function MyTabs() {
 
       <Tab.Screen
         name="More"
-        component={settingTabScreen}
+        component={SettingTabScreen}
         options={{
           tabBarIcon: () => {
             return (
@@ -197,14 +199,14 @@ const HomeWithSafeArea = Component => props => {
 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' ,        }} edges={['bottom', 'top']}>  
-      {/* <StatusBar barStyle={"light-content"}/> */}
+    <SafeAreaView style={{ flex: 1 }} >  
+      <StatusBar barStyle={"light-content"}/>
       <Component {...props} />
     </SafeAreaView>
   );
 };
 
-const settingTabScreen = () => {
+const SettingTabScreen = () => {
   return (
     <Stack.Navigator
       initialRouteName="More"

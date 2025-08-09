@@ -44,7 +44,9 @@ allergy suffering and allergy treatment.</p>
 
 
       <h2>Questions?</h2>
-      <p>Please contact us with any questions and concerns at: <span class="email">apps@aerobiology.ca</span></p>
+      <p>Please contact us at: 
+        <a href="mailto:apps@aerobiology.ca">apps@aerobiology.ca</a>
+      </p>
     `,
   };
 
@@ -74,10 +76,14 @@ allergy suffering and allergy treatment.</p>
       fontWeight: 'bold',
       color: '#000',
     },
+    a:{
+      fontWeight: 'bold',
+      color: 'blue',
+    }
   };
 
   return (
-    <ScrollView contentContainerStyle={{flexGrow:1, padding:20}}>
+        <ScrollView contentContainerStyle={{flexGrow:1, padding:20, paddingBottom:200}}>
       <AppHeader goBack/>
       <RenderHtml
         contentWidth={responsiveWidth(100)}

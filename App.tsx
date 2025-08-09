@@ -48,21 +48,21 @@ import { store } from './src/redux/store';
 import Toast from 'react-native-toast-message';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
-import { Platform, SafeAreaView } from 'react-native';
+import { Platform, SafeAreaView, StatusBar } from 'react-native';
 
 const App = () => {
   useEffect(() => {
     // Create channel on start
     async function setup() {
-      if (Platform.OS === 'android') {
+      // if (Platform.OS === 'android') {
         await notifee.requestPermission();
         await notifee.createChannel({
           id: 'default',
           name: 'Default Channel',
           importance: 4, // HIGH
         });
-      }
-    }
+     
+    } 
     setup();
   }, []);
 
@@ -89,6 +89,7 @@ const App = () => {
   return (
 
     <Provider store={store}>
+      <StatusBar  barStyle={'dark-content'}/>
       <NavigationContainer>
         <Routes />
         <Toast />

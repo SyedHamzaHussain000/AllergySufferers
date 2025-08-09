@@ -10,6 +10,8 @@ import {
   Alert,
   Animated,
   Image,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import AppHeader from '../../../components/AppHeader';
@@ -50,6 +52,7 @@ import {useFocusEffect} from '@react-navigation/native';
 const DatavisualizerSample = ({navigation}) => {
   const dispatch = useDispatch();
   const screenWidth = Dimensions.get('window').width;
+  const screenHeight = Dimensions.get('window').height;
   const userData = useSelector(state => state.auth.user);
   const expireDate = useSelector(state => state.auth.expireDate);
   const allActiveMedicationRedux = useSelector(
@@ -66,6 +69,8 @@ const DatavisualizerSample = ({navigation}) => {
   const [takingMedications, setTakingMedications] = useState([]);
   const [todayPollensData, setTodayPollensData] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
+
+  console.log("MedicationnRecord",MedicationnRecord)
 
   const [pollenLoader, setPollenLoader] = useState(false);
 
@@ -237,9 +242,9 @@ const DatavisualizerSample = ({navigation}) => {
           value: bar.value,
           frontColor: bar.frontColor,
           label: index === 0 ? date : '',
-          labelWidth: 20,
+          labelWidth: 0,
           labelTextStyle: {color: 'gray'},
-          spacing: responsiveWidth(0.5),
+          spacing: 0,
         });
       });
 
@@ -248,8 +253,8 @@ const DatavisualizerSample = ({navigation}) => {
         group.push({
           value: 0,
           frontColor: 'transparent',
-          spacing: responsiveWidth(1.25),
-          labelWidth: 20,
+          spacing: responsiveWidth(6.7), // → outputs 27.49 in logs
+          labelWidth: 0,
         });
       }
 
@@ -515,6 +520,8 @@ const DatavisualizerSample = ({navigation}) => {
 
   const chartSpacing = responsiveWidth(28); // You can tweak this value as needed
 
+  console.log("chartSpacing",chartSpacing)
+
   const emojiMap = {
     1: AppImages.Hello,
     2: AppImages.Mask,
@@ -523,8 +530,11 @@ const DatavisualizerSample = ({navigation}) => {
     5: AppImages.Bored,
   };
 
+  const NewPro =[ { value: 0 }, { value: 2 }, { value: 3 } ]
+
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1, backgroundColor:AppColors.WHITE}}>
+      
       <ScrollView
         contentContainerStyle={{
           padding: 20,
@@ -569,7 +579,7 @@ const DatavisualizerSample = ({navigation}) => {
               <View style={{height: responsiveHeight(30)}}>
                 {MedicationnRecord?.length > 0 ? (
                   <View>
-                    <ScrollView horizontal={true}>
+                    <ScrollView style={{marginLeft:10}} horizontal={true}>
                       <View
                         style={{
                           position: 'absolute',
@@ -613,7 +623,10 @@ const DatavisualizerSample = ({navigation}) => {
                         })}
                       </View>
 
-
+                    
+                        
+                  
+                        
                       <BarChart
                         data={MedicationnRecord || []}
                         barWidth={7}
@@ -626,6 +639,8 @@ const DatavisualizerSample = ({navigation}) => {
                         // xAxisLabelTexts={[]}
                         lineData={PrimaryLineData || []}
                         lineData2={SecondaryLineData || []}
+                        lineData3={NewPro || []}
+                        
                         lineConfig={{
                           color: colours[0],
                           thickness: 2,
@@ -633,7 +648,7 @@ const DatavisualizerSample = ({navigation}) => {
                           dataPointsColor: colours[0],
                           spacing: chartSpacing,
                           // textColor: 'red',
-                          initialSpacing: responsiveWidth(10),
+                          initialSpacing: responsiveWidth(15),
                         }}
                         lineConfig2={{
                           color: colours[1],
@@ -641,20 +656,25 @@ const DatavisualizerSample = ({navigation}) => {
                           curved: false,
                           dataPointsColor: colours[1],
                           spacing: chartSpacing,
-                          initialSpacing: responsiveWidth(10),
+                          initialSpacing: responsiveWidth(15),
                         }}
+                        
                         // xAxisIndicesWidth={responsiveWidth(28)}
-                        yAxisLabelTexts={[
-                          '0',
-                          ' ',
-                          '2',
-                          ' ',
-                          '4',
-                          ' ',
-                          '6',
-                          ' ',
-                          '8',
-                        ]}
+                        // yAxisLabelTexts={[
+                        //   '0',
+                        //   ' ',
+                        //   '2',
+                        //   ' ',
+                        //   '4',
+                        //   ' ',
+                        //   '6',
+                        //   ' ',
+                        //   '8',
+                        // ]}
+                        showYAxisIndices={false}
+                        showVerticalLines={false}
+                      hideYAxisText={true}
+                        yAxisThickness={0}
                         // hideXAxisText={true}
                         // xAxisLabelTexts={[]} // extra safety
                         // xAxisLabelTextStyle={{
@@ -669,11 +689,14 @@ const DatavisualizerSample = ({navigation}) => {
                         stepValue={1}
                       />
 
+                      
+                      
+
                       <View
                         style={{
                           position: 'absolute',
                           zIndex: 10,
-                          bottom: -5,
+                          bottom: Platform.OS == "ios" ? 0: -5,
                           backgroundColor: AppColors.WHITE,
                           width: responsiveWidth(100),
                           height: responsiveHeight(2),
@@ -701,6 +724,30 @@ const DatavisualizerSample = ({navigation}) => {
                         })}
                       </View>
                     </ScrollView>
+
+
+                           <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 10,
+                          // bottom: responsiveHeight(1),
+                          // backgroundColor: AppColors.rightArrowCOlor,
+                          left:responsiveWidth(1.9),
+                          gap: Platform.OS == "ios" ? 30 : 27,
+                          justifyContent:'space-between',
+                          borderRightWidth:1,
+                          paddingRight:5
+
+                        }}
+                      >
+                        <AppText title={8} textSize={2} textColor={AppColors.LIGHTGRAY}/>
+                        <AppText title={6} textSize={2} textColor={AppColors.LIGHTGRAY}/>
+                        <AppText title={4} textSize={2} textColor={AppColors.LIGHTGRAY}/>
+                        <AppText title={2} textSize={2} textColor={AppColors.LIGHTGRAY}/>
+                        <AppText title={0} textSize={2} textColor={AppColors.LIGHTGRAY}/>
+                        </View>
+                        
+
 
                     <View
                       style={{
@@ -983,7 +1030,7 @@ const DatavisualizerSample = ({navigation}) => {
                   data={todayPollensData?.sort((a, b) => a.common_name.localeCompare(b.common_name))}
 
                   renderItem={({item}) => {
-                      console.log("type of",item )
+
                     return (
                       <TouchableOpacity
                         onPress={() => addAllergens(item)}
