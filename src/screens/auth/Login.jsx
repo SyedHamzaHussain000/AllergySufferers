@@ -88,10 +88,10 @@ const Login = ({navigation}) => {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS == "ios" ? 'padding': 'position'} style={{flex:1}}>
+    <KeyboardAvoidingView behavior={Platform.OS == "ios" ? 'padding': 'height'} style={{flex:1}}>
     <View
       style={{
-        flex: 1,
+        // flex: 1,
         backgroundColor: AppColors.WHITE,
         justifyContent: 'center',
         alignItems: 'center',

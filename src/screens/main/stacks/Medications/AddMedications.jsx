@@ -260,10 +260,10 @@ const AddMedications = ({navigation}) => {
       return;
     }
 
-    if(allActiveMedicationRedux.length == 8 ){
+    if(allActiveMedicationRedux.length == 7 ){
       Toast.show({
         type: 'error',
-        text1: 'You can only add 8 medications at a time',
+        text1: 'You can only add 7 medications at a time',
         position:'bottom',
         visibilityTime:800
       });

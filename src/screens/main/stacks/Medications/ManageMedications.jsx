@@ -56,6 +56,8 @@ const ManageMedications = ({navigation}) => {
     state => state.medications.ActiveMedications,
   );
 
+  console.log("allActiveMedicationRedux",allActiveMedicationRedux)
+
   const [activeMedication, setActiveMedication] = useState(allActiveMedicationRedux);
   const [loader, setLoader] = useState(false);
 
@@ -135,10 +137,10 @@ const ManageMedications = ({navigation}) => {
               <ActivityIndicator size={'large'} color={AppColors.BLACK} />
             )} */}
 
-            {activeMedication ? (
+            {allActiveMedicationRedux ? (
               <NestableScrollContainer>
                 <NestableDraggableFlatList
-                  data={activeMedication}
+                  data={allActiveMedicationRedux}
                   contentContainerStyle={{gap: 10}}
                   renderItem={({item, drag, isActive}) => {
                     return (

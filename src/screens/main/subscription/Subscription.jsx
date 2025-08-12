@@ -28,6 +28,7 @@ const Subscription = ({navigation}) => {
   };
 
   const subscribeNow = async(isExpired, type) => {
+
     
     if (userData?.email) {
       if (isExpired == false) {

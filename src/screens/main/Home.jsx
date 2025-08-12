@@ -168,6 +168,7 @@ const Home = ({navigation}) => {
 
   const getPollensData = (allcities, newindex) => {
     console.log("allcities",allcities)
+    console.log("newindex", newindex)
       // console.log("allcities[newindex ? newindex : 0]",allcities[newindex ? newindex : 0])
     setPollenLoader(true);
     let data = new FormData();

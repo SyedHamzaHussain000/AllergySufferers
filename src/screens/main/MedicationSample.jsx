@@ -47,7 +47,6 @@ const MedicationSample = ({navigation}) => {
 
   const expireDate = useSelector(state => state.auth.expireDate);
 
-
   const allActiveMedicationRedux = useSelector(
     state => state.medications.ActiveMedications,
   );
@@ -77,21 +76,27 @@ const MedicationSample = ({navigation}) => {
   const [sliderScrollEnabled, setSliderScrollEnabled] = useState(false);
   const [savingDataLoader, setSavingDataLoader] = useState(false);
 
+  const [currentIndex, setCurrentIndex] = useState(
+    MedicationnRecord.length - 1,
+  ); // start at latest week
+
+  console.log('currentIndex', currentIndex, MedicationnRecord.length);
+
   useEffect(() => {
     generateMedicationSlides(selecteddate, allActiveMedicationRedux);
   }, [selecteddate, allActiveMedicationRedux]);
 
   useEffect(() => {
     // const nav = navigation.addListener('focus', () => {
-      getApiDataAndSaveToRedux(allActiveMedicationRedux);
-      // getMedApiDataAndSaveToRedux();
+    getApiDataAndSaveToRedux(allActiveMedicationRedux);
+    // getMedApiDataAndSaveToRedux();
     // });
     // return nav;
   }, [allActiveMedicationRedux]);
 
-  useEffect(()=>{
-    getMedApiDataAndSaveToRedux(allMyCurrentMeds)
-  },[ allMyCurrentMeds])
+  useEffect(() => {
+    getMedApiDataAndSaveToRedux(allMyCurrentMeds);
+  }, [allMyCurrentMeds]);
 
   useFocusEffect(
     useCallback(() => {
@@ -104,9 +109,8 @@ const MedicationSample = ({navigation}) => {
   );
 
   const getMedApiDataAndSaveToRedux = async () => {
-
-    if(allMyCurrentMeds.length > 0){
-      return
+    if (allMyCurrentMeds.length > 0) {
+      return;
     }
     const response = await ApiCallWithUserId(
       'post',
@@ -114,14 +118,13 @@ const MedicationSample = ({navigation}) => {
       userData?.id,
     );
 
-    console.log("response,,,,,,,,,,,,,,,,,,,,,,,",response)
+    console.log('response,,,,,,,,,,,,,,,,,,,,,,,', response);
 
     if (response?.data?.length > 0) {
       // console.log('get_medications_active....', response?.data);
       dispatch(setAllMedicationFromApi(response?.data));
     }
   };
-
 
   const getApiDataAndSaveToRedux = async () => {
     if (allActiveMedicationRedux.length === 0) {
@@ -137,7 +140,7 @@ const MedicationSample = ({navigation}) => {
       if (getActiveMedicationData?.entries?.items?.length > 0) {
         dispatch(setActiveMedication(getActiveMedicationData.entries.items));
         setSavingDataLoader(false);
-      }else{
+      } else {
         setSavingDataLoader(false);
       }
       return;
@@ -168,6 +171,7 @@ const MedicationSample = ({navigation}) => {
   };
 
   const setAllMedicationToRedux = async () => {
+    // return
     const currentDate = moment().format('YYYY-MM-DD');
 
     setLoader(true);
@@ -176,6 +180,9 @@ const MedicationSample = ({navigation}) => {
       const allergenLastDate =
         allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date;
 
+      // console.log(".................", allergenLastDate, "currentDate",currentDate)
+
+      // return
       // Alert.alert("currentDate",currentDate,  )
 
       if (allergenLastDate == currentDate) {
@@ -191,9 +198,7 @@ const MedicationSample = ({navigation}) => {
         const toAdd = [];
 
         dateArray.forEach(date => {
-
           allMyCurrentMeds.forEach(med => {
-
             toAdd.push({
               ...med,
               date: date,
@@ -391,6 +396,18 @@ const MedicationSample = ({navigation}) => {
     SaveMedicationDataInApi(allActiveMedicationRedux);
   };
 
+  const goNext = () => {
+    if (currentIndex < MedicationnRecord.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    }
+  };
+
+  const goPrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    }
+  };
+
   useEffect(() => {
     if (sliderRef.current && MedicationnRecord.length > 0) {
       // Jump to the last slide
@@ -406,7 +423,6 @@ const MedicationSample = ({navigation}) => {
       return () => clearTimeout(timeout);
     }
   }, [sliderScrollEnabled]);
-
 
   const memoizedMedicationList = () => {
     if (allActiveMedicationRedux.length === 0) return null;
@@ -481,58 +497,253 @@ const MedicationSample = ({navigation}) => {
     );
   };
 
+  // const memoizedSlider = () => {
+  //   // useMemo(() => {
+  //   if (MedicationnRecord.length === 0) return null;
+
+  //   const screenWidth = Dimensions.get('window').width;
+
+  //   return (
+  //     <View style={{height: responsiveHeight(35)}}>
+  //             <Text style={{fontSize: 16, alignSelf:'center'}}>{MedicationnRecord[0]?.title}</Text>
+  //       <ScrollView  horizontal style={{paddingRight:100}}>
+
+  //        {/* <View style={{alignItems: 'center'}}> */}
+  //             <BarChart
+  //               data={MedicationnRecord[0]?.barData}
+  //               barWidth={7}
+  //               frontColor="#E23131"
+  //               showLine={false}
+  //               initialSpacing={0}
+  //               xAxisLabelTextStyle={{
+  //                 fontSize: 10,
+  //                 color: '#000',
+  //                 fontWeight: '400',
+  //                 width: 20,
+  //               }}
+  //               // width={screenWidth * 0.9}
+  //               barBorderRadius={2}
+  //               isAnimated={true}
+  //               maxValue={8}
+  //               stepValue={1}
+  //               hideDataPoints={false}
+  //               spacing={7}
+  //               formatYLabel={label => parseFloat(label).toFixed(0)}
+  //             />
+  //             </ScrollView>
+  //           {/* </View> */}
+
+  //       {/* <AppIntroSlider
+  //         ref={sliderRef}
+  //         data={MedicationnRecord}
+  //         showNextButton={false}
+  //         showPrevButton={false}
+  //         showDoneButton={false}
+  //         nestedScrollEnabled={true}
+  //         scrollEnabled={true}
+  //         renderItem={({item}) => (
+  //           <View style={{alignItems: 'center'}}>
+  //             <Text style={{fontSize: 16}}>{item.title}</Text>
+  //             <BarChart
+  //               data={item.barData}
+  //               barWidth={7}
+  //               frontColor="#E23131"
+  //               showLine={false}
+  //               initialSpacing={0}
+  //               xAxisLabelTextStyle={{
+  //                 fontSize: 10,
+  //                 color: '#000',
+  //                 fontWeight: '400',
+  //                 width: 20,
+  //               }}
+  //               width={screenWidth * 0.9}
+  //               barBorderRadius={2}
+  //               isAnimated={true}
+  //               maxValue={8}
+  //               stepValue={1}
+  //               hideDataPoints={false}
+  //               spacing={7}
+  //               formatYLabel={label => parseFloat(label).toFixed(0)}
+  //             />
+  //           </View>
+  //         )}
+  //         dotStyle={{backgroundColor: '#ccc', marginTop: 50}}
+  //         activeDotStyle={{backgroundColor: AppColors.BLACK, marginTop: 50}}
+  //       /> */}
+
+  //     </View>
+  //   );
+  // };
+
+  //   const memoizedSlider = () => {
+  //   if (MedicationnRecord.length === 0) return null;
+
+  //   const screenWidth = Dimensions.get('window').width;
+  //   const currentSlide = MedicationnRecord[0];
+  //   const barWidth = 7;
+  //   const spacing = 7; // same as your chart spacing
+
+  //   // Calculate needed width for all bars
+  //   const chartWidth =
+  //     currentSlide?.barData?.length * (barWidth + spacing) + spacing;
+
+  //   return (
+  //     <View style={{ height: responsiveHeight(35) }}>
+  //       <Text style={{ fontSize: 16, alignSelf: 'center' }}>
+  //         {currentSlide?.title}
+  //       </Text>
+  //       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+  //         <BarChart
+  //           data={currentSlide?.barData}
+  //           barWidth={barWidth}
+  //           frontColor="#E23131"
+  //           showLine={false}
+  //           initialSpacing={0}
+  //           xAxisLabelTextStyle={{
+  //             fontSize: 10,
+  //             color: '#000',
+  //             fontWeight: '400',
+  //             width: 20,
+  //           }}
+  //           width={chartWidth} // ✅ fix: dynamically sized
+  //           barBorderRadius={2}
+  //           isAnimated={true}
+  //           maxValue={8}
+  //           stepValue={1}
+  //           hideDataPoints={false}
+  //           spacing={spacing}
+  //           formatYLabel={(label) => parseFloat(label).toFixed(0)}
+  //         />
+  //       </ScrollView>
+  //     </View>
+  //   );
+  // };
+
   const memoizedSlider = () => {
-    // useMemo(() => {
     if (MedicationnRecord.length === 0) return null;
 
     const screenWidth = Dimensions.get('window').width;
+    const barWidth = 7;
+    const spacing = 7;
+
+    const currentSlide =
+      MedicationnRecord[currentIndex == -1 ? 0 : currentIndex];
+
+    const chartWidth =
+      currentSlide?.barData?.length * (barWidth + spacing) + spacing;
+
     return (
-      <View style={{height: responsiveHeight(35)}}>
-        <AppIntroSlider
-          ref={sliderRef}
-          data={MedicationnRecord}
-          showNextButton={false}
-          showPrevButton={false}
-          showDoneButton={false}
-          nestedScrollEnabled={true}
-          scrollEnabled={true}
-          renderItem={({item}) => (
-            <View style={{alignItems: 'center'}}>
-              {/* {console.log('item.......', item.barData)} */}
-              <Text style={{fontSize: 16}}>{item.title}</Text>
-              <BarChart
-                data={item.barData}
-                barWidth={7}
-                frontColor="#E23131"
-                showLine={false}
-                initialSpacing={0}
-                xAxisLabelTextStyle={{
-                  fontSize: 10,
-                  color: '#000',
-                  fontWeight: '400',
-                  width: 20,
-                }}
-                width={screenWidth * 0.9}
-                barBorderRadius={2}
-                isAnimated={true}
-                maxValue={8}
-                stepValue={1}
-                hideDataPoints={false}
-                spacing={7}
-                formatYLabel={label => parseFloat(label).toFixed(0)}
-              />
-            </View>
-          )}
-          dotStyle={{backgroundColor: '#ccc', marginTop: 50}}
-          activeDotStyle={{backgroundColor: AppColors.BLACK, marginTop: 50}}
-        />
+      <View style={{height: responsiveHeight(35), alignItems: 'center'}}>
+        <Text style={{fontSize: 16}}>{currentSlide?.title}</Text>
+
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <TouchableOpacity
+            onPress={goPrev}
+            disabled={currentIndex === 0}
+            style={{height: responsiveHeight(18), justifyContent: 'center', marginRight:10}}>
+            <AntDesign
+              name="left"
+                            size={20}
+              color={currentIndex === 0 ? AppColors.LIGHTGRAY : AppColors.BLACK}
+            />
+          </TouchableOpacity>
+
+          <View
+            style={{
+              position: 'absolute',
+              zIndex: 10,
+              // bottom: responsiveHeight(1),
+              // backgroundColor: AppColors.rightArrowCOlor,
+              left: responsiveWidth(2.5),
+              gap: Platform.OS == 'ios' ? 9 : 8,
+              justifyContent: 'space-between',
+              borderRightWidth: 1,
+              paddingRight: 5,
+              marginBottom:14,
+              marginLeft:12
+            }}>
+              <AppText title={8} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+              <AppText title={7} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+              <AppText title={6} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+              <AppText title={5} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+            <AppText title={4} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+            <AppText title={3} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+            <AppText title={2} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+            <AppText title={1} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+            <AppText title={0} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+          </View>
+
+          {/* Chart */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <BarChart
+              data={currentSlide?.barData}
+              barWidth={barWidth}
+              frontColor="#E23131"
+              showLine={false}
+              initialSpacing={0}
+              xAxisLabelTextStyle={{
+                fontSize: 10,
+                color: '#000',
+                fontWeight: '400',
+                width: 20,
+              }}
+              width={chartWidth}
+              barBorderRadius={2}
+              isAnimated={true}
+              maxValue={8}
+              stepValue={1}
+              hideDataPoints={false}
+              spacing={spacing}
+              formatYLabel={label => parseFloat(label).toFixed(0)}
+              //hiding verticle line
+              showYAxisIndices={false}
+              showVerticalLines={false}
+              hideYAxisText={true}
+              yAxisThickness={0}
+            />
+          </ScrollView>
+
+          {/* Right arrow */}
+          <TouchableOpacity
+            onPress={goNext}
+            disabled={currentIndex === MedicationnRecord.length - 1}
+            style={{height: responsiveHeight(18), justifyContent: 'center'}}>
+            <AntDesign
+              name="right"
+              size={20}
+              color={
+                currentIndex === MedicationnRecord.length - 1
+                  ? AppColors.LIGHTGRAY
+                  : AppColors.BLACK
+              }
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Dots */}
+        <View style={{flexDirection: 'row', marginTop: 10}}>
+          {MedicationnRecord.map((_, index) => (
+            <View
+              key={index}
+              style={{
+                height: 8,
+                width: 8,
+                borderRadius: 4,
+                marginHorizontal: 4,
+                backgroundColor:
+                  index === currentIndex ? AppColors.BLACK : '#ccc',
+              }}
+            />
+          ))}
+        </View>
       </View>
     );
   };
 
+  // console.log("MedicationnRecord", MedicationnRecord.length)
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
-      <StatusBar  barStyle={'dark-content'}/>
+      <StatusBar barStyle={'dark-content'} />
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
         <AppHeader
           heading="Medication"
@@ -567,7 +778,9 @@ const MedicationSample = ({navigation}) => {
           }}
         />
 
-        <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom:200}}>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1, paddingBottom: 200}}
+          nestedScrollEnabled>
           {savingDataLoader && (
             <ActivityIndicator size={'small'} color={AppColors.BLACK} />
           )}
