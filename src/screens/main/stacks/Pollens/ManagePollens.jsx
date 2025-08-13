@@ -47,7 +47,6 @@ const ManagePollens = ({navigation}) => {
     const nav = navigation.addListener('focus', () => {
       getAllPollens();
     });
-
     return nav;
   }, [navigation]);
 
@@ -117,6 +116,8 @@ const ManagePollens = ({navigation}) => {
         setLoader(false);
       });
   };
+
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <GestureHandlerRootView style={{flex: 1}}>

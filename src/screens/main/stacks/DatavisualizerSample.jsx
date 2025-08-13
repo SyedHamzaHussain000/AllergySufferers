@@ -48,6 +48,7 @@ import {
   setActiveCity,
 } from '../../../redux/Slices/MedicationSlice';
 import {useFocusEffect} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const DatavisualizerSample = ({navigation}) => {
   const dispatch = useDispatch();
@@ -61,7 +62,10 @@ const DatavisualizerSample = ({navigation}) => {
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const activeCity = useSelector(state => state?.medications?.ActiveCity);
 
+
   console.log("activeCity",activeCity)
+
+
 
   const [type, setType] = useState('allergens');
   const [medicationData, setMedicationsData] = useState();
@@ -70,7 +74,7 @@ const DatavisualizerSample = ({navigation}) => {
   const [todayPollensData, setTodayPollensData] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
 
-  console.log("MedicationnRecord",MedicationnRecord)
+  // console.log('MedicationnRecord', MedicationnRecord);
 
   const [pollenLoader, setPollenLoader] = useState(false);
 
@@ -80,6 +84,7 @@ const DatavisualizerSample = ({navigation}) => {
   );
 
   const colours = ['lightblue', 'lightgreen'];
+  const insets = useSafeAreaInsets();
 
   const [open, setOpen] = useState(false);
 
@@ -101,18 +106,26 @@ const DatavisualizerSample = ({navigation}) => {
   const [AllDayNumber, setAllDayNumber] = useState([]);
   const [activeDate, setActiveDate] = useState(null);
 
-
   // console.log("allCities",AllCities[0])
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       getAllAllergens();
 
-      getSelectedAllergens();
+      // getSelectedAllergens(activeCity);
+
+      if(!activeCity){
+        NewActiveCity()
+      }
     });
 
     return nav;
   }, [navigation]);
+  
+
+  useEffect(()=>{
+    getSelectedAllergens(activeCity);
+  },[activeCity])
 
   useEffect(() => {
     if (allActiveMedicationRedux.length > 0) {
@@ -121,12 +134,28 @@ const DatavisualizerSample = ({navigation}) => {
   }, [allActiveMedicationRedux]);
 
   useEffect(() => {
-    getSelectedAllergens();
+    // getSelectedAllergens(activeCity);
 
     if (type == 'medication') {
       getMedicationApi();
     }
-  }, [selecteddate]);
+  }, [selecteddate, activeCity]);
+
+  
+
+  const NewActiveCity = () => {
+
+    // console.log("activeCity",AllCities)
+    // Alert.alert("ative med new")
+    // return
+
+    if(!activeCity){
+      dispatch(setActiveCity(AllCities[0]));
+      return
+    }else{
+      console.log("active city is exist")
+    }
+  }
 
   const setMedicationLoading = (id, isLoading) => {
     setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
@@ -266,8 +295,8 @@ const DatavisualizerSample = ({navigation}) => {
 
   const getDataVisualizer = async (selecallergens, city) => {
 
-    dispatch(setActiveCity(city ? city : AllCities[0]));
-
+    // console.log("city ? city : AllCities[0]", city ? city : AllCities[0])
+    
     // console.log("city",city)
     if (!selecallergens || selecallergens.length === 0) {
       // no allergens selected, clear chart data
@@ -282,64 +311,74 @@ const DatavisualizerSample = ({navigation}) => {
     setPickedCity(AllCities[0]);
 
     // if (getCity) {
-      setDataVisualizerLoader(true);
-      const allergenParams = selecallergens
-        .map(
-          item =>
-            `scientific_names[]=${encodeURIComponent(item.allergen_name)}`,
-        )
-        .join('&');
-      // console.log('selecteddate', selecteddate, 'allergenParams', allergenParams);
+    setDataVisualizerLoader(true);
+    const allergenParams = selecallergens
+      .map(
+        item => `scientific_names[]=${encodeURIComponent(item.allergen_name)}`,
+      )
+      .join('&');
+    // console.log('selecteddate', selecteddate, 'allergenParams', allergenParams);
 
-      const dateis = moment(allActiveMedicationRedux[0]?.date).format(
-        'YYYY-MM-DD',
-      );
+    const dateis = moment(allActiveMedicationRedux[0]?.date).format(
+      'YYYY-MM-DD',
+    );
 
-      const config = {
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=${city ? city?.lat : AllCities[0]?.lat}&lng=${ city ? city?.lng :AllCities[0]?.lng}&start_date=${dateis}&${allergenParams}`,
-        headers: {
-          'Cache-Control': 'no-cache',
-          Pragma: 'no-cache',
-          Expires: '0',
-        },
-      };
+    const pickLat = city ? city?.lat : activeCity ? activeCity.lat :   AllCities[0]?.lat
+    const pickLng = city ? city?.lng : activeCity ? activeCity.lng : AllCities[0]?.lng
 
-      axios
-        .request(config)
-        .then(response => {
-          const apiData = response.data;
-          console.log('api data of symptoms', apiData);
-          setAllSymtoms(apiData.symptom_level);
-          const chartLineData = {};
-          Object.keys(apiData).forEach(key => {
-            if (key !== 'dates' && key !== 'symptom_level') {
-              chartLineData[key] = apiData[key].map(val => ({value: val}));
-            }
-          });
+  // console.log("city",city)
+    console.log("pickLat", pickLat)
+    console.log("pickLng", pickLng)
 
-          //edited code
-          const first = selecallergens[0];
-          const second = selecallergens[1];
+    const config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${
+        userData.id
+      }/data_visualizer?lat=${city ? city?.lat : activeCity ? activeCity.lat :   AllCities[0]?.lat}&lng=${
+        city ? city?.lng : activeCity ? activeCity.lng : AllCities[0]?.lng
+      }&start_date=${dateis}&${allergenParams}`,
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+    };
 
-          setPrimaryLineData(chartLineData[first?.allergen_name] || []);
-          setSecondaryLineData(chartLineData[second?.allergen_name] || []);
-
-          colours[0] = first?.chartColor || 'lightblue';
-          colours[1] = second?.chartColor || 'lightgreen';
-
-          // ....................
-
-          setDataVisualizerLoader(false);
-        })
-        .then(response => {
-          setDataVisualizerLoader(false);
-        })
-        .catch(error => {
-          setDataVisualizerLoader(false);
-          console.log(error);
+    axios
+      .request(config)
+      .then(response => {
+        const apiData = response.data;
+        console.log('api data of symptoms', apiData);
+        setAllSymtoms(apiData.symptom_level);
+        const chartLineData = {};
+        Object.keys(apiData).forEach(key => {
+          if (key !== 'dates' && key !== 'symptom_level') {
+            chartLineData[key] = apiData[key].map(val => ({value: val}));
+          }
         });
+
+        //edited code
+        const first = selecallergens[0];
+        const second = selecallergens[1];
+
+        setPrimaryLineData(chartLineData[first?.allergen_name] || []);
+        setSecondaryLineData(chartLineData[second?.allergen_name] || []);
+
+        colours[0] = first?.chartColor || 'lightblue';
+        colours[1] = second?.chartColor || 'lightgreen';
+
+        // ....................
+
+        setDataVisualizerLoader(false);
+      })
+      .then(response => {
+        setDataVisualizerLoader(false);
+      })
+      .catch(error => {
+        setDataVisualizerLoader(false);
+        console.log(error);
+      });
     // } else {
     //   console.log('add city');
     // }
@@ -381,7 +420,7 @@ const DatavisualizerSample = ({navigation}) => {
       .request(config)
       .then(response => {
         setPollenLoader(false);
-        getSelectedAllergens();
+        getSelectedAllergens(activeCity);
       })
       .catch(error => {
         console.log(error);
@@ -389,10 +428,9 @@ const DatavisualizerSample = ({navigation}) => {
       });
   };
 
-  const getSelectedAllergens = (city) => {
+  const getSelectedAllergens = city => {
     // setActiveDate(null)
 
-    
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -494,7 +532,6 @@ const DatavisualizerSample = ({navigation}) => {
   const getLocation = async type => {
     setType(type);
 
-    
     // if (userData.email) {
     //   const res = await GetAllLocation(userData.id);
     //   console.log('res', res);
@@ -507,20 +544,14 @@ const DatavisualizerSample = ({navigation}) => {
 
   const SelectLocation = async city => {
     // await AsyncStorage.setItem('isCity', JSON.stringify(city));
-    dispatch(setActiveCity(city))
-    getSelectedAllergens(city);
+    dispatch(setActiveCity(city));
+    // getSelectedAllergens(city);
   };
 
-  const removeCity = async () => {
-    // console.log('remove citu');
-    // await AsyncStorage.removeItem('isCity');
-    dispatch(setActiveCity(null))
-    getSelectedAllergens();
-  };
 
   const chartSpacing = responsiveWidth(28); // You can tweak this value as needed
 
-  console.log("chartSpacing",chartSpacing)
+  // console.log('chartSpacing', chartSpacing);q
 
   const emojiMap = {
     1: AppImages.Hello,
@@ -530,17 +561,17 @@ const DatavisualizerSample = ({navigation}) => {
     5: AppImages.Bored,
   };
 
-  const NewPro =[ { value: 0 }, { value: 2 }, { value: 3 } ]
+  const NewPro = [{value: 0}, {value: 2}, {value: 3}];
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor:AppColors.WHITE}}>
-      
+    <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <ScrollView
         contentContainerStyle={{
           padding: 20,
           flexGrow: 1,
           backgroundColor: AppColors.WHITE,
           paddingBottom: 200,
+          // paddingBottom: insets.bottom + 40,
         }}>
         <AppHeader
           heading="Data Visualizer"
@@ -569,17 +600,20 @@ const DatavisualizerSample = ({navigation}) => {
             {DataVisualizerLoader == true ? (
               <View
                 style={{
-                  height: responsiveHeight(30),
+                  // height: responsiveHeight(30),
+                  minHeight: responsiveHeight(30),
+                  position: 'relative',
+                  paddingBottom: 20,
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
                 <ActivityIndicator size={'large'} color={AppColors.BLACK} />
               </View>
             ) : (
-              <View style={{height: responsiveHeight(30)}}>
+              <View style={{minHeight: responsiveHeight(30),paddingBottom: 20, position: 'relative'}}>
                 {MedicationnRecord?.length > 0 ? (
                   <View>
-                    <ScrollView style={{marginLeft:10}} horizontal={true}>
+                    <ScrollView   contentContainerStyle={{minWidth: responsiveWidth(100)}} style={{marginLeft: 10}} horizontal={true}>
                       <View
                         style={{
                           position: 'absolute',
@@ -623,10 +657,6 @@ const DatavisualizerSample = ({navigation}) => {
                         })}
                       </View>
 
-                    
-                        
-                  
-                        
                       <BarChart
                         data={MedicationnRecord || []}
                         barWidth={7}
@@ -640,7 +670,6 @@ const DatavisualizerSample = ({navigation}) => {
                         lineData={PrimaryLineData || []}
                         lineData2={SecondaryLineData || []}
                         lineData3={NewPro || []}
-                        
                         lineConfig={{
                           color: colours[0],
                           thickness: 2,
@@ -658,7 +687,6 @@ const DatavisualizerSample = ({navigation}) => {
                           spacing: chartSpacing,
                           initialSpacing: responsiveWidth(15),
                         }}
-                        
                         // xAxisIndicesWidth={responsiveWidth(28)}
                         // yAxisLabelTexts={[
                         //   '0',
@@ -673,7 +701,7 @@ const DatavisualizerSample = ({navigation}) => {
                         // ]}
                         showYAxisIndices={false}
                         showVerticalLines={false}
-                      hideYAxisText={true}
+                        hideYAxisText={true}
                         yAxisThickness={0}
                         // hideXAxisText={true}
                         // xAxisLabelTexts={[]} // extra safety
@@ -689,14 +717,11 @@ const DatavisualizerSample = ({navigation}) => {
                         stepValue={1}
                       />
 
-                      
-                      
-
                       <View
                         style={{
                           position: 'absolute',
                           zIndex: 10,
-                          bottom: Platform.OS == "ios" ? 0: -5,
+                          bottom: Platform.OS == 'ios' ? 0 : -5,
                           backgroundColor: AppColors.WHITE,
                           width: responsiveWidth(100),
                           height: responsiveHeight(2),
@@ -725,43 +750,83 @@ const DatavisualizerSample = ({navigation}) => {
                       </View>
                     </ScrollView>
 
-
-                           <View
-                        style={{
-                          position: 'absolute',
-                          zIndex: 10,
-                          // bottom: responsiveHeight(1),
-                          // backgroundColor: AppColors.rightArrowCOlor,
-                          left:responsiveWidth(1.9),
-                          gap: Platform.OS == "ios" ? 30 : 27,
-                          justifyContent:'space-between',
-                          borderRightWidth:1,
-                          paddingRight:5
-
-                        }}
-                      >
-                        <AppText title={8} textSize={2} textColor={AppColors.LIGHTGRAY}/>
-                        <AppText title={6} textSize={2} textColor={AppColors.LIGHTGRAY}/>
-                        <AppText title={4} textSize={2} textColor={AppColors.LIGHTGRAY}/>
-                        <AppText title={2} textSize={2} textColor={AppColors.LIGHTGRAY}/>
-                        <AppText title={0} textSize={2} textColor={AppColors.LIGHTGRAY}/>
-                        </View>
-                        
-
+                    <View
+                      style={{
+                        position: 'absolute',
+                        zIndex: 10,
+                        // bottom: responsiveHeight(1),
+                        // backgroundColor: AppColors.rightArrowCOlor,
+                        left: responsiveWidth(1.9),
+                        gap: Platform.OS == 'ios' ? 30 : 27,
+                        justifyContent: 'space-between',
+                        borderRightWidth: 1,
+                        paddingRight: 5,
+                      }}>
+                      <AppText
+                        title={8}
+                        textSize={2}
+                        textColor={AppColors.LIGHTGRAY}
+                      />
+                      <AppText
+                        title={6}
+                        textSize={2}
+                        textColor={AppColors.LIGHTGRAY}
+                      />
+                      <AppText
+                        title={4}
+                        textSize={2}
+                        textColor={AppColors.LIGHTGRAY}
+                      />
+                      <AppText
+                        title={2}
+                        textSize={2}
+                        textColor={AppColors.LIGHTGRAY}
+                      />
+                      <AppText
+                        title={0}
+                        textSize={2}
+                        textColor={AppColors.LIGHTGRAY}
+                      />
+                    </View>
 
                     <View
                       style={{
                         position: 'absolute',
                         zIndex: 1,
                         right: 0,
+                          // minWidth: responsiveWidth(13.5),
+                          //  justifyContent: 'space-between',
+    // paddingVertical: responsiveHeight(1),
+                        // justifyContent: 'flex-start',,
                         height: responsiveHeight(30),
-                        gap: 25,
+                        top: '37%',
+                        gap: 10,
                       }}>
-                      <AppText title={'Very \nHigh'} textSize={1.5} />
-                      <AppText title={'High'} textSize={1.5} />
+                      <AppText 
+                      // style={{
+                      //   position: 'absolute',
+                      //   top: '31%',
+                      // }} 
+                       title={'Very \nHigh'} textSize={1.5} />
+                      <AppText  
+    //                   style={{
+    //   position: 'absolute',
+    //   top: '44.5%', 
+    // }} 
+    title={'High'} textSize={1.5} />
 
-                      <AppText title={'Moderate'} textSize={1.5} />
-                      <AppText title={'Low'} textSize={1.5} />
+                      <AppText    
+    //                    style={{
+    //   position: 'absolute',
+    //   top: '53%',
+    // }}
+ title={'Moderate'} textSize={1.5} />
+                      <AppText 
+                      // style={{
+                      //   position: 'absolute',
+                      //   top: '62%'
+                      // }} 
+                      title={'Low'} textSize={1.5} />
                     </View>
                   </View>
                 ) : (
@@ -806,18 +871,34 @@ const DatavisualizerSample = ({navigation}) => {
                   renderItem={({item, index}) => (
                     <View
                       style={{
-                        height: responsiveHeight(6),
+                        minHeight: responsiveHeight(6),
                         width: responsiveWidth(90),
-                        borderWidth: 1,
+                        // maxWidth: 400,
+                        paddingVertical: 10,
                         borderRadius: 10,
                         borderColor: AppColors.LIGHTGRAY,
-                        marginTop: 5,
                         backgroundColor: colours[index],
                         flexDirection: 'row',
+                        marginTop: 5,
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         paddingHorizontal: 20,
-                      }}>
+                        borderWidth: 1,
+                      }}
+                      // style={{
+                      //   height: responsiveHeight(6),
+                      //   width: responsiveWidth(90),
+                      //   borderWidth: 1,
+                      //   borderRadius: 10,
+                      //   borderColor: AppColors.LIGHTGRAY,
+                      //   marginTop: 5,
+                      //   backgroundColor: colours[index],
+                      //   flexDirection: 'row',
+                      //   justifyContent: 'space-between',
+                      //   alignItems: 'center',
+                      //   paddingHorizontal: 20,
+                      // }}
+                    >
                       <AppText title={item.allergen_name} textSize={1.5} />
 
                       {loadingItemId === item.id ? (
@@ -844,8 +925,10 @@ const DatavisualizerSample = ({navigation}) => {
                   <AppText title={'City'} textSize={2} textFontWeight />
                   <View
                     style={{
-                      height: 50,
+                      // height: 50,
+                      minHeight: responsiveHeight(6),
                       width: responsiveWidth(90),
+                      // maxWidth: 400,
                       alignSelf: 'center',
                       backgroundColor: AppColors.PEACHCOLOUR,
                       borderRadius: 10,
@@ -855,12 +938,15 @@ const DatavisualizerSample = ({navigation}) => {
                       paddingHorizontal: 20,
                     }}>
                     <AppText
-                      title={activeCity?.city_name ? activeCity?.city_name : AllCities[0]?.city_name}
+                      title={
+                        activeCity?.city_name
+                          ? activeCity?.city_name
+                          : AllCities[0]?.city_name
+                      }
                       textSize={2}
                       textFontWeight
                       textColor={AppColors.BLACK}
                     />
-
                   </View>
                 </View>
               )}
@@ -869,15 +955,18 @@ const DatavisualizerSample = ({navigation}) => {
             <View>
               <View
                 style={{
-                  marginTop: 20,
+                  marginVertical: 10,
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                 }}>
                 <TouchableOpacity
                   onPress={() => getAllAllergens()}
                   style={{
-                    height: responsiveHeight(5),
-                    width: responsiveWidth(44),
+                    // height: responsiveHeight(5),
+                    // width: responsiveWidth(44),
+                    minHeight: responsiveHeight(5.5),
+                    paddingVertical: 10,
+                    width: '48%',
                     backgroundColor:
                       type == 'allergens'
                         ? AppColors.BTNCOLOURS
@@ -900,8 +989,11 @@ const DatavisualizerSample = ({navigation}) => {
                 <TouchableOpacity
                   onPress={() => getMedicationApi()}
                   style={{
-                    height: responsiveHeight(5),
-                    width: responsiveWidth(44),
+                    // height: responsiveHeight(5),
+                    // width: responsiveWidth(44),
+                    minHeight: responsiveHeight(5.5),
+paddingVertical: 10,
+width: '48%',
                     borderWidth: 1,
                     borderRadius: 10,
                     alignItems: 'center',
@@ -923,19 +1015,35 @@ const DatavisualizerSample = ({navigation}) => {
               </View>
               <TouchableOpacity
                 onPress={() => getLocation('Add Location')}
-                style={{
-                  height: responsiveHeight(5),
-                  width: responsiveWidth(90),
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor:
-                    type == 'Add Location'
-                      ? AppColors.BTNCOLOURS
-                      : AppColors.WHITE,
-                  marginTop: 10,
-                }}>
+                  style={{
+    width: responsiveWidth(90),
+    // maxWidth: 400, 
+    alignSelf: 'center', 
+    borderWidth: 1,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor:
+      type === 'Add Location'
+        ? AppColors.BTNCOLOURS
+        : AppColors.WHITE,
+    marginTop: 10,
+    paddingVertical: 12, 
+  }}
+                // style={{
+                //   height: responsiveHeight(5),
+                //   width: responsiveWidth(90),
+                //   borderWidth: 1,
+                //   borderRadius: 10,
+                //   alignItems: 'center',
+                //   justifyContent: 'center',
+                //   backgroundColor:
+                //     type == 'Add Location'
+                //       ? AppColors.BTNCOLOURS
+                //       : AppColors.WHITE,
+                //   marginTop: 10,
+                // }}
+                >
                 <AppText
                   title={'Change Location'}
                   textColor={
@@ -1027,16 +1135,19 @@ const DatavisualizerSample = ({navigation}) => {
             ) : type == 'allergens' ? (
               <View>
                 <FlatList
-                  data={todayPollensData?.sort((a, b) => a.common_name.localeCompare(b.common_name))}
-
+                  data={todayPollensData?.sort((a, b) =>
+                    a.common_name.localeCompare(b.common_name),
+                  )}
                   renderItem={({item}) => {
-
                     return (
                       <TouchableOpacity
                         onPress={() => addAllergens(item)}
                         style={{
-                          height: responsiveHeight(6),
-                          width: responsiveWidth(90),
+                          // height: responsiveHeight(6),
+                          minHeight: responsiveHeight(6),
+                          maxWidth: 400,
+                          // width: responsiveWidth(90),
+                          width: '100%',
                           borderWidth: 1,
                           borderRadius: 10,
                           borderColor: AppColors.LIGHTGRAY,

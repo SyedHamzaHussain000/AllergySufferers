@@ -56,10 +56,12 @@ const ManageMedications = ({navigation}) => {
     state => state.medications.ActiveMedications,
   );
 
-  console.log("allActiveMedicationRedux",allActiveMedicationRedux)
+  console.log("ActiveMedications",allActiveMedicationRedux)
 
+  
   const [activeMedication, setActiveMedication] = useState(allActiveMedicationRedux);
   const [loader, setLoader] = useState(false);
+  console.log("allActiveMedicationRedux",activeMedication)
 
   const [data3, setData3] = useState([1, 2, 3, 4]);
 
@@ -69,6 +71,12 @@ const ManageMedications = ({navigation}) => {
     moment().local().format('YYYY-MM-DD'),
   );
   const [open, setOpen] = useState(false);
+
+
+  useEffect(()=>{
+      setActiveMedication(allActiveMedicationRedux)
+  },[allActiveMedicationRedux])
+  
 
 
 
@@ -93,6 +101,12 @@ const ManageMedications = ({navigation}) => {
     // console.log("deleteMed", medData.id)
     // return
   };
+
+  const sortMedication = (data) => {
+
+    console.log("sorted data", data)
+    setActiveMedication(data)
+  }
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -137,10 +151,10 @@ const ManageMedications = ({navigation}) => {
               <ActivityIndicator size={'large'} color={AppColors.BLACK} />
             )} */}
 
-            {allActiveMedicationRedux ? (
+            {activeMedication ? (
               <NestableScrollContainer>
                 <NestableDraggableFlatList
-                  data={allActiveMedicationRedux}
+                  data={activeMedication}
                   contentContainerStyle={{gap: 10}}
                   renderItem={({item, drag, isActive}) => {
                     return (
@@ -194,7 +208,7 @@ const ManageMedications = ({navigation}) => {
                     );
                   }}
                   keyExtractor={(item, index) => index.toString()}
-                  onDragEnd={({data}) => setActiveMedication(data)}
+                  onDragEnd={({data}) => sortMedication(data)}
                   dragEnabled={true}
                   activationDistance={10}
                 />

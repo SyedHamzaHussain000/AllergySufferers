@@ -509,17 +509,18 @@ const Home = ({navigation}) => {
                                 textFontWeight
                                 textSize={2}
                               />
-                              {pollenLoader == true ? (
+                              {/* {pollenLoader == true ? (
                                 <ActivityIndicator
                                   size={'small'}
                                   color={AppColors.BLACK}
                                 />
-                              ) : (
+                              ) : ( */}
                                 <AppText
-                                  title={pollenData?.today?.text}
+                                  // title={pollenData?.today?.text}
+                                  title={moment().local().format('MMMM Do, YYYY')}
                                   textColor={'#777777'}
                                 />
-                              )}
+                              {/* )} */}
                             </View>
                           </View>
 

@@ -180,6 +180,11 @@ const MedicationSlice = createSlice({
     },
     setActiveCity: (state, action) => {
       state.ActiveCity = action.payload
+    },
+    setSortCity:(state, action) => {
+
+      console.log("actui", action.payload)
+      state.allMyCity = action.payload
     }
   },
 });
@@ -200,7 +205,8 @@ export const {
   setAddCity,
   setAllCityFromApi,
   setRemoveCity,
-  setActiveCity
+  setActiveCity,
+  setSortCity
 } = MedicationSlice.actions;
 
 export default MedicationSlice.reducer;

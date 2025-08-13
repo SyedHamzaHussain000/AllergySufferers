@@ -118,8 +118,6 @@ const MedicationSample = ({navigation}) => {
       userData?.id,
     );
 
-    console.log('response,,,,,,,,,,,,,,,,,,,,,,,', response);
-
     if (response?.data?.length > 0) {
       // console.log('get_medications_active....', response?.data);
       dispatch(setAllMedicationFromApi(response?.data));
@@ -164,14 +162,13 @@ const MedicationSample = ({navigation}) => {
         {data: AllActiveArray},
       );
       setSavingDataLoader(false);
-      console.log('dataSaved', dataSaved);
+      console.log('dataSaved');
     } else {
       setSavingDataLoader(false);
     }
   };
 
   const setAllMedicationToRedux = async () => {
-    // return
     const currentDate = moment().format('YYYY-MM-DD');
 
     setLoader(true);
@@ -180,10 +177,11 @@ const MedicationSample = ({navigation}) => {
       const allergenLastDate =
         allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date;
 
-      // console.log(".................", allergenLastDate, "currentDate",currentDate)
-
-      // return
-      // Alert.alert("currentDate",currentDate,  )
+      if (moment(allergenLastDate).isAfter(moment(currentDate))) {
+        // allergenLastDate is greater than currentDate
+        console.log('Allergen last date is in the future');
+        return;
+      }
 
       if (allergenLastDate == currentDate) {
         setLoader(false);
@@ -349,6 +347,8 @@ const MedicationSample = ({navigation}) => {
         });
       }
 
+      setCurrentIndex(slides.length - 1);
+
       setMedicationnRecord(slides);
 
       setMedicationLoader(false);
@@ -426,6 +426,8 @@ const MedicationSample = ({navigation}) => {
 
   const memoizedMedicationList = () => {
     if (allActiveMedicationRedux.length === 0) return null;
+
+    // console.log("allActiveMedicationRedux",allActiveMedicationRedux)
 
     const filteredMedication = allActiveMedicationRedux.filter(
       item => item.date === selecteddate,
@@ -640,10 +642,14 @@ const MedicationSample = ({navigation}) => {
           <TouchableOpacity
             onPress={goPrev}
             disabled={currentIndex === 0}
-            style={{height: responsiveHeight(18), justifyContent: 'center', marginRight:10}}>
+            style={{
+              height: responsiveHeight(18),
+              justifyContent: 'center',
+              marginRight: 10,
+            }}>
             <AntDesign
               name="left"
-                            size={20}
+              size={20}
               color={currentIndex === 0 ? AppColors.LIGHTGRAY : AppColors.BLACK}
             />
           </TouchableOpacity>
@@ -659,13 +665,13 @@ const MedicationSample = ({navigation}) => {
               justifyContent: 'space-between',
               borderRightWidth: 1,
               paddingRight: 5,
-              marginBottom:14,
-              marginLeft:12
+              marginBottom: 14,
+              marginLeft: 12,
             }}>
-              <AppText title={8} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
-              <AppText title={7} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
-              <AppText title={6} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
-              <AppText title={5} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+            <AppText title={8} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+            <AppText title={7} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+            <AppText title={6} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
+            <AppText title={5} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
             <AppText title={4} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
             <AppText title={3} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
             <AppText title={2} textSize={1.5} textColor={AppColors.LIGHTGRAY} />

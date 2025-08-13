@@ -1,4 +1,4 @@
-import {View, Text} from 'react-native';
+import {View, Text, ViewStyle} from 'react-native';
 import React from 'react';
 import AppColors from '../../utils/AppColors';
 import {
@@ -16,6 +16,7 @@ type textProps = {
   textwidth?: any;
   textHeight?:any,
   marginTop?: any,
+  style?: ViewStyle
 };
 
 const AppText = ({
@@ -27,10 +28,11 @@ const AppText = ({
   textwidth,
   textHeight,
   marginTop,
+  style,
 }: textProps) => {
   return (
     <Text
-      style={{
+      style={[{
         width: textwidth ? responsiveWidth(textwidth) : null,
         fontSize: textSize
           ? responsiveFontSize(textSize)
@@ -41,7 +43,7 @@ const AppText = ({
         alignSelf: textAlignment ? textAlignment : null,
         height: textHeight ? responsiveHeight(textHeight): null, 
         marginTop: responsiveHeight(marginTop),
-      }}>
+      },style]}>
       {title}
     </Text>
   );

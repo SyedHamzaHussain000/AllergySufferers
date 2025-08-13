@@ -62,8 +62,8 @@ const FeedBack = () => {
   };
 
   return (
-    <SafeAreaView style={{flex:1}}>
-      <KeyboardAvoidingView behavior={Platform.OS == "ios" ?'padding': 'position'} style={{flex:1}}>
+    // <SafeAreaView style={{flex:1}}>
+      <KeyboardAvoidingView behavior={Platform.OS == "ios" ?'padding': 'height'} style={{flex:1}}>
         <TouchableOpacity activeOpacity={1} onPress={()=> Keyboard.dismiss()}>
     <ScrollView  contentContainerStyle={{flexGrow:1, padding: 20, paddingBottom:20}}>
       <AppHeader heading="Aerobiology" subheading="Feedback" goBack={true} />
@@ -171,7 +171,7 @@ const FeedBack = () => {
     </ScrollView>
     </TouchableOpacity>
     </KeyboardAvoidingView>
-     </SafeAreaView>
+    //  </SafeAreaView> 
   );
 };
 

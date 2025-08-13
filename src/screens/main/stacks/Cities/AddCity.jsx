@@ -50,6 +50,7 @@ const AddCity = ({navigation}) => {
         lat: JSON.stringify(detail?.location?.latitude),
         lng: JSON.stringify(detail?.location?.longitude),
         city_name: detail?.displayName?.text,
+        currentLocation: false,
       }))
 
       Toast.show({

@@ -35,59 +35,54 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AppImages from '../../../../assets/images/AppImages';
 import Toast from 'react-native-toast-message';
-import { setRemoveCity } from '../../../../redux/Slices/MedicationSlice';
+import { setRemoveCity, setSortCity } from '../../../../redux/Slices/MedicationSlice';
+import { ApiCallWithUserId } from '../../../../global/ApiCall';
 
 const ManageCities = ({navigation}) => {
   const dispatch = useDispatch();
   const userdata = useSelector(state => state.auth.user);
   const allMyCity = useSelector(state => state?.medications?.allMyCity);
   const [loader, setLoader] = useState(false);
-  const [cities, setCities] = useState([]);
+  const [cities, setCities] = useState([])
+  const [activeMedication, setActiveMedication] = useState();
 
-  console.log("allMyCity",allMyCity)
-
-    const [activeMedication, setActiveMedication] = useState(allMyCity);
   
 
-  useEffect(() => {
-    // const nav = navigation.addListener('focus', () => {
-      // getAllCities();
-      setActiveMedication(allMyCity)
-    // });
-    // return nav;
-  }, [allMyCity]);
 
-  // const getAllCities = () => {
+  useEffect(()=>{
+    const nav = navigation.addListener('focus', ()=>{
+      getAllCities()
+    })
 
-  //   if(activeMedication.length == 5){
-  //     Toast.show({
-  //       type:'error',
-  //       text1:"You can add up to 5 cities only. Please remove one to add a new city."
-  //     })
-  //     return
-  //   }
-  //   setLoader(true);
-  //   let config = {
-  //     method: 'get',
-  //     maxBodyLength: Infinity,
-  //     url: `${BASE_URL}/allergy_data/v1/user/${userdata.id}/get_cities`,
-  //     headers: {},
-  //   };
+    return nav
+  },[navigation])
 
-  //   axios
-  //     .request(config)
-  //     .then(response => {
-  //       console.log(JSON.stringify(response.data));
+  // console.log("allMyCity",allMyCity)
+  const getAllCities = () => {
 
-  //       // dispatch()
-  //       setLoader(false);
-  //       setActiveMedication(response?.data?.cities);
-  //     })
-  //     .catch(error => {
-  //       console.log(error);
-  //       setLoader(false);
-  //     });
-  // };
+    
+    setLoader(true);
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userdata.id}/get_cities`,
+      headers: {},
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+
+        // dispatch()
+        setLoader(false);
+        setActiveMedication(response?.data?.cities);
+      })
+      .catch(error => {
+        console.log(error);
+        setLoader(false);
+      });
+  };
 
   const deleteActiveMedication = item => {
 
@@ -121,6 +116,20 @@ const ManageCities = ({navigation}) => {
       });
   };
 
+  const sortingCities  = async (data) => {
+
+
+    
+    
+    
+    
+    const sortCitiesApi = await ApiCallWithUserId('post', 'sort_cities', userdata.id, {"data": data} )
+    dispatch(setSortCity(data))
+
+    console.log("sortCitiesApi", sortCitiesApi)
+
+  }
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView contentContainerStyle={{padding: 20, paddingBottom:200}}>
@@ -144,7 +153,7 @@ const ManageCities = ({navigation}) => {
               data={activeMedication}
               contentContainerStyle={{gap: 10}}
               renderItem={({item, drag, isActive}) => {
-                console.log('itemmm', item);
+                // console.log('itemmm', item);
                 return (
                   <TouchableOpacity onLongPress={drag}>
                     <AppTextInput
@@ -194,7 +203,7 @@ const ManageCities = ({navigation}) => {
                 );
               }}
               keyExtractor={(item, index) => index.toString()}
-              onDragEnd={({data}) => setActiveMedication(data)}
+              onDragEnd={({data}) => {sortingCities(data), setActiveMedication(data)} }
               dragEnabled={true}
               activationDistance={10}
             />
