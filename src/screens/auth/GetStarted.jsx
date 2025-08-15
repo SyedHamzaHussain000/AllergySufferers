@@ -34,7 +34,7 @@ const GetStarted = ({navigation}) => {
 
       setSubLoader(true);
       
-      const checkSub = await CheckSubscription(userData.id)
+      const checkSub = await CheckSubscription(userData?.id)
 
       
 

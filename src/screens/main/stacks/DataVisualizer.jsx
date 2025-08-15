@@ -112,7 +112,7 @@ const DataVisualizer = ({navigation}) => {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_all_allergens`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_all_allergens`,
       headers: {'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0'},
     };
 
@@ -139,7 +139,7 @@ const DataVisualizer = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications_active`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_medications_active`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -287,7 +287,7 @@ const DataVisualizer = ({navigation}) => {
 
     axios
       .post(
-        `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medication_records`,
+        `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_medication_records`,
         data,
         {headers: {'Content-Type': 'application/json'}},
       )
@@ -384,7 +384,7 @@ const DataVisualizer = ({navigation}) => {
       const config = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/data_visualizer?lat=${parseCity?.lat}&lng=${parseCity?.lng}&start_date=${dateis}&${allergenParams}`,
+        url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/data_visualizer?lat=${parseCity?.lat}&lng=${parseCity?.lng}&start_date=${dateis}&${allergenParams}`,
         headers: {
           'Cache-Control': 'no-cache',
           Pragma: 'no-cache',
@@ -453,7 +453,7 @@ const DataVisualizer = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_allergens`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/set_allergens`,
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache',
@@ -480,7 +480,7 @@ const DataVisualizer = ({navigation}) => {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_allergens`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_allergens`,
       headers: {
         'Cache-Control': 'no-cache',
         Pragma: 'no-cache',
@@ -529,7 +529,7 @@ const DataVisualizer = ({navigation}) => {
       const config = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/delete_allergen`,
+        url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/delete_allergen`,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -572,7 +572,7 @@ const DataVisualizer = ({navigation}) => {
       });
 
       await axios.post(
-        `${BASE_URL}/allergy_data/v1/user/${userData.id}/add_medication_units`,
+        `${BASE_URL}/allergy_data/v1/user/${userData?.id}/add_medication_units`,
         data,
         {headers: {'Content-Type': 'application/json'}},
       );
@@ -599,7 +599,7 @@ const DataVisualizer = ({navigation}) => {
       });
 
       await axios.post(
-        `${BASE_URL}/allergy_data/v1/user/${userData.id}/remove_medication_units`,
+        `${BASE_URL}/allergy_data/v1/user/${userData?.id}/remove_medication_units`,
         data,
         {headers: {'Content-Type': 'application/json'}},
       );
@@ -622,7 +622,7 @@ const DataVisualizer = ({navigation}) => {
   const getLocation = async type => {
     setType(type);
     if (userData.email) {
-      const res = await GetAllLocation(userData.id);
+      const res = await GetAllLocation(userData?.id);
       console.log('res', res);
 
       setAllCities(res.cities);

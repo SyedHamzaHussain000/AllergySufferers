@@ -46,9 +46,6 @@ const ManageCities = ({navigation}) => {
   const [cities, setCities] = useState([])
   const [activeMedication, setActiveMedication] = useState();
 
-  
-
-
   useEffect(()=>{
     const nav = navigation.addListener('focus', ()=>{
       getAllCities()
@@ -57,7 +54,6 @@ const ManageCities = ({navigation}) => {
     return nav
   },[navigation])
 
-  // console.log("allMyCity",allMyCity)
   const getAllCities = () => {
 
     
@@ -65,7 +61,7 @@ const ManageCities = ({navigation}) => {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userdata.id}/get_cities`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userdata?.id}/get_cities`,
       headers: {},
     };
 
@@ -96,7 +92,7 @@ const ManageCities = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userdata.id}/delete_city`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userdata?.id}/delete_city`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -117,13 +113,8 @@ const ManageCities = ({navigation}) => {
   };
 
   const sortingCities  = async (data) => {
-
-
     
-    
-    
-    
-    const sortCitiesApi = await ApiCallWithUserId('post', 'sort_cities', userdata.id, {"data": data} )
+    const sortCitiesApi = await ApiCallWithUserId('post', 'sort_cities', userdata?.id, {"data": data} )
     dispatch(setSortCity(data))
 
     console.log("sortCitiesApi", sortCitiesApi)

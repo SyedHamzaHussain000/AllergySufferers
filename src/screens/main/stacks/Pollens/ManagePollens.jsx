@@ -35,8 +35,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import axios from 'axios';
 import AppImages from '../../../../assets/images/AppImages';
 import {ApiCallWithUserId} from '../../../../global/ApiCall';
+import SubscribeBar from '../../../../components/SubscribeBar';
 const ManagePollens = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
+      const expireDate = useSelector(state => state.auth.expireDate);
   const [myPollens, setMyPollens] = useState([]);
 
   const [Loader, setLoader] = useState(false);
@@ -59,7 +61,7 @@ const ManagePollens = ({navigation}) => {
     const sortPollens = await ApiCallWithUserId(
       'post',
       'sort_pollens',
-      userData.id,
+      userData?.id,
       {data: data},
     );
     // setLoader(false);
@@ -71,7 +73,7 @@ const ManagePollens = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_pollens`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_pollens`,
       headers: {},
     };
 
@@ -98,7 +100,7 @@ const ManagePollens = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/delete_pollen`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/delete_pollen`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -127,69 +129,97 @@ const ManagePollens = ({navigation}) => {
             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
           ) : null}
 
-          {myPollens ? (
-            <NestableScrollContainer>
-              <NestableDraggableFlatList
-                data={myPollens}
-                contentContainerStyle={{gap: 10}}
-                renderItem={({item, drag, isActive}) => {
-                  // console.log("item", item)
-                  return (
-                    <TouchableOpacity onLongPress={drag}>
-                      <AppTextInput
-                        inputPlaceHolder={item.common_name}
-                        inputWidth={75}
-                        arrowDelete={
-                          <TouchableOpacity
-                            onPress={() =>
-                              Alert.alert(
-                                'Delete pollen and spores',
-                                'Are you sure you want to delete this pollen or spores?',
-                                [
-                                  {
-                                    text: 'Cancel',
-                                    onPress: () =>
-                                      console.log('Cancel Pressed'),
-                                    style: 'cancel',
-                                  },
-                                  {
-                                    text: 'OK',
-                                    onPress: () => deletePolles(item),
-                                  },
-                                ],
-                                {cancelable: false},
-                              )
-                            }>
-                            <MaterialCommunityIcons
-                              name={'delete'}
-                              size={responsiveFontSize(2.5)}
-                              color={AppColors.LIGHTGRAY}
-                            />
-                          </TouchableOpacity>
-                        }
-                        rightLogo={
-                          <View style={{marginTop: 4}}>
-                            <Image
-                              source={AppImages.updown}
-                              style={{
-                                height: 14,
-                                width: 14,
-                                resizeMode: 'contain',
-                              }}
+          {
+            <>
+            {
+              expireDate ? 
+              <>
+              {myPollens ? (
+                <NestableScrollContainer>
+                  <NestableDraggableFlatList
+                    data={myPollens}
+                    contentContainerStyle={{gap: 10}}
+                    renderItem={({item, drag, isActive}) => {
+                      // console.log("item", item)
+                      return (
+                        <TouchableOpacity onLongPress={drag}>
+                          <AppTextInput
+                            inputPlaceHolder={item.common_name}
+                            inputWidth={75}
+                            arrowDelete={
+                              <TouchableOpacity
+                                onPress={() =>
+                                  Alert.alert(
+                                    'Delete pollen and spores',
+                                    'Are you sure you want to delete this pollen or spores?',
+                                    [
+                                      {
+                                        text: 'Cancel',
+                                        onPress: () =>
+                                          console.log('Cancel Pressed'),
+                                        style: 'cancel',
+                                      },
+                                      {
+                                        text: 'OK',
+                                        onPress: () => deletePolles(item),
+                                      },
+                                    ],
+                                    {cancelable: false},
+                                  )
+                                }>
+                                <MaterialCommunityIcons
+                                  name={'delete'}
+                                  size={responsiveFontSize(2.5)}
+                                  color={AppColors.LIGHTGRAY}
+                                />
+                              </TouchableOpacity>
+                            }
+                            rightLogo={
+                              <View style={{marginTop: 4}}>
+                                <Image
+                                  source={AppImages.updown}
+                                  style={{
+                                    height: 14,
+                                    width: 14,
+                                    resizeMode: 'contain',
+                                  }}
+                                />
+                              </View>
+                            }
+                          />
+                        </TouchableOpacity>
+                      );
+                    }}
+                    keyExtractor={(item, index) => index.toString()}
+                    onDragEnd={({data}) => {sortPollens(data), setMyPollens(data)}}
+                    dragEnabled={true}
+                    activationDistance={10}
+                  />
+                </NestableScrollContainer>
+              ) : null}
+              </>
+              :
+              <>
+                  <View
+                            style={{
+                              height: responsiveHeight(30),
+                              justifyContent: 'center',
+                            }}>
+                            <SubscribeBar
+                              title="Subscribe now to add and manage the pollens here."
+                              title2={'Unlock full access to pollens management.'}
+                              handlePress={() =>
+                                navigation.navigate('Subscription')
+                              }
                             />
                           </View>
-                        }
-                      />
-                    </TouchableOpacity>
-                  );
-                }}
-                keyExtractor={(item, index) => index.toString()}
-                onDragEnd={({data}) => {sortPollens(data), setMyPollens(data)}}
-                dragEnabled={true}
-                activationDistance={10}
-              />
-            </NestableScrollContainer>
-          ) : null}
+              </>
+
+            }
+            
+            </>
+          }
+
 
           <View style={{marginTop: 20, gap: 10}}>
             <AppButton

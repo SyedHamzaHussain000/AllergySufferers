@@ -41,7 +41,8 @@ export const ApiCallWithUserId = async(method, endpoint, userId,data) => {
         const res = await axios(config)
        return res.data
     } catch (error) {
-        console.log("error api call by userid", error)
+        console.log(`error api call by userid and api name is ${endpoint}`, error)
+        
      return error
     } 
 }

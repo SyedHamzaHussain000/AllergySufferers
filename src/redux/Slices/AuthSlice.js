@@ -181,6 +181,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import CheckSubscription from '../../global/CheckSubscription';
+import { Alert } from 'react-native';
 
 const initialState = {
   user: null,
@@ -201,8 +202,8 @@ export const CurrentLogin = createAsyncThunk(
     try {
       const { data } = await axios.request(config);
       
-      const subData = await CheckSubscription(data.id);
-      return { data, subData };
+      // const subData = await CheckSubscription(data.id);
+      return data;
     } catch (error) {
       console.log('Error during login:', error);
       return rejectWithValue(error.response?.data || 'Login failed');
@@ -240,10 +241,11 @@ const AuthSlice = createSlice({
   extraReducers: builder => {
     builder
       .addCase(CurrentLogin.fulfilled, (state, action) => {
-        state.user = action.payload.data;
+        // Alert.alert("action.payload.expiry",action.payload.expiry)
+        state.user = action.payload;
         state.loader = false;
-        state.expireDate = action.payload.subData.expiry;
-        state.isExpired = action.payload.subData.false;
+        state.expireDate = action.payload.expiry;
+        state.isExpired = false;
       })
       .addCase(CurrentLogin.pending, state => {
         state.loader = true;

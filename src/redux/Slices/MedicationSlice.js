@@ -50,7 +50,10 @@ const MedicationSlice = createSlice({
     },
     setAllMedicationFromApi: (state, action) => {
       // Alert.alert("sadasdas redux")
+
       const newMed = action.payload;
+      // console.log("newMed",newMed[newMed.length - 1])
+
       state.MyCurrentMeds = newMed;
     },
     UpdateMedicationListOnEveryDate: (state, action) => {
@@ -58,7 +61,7 @@ const MedicationSlice = createSlice({
       const allMedRecords = state.ActiveMedications;
       const newMed = action.payload;
 
-      console.log('newMed', newMed);
+      
 
       const existMed = allMedRecords.find(
         med => med.id == newMed.id && med.date == curretDate,
@@ -108,6 +111,9 @@ const MedicationSlice = createSlice({
     deleteAllData: state => {
       state.ActiveMedications = [];
       state.MyCurrentMeds = [];
+      state.allMyCity = []
+      state.ActiveCity = null
+      
     },
 
     //add city flow
@@ -185,7 +191,8 @@ const MedicationSlice = createSlice({
 
       console.log("actui", action.payload)
       state.allMyCity = action.payload
-    }
+    },
+    
   },
 });
 
@@ -206,7 +213,8 @@ export const {
   setAllCityFromApi,
   setRemoveCity,
   setActiveCity,
-  setSortCity
+  setSortCity,
+
 } = MedicationSlice.actions;
 
 export default MedicationSlice.reducer;

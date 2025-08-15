@@ -63,7 +63,6 @@ const DatavisualizerSample = ({navigation}) => {
   const activeCity = useSelector(state => state?.medications?.ActiveCity);
 
 
-  console.log("activeCity",activeCity)
 
 
 
@@ -169,7 +168,7 @@ const DatavisualizerSample = ({navigation}) => {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_all_allergens`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_all_allergens`,
       headers: {'Cache-Control': 'no-cache', Pragma: 'no-cache', Expires: '0'},
     };
 
@@ -197,7 +196,7 @@ const DatavisualizerSample = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications_active`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_medications_active`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -326,15 +325,12 @@ const DatavisualizerSample = ({navigation}) => {
     const pickLat = city ? city?.lat : activeCity ? activeCity.lat :   AllCities[0]?.lat
     const pickLng = city ? city?.lng : activeCity ? activeCity.lng : AllCities[0]?.lng
 
-  // console.log("city",city)
-    console.log("pickLat", pickLat)
-    console.log("pickLng", pickLng)
-
+    
     const config = {
       method: 'post',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${
-        userData.id
+        userData?.id
       }/data_visualizer?lat=${city ? city?.lat : activeCity ? activeCity.lat :   AllCities[0]?.lat}&lng=${
         city ? city?.lng : activeCity ? activeCity.lng : AllCities[0]?.lng
       }&start_date=${dateis}&${allergenParams}`,
@@ -406,7 +402,7 @@ const DatavisualizerSample = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_allergens`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/set_allergens`,
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache',
@@ -434,7 +430,7 @@ const DatavisualizerSample = ({navigation}) => {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_allergens`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_allergens`,
       headers: {
         'Cache-Control': 'no-cache',
         Pragma: 'no-cache',
@@ -483,7 +479,7 @@ const DatavisualizerSample = ({navigation}) => {
       const config = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/delete_allergen`,
+        url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/delete_allergen`,
         headers: {
           'Content-Type': 'application/json',
         },

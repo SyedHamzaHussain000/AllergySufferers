@@ -41,11 +41,19 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {GetCurrentLocation} from '../../global/GetCurrentLocation';
 import {GetCityName} from '../../global/GetCityName';
-import {setAddCity, setAllCityFromApi} from '../../redux/Slices/MedicationSlice';
+import {
+  setAddCity,
+  setAllCityFromApi,
+} from '../../redux/Slices/MedicationSlice';
 import Geocoder from 'react-native-geocoding';
 import GetAllLocation from '../../global/GetAllLocation';
 import SubscribeBar from '../../components/SubscribeBar';
-import {SafeAreaView, SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context'
+import {
+  SafeAreaView,
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import {setSubscription} from '../../redux/Slices/AuthSlice';
 const Home = ({navigation}) => {
   Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
 
@@ -53,22 +61,18 @@ const Home = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const AllCities = useSelector(state => state?.medications?.allMyCity);
 
-
   // console.log('userData', AllCities);
 
   const sortCities = [...AllCities].sort((a, b) => {
-                      return (
-                        (b.currentLocation || b.isCurrentLocation ? 1 : 0) -
-                        (a.currentLocation || a.isCurrentLocation ? 1 : 0)
-                      );
-                    })
+    return (
+      (b.currentLocation || b.isCurrentLocation ? 1 : 0) -
+      (a.currentLocation || a.isCurrentLocation ? 1 : 0)
+    );
+  });
 
-  const isExpiredRedux = useSelector(state => state.auth.isExpired);
   const expireDate = useSelector(state => state.auth.expireDate);
-  const SubscriptionType = useSelector(state => state.auth.SubscriptionType);
 
-  console.log("expireDate",expireDate)
-
+  console.log('expireDate', expireDate);
 
   const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
 
@@ -135,7 +139,7 @@ const Home = ({navigation}) => {
 
       if (userData) {
         getActivePollens();
-        GetLocationFromApi()
+        GetLocationFromApi();
         // getAllCities();
         // getCurrentLocation();
       } else {
@@ -145,9 +149,6 @@ const Home = ({navigation}) => {
     return nav;
   }, [navigation, hasFetchedOnce, userData]);
 
-  
-
-
   useFocusEffect(
     useCallback(() => {
       if (AllCities && AllCities.length > 0) {
@@ -156,20 +157,35 @@ const Home = ({navigation}) => {
     }, [AllCities]),
   );
 
+  useEffect(() => {
+    if (expireDate) {
+      if (moment(expireDate).isAfter(new Date())) {
+        console.log('Subscription is valid');
+      } else {
+        dispatch(
+          setSubscription({
+            isExpired: true,
+            expireDate: '',
+            SubscriptionType: null,
+          }),
+        );
+      }
+    }
+  }, [expireDate]);
+
   const GetLocationFromApi = async () => {
     // console.log("AllCities.........",AllCities)
-    if(AllCities.length == 0){
-      const getLocationFromApi = await GetAllLocation(userData.id);
+    if (AllCities.length == 0) {
+      const getLocationFromApi = await GetAllLocation(userData?.id);
       // Alert.alert("fetching from current lat lng")
-      dispatch(setAllCityFromApi(getLocationFromApi.cities))
-
+      dispatch(setAllCityFromApi(getLocationFromApi.cities));
     }
-  }
+  };
 
   const getPollensData = (allcities, newindex) => {
-    console.log("allcities",allcities)
-    console.log("newindex", newindex)
-      // console.log("allcities[newindex ? newindex : 0]",allcities[newindex ? newindex : 0])
+    console.log('allcities', allcities);
+    console.log('newindex', newindex);
+    // console.log("allcities[newindex ? newindex : 0]",allcities[newindex ? newindex : 0])
     setPollenLoader(true);
     let data = new FormData();
     data.append('lat', allcities[newindex ? newindex : 0]?.lat);
@@ -250,13 +266,12 @@ const Home = ({navigation}) => {
     setFechingCurrentLocation(true);
     const gettingCurrentLatlng = await GetCurrentLocation();
 
-
     const getCityName = await GetCityName(
       gettingCurrentLatlng.latitude,
       gettingCurrentLatlng.longitude,
     );
 
-    console.log("getCityName",getCityName)
+    console.log('getCityName', getCityName);
     setFechingCurrentLocation(false);
 
     dispatch(
@@ -349,8 +364,14 @@ const Home = ({navigation}) => {
 
   const settingData = SettingHeaders();
 
-  
+  const freeData = [
+    {id: 1, name: 'Total Spores', value: todayPollensData?.total_spores},
+    {id: 2, name: 'Total Trees', value: todayPollensData?.total_trees},
+    {id: 3, name: 'Total Grasses', value: todayPollensData?.total_grasses},
+    {id: 4, name: 'Total Weeds', value: todayPollensData?.total_weeds},
+  ];
 
+  // console.log("isfutureArray",isfutureArray)
 
   return (
     <>
@@ -515,11 +536,20 @@ const Home = ({navigation}) => {
                                   color={AppColors.BLACK}
                                 />
                               ) : ( */}
-                                <AppText
-                                  // title={pollenData?.today?.text}
-                                  title={moment().local().format('MMMM Do, YYYY')}
-                                  textColor={'#777777'}
-                                />
+                              <AppText
+                                // title={pollenData?.today?.text}
+                                title={
+                                  pollenLoader == true ? (
+                                    <ActivityIndicator
+                                      size={'small'}
+                                      color={AppColors.BLACK}
+                                    />
+                                  ) : (
+                                    moment().local().format('MMMM Do, YYYY')
+                                  )
+                                }
+                                textColor={'#777777'}
+                              />
                               {/* )} */}
                             </View>
                           </View>
@@ -571,101 +601,149 @@ const Home = ({navigation}) => {
                     </View>
                   ) : (
                     <View style={{flexDirection: 'row'}}>
-                      {todayPollensData?.current?.length > 0 ? (
-                        <FlatList
-                          data={activePollen}
-                          horizontal={true}
-                          showsHorizontalScrollIndicator={false}
-                          contentContainerStyle={{
-                            gap: 20,
-                            flexDirection: 'row',
-                          }}
-                          renderItem={({item}) => {
-                            const index = todayPollensData?.current.findIndex(
-                              p => p.scientific_name === item.name,
-                            );
-                            const todayPollenInAir = todayPollensData?.current;
+                      {expireDate ? (
+                        <>
+                          {todayPollensData?.current?.length > 0 ? (
+                            <FlatList
+                              data={activePollen}
+                              horizontal={true}
+                              showsHorizontalScrollIndicator={false}
+                              contentContainerStyle={{
+                                gap: 20,
+                                flexDirection: 'row',
+                              }}
+                              renderItem={({item}) => {
+                                const index =
+                                  todayPollensData?.current.findIndex(
+                                    p => p.scientific_name === item.name,
+                                  );
+                                const todayPollenInAir =
+                                  todayPollensData?.current;
 
-                            return (
-                              <View style={{gap: 10}}>
-                                <AppText
-                                  title={item.common_name}
-                                  textAlignment={'center'}
-                                  textSize={1.5}
-                                  textColor={AppColors.BLACK}
-                                  textFontWeight
-                                  textwidth={40}
-                                  textHeight={6}
-                                />
+                                return (
+                                  <View style={{gap: 10}}>
+                                    <AppText
+                                      title={item.common_name}
+                                      textAlignment={'center'}
+                                      textSize={1.5}
+                                      textColor={AppColors.BLACK}
+                                      textFontWeight
+                                      textwidth={40}
+                                      textHeight={6}
+                                    />
 
-                                <SpeedoMeter
-                                  imgWeight={30}
-                                  imgHeight={10}
-                                  speedometerWidth={30}
-                                  imageTop={-10}
-                                  TextBottom={
-                                    todayPollenInAir[index]?.level == 1
-                                      ? 'Low'
-                                      : todayPollenInAir[index]?.level == 2
-                                      ? 'Moderate'
-                                      : todayPollenInAir[index]?.level == 3
-                                      ? 'High'
-                                      : todayPollenInAir[index]?.level == 4
-                                      ? 'Very High'
-                                      : 'None'
-                                  }
-                                  isPollenorSpores={
-                                    todayPollenInAir[index]?.type
-                                  }
-                                  TempreaturePriorityFontSize={1.6}
-                                />
-                              </View>
-                            );
-                          }}
-                        />
+                                    <SpeedoMeter
+                                      imgWeight={30}
+                                      imgHeight={10}
+                                      speedometerWidth={30}
+                                      imageTop={-10}
+                                      TextBottom={
+                                        todayPollenInAir[index]?.level == 1
+                                          ? 'Low'
+                                          : todayPollenInAir[index]?.level == 2
+                                          ? 'Moderate'
+                                          : todayPollenInAir[index]?.level == 3
+                                          ? 'High'
+                                          : todayPollenInAir[index]?.level == 4
+                                          ? 'Very High'
+                                          : 'None'
+                                      }
+                                      isPollenorSpores={
+                                        todayPollenInAir[index]?.type
+                                      }
+                                      TempreaturePriorityFontSize={1.6}
+                                    />
+                                  </View>
+                                );
+                              }}
+                            />
+                          ) : (
+                            <FlatList
+                              data={activePollen}
+                              horizontal={true}
+                              showsHorizontalScrollIndicator={false}
+                              contentContainerStyle={{
+                                gap: 20,
+                                flexDirection: 'row',
+                              }}
+                              renderItem={({item}) => {
+                                return (
+                                  <View style={{gap: 10}}>
+                                    <AppText
+                                      title={item.name}
+                                      textAlignment={'center'}
+                                      textSize={1.5}
+                                      textColor={AppColors.BLACK}
+                                      textFontWeight
+                                    />
+
+                                    <SpeedoMeter
+                                      imgWeight={30}
+                                      imgHeight={10}
+                                      speedometerWidth={30}
+                                      imageTop={-10}
+                                      TextBottom={
+                                        item?.level == 1
+                                          ? 'Low'
+                                          : item?.level == 2
+                                          ? 'Moderate'
+                                          : item?.level == 3
+                                          ? 'High'
+                                          : item?.level == 4
+                                          ? 'Very High'
+                                          : null
+                                      }
+                                      TempreaturePriority={'Moderate'}
+                                      TempreaturePriorityFontSize={1.6}
+                                    />
+                                  </View>
+                                );
+                              }}
+                            />
+                          )}
+                        </>
                       ) : (
-                        <FlatList
-                          data={activePollen}
-                          horizontal={true}
-                          showsHorizontalScrollIndicator={false}
-                          contentContainerStyle={{
-                            gap: 20,
-                            flexDirection: 'row',
-                          }}
-                          renderItem={({item}) => {
-                            return (
-                              <View style={{gap: 10}}>
-                                <AppText
-                                  title={item.name}
-                                  textAlignment={'center'}
-                                  textSize={1.5}
-                                  textColor={AppColors.BLACK}
-                                  textFontWeight
-                                />
+                        <>
+                          <FlatList
+                            data={freeData}
+                            horizontal
+                            renderItem={({item}) => {
+                              return (
+                                <View style={{gap: 10}}>
+                                  <AppText
+                                    title={item.name}
+                                    textAlignment={'center'}
+                                    textSize={1.5}
+                                    textColor={AppColors.BLACK}
+                                    textFontWeight
+                                    textwidth={40}
+                                    textHeight={6}
+                                  />
 
-                                <SpeedoMeter
-                                  imgWeight={30}
-                                  imgHeight={10}
-                                  speedometerWidth={30}
-                                  imageTop={-10}
-                                  TextBottom={
-                                    item?.level == 1
-                                      ? 'Low'
-                                      : item?.level == 2
-                                      ? 'Moderate'
-                                      : item?.level == 3
-                                      ? 'High'
-                                      : item?.level == 4
-                                      ? 'Very High'
-                                      : null
-                                  }
-                                  TempreaturePriority={'Moderate'}
-                                  TempreaturePriorityFontSize={1.6}
-                                />
-                              </View>
-                            );
-                          }}
-                        />
+                                  <SpeedoMeter
+                                    imgWeight={30}
+                                    imgHeight={10}
+                                    speedometerWidth={30}
+                                    imageTop={-10}
+                                    TextBottom={
+                                      item.value == 1
+                                        ? 'Low'
+                                        : item.value == 2
+                                        ? 'Moderate'
+                                        : item.value == 3
+                                        ? 'High'
+                                        : item.value == 4
+                                        ? 'Very High'
+                                        : 'None'
+                                    }
+                                    isPollenorSpores={''}
+                                    TempreaturePriorityFontSize={1.6}
+                                  />
+                                </View>
+                              );
+                            }}
+                          />
+                        </>
                       )}
                     </View>
                   )}
@@ -716,16 +794,14 @@ const Home = ({navigation}) => {
                     )}
                     {selected == 'Past' ? (
                       <>
-                      {
-                        expireDate ? (
-
+                        {expireDate ? (
                           <FlatList
                             data={ispastArray}
                             contentContainerStyle={{paddingTop: 100}}
                             inverted
                             renderItem={({item, index}) => {
                               // console.log('past index', index, ispastArray.length);
-    
+
                               const pastPollenAndSpores = item?.current?.sort(
                                 (a, b) => {
                                   if (a.type !== b.type) {
@@ -734,7 +810,7 @@ const Home = ({navigation}) => {
                                   return b.level - a.level;
                                 },
                               );
-    
+
                               const pastpollenHeaderIndex =
                                 pastPollenAndSpores.findIndex(
                                   i => i.type === 'pollen',
@@ -743,7 +819,7 @@ const Home = ({navigation}) => {
                                 pastPollenAndSpores.findIndex(
                                   i => i.type === 'spore',
                                 );
-    
+
                               return (
                                 <View
                                   style={{
@@ -752,10 +828,11 @@ const Home = ({navigation}) => {
                                       index == ispastArray?.length - 1 ? 10 : 0,
                                     borderTopLeftRadius:
                                       index == ispastArray?.length - 1 ? 10 : 0,
-                                    borderBottomRightRadius: index == 0 ? 10 : 0,
+                                    borderBottomRightRadius:
+                                      index == 0 ? 10 : 0,
                                     borderBottomLeftRadius: index == 0 ? 10 : 0,
                                     padding: 20,
-    
+
                                     alignItems: 'flex-start',
                                     justifyContent: 'space-between',
                                     borderBottomWidth: index == 0 ? 1 : 0,
@@ -793,7 +870,7 @@ const Home = ({navigation}) => {
                                       textFontWeight
                                     />
                                   </View> */}
-    
+
                                   <TouchableOpacity
                                     onPress={() => {
                                       if (expandedFutureKey === item.key) {
@@ -821,7 +898,9 @@ const Home = ({navigation}) => {
                                           width: 20,
                                           borderRadius: 200,
                                           borderWidth: 1,
-                                          borderColor: getThBgColour(item?.label),
+                                          borderColor: getThBgColour(
+                                            item?.label,
+                                          ),
                                           alignItems: 'center',
                                           justifyContent: 'center',
                                         }}>
@@ -836,7 +915,7 @@ const Home = ({navigation}) => {
                                           }}
                                         />
                                       </View>
-    
+
                                       <AppText
                                         title={item.key}
                                         textSize={2}
@@ -844,14 +923,14 @@ const Home = ({navigation}) => {
                                         textFontWeight
                                       />
                                     </View>
-    
+
                                     <AntDesign
                                       name={'plus'}
                                       size={responsiveFontSize(3)}
                                       color={AppColors.BLACK}
                                     />
                                   </TouchableOpacity>
-    
+
                                   {/* <ScrollView
                                     horizontal
                                     style={{
@@ -975,7 +1054,7 @@ const Home = ({navigation}) => {
                                       />
                                     </View>
                                   </ScrollView> */}
-    
+
                                   <ScrollView
                                     horizontal
                                     contentContainerStyle={{
@@ -987,10 +1066,13 @@ const Home = ({navigation}) => {
                                         active =>
                                           active.name == newItem.common_name,
                                       );
-    
+
                                       return (
                                         <View
-                                          style={{gap: 10, alignItems: 'center'}}>
+                                          style={{
+                                            gap: 10,
+                                            alignItems: 'center',
+                                          }}>
                                           <AppText
                                             title={newItem.common_name}
                                             textAlignment={'center'}
@@ -1000,7 +1082,7 @@ const Home = ({navigation}) => {
                                             textwidth={40}
                                             textHeight={5}
                                           />
-    
+
                                           <SpeedoMeter
                                             imgWeight={30}
                                             imgHeight={10}
@@ -1009,16 +1091,19 @@ const Home = ({navigation}) => {
                                             TextBottom={
                                               item?.current[indexes]?.level == 1
                                                 ? 'Low'
-                                                : item?.current[indexes]?.level == 2
+                                                : item?.current[indexes]
+                                                    ?.level == 2
                                                 ? 'Moderate'
-                                                : item?.current[indexes]?.level == 3
+                                                : item?.current[indexes]
+                                                    ?.level == 3
                                                 ? 'High'
-                                                : item?.current[indexes]?.level == 4
+                                                : item?.current[indexes]
+                                                    ?.level == 4
                                                 ? 'Very High'
                                                 : 'None'
                                             }
                                             isPollenorSpores={
-                                              item?.current[index]?.type
+                                              item?.current[indexes]?.type
                                             }
                                             TempreaturePriorityFontSize={1.6}
                                           />
@@ -1026,7 +1111,7 @@ const Home = ({navigation}) => {
                                       );
                                     })}
                                   </ScrollView>
-    
+
                                   {expandedFutureKey === item.key && (
                                     <View style={{marginTop: 20}}>
                                       <FlatList
@@ -1034,14 +1119,15 @@ const Home = ({navigation}) => {
                                         renderItem={({item, index}) => {
                                           return (
                                             <View style={{gap: 5}}>
-                                              {index === pastpollenHeaderIndex && (
+                                              {index ===
+                                                pastpollenHeaderIndex && (
                                                 <AppText
                                                   title="Pollen"
                                                   textSize={2}
                                                   textFontWeight
                                                 />
                                               )}
-    
+
                                               {index === sporesHeaderIndex && (
                                                 <AppText
                                                   title="Spores"
@@ -1050,7 +1136,7 @@ const Home = ({navigation}) => {
                                                   textFontWeight
                                                 />
                                               )}
-    
+
                                               <PointPollenSpores
                                                 PollenSporesArr={
                                                   pastPollenAndSpores
@@ -1058,7 +1144,9 @@ const Home = ({navigation}) => {
                                                 index={index}
                                                 item={item}
                                                 selected={selected}
-                                                containerwidth={responsiveWidth(80)}
+                                                containerwidth={responsiveWidth(
+                                                  80,
+                                                )}
                                               />
                                             </View>
                                           );
@@ -1070,62 +1158,85 @@ const Home = ({navigation}) => {
                               );
                             }}
                           />
-                        ):(
-                             <View
-              style={{height: responsiveHeight(30), justifyContent: 'center', }}>
-              <SubscribeBar
-                title="Subscribe Now to look at the past data"
-                title2={'Unlock Full Access to past data'}
-                handlePress={() => navigation.navigate('Subscription')}
-              />
-            </View>
-                        )
-                      }
+                        ) : (
+                          <View
+                            style={{
+                              height: responsiveHeight(30),
+                              justifyContent: 'center',
+                            }}>
+                            <SubscribeBar
+                              title="Subscribe now to look at the past data"
+                              title2={'Unlock full access to past data'}
+                              handlePress={() =>
+                                navigation.navigate('Subscription')
+                              }
+                            />
+                          </View>
+                        )}
                       </>
                     ) : selected == 'Today' ? (
-                      <FlatList
-                        data={sortedPollenData}
-                        contentContainerStyle={{paddingBottom: 50}}
-                        renderItem={({item, index}) => {
-                          // console.log('setting data ===>',sortedPollenData)
-                          const pollenHeaderIndex = settingData.find(
-                            h => h.title === 'Pollen',
-                          )?.index;
-                          const sporesHeaderIndex = settingData.find(
-                            h => h.title === 'Spores',
-                          )?.index;
+                      <>
+                        {expireDate ? (
+                          <FlatList
+                            data={sortedPollenData}
+                            contentContainerStyle={{paddingBottom: 50}}
+                            renderItem={({item, index}) => {
+                              // console.log('setting data ===>',sortedPollenData)
+                              const pollenHeaderIndex = settingData.find(
+                                h => h.title === 'Pollen',
+                              )?.index;
+                              const sporesHeaderIndex = settingData.find(
+                                h => h.title === 'Spores',
+                              )?.index;
 
-                          return (
-                            <View style={{gap: 8}}>
-                              {index === pollenHeaderIndex && (
-                                <AppText
-                                  title="Pollen"
-                                  textSize={2}
-                                  textFontWeight
-                                />
-                              )}
+                              return (
+                                <View style={{gap: 8}}>
+                                  {index === pollenHeaderIndex && (
+                                    <AppText
+                                      title="Pollen"
+                                      textSize={2}
+                                      textFontWeight
+                                    />
+                                  )}
 
-                              {index === sporesHeaderIndex && (
-                                <AppText
-                                  title="Spores"
-                                  textSize={2}
-                                  marginTop={2}
-                                  textFontWeight
-                                />
-                              )}
+                                  {index === sporesHeaderIndex && (
+                                    <AppText
+                                      title="Spores"
+                                      textSize={2}
+                                      marginTop={2}
+                                      textFontWeight
+                                    />
+                                  )}
 
-                              <PointPollenSpores
-                                PollenSporesArr={sortedPollenData}
-                                index={index}
-                                item={item}
-                                selected={selected}
+                                  <PointPollenSpores
+                                    PollenSporesArr={sortedPollenData}
+                                    index={index}
+                                    item={item}
+                                    selected={selected}
+                                  />
+                                </View>
+                              );
+                            }}
+                          />
+                        ) : (
+                          <>
+                            <View
+                              style={{
+                                height: responsiveHeight(30),
+                                justifyContent: 'center',
+                              }}>
+                              <SubscribeBar
+                                title="Subscribe now to look at the today data"
+                                title2={'Unlock full access to today data'}
+                                handlePress={() =>
+                                  navigation.navigate('Subscription')
+                                }
                               />
                             </View>
-                          );
-                        }}
-                      />
+                          </>
+                        )}
+                      </>
                     ) : selected == 'Future' ? (
-                      
                       <FlatList
                         data={isfutureArray}
                         contentContainerStyle={{paddingBottom: 50}}
@@ -1138,6 +1249,31 @@ const Home = ({navigation}) => {
                               return b.level - a.level;
                             },
                           );
+
+                          // console.log("item, future",item)
+
+                          const FuturefreeData = [
+                            {
+                              id: 1,
+                              name: 'Total Spores',
+                              value: item?.total_spores,
+                            },
+                            {
+                              id: 2,
+                              name: 'Total Trees',
+                              value: item?.total_trees,
+                            },
+                            {
+                              id: 3,
+                              name: 'Total Grasses',
+                              value: item?.total_grasses,
+                            },
+                            {
+                              id: 4,
+                              name: 'Total Weeds',
+                              value: item?.total_weeds,
+                            },
+                          ];
 
                           const pollenHeaderIndex =
                             futurePollenAndSpores.findIndex(
@@ -1166,10 +1302,14 @@ const Home = ({navigation}) => {
                               }}>
                               <TouchableOpacity
                                 onPress={() => {
-                                  if (expandedFutureKey === item.key) {
-                                    setExpandedFutureKey(null); // Collapse if already expanded
+                                  if (expireDate) {
+                                    if (expandedFutureKey === item.key) {
+                                      setExpandedFutureKey(null); // Collapse if already expanded
+                                    } else {
+                                      setExpandedFutureKey(item.key); // Expand only this one
+                                    }
                                   } else {
-                                    setExpandedFutureKey(item.key); // Expand only this one
+                                    console.log('Please Subscribe');
                                   }
                                 }}
                                 style={{
@@ -1228,49 +1368,97 @@ const Home = ({navigation}) => {
                                   gap: 10,
                                   marginTop: 20,
                                 }}>
-                                {activePollen?.map(newItem => {
-                                  const indexes = item.current.findIndex(
-                                    active =>
-                                      active.name == newItem.common_name,
-                                  );
+                                {expireDate ? (
+                                  <>
+                                    {activePollen?.map(newItem => {
+                                      const indexes = item.current.findIndex(
+                                        active =>
+                                          active.name == newItem.common_name,
+                                      );
 
-                                  return (
-                                    <View
-                                      style={{gap: 10, alignItems: 'center'}}>
-                                      <AppText
-                                        title={newItem.common_name}
-                                        textAlignment={'center'}
-                                        textSize={1.5}
-                                        textColor={AppColors.BLACK}
-                                        textFontWeight
-                                        textwidth={40}
-                                        textHeight={5}
-                                      />
+                                      return (
+                                        <View
+                                          style={{
+                                            gap: 10,
+                                            alignItems: 'center',
+                                          }}>
+                                          <AppText
+                                            title={newItem.common_name}
+                                            textAlignment={'center'}
+                                            textSize={1.5}
+                                            textColor={AppColors.BLACK}
+                                            textFontWeight
+                                            textwidth={40}
+                                            textHeight={5}
+                                          />
 
-                                      <SpeedoMeter
-                                        imgWeight={30}
-                                        imgHeight={10}
-                                        speedometerWidth={30}
-                                        imageTop={-10}
-                                        TextBottom={
-                                          item?.current[indexes]?.level == 1
-                                            ? 'Low'
-                                            : item?.current[indexes]?.level == 2
-                                            ? 'Moderate'
-                                            : item?.current[indexes]?.level == 3
-                                            ? 'High'
-                                            : item?.current[indexes]?.level == 4
-                                            ? 'Very High'
-                                            : 'None'
-                                        }
-                                        isPollenorSpores={
-                                          item?.current[index]?.type
-                                        }
-                                        TempreaturePriorityFontSize={1.6}
-                                      />
-                                    </View>
-                                  );
-                                })}
+                                          <SpeedoMeter
+                                            imgWeight={30}
+                                            imgHeight={10}
+                                            speedometerWidth={30}
+                                            imageTop={-10}
+                                            TextBottom={
+                                              item?.current[indexes]?.level == 1
+                                                ? 'Low'
+                                                : item?.current[indexes]
+                                                    ?.level == 2
+                                                ? 'Moderate'
+                                                : item?.current[indexes]
+                                                    ?.level == 3
+                                                ? 'High'
+                                                : item?.current[indexes]
+                                                    ?.level == 4
+                                                ? 'Very High'
+                                                : 'None'
+                                            }
+                                            isPollenorSpores={
+                                              item?.current[indexes]?.type
+                                            }
+                                            TempreaturePriorityFontSize={1.6}
+                                          />
+                                        </View>
+                                      );
+                                    })}
+                                  </>
+                                ) : (
+                                  <>
+                                    {FuturefreeData.map(newItem => {
+                                      return (
+                                        <View style={{gap: 10}}>
+                                          <AppText
+                                            title={newItem?.name}
+                                            textAlignment={'center'}
+                                            textSize={1.5}
+                                            textColor={AppColors.BLACK}
+                                            textFontWeight
+                                            textwidth={40}
+                                            textHeight={6}
+                                          />
+
+                                          <SpeedoMeter
+                                            imgWeight={30}
+                                            imgHeight={10}
+                                            speedometerWidth={30}
+                                            imageTop={-10}
+                                            TextBottom={
+                                              newItem?.value == 1
+                                                ? 'Low'
+                                                : newItem?.value == 2
+                                                ? 'Moderate'
+                                                : newItem?.value == 3
+                                                ? 'High'
+                                                : newItem?.value == 4
+                                                ? 'Very High'
+                                                : 'None'
+                                            }
+                                            isPollenorSpores={''}
+                                            TempreaturePriorityFontSize={1.6}
+                                          />
+                                        </View>
+                                      );
+                                    })}
+                                  </>
+                                )}
                               </ScrollView>
 
                               {expandedFutureKey === item.key && (
@@ -1364,8 +1552,6 @@ const Home = ({navigation}) => {
         )}
       </LinearGradient>
     </>
-
-
   );
 };
 

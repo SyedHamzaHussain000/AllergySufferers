@@ -74,7 +74,7 @@ const Notification = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_notification`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/set_notification`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -103,7 +103,7 @@ const Notification = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_notifications`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_notifications`,
       headers: {},
     };
 
@@ -134,7 +134,7 @@ setNotificationLoader(true);
 let config = {
   method: 'post',
   maxBodyLength: Infinity,
-  url: `https://www.allergysufferers.ca/wp-json/allergy_data/v1/user/${userData.id}/remove_notification?scientific_name=${item.name}`,
+  url: `https://www.allergysufferers.ca/wp-json/allergy_data/v1/user/${userData?.id}/remove_notification?scientific_name=${item.name}`,
   headers: { }
 };
 

@@ -45,6 +45,8 @@ const AddMedications = ({navigation}) => {
   const allActiveMedicationRedux = useSelector(
     state => state.medications.MyCurrentMeds,
   );
+    const expireDate = useSelector(state => state.auth.expireDate);
+  
   const [medicationData, setMedicationsData] = useState([]);
   const [MedicationLoader, setMedciationLoader] = useState(false);
 
@@ -75,7 +77,7 @@ const AddMedications = ({navigation}) => {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/get_medications`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_medications`,
       headers: {},
     };
 
@@ -144,6 +146,30 @@ const AddMedications = ({navigation}) => {
   // };
 
   const AddMedicationActive = medicationdata => {
+
+    // console.log("expireDate",expireDate)
+
+      if (!expireDate) {
+          Alert.alert(
+            'Subscribe', // Title of the alert
+            'Subscribe to add the pollens', // Message
+            [
+              {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+              },
+              {
+                text: 'Subscribe Now',
+                onPress: () => navigation.navigate("Subscription"),
+                // You can replace the above with your subscription logic
+              },
+            ],
+            {cancelable: false},
+          );
+          return;
+        }
+
     if (medicationdata.id === 6082) {
       SetAddYourMedication(true);
       return;
@@ -171,7 +197,7 @@ const AddMedications = ({navigation}) => {
             let config = {
               method: 'post',
               maxBodyLength: Infinity,
-              url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_medications`,
+              url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/set_medications`,
               headers: {
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-cache',
@@ -205,6 +231,7 @@ const AddMedications = ({navigation}) => {
 
   const AddCustomMedication = () => {
 
+    
     if (customMecication == '') {
       return Alert.alert('Please type a medication name');
     }
@@ -219,7 +246,7 @@ const AddMedications = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_medication_custom`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/set_medication_custom`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -253,7 +280,26 @@ const AddMedications = ({navigation}) => {
   // local functionality
    const AddMedicationActiveToLocal  = async (medData) => {
 
-    
+     if (!expireDate) {
+          Alert.alert(
+            'Subscribe', // Title of the alert
+            'Subscribe to add the pollens', // Message
+            [
+              {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+              },
+              {
+                text: 'Subscribe Now',
+                onPress: () => navigation.navigate("Subscription"),
+                // You can replace the above with your subscription logic
+              },
+            ],
+            {cancelable: false},
+          );
+          return;
+        }
     
     if (medData.id === 6082) {
       AddMedicationActive(medData);

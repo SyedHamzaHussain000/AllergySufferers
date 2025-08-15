@@ -80,7 +80,7 @@ const MedicationSample = ({navigation}) => {
     MedicationnRecord.length - 1,
   ); // start at latest week
 
-  console.log('currentIndex', currentIndex, MedicationnRecord.length);
+  // console.log('currentIndex', currentIndex, MedicationnRecord.length);
 
   useEffect(() => {
     generateMedicationSlides(selecteddate, allActiveMedicationRedux);
@@ -94,9 +94,9 @@ const MedicationSample = ({navigation}) => {
     // return nav;
   }, [allActiveMedicationRedux]);
 
-  useEffect(() => {
-    getMedApiDataAndSaveToRedux(allMyCurrentMeds);
-  }, [allMyCurrentMeds]);
+  // useEffect(() => {
+  //   // getMedApiDataAndSaveToRedux(allMyCurrentMeds);
+  // }, [allMyCurrentMeds]);
 
   useFocusEffect(
     useCallback(() => {
@@ -136,7 +136,11 @@ const MedicationSample = ({navigation}) => {
       );
 
       if (getActiveMedicationData?.entries?.items?.length > 0) {
-        dispatch(setActiveMedication(getActiveMedicationData.entries.items));
+        console.log(
+          'getActiveMedicationData',
+          getActiveMedicationData?.entries?.items,
+        );
+        dispatch(setActiveMedication(getActiveMedicationData?.entries?.items));
         setSavingDataLoader(false);
       } else {
         setSavingDataLoader(false);
@@ -158,7 +162,7 @@ const MedicationSample = ({navigation}) => {
       const dataSaved = await ApiCallWithUserId(
         'post',
         'update_medication_units',
-        userData.id,
+        userData?.id,
         {data: AllActiveArray},
       );
       setSavingDataLoader(false);
@@ -173,13 +177,20 @@ const MedicationSample = ({navigation}) => {
 
     setLoader(true);
 
+    // Alert.alert('currentDate', currentDate,       allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date );
+    // return
+
+    // Alert.alert("currentDate", currentDate, allActiveMedicationRedux.length  )
+
     if (allActiveMedicationRedux.length > 0) {
       const allergenLastDate =
         allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date;
 
+      // Alert.alert("Calling...",allergenLastDate,currentDate )
       if (moment(allergenLastDate).isAfter(moment(currentDate))) {
         // allergenLastDate is greater than currentDate
         console.log('Allergen last date is in the future');
+        setLoader(false);
         return;
       }
 
@@ -187,34 +198,65 @@ const MedicationSample = ({navigation}) => {
         setLoader(false);
       } else {
         // Alert.alert("runnig the medication alert")
+        // const dateArray = skipLastDateAndReturnDateRangeArray(
+        //   allergenLastDate,
+        //   currentDate,
+        // )
+        // // console.log("currentDate",currentDate, allActiveMedicationRedux.length, allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date, dateArray, allMyCurrentMeds)
+
+        // const toAdd = [];
+
+        // dateArray.forEach(date => {
+        //   allMyCurrentMeds.forEach(med => {
+        //     toAdd.push({
+        //       ...med,
+        //       date: date,
+        //       units: 0,
+        //     });
+        //   });
+        // });
+
+        // const mergeDates = [...allActiveMedicationRedux, ...toAdd];
+
+        // console.log('mergeDates', toAdd);
+
+        // dispatch(setActiveMedication(mergeDates));
+        // setLoader(false);
+
         const dateArray = skipLastDateAndReturnDateRangeArray(
           allergenLastDate,
           currentDate,
         );
-        // console.log("currentDate",currentDate, allActiveMedicationRedux.length, allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date, dateArray, allMyCurrentMeds)
+
+        // Create a set of existing date+id combos
+        const existingMap = new Set(
+          allActiveMedicationRedux.map(med => `${med.date}_${med.id}`),
+        );
 
         const toAdd = [];
 
         dateArray.forEach(date => {
           allMyCurrentMeds.forEach(med => {
-            toAdd.push({
-              ...med,
-              date: date,
-              units: 0,
-            });
+            const key = `${date}_${med.id}`;
+            if (!existingMap.has(key)) {
+              // ✅ Only add if it doesn’t already exist
+              toAdd.push({
+                ...med,
+                date,
+                units: 0,
+              });
+            }
           });
         });
 
         const mergeDates = [...allActiveMedicationRedux, ...toAdd];
-
-        console.log('mergeDates', toAdd);
-
         dispatch(setActiveMedication(mergeDates));
-        setLoader(false);
       }
     } else {
       const activeDateStr = moment(new Date()).format('YYYY-MM-DD');
       const dateArray = generateDateRangeArray(activeDateStr, currentDate);
+
+      console.log('dateArray', dateArray);
 
       const toAdd = [];
 

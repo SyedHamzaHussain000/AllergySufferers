@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   TextInput,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import React, {useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -25,21 +26,31 @@ import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
 import { setAddCity } from '../../../../redux/Slices/MedicationSlice';
 import Toast from 'react-native-toast-message';
+import moment from 'moment';
 
 const AddCity = ({navigation}) => {
   const dispatch = useDispatch()
   const userdata = useSelector(state => state.auth.user);
   const allMyCity = useSelector(state => state?.medications?.allMyCity);
-
+  const expireDate = useSelector(state => state.auth.expireDate);
   const [detail, setDetil] = useState();
   const [cityLoader, setCityLoader] = useState(false);
 
   const addNewCity = () => {
-    
+
+    if(!expireDate){
+
+      const isManualAddedCount = allMyCity.filter((state) =>   state?.currentLocation == false) 
+
+        if(isManualAddedCount?.length == 2 || isManualAddedCount?.length > 2){
+            Alert.alert('You can only add 2 cities to add more please subscribe');
+            return
+        }
+    }
 
     if(allMyCity.length == 5 || allMyCity.length > 5){
 
-      alert('You can only add 5 cities');
+      Alert.alert('You can only add 5 cities');
       return
     }
     
@@ -64,18 +75,20 @@ const AddCity = ({navigation}) => {
 
 
     if (detail) {
+      // Alert.alert("city error")
       let data = JSON.stringify({
-        data: {
+        // data: {
           lat: JSON.stringify(detail?.location?.latitude),
           lng: JSON.stringify(detail?.location?.longitude),
           city_name: detail?.displayName?.text,
-        },
+          currentLocation: false,
+        // },
       });
 
       let config = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: `${BASE_URL}/allergy_data/v1/user/${userdata.id}/set_cities`,
+        url: `${BASE_URL}/allergy_data/v1/user/${userdata?.id}/set_cities`,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -94,7 +107,7 @@ const AddCity = ({navigation}) => {
           setCityLoader(false);
         });
     } else {
-      alert('Please select a city');
+      Alert.alert('Please select a city');
       setCityLoader(false);
     }
   };

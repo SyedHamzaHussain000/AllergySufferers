@@ -75,6 +75,46 @@ const Main = () => {
         name="Subscription"
         component={HomeWithSafeArea(Subscription)}
       />
+
+      {/* setting screen */}
+      <Stack.Screen name="More" component={HomeWithSafeArea(More)} />
+      <Stack.Screen name="Account" component={HomeWithSafeArea(Account)} />
+      <Stack.Screen
+        name="HelpScreen"
+        component={HomeWithSafeArea(HelpScreen)}
+      />
+
+      <Stack.Screen
+        name="Notification"
+        component={HomeWithSafeArea(Notification)}
+      />
+
+      <Stack.Screen
+        name="AppSetting"
+        component={HomeWithSafeArea(AppSetting)}
+      />
+      <Stack.Screen name="AddCity" component={HomeWithSafeArea(AddCity)} />
+      <Stack.Screen
+        name="ManageCities"
+        component={HomeWithSafeArea(ManageCities)}
+      />
+      <Stack.Screen
+        name="ManagePollens"
+        component={HomeWithSafeArea(ManagePollens)}
+      />
+      <Stack.Screen
+        name="AddPollens"
+        component={HomeWithSafeArea(AddPollens)}
+      />
+      <Stack.Screen
+        name="ManageMedications"
+        component={HomeWithSafeArea(ManageMedications)}
+      />
+      <Stack.Screen
+        name="AddMedications"
+        component={HomeWithSafeArea(AddMedications)}
+      />
+      <Stack.Screen name="TipsTrick" component={HomeWithSafeArea(TipsTrick)} />
   
       
     </Stack.Navigator>

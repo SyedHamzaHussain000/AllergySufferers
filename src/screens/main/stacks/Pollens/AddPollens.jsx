@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
@@ -34,6 +35,8 @@ const AddPollens = ({navigation}) => {
   const [allPollens, setALlPollens] = useState([]);
   const [search, setSearch] = useState('');
   const [loader, setLoader] = useState(false);
+
+  const expireDate = useSelector(state => state.auth.expireDate);
 
   const [PollenLoader, setPollenApiLoader] = useState(false);
   useEffect(() => {
@@ -66,6 +69,27 @@ const AddPollens = ({navigation}) => {
   };
 
   const setPollenApi = item => {
+    if (!expireDate) {
+      Alert.alert(
+        'Subscribe', // Title of the alert
+        'Subscribe to add the pollens', // Message
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+          {
+            text: 'Subscribe Now',
+            onPress: () => navigation.navigate("Subscription"),
+            // You can replace the above with your subscription logic
+          },
+        ],
+        {cancelable: false},
+      );
+      return;
+    }
+
     setPollenApiLoader(true);
     let data = JSON.stringify({
       data: item.id,
@@ -74,7 +98,7 @@ const AddPollens = ({navigation}) => {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData.id}/set_pollens`,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/set_pollens`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -84,20 +108,19 @@ const AddPollens = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-
-
         setPollenApiLoader(false);
 
-        if(response.data.code == 'max-limit'){
-            Toast.show({
-              type: 'error',
-              text1: "You have reached the maximum number of allowed pollen entries."
-            })
-        }else{
+        if (response.data.code == 'max-limit') {
+          Toast.show({
+            type: 'error',
+            text1:
+              'You have reached the maximum number of allowed pollen entries.',
+          });
+        } else {
           Toast.show({
             type: 'success',
             text1: 'Pollen added successfully',
-            position:'top'
+            position: 'top',
           });
         }
       })
@@ -110,11 +133,7 @@ const AddPollens = ({navigation}) => {
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={{padding: 20}}>
-        <AppHeader
-          heading="Add pollen and spores"
-          
-          goBack
-        />
+        <AppHeader heading="Add pollen and spores" goBack />
 
         <View style={{gap: 10}}>
           <AppTextInput
@@ -152,7 +171,8 @@ const AddPollens = ({navigation}) => {
                 item.common_name.toLowerCase().includes(search.toLowerCase()),
             )
             .map((item, index) => (
-              <TouchableOpacity onPress={() => setPollenApi(item)}
+              <TouchableOpacity
+                onPress={() => setPollenApi(item)}
                 style={{
                   padding: 20,
                   borderWidth: 1,
@@ -163,17 +183,21 @@ const AddPollens = ({navigation}) => {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                 }}>
-                <View >
+                <View>
                   <AppText
                     title={item.name}
                     textSize={2}
                     textFontWeight
                     textwidth={70}
                   />
-                  <AppText title={item.common_name} textSize={1.8} textwidth={70}/>
+                  <AppText
+                    title={item.common_name}
+                    textSize={1.8}
+                    textwidth={70}
+                  />
                 </View>
 
-                <View >
+                <View>
                   <AntDesign
                     name={'pluscircle'}
                     size={responsiveFontSize(3)}

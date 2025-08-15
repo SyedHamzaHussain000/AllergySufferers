@@ -42,8 +42,11 @@ import {
   deleteActiveMedication,
   removeCurrentActiveMedication,
   RemoveUpdateMedicationListOnEveryDate,
+  setActiveMedication,
+  setAllMedicationFromApi,
 } from '../../../../redux/Slices/MedicationSlice';
 import Toast from 'react-native-toast-message';
+import SubscribeBar from '../../../../components/SubscribeBar';
 // import { NestableScrollContainer, NestableDraggableFlatList } from "react-native-draggable-flatlist"
 
 const ManageMedications = ({navigation}) => {
@@ -56,12 +59,13 @@ const ManageMedications = ({navigation}) => {
     state => state.medications.ActiveMedications,
   );
 
-  console.log("ActiveMedications",allActiveMedicationRedux)
+  const expireDate = useSelector(state => state.auth.expireDate);
 
-  
-  const [activeMedication, setActiveMedication] = useState(allActiveMedicationRedux);
-  const [loader, setLoader] = useState(false);
-  console.log("allActiveMedicationRedux",activeMedication)
+  // console.log('ActiveMedications', ActiveMedications);
+
+  // const [activeMedication, setActiveMedication] = useState(
+  //   allActiveMedicationRedux,
+  // );
 
   const [data3, setData3] = useState([1, 2, 3, 4]);
 
@@ -72,162 +76,208 @@ const ManageMedications = ({navigation}) => {
   );
   const [open, setOpen] = useState(false);
 
+  const [loader, setLoader] = useState(false)
 
-  useEffect(()=>{
-      setActiveMedication(allActiveMedicationRedux)
-  },[allActiveMedicationRedux])
-  
-
-
+  useEffect(() => {
+    setLoader(false)
+  }, [ActiveMedications]);
 
   const deleteActiveMedicationRedux = async medData => {
     // dispatch( deleteActiveMedication(medData))
-    
+
     // return
     dispatch(RemoveUpdateMedicationListOnEveryDate(medData));
     dispatch(removeCurrentActiveMedication(medData));
 
     // return
-    
-    const deleteMed = await ApiCallWithUserId('post', 'delete_medication', userData?.id, {"data":medData.id})
-    
-    console.log("deleteMed : ",deleteMed)
+
+    const deleteMed = await ApiCallWithUserId(
+      'post',
+      'delete_medication',
+      userData?.id,
+      {data: medData.id},
+    );
+
     Toast.show({
-      type:'success',
+      type: 'success',
       text1: 'Medication Deleted',
       position: 'bottom',
       visibilityTime: 800,
-    })
-    // console.log("deleteMed", medData.id)
-    // return
+    });
   };
 
-  const sortMedication = (data) => {
+  const sortMedication = async data => {
 
-    console.log("sorted data", data)
-    setActiveMedication(data)
+    setLoader(true)
+    const sortnow = await updateSortedCurrentDateMedsInList(ActiveMedications, data)
+    dispatch(setActiveMedication(sortnow))
   }
+
+
+
+const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) => {
+  const currentIndexes = await getCurrentDateIndexes(fullList, selecteddate);
+
+  const newList = [...fullList]; // copy full list
+
+  currentIndexes.forEach(({ index }, i) => {
+    newList[index] = sortedCurrentMeds[i]; // replace only current date items
+  });
+
+  return newList;
+};
+
+
+  const getCurrentDateIndexes = array => {
+    const currentDate = moment(new Date()).format('YYYY-MM-DD');
+
+    return array
+      .map((item, index) => ({item, index})) // attach index to each item
+      .filter(({item}) => item.date == currentDate); // keep only current date items
+  };
+
+  const currentDateMeds = ActiveMedications?.filter(
+  item => item.date === selecteddate,
+);
+
+
+
+
 
   return (
     <SafeAreaView style={{flex: 1}}>
-      <ScrollView contentContainerStyle={{flexGrow:1, paddingBottom:200}}>
+      <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 200}}>
         <View>
+          <GestureHandlerRootView style={{flex: 1}}>
+            <View style={{padding: 20}}>
+              <AppHeader heading={`Manage ${'\n'}Medications`} goBack />
 
-      <GestureHandlerRootView style={{flex: 1}}>
-        <View style={{padding: 20}}>
-          <AppHeader
-            heading={`Manage ${'\n'}Medications`}
-            goBack
-            
-          />
+              <DatePicker
+                modal
+                open={open}
+                date={date}
+                mode="date"
+                minimumDate={activeDate ? activeDate : new Date()}
+                maximumDate={new Date()}
+                onConfirm={selectedDate => {
+                  setDate(selectedDate);
+                  setOpen(false);
+                  const picked = moment(selectedDate).startOf('day');
+                  const formattedDate = picked.format('YYYY-MM-DD');
+                  setSelectedDate(formattedDate);
+                }}
+                onCancel={() => {
+                  setOpen(false);
+                }}
+              />
 
-          <DatePicker
-            modal
-            open={open}
-            date={date}
-            mode="date"
-            minimumDate={activeDate ? activeDate : new Date()}
-            maximumDate={new Date()}
-            onConfirm={selectedDate => {
-              setDate(selectedDate);
-              setOpen(false);
-              const picked = moment(selectedDate).startOf('day');
-              const formattedDate = picked.format('YYYY-MM-DD');
-              setSelectedDate(formattedDate);
-            }}
-            onCancel={() => {
-              setOpen(false);
-            }}
-          />
-
-          <View style={{gap: 10}}>
-            <AppText
-              textSize={'Active Medication'}
-              textColor={AppColors.BLACK}
-              textFontWeight
-            />
-
-            {/* {loader && (
-              <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-            )} */}
-
-            {activeMedication ? (
-              <NestableScrollContainer>
-                <NestableDraggableFlatList
-                  data={activeMedication}
-                  contentContainerStyle={{gap: 10}}
-                  renderItem={({item, drag, isActive}) => {
-                    return (
-                      <TouchableOpacity onLongPress={drag}>
-                        <AppTextInput
-                          inputPlaceHolder={item.name}
-                          inputWidth={75}
-                          arrowDelete={
-                            <TouchableOpacity
-                              onPress={() =>
-                                Alert.alert(
-                                  'Delete Medication',
-                                  'Are you sure you want to delete this medication?',
-                                  [
-                                    {
-                                      text: 'Cancel',
-                                      onPress: () =>
-                                        console.log('Cancel Pressed'),
-                                      style: 'cancel',
-                                    },
-                                    {
-                                      text: 'OK',
-                                      onPress: () =>
-                                        deleteActiveMedicationRedux(item),
-                                    },
-                                  ],
-                                  {cancelable: false},
-                                )
-                              }>
-                              <MaterialCommunityIcons
-                                name={'delete'}
-                                size={responsiveFontSize(2.5)}
-                                color={AppColors.LIGHTGRAY}
-                              />
-                            </TouchableOpacity>
-                          }
-                          rightLogo={
-                            <View style={{marginTop: 4}}>
-                              <Image
-                                source={AppImages.updown}
-                                style={{
-                                  height: 14,
-                                  width: 14,
-                                  resizeMode: 'contain',
-                                }}
-                              />
-                            </View>
-                          }
-                        />
-                      </TouchableOpacity>
-                    );
-                  }}
-                  keyExtractor={(item, index) => index.toString()}
-                  onDragEnd={({data}) => sortMedication(data)}
-                  dragEnabled={true}
-                  activationDistance={10}
+              <View style={{gap: 10}}>
+                <AppText
+                  textSize={'Active Medication'}
+                  textColor={AppColors.BLACK}
+                  textFontWeight
                 />
-              </NestableScrollContainer>
-            ) : null}
-          </View>
 
-          <View style={{marginTop: 20, gap: 10}}>
-            <AppButton
-              title={'Add MEDICATION'}
-              bgColor={AppColors.BTNCOLOURS}
-              RightColour={AppColors.rightArrowCOlor}
-              handlePress={() => navigation.navigate('AddMedications')}
-            />
-          </View>
+                {loader && (
+              <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+            )}
+
+                {expireDate ? (
+                  <>
+                    {currentDateMeds ? (
+                      <NestableScrollContainer>
+                        <NestableDraggableFlatList
+                          data={currentDateMeds}
+                          contentContainerStyle={{gap: 10}}
+                          renderItem={({item, drag, isActive}) => {
+                            return (
+                              <TouchableOpacity onLongPress={drag}>
+                                <AppTextInput
+                                  inputPlaceHolder={item.name}
+                                  inputWidth={75}
+                                  arrowDelete={
+                                    <TouchableOpacity
+                                      onPress={() =>
+                                        Alert.alert(
+                                          'Delete Medication',
+                                          'Are you sure you want to delete this medication?',
+                                          [
+                                            {
+                                              text: 'Cancel',
+                                              onPress: () =>
+                                                console.log('Cancel Pressed'),
+                                              style: 'cancel',
+                                            },
+                                            {
+                                              text: 'OK',
+                                              onPress: () =>
+                                                deleteActiveMedicationRedux(
+                                                  item,
+                                                ),
+                                            },
+                                          ],
+                                          {cancelable: false},
+                                        )
+                                      }>
+                                      <MaterialCommunityIcons
+                                        name={'delete'}
+                                        size={responsiveFontSize(2.5)}
+                                        color={AppColors.LIGHTGRAY}
+                                      />
+                                    </TouchableOpacity>
+                                  }
+                                  rightLogo={
+                                    <View style={{marginTop: 4}}>
+                                      <Image
+                                        source={AppImages.updown}
+                                        style={{
+                                          height: 14,
+                                          width: 14,
+                                          resizeMode: 'contain',
+                                        }}
+                                      />
+                                    </View>
+                                  }
+                                />
+                              </TouchableOpacity>
+                            );
+                          }}
+                          keyExtractor={(item, index) => index.toString()}
+                          onDragEnd={({data}) => sortMedication(data)}
+                          dragEnabled={true}
+                          activationDistance={10}
+                        />
+                      </NestableScrollContainer>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    <View
+                      style={{
+                        height: responsiveHeight(30),
+                        justifyContent: 'center',
+                      }}>
+                      <SubscribeBar
+                        title="Subscribe now to add medication"
+                        title2={'Unlock full access to medication'}
+                        handlePress={() => navigation.navigate('Subscription')}
+                      />
+                    </View>
+                  </>
+                )}
+              </View>
+
+              <View style={{marginTop: 20, gap: 10}}>
+                <AppButton
+                  title={'Add MEDICATION'}
+                  bgColor={AppColors.BTNCOLOURS}
+                  RightColour={AppColors.rightArrowCOlor}
+                  handlePress={() => navigation.navigate('AddMedications')}
+                />
+              </View>
+            </View>
+          </GestureHandlerRootView>
         </View>
-      </GestureHandlerRootView>
-      </View>
-
       </ScrollView>
     </SafeAreaView>
   );
