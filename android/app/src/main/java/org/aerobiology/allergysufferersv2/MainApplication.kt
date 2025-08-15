@@ -1,4 +1,4 @@
-package com.allergysufferers
+package org.aerobiology.allergysufferersv2;
 
 import android.app.Application
 import com.facebook.react.PackageList

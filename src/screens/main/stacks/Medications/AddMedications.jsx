@@ -306,7 +306,7 @@ const AddMedications = ({navigation}) => {
       return;
     }
 
-    if(allActiveMedicationRedux.length == 7 ){
+    if(allActiveMedicationRedux.length == 7 || allActiveMedicationRedux.length > 7 ){
       Toast.show({
         type: 'error',
         text1: 'You can only add 7 medications at a time',

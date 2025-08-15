@@ -1,27 +1,43 @@
 {
   "project_info": {
-    "project_number": "950757790584",
-    "firebase_url": "https://fir-project-fc1f4-default-rtdb.firebaseio.com",
-    "project_id": "fir-project-fc1f4",
-    "storage_bucket": "fir-project-fc1f4.firebasestorage.app"
+    "project_number": "97265103786",
+    "project_id": "aerobiology-research",
+    "storage_bucket": "aerobiology-research.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:950757790584:android:247b036569605997222e8d",
+        "mobilesdk_app_id": "1:97265103786:android:145cc5f75bbe11dc2331d3",
         "android_client_info": {
-          "package_name": "com.allergysufferers"
+          "package_name": "org.aerobiology.allergySufferersV2"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "97265103786-49oejj3hqj1bec0438mcmakjm3c089n9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyByBd0hZ3xf3vClk9y79FwrUeu-4xT76Zc"
+          "current_key": "AIzaSyBhfVrkglKNP1Miuq1VcQXPG0qP8ZOvKrE"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "97265103786-49oejj3hqj1bec0438mcmakjm3c089n9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "97265103786-qnua0umeq8tnlak8gdql7r5vklubgeni.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ca.aerobiology.allergysufferers"
+              }
+            }
+          ]
         }
       }
     }

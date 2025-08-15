@@ -1,5 +1,5 @@
-import {View, Text, TouchableOpacity} from 'react-native';
-import React from 'react';
+import {View, Text, TouchableOpacity, Platform} from 'react-native';
+import React, { useEffect, useState } from 'react';
 import AppHeader from '../../../components/AppHeader';
 import SubscriptionCard from '../../../components/SubscriptionCard';
 import AppText from '../../../components/AppTextComps/AppText';
@@ -7,14 +7,54 @@ import AppColors from '../../../utils/AppColors';
 import {useDispatch, useSelector} from 'react-redux';
 import {setSubscription} from '../../../redux/Slices/AuthSlice';
 import SubscribeNow from '../../../global/SubscribeNow';
+import {
+  endConnection,
+  initConnection,
+  flushFailedPurchasesCachedAsPendingAndroid,
+  getSubscriptions,
+  Subscription,
+  presentCodeRedemptionSheetIOS,
+} from 'react-native-iap';
 
-const Subscription = ({navigation}) => {
+
+const AppSubscription = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
 
-  const isExpiredRedux = useSelector(state => state.auth.isExpired);
   const expireDate = useSelector(state => state.auth.expireDate);
-  const SubscriptionType = useSelector(state => state.auth.SubscriptionType);
+  const isAndroid = Platform.OS === 'android'; // check platform is android or not
+
+    const androidsubscriptionsId = ['premium_oneyear'];
+    
+  const [connection, setConnection] = useState(false); // set in-app purchase is connected or not
+  const [subscription, setSubscription] = useState([]);
+  const [offerings, setOfferings] = useState(null);
+
+  useEffect(() => {
+    const setup = async () => {
+      const result = await initConnection();
+      // console.log('IAP connected?', result);
+      setConnection(result);
+
+      if (Platform.OS === 'android') {
+        await flushFailedPurchasesCachedAsPendingAndroid();
+      }
+    };
+
+    setup();
+
+    return () => {
+      endConnection();
+    };
+  }, []);
+
+   useEffect(() => {
+    if (isAndroid) {
+      if (connection) {
+        getSubscriptionInfo();
+      }
+    }
+  }, [connection]);
 
   const NoSubscription = () => {
     dispatch(setSubscription({isExpired: true}));
@@ -24,6 +64,20 @@ const Subscription = ({navigation}) => {
       navigation.navigate('Main');
     } else {
       navigation.navigate('Login');
+    }
+  };
+
+  // To get Subscription information
+  const getSubscriptionInfo = async () => {
+    try {
+      const subscriptions = await getSubscriptions({
+        skus: androidsubscriptionsId,
+      });
+      console.log('sussssb', subscriptions);
+
+      setSubscription(subscriptions); // set subscription information
+    } catch (error) {
+      console.error('Error fetching products: ', error);
     }
   };
 
@@ -80,4 +134,4 @@ const Subscription = ({navigation}) => {
   );
 };
 
-export default Subscription;
+export default AppSubscription;

@@ -27,11 +27,12 @@ import TipsTrick from '../screens/main/stacks/Help/TipsTrick';
 import PollenInfoForCad from '../screens/main/stacks/Help/PollenInfoForCad';
 import HelpScreen from '../screens/main/stacks/Help/HelpScreen';
 import Notification from '../screens/main/stacks/notification/Notification';
-import Subscription from '../screens/main/subscription/Subscription';
+// import Subscription from '../screens/main/subscription/AppSubscription';
 import ForcastExplaination from '../screens/main/stacks/forcastexplaination/ForcastExplaination';
 import MedicationSample from '../screens/main/MedicationSample';
 import DatavisualizerSample from '../screens/main/stacks/DatavisualizerSample';
 import { responsiveHeight } from '../utils/Responsive_Dimensions';
+import AppSubscription from '../screens/main/subscription/AppSubscription';
 // import { SafeAreaView, useSafeAreaInsets } from "react-SafeAreaViewnative-safe-area-context";
 
 
@@ -73,7 +74,7 @@ const Main = () => {
       />
       <Stack.Screen
         name="Subscription"
-        component={HomeWithSafeArea(Subscription)}
+        component={HomeWithSafeArea(AppSubscription)}
       />
 
       {/* setting screen */}

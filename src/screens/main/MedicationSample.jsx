@@ -94,14 +94,14 @@ const MedicationSample = ({navigation}) => {
     // return nav;
   }, [allActiveMedicationRedux]);
 
-  // useEffect(() => {
-  //   // getMedApiDataAndSaveToRedux(allMyCurrentMeds);
-  // }, [allMyCurrentMeds]);
+  
 
   useFocusEffect(
     useCallback(() => {
       if (allMyCurrentMeds && allMyCurrentMeds.length > 0) {
         setAllMedicationToRedux();
+      }else{
+        getMedApiDataAndSaveToRedux(allMyCurrentMeds, allActiveMedicationRedux);
       }
 
       // Alert.alert("runninnng use focus")
@@ -109,17 +109,25 @@ const MedicationSample = ({navigation}) => {
   );
 
   const getMedApiDataAndSaveToRedux = async () => {
-    if (allMyCurrentMeds.length > 0) {
+
+    const currentDate = moment().local().format('YYYY-MM-DD');
+
+    if (allMyCurrentMeds.length > 0 ||  moment(allActiveMedicationRedux[allActiveMedicationRedux.length - 1].date).format("YYYY-MM-DD") === currentDate  ) {
+          // Alert.alert("Called in return")
       return;
     }
+
+    // Alert.alert("Called After")
     const response = await ApiCallWithUserId(
       'post',
       'get_medications_active',
       userData?.id,
     );
 
+    // console.log("response........",response)
+
     if (response?.data?.length > 0) {
-      // console.log('get_medications_active....', response?.data);
+      // console.log('get_medications_active....');
       dispatch(setAllMedicationFromApi(response?.data));
     }
   };
@@ -173,7 +181,7 @@ const MedicationSample = ({navigation}) => {
   };
 
   const setAllMedicationToRedux = async () => {
-    const currentDate = moment().format('YYYY-MM-DD');
+    const currentDate = moment().local().format('YYYY-MM-DD');
 
     setLoader(true);
 
@@ -187,12 +195,12 @@ const MedicationSample = ({navigation}) => {
         allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date;
 
       // Alert.alert("Calling...",allergenLastDate,currentDate )
-      if (moment(allergenLastDate).isAfter(moment(currentDate))) {
-        // allergenLastDate is greater than currentDate
-        console.log('Allergen last date is in the future');
-        setLoader(false);
-        return;
-      }
+      // if (moment(allergenLastDate).isAfter(moment(currentDate))) {
+      //   // allergenLastDate is greater than currentDate
+      //   console.log('Allergen last date is in the future');
+      //   setLoader(false);
+      //   return;
+      // }
 
       if (allergenLastDate == currentDate) {
         setLoader(false);

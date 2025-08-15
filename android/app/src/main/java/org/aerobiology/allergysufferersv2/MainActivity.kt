@@ -1,4 +1,5 @@
-package com.allergysufferers
+package org.aerobiology.allergysufferersv2;
+
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

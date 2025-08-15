@@ -8,7 +8,7 @@ import CreateAccount from '../screens/auth/CreateAccount';
 import ForgetPassword from '../screens/auth/ForgetPassword/ForgetPassword';
 import EnterOtp from '../screens/auth/ForgetPassword/EnterOtp';
 import EnternewPassword from '../screens/auth/ForgetPassword/EnternewPassword';
-import Subscription from '../screens/main/subscription/Subscription';
+import Subscription from '../screens/main/subscription/AppSubscription';
 
 const Stack = createStackNavigator();
 const Auth = () => {

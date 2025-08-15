@@ -62,10 +62,6 @@ const DatavisualizerSample = ({navigation}) => {
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const activeCity = useSelector(state => state?.medications?.ActiveCity);
 
-
-
-
-
   const [type, setType] = useState('allergens');
   const [medicationData, setMedicationsData] = useState();
 
@@ -113,18 +109,17 @@ const DatavisualizerSample = ({navigation}) => {
 
       // getSelectedAllergens(activeCity);
 
-      if(!activeCity){
-        NewActiveCity()
+      if (!activeCity) {
+        NewActiveCity();
       }
     });
 
     return nav;
   }, [navigation]);
-  
 
-  useEffect(()=>{
+  useEffect(() => {
     getSelectedAllergens(activeCity);
-  },[activeCity])
+  }, [activeCity]);
 
   useEffect(() => {
     if (allActiveMedicationRedux.length > 0) {
@@ -140,21 +135,18 @@ const DatavisualizerSample = ({navigation}) => {
     }
   }, [selecteddate, activeCity]);
 
-  
-
   const NewActiveCity = () => {
-
     // console.log("activeCity",AllCities)
     // Alert.alert("ative med new")
     // return
 
-    if(!activeCity){
+    if (!activeCity) {
       dispatch(setActiveCity(AllCities[0]));
-      return
-    }else{
-      console.log("active city is exist")
+      return;
+    } else {
+      console.log('active city is exist');
     }
-  }
+  };
 
   const setMedicationLoading = (id, isLoading) => {
     setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
@@ -293,14 +285,14 @@ const DatavisualizerSample = ({navigation}) => {
   };
 
   const getDataVisualizer = async (selecallergens, city) => {
-
     // console.log("city ? city : AllCities[0]", city ? city : AllCities[0])
-    
+
     // console.log("city",city)
     if (!selecallergens || selecallergens.length === 0) {
       // no allergens selected, clear chart data
       setPrimaryLineData([]);
       setSecondaryLineData([]);
+      setLoadingItemId(null);
       return;
     }
 
@@ -322,16 +314,25 @@ const DatavisualizerSample = ({navigation}) => {
       'YYYY-MM-DD',
     );
 
-    const pickLat = city ? city?.lat : activeCity ? activeCity.lat :   AllCities[0]?.lat
-    const pickLng = city ? city?.lng : activeCity ? activeCity.lng : AllCities[0]?.lng
+    const pickLat = city
+      ? city?.lat
+      : activeCity
+      ? activeCity.lat
+      : AllCities[0]?.lat;
+    const pickLng = city
+      ? city?.lng
+      : activeCity
+      ? activeCity.lng
+      : AllCities[0]?.lng;
 
-    
     const config = {
       method: 'post',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${
         userData?.id
-      }/data_visualizer?lat=${city ? city?.lat : activeCity ? activeCity.lat :   AllCities[0]?.lat}&lng=${
+      }/data_visualizer?lat=${
+        city ? city?.lat : activeCity ? activeCity.lat : AllCities[0]?.lat
+      }&lng=${
         city ? city?.lng : activeCity ? activeCity.lng : AllCities[0]?.lng
       }&start_date=${dateis}&${allergenParams}`,
       headers: {
@@ -363,16 +364,18 @@ const DatavisualizerSample = ({navigation}) => {
 
         colours[0] = first?.chartColor || 'lightblue';
         colours[1] = second?.chartColor || 'lightgreen';
-
+        setLoadingItemId(null);
         // ....................
 
         setDataVisualizerLoader(false);
       })
       .then(response => {
         setDataVisualizerLoader(false);
+        setLoadingItemId(null);
       })
       .catch(error => {
         setDataVisualizerLoader(false);
+        setLoadingItemId(null);
         console.log(error);
       });
     // } else {
@@ -463,6 +466,7 @@ const DatavisualizerSample = ({navigation}) => {
 
   const deleteAllergens = async item => {
     // console.log("item", item, takingMedications,"Primarylinedata", PrimaryLineData, "SecondaryLineData", SecondaryLineData)
+    // Alert.alert("alldsadlsaldas")
     // return
     if (!item?.id) {
       console.warn('Invalid allergen item. Skipping delete.');
@@ -470,6 +474,9 @@ const DatavisualizerSample = ({navigation}) => {
     }
 
     setLoadingItemId(item.id);
+
+ 
+
 
     try {
       const data = JSON.stringify({
@@ -488,14 +495,14 @@ const DatavisualizerSample = ({navigation}) => {
 
       await axios.request(config);
 
-      const updatedAllergens = takingMedications.filter(
+          const updatedAllergens = takingMedications.filter(
         med => med.id !== item.id,
       );
 
       setTakingMedications(updatedAllergens);
 
-      console.log('updatedAllergens', updatedAllergens);
-
+      // console.log('updatedAllergens', updatedAllergens);
+   
       // 🧠 Update graph based on remaining allergens
       if (updatedAllergens.length === 0) {
         setPrimaryLineData([]);
@@ -505,8 +512,9 @@ const DatavisualizerSample = ({navigation}) => {
       }
     } catch (error) {
       console.error('Error deleting allergen:', error);
-    } finally {
       setLoadingItemId(null);
+    } finally {
+      // setLoadingItemId(null);
     }
   };
 
@@ -538,12 +546,13 @@ const DatavisualizerSample = ({navigation}) => {
     // }
   };
 
+  // console.log("loadingItemId",loadingItemId)
+
   const SelectLocation = async city => {
     // await AsyncStorage.setItem('isCity', JSON.stringify(city));
     dispatch(setActiveCity(city));
     // getSelectedAllergens(city);
   };
-
 
   const chartSpacing = responsiveWidth(28); // You can tweak this value as needed
 
@@ -606,10 +615,18 @@ const DatavisualizerSample = ({navigation}) => {
                 <ActivityIndicator size={'large'} color={AppColors.BLACK} />
               </View>
             ) : (
-              <View style={{minHeight: responsiveHeight(30),paddingBottom: 20, position: 'relative'}}>
+              <View
+                style={{
+                  minHeight: responsiveHeight(30),
+                  paddingBottom: 20,
+                  // position: 'absolute',
+                }}>
                 {MedicationnRecord?.length > 0 ? (
                   <View>
-                    <ScrollView   contentContainerStyle={{minWidth: responsiveWidth(100)}} style={{marginLeft: 10}} horizontal={true}>
+                    <ScrollView
+                      contentContainerStyle={{minWidth: responsiveWidth(100)}}
+                      style={{marginLeft: 10}}
+                      horizontal={true}>
                       <View
                         style={{
                           position: 'absolute',
@@ -665,7 +682,6 @@ const DatavisualizerSample = ({navigation}) => {
                         // xAxisLabelTexts={[]}
                         lineData={PrimaryLineData || []}
                         lineData2={SecondaryLineData || []}
-                        lineData3={NewPro || []}
                         lineConfig={{
                           color: colours[0],
                           thickness: 2,
@@ -790,39 +806,47 @@ const DatavisualizerSample = ({navigation}) => {
                         position: 'absolute',
                         zIndex: 1,
                         right: 0,
-                          // minWidth: responsiveWidth(13.5),
-                          //  justifyContent: 'space-between',
-    // paddingVertical: responsiveHeight(1),
+                        // minWidth: responsiveWidth(13.5),
+                        //  justifyContent: 'space-between',
+                        // paddingVertical: responsiveHeight(1),
                         // justifyContent: 'flex-start',,
                         height: responsiveHeight(30),
                         top: '37%',
                         gap: 10,
                       }}>
-                      <AppText 
-                      // style={{
-                      //   position: 'absolute',
-                      //   top: '31%',
-                      // }} 
-                       title={'Very \nHigh'} textSize={1.5} />
-                      <AppText  
-    //                   style={{
-    //   position: 'absolute',
-    //   top: '44.5%', 
-    // }} 
-    title={'High'} textSize={1.5} />
+                      <AppText
+                        // style={{
+                        //   position: 'absolute',
+                        //   top: '31%',
+                        // }}
+                        title={'Very \nHigh'}
+                        textSize={1.5}
+                      />
+                      <AppText
+                        //                   style={{
+                        //   position: 'absolute',
+                        //   top: '44.5%',
+                        // }}
+                        title={'High'}
+                        textSize={1.5}
+                      />
 
-                      <AppText    
-    //                    style={{
-    //   position: 'absolute',
-    //   top: '53%',
-    // }}
- title={'Moderate'} textSize={1.5} />
-                      <AppText 
-                      // style={{
-                      //   position: 'absolute',
-                      //   top: '62%'
-                      // }} 
-                      title={'Low'} textSize={1.5} />
+                      <AppText
+                        //                    style={{
+                        //   position: 'absolute',
+                        //   top: '53%',
+                        // }}
+                        title={'Moderate'}
+                        textSize={1.5}
+                      />
+                      <AppText
+                        // style={{
+                        //   position: 'absolute',
+                        //   top: '62%'
+                        // }}
+                        title={'Low'}
+                        textSize={1.5}
+                      />
                     </View>
                   </View>
                 ) : (
@@ -831,35 +855,10 @@ const DatavisualizerSample = ({navigation}) => {
               </View>
             )}
 
-            <DatePicker
-              modal
-              open={open}
-              date={date}
-              mode="date"
-              minimumDate={
-                allActiveMedicationRedux.length > 0
-                  ? moment(allActiveMedicationRedux[0]?.date).local()
-                  : moment().local()
-              }
-              // minimumDate={allActiveMedicationRedux[0]?.date ? new Date(allActiveMedicationRedux[0]?.date) :  new Date() }
-              maximumDate={new Date(moment().local())}
-              onConfirm={selectedDate => {
-                setDate(selectedDate);
-                setOpen(false);
-                const today = moment().startOf('day');
-                const picked = moment(selectedDate).startOf('day');
-                const formattedDate = picked.format('YYYY-MM-DD');
-
-                setSelectedDate(formattedDate);
-                // getMedicationRecords(formattedDate);
-              }}
-              onCancel={() => {
-                setOpen(false);
-              }}
-            />
+        
 
             <View style={{gap: 20}}>
-              <View>
+              <View >
                 <AppText title={'Allergens'} textSize={2} textFontWeight />
                 <FlatList
                   data={takingMedications}
@@ -878,7 +877,9 @@ const DatavisualizerSample = ({navigation}) => {
                         marginTop: 5,
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        paddingHorizontal: 20,
+                        paddingRight: 0,
+                        paddingLeft:5,
+
                         borderWidth: 1,
                       }}
                       // style={{
@@ -895,7 +896,9 @@ const DatavisualizerSample = ({navigation}) => {
                       //   paddingHorizontal: 20,
                       // }}
                     >
-                      <AppText title={item.allergen_name} textSize={1.5} />
+
+                      <AppText title={item.allergen_name} textSize={1.5}  textwidth={65}  />
+
 
                       {loadingItemId === item.id ? (
                         <ActivityIndicator
@@ -903,7 +906,7 @@ const DatavisualizerSample = ({navigation}) => {
                           color={AppColors.LIGHTGRAY}
                         />
                       ) : (
-                        <TouchableOpacity onPress={() => deleteAllergens(item)}>
+                        <TouchableOpacity onPress={() => deleteAllergens(item)} style={{  padding:10, width:responsiveWidth(25), alignItems:'flex-end', justifyContent:'cennter', paddingRight:30}}>
                           <AntDesign
                             name="minus"
                             size={responsiveFontSize(2)}
@@ -988,8 +991,8 @@ const DatavisualizerSample = ({navigation}) => {
                     // height: responsiveHeight(5),
                     // width: responsiveWidth(44),
                     minHeight: responsiveHeight(5.5),
-paddingVertical: 10,
-width: '48%',
+                    paddingVertical: 10,
+                    width: '48%',
                     borderWidth: 1,
                     borderRadius: 10,
                     alignItems: 'center',
@@ -1011,21 +1014,21 @@ width: '48%',
               </View>
               <TouchableOpacity
                 onPress={() => getLocation('Add Location')}
-                  style={{
-    width: responsiveWidth(90),
-    // maxWidth: 400, 
-    alignSelf: 'center', 
-    borderWidth: 1,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor:
-      type === 'Add Location'
-        ? AppColors.BTNCOLOURS
-        : AppColors.WHITE,
-    marginTop: 10,
-    paddingVertical: 12, 
-  }}
+                style={{
+                  width: responsiveWidth(90),
+                  // maxWidth: 400,
+                  alignSelf: 'center',
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor:
+                    type === 'Add Location'
+                      ? AppColors.BTNCOLOURS
+                      : AppColors.WHITE,
+                  marginTop: 10,
+                  paddingVertical: 12,
+                }}
                 // style={{
                 //   height: responsiveHeight(5),
                 //   width: responsiveWidth(90),
@@ -1039,7 +1042,7 @@ width: '48%',
                 //       : AppColors.WHITE,
                 //   marginTop: 10,
                 // }}
-                >
+              >
                 <AppText
                   title={'Change Location'}
                   textColor={
@@ -1137,7 +1140,7 @@ width: '48%',
                   renderItem={({item}) => {
                     return (
                       <TouchableOpacity
-                        onPress={() => addAllergens(item)}
+                        onPress={() => pollenLoader == true ? console.log("adding"): addAllergens(item)}
                         style={{
                           // height: responsiveHeight(6),
                           minHeight: responsiveHeight(6),
@@ -1209,6 +1212,33 @@ width: '48%',
           </View>
         )}
       </ScrollView>
+
+          <DatePicker
+              modal
+              open={open}
+              date={date}
+              mode="date"
+              minimumDate={
+                allActiveMedicationRedux.length > 0
+                  ? moment(allActiveMedicationRedux[0]?.date).local()
+                  : moment().local()
+              }
+              // minimumDate={allActiveMedicationRedux[0]?.date ? new Date(allActiveMedicationRedux[0]?.date) :  new Date() }
+              maximumDate={new Date(moment().local())}
+              onConfirm={selectedDate => {
+                setDate(selectedDate);
+                setOpen(false);
+                const today = moment().startOf('day');
+                const picked = moment(selectedDate).startOf('day');
+                const formattedDate = picked.format('YYYY-MM-DD');
+
+                setSelectedDate(formattedDate);
+                // getMedicationRecords(formattedDate);
+              }}
+              onCancel={() => {
+                setOpen(false);
+              }}
+            />
     </SafeAreaView>
   );
 };

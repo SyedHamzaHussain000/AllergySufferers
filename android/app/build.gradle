@@ -88,14 +88,14 @@ android {
        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
      }
 
-    namespace "com.allergysufferers"
+    namespace "org.aerobiology.allergySufferersV2"
     defaultConfig {
-        applicationId "com.allergysufferers"
+        applicationId "org.aerobiology.allergySufferersV2"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        // missingDimensionStrategy "store", "play"
+        missingDimensionStrategy "store", "play"
     }
     signingConfigs {
         debug {

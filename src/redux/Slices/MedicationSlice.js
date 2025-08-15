@@ -52,7 +52,7 @@ const MedicationSlice = createSlice({
       // Alert.alert("sadasdas redux")
 
       const newMed = action.payload;
-      // console.log("newMed",newMed[newMed.length - 1])
+      console.log("newMed",newMed[newMed.length - 1])
 
       state.MyCurrentMeds = newMed;
     },
