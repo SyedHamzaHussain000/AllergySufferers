@@ -94,8 +94,6 @@ const MedicationSample = ({navigation}) => {
     // return nav;
   }, [allActiveMedicationRedux]);
 
-  
-
   useFocusEffect(
     useCallback(() => {
       if (allMyCurrentMeds && allMyCurrentMeds.length > 0) {
@@ -728,6 +726,7 @@ const MedicationSample = ({navigation}) => {
             <AppText title={1} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
             <AppText title={0} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
           </View>
+
 
           {/* Chart */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>

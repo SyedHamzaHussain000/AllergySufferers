@@ -12,6 +12,8 @@ import { useSelector } from 'react-redux';
 const More = ({navigation}) => {
     const userData = useSelector(state => state.auth.user);
 
+    console.log("userData",userData)
+
   const pollens = [
     {id: 1, name: 'App Settings', top: true, onPress: ()=> navigation.navigate("AppSetting")},
     {id: 2, name: 'Data Visualizer', onPress: ()=> navigation.navigate("DataVisualizer")},
@@ -29,8 +31,8 @@ const More = ({navigation}) => {
         <AppHeader heading="More" icon={<Entypo name={"location-pin"} size={responsiveFontSize(2.5)} color={AppColors.BTNCOLOURS}/>}/>
 
         <View style={{flexDirection: 'row', gap: 20, alignItems: 'center'}}>
-          <AppText title={`Account ID: ${userData?.id}`} textSize={2} />
-          <AppText title={'App Version: 2.0.108'} textSize={2} />
+          <AppText title={`Name: ${userData?.user_name}`} textSize={2} />
+          <AppText title={'App Version: 5.9.8'} textSize={2} />
         </View>
 
         <View

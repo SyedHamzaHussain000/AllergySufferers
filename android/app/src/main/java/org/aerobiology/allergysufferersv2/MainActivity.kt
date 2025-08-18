@@ -1,10 +1,11 @@
-package org.aerobiology.allergysufferersv2;
+package org.aerobiology.allergySufferersV2;
 
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
+import org.aerobiology.allergySufferersV2.BuildConfig
 
 class MainActivity : ReactActivity() {
 

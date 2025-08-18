@@ -40,7 +40,7 @@ const CreateAccount = ({navigation}) => {
     const token = await messaging().getToken();
 
     let data = JSON.stringify({
-      full_name: userData.full_name,
+      // full_name: userData.full_name,
       user_name: userData.user_name,
       email: userData.email,
       password: userData.password,
@@ -103,19 +103,19 @@ const CreateAccount = ({navigation}) => {
             textFontWeight
           />
           <AppText
-            title={'Let’s Sign Up for explore continues'}
+            title={'Sign up to access the most accurate pollen and spore forecasts that uses actual data, 32 years of modelling and an accuracy rate of 80% annually'}
             textColor={AppColors.LIGHTGRAY}
             textSize={1.8}
           />
         </View>
 
         <View style={{gap: 20}}>
-          <AppTextInput
+          {/* <AppTextInput
             title="Full Name"
             inputPlaceHolder={'Input Full Name'}
             onChangeText={(text)=>  setUserData({...userData, full_name: text})} value={userData.full_name}
             textInput
-          />
+          /> */}
           <AppTextInput title="Username" inputPlaceHolder={'Input Username'} onChangeText={(text)=>  setUserData({...userData, user_name: text})} value={userData.user_name} textInput/>
           <AppTextInput
             title="Email Address"

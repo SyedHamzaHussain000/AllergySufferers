@@ -1,5 +1,12 @@
-import {View, Text, TouchableOpacity, Platform} from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Platform,
+  FlatList,
+  ScrollView,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../components/AppHeader';
 import SubscriptionCard from '../../../components/SubscriptionCard';
 import AppText from '../../../components/AppTextComps/AppText';
@@ -14,8 +21,8 @@ import {
   getSubscriptions,
   Subscription,
   presentCodeRedemptionSheetIOS,
+  requestSubscription,
 } from 'react-native-iap';
-
 
 const AppSubscription = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
@@ -24,10 +31,10 @@ const AppSubscription = ({navigation}) => {
   const expireDate = useSelector(state => state.auth.expireDate);
   const isAndroid = Platform.OS === 'android'; // check platform is android or not
 
-    const androidsubscriptionsId = ['premium_oneyear'];
-    
+  const androidsubscriptionsId = ['premium_oneyear', 'premium_monthly'];
+
   const [connection, setConnection] = useState(false); // set in-app purchase is connected or not
-  const [subscription, setSubscription] = useState([]);
+  const [subscriptionLocal, setSubscriptionLocal] = useState([]);
   const [offerings, setOfferings] = useState(null);
 
   useEffect(() => {
@@ -48,7 +55,7 @@ const AppSubscription = ({navigation}) => {
     };
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     if (isAndroid) {
       if (connection) {
         getSubscriptionInfo();
@@ -59,8 +66,6 @@ const AppSubscription = ({navigation}) => {
   const NoSubscription = () => {
     dispatch(setSubscription({isExpired: true}));
     if (userData?.email) {
-
-
       navigation.navigate('Main');
     } else {
       navigation.navigate('Login');
@@ -75,49 +80,92 @@ const AppSubscription = ({navigation}) => {
       });
       console.log('sussssb', subscriptions);
 
-      setSubscription(subscriptions); // set subscription information
+      setSubscriptionLocal(subscriptions); // set subscription information
     } catch (error) {
       console.error('Error fetching products: ', error);
     }
   };
 
-  const subscribeNow = async(isExpired, type) => {
+  const subscribeNow = async (data, isExpired, type) => {
+    if (Platform.OS == 'android') {
+      if (userData?.email) {
 
-    
-    if (userData?.email) {
-      if (isExpired == false) {
-        
-        const subscribeApi = await SubscribeNow(type , userData?.id)
-        console.log("userData", userData.email,isExpired , subscribeApi);
-        dispatch(setSubscription({isExpired: isExpired, SubscriptionType: type, expireDate: subscribeApi.expiry}));
         navigation.navigate('Home');
-      }
+        return 
+        const offerToken = data?.subscriptionOfferDetails[0].offerToken;
 
-    } else {
-      if (isExpired == false) {
+        const purchaseData = await requestSubscription({
+          sku: data?.productId,
+          ...(offerToken && {
+            subscriptionOffers: [{sku: data?.productId, offerToken}],
+          }),
+        });
+        console.log('offerToken', purchaseData);
+
+        return;
+        if (isExpired == false) {
+          const subscribeApi = await SubscribeNow(type, userData?.id);
+          console.log('userData', userData.email, isExpired, subscribeApi);
+          dispatch(
+            setSubscription({
+              isExpired: isExpired,
+              SubscriptionType: type,
+              expireDate: subscribeApi.expiry,
+            }),
+          );
+          navigation.navigate('Home');
+        }
+      } else {
+
         navigation.navigate('Login');
-        dispatch(setSubscription({isExpired: isExpired, SubscriptionType: type}));
+        return;
+        
+        const offerToken = data?.subscriptionOfferDetails[0].offerToken;
+        const purchaseData = await requestSubscription({
+          sku: data?.productId,
+          ...(offerToken && {
+            subscriptionOffers: [{sku: data?.productId, offerToken}],
+          }),
+        });
+        console.log('offerToken', purchaseData);
+        
+        return;
+        if (isExpired == false) {
+          navigation.navigate('Login');
+          dispatch(
+            setSubscription({isExpired: isExpired, SubscriptionType: type}),
+          );
+        }
       }
     }
 
+    return;
   };
 
   return (
-    <View style={{padding: 20}}>
+    <ScrollView contentContainerStyle={{flexGrow: 1, padding: 20}}>
       <AppHeader goBack={true} heading="Subscription" />
 
       <View style={{gap: 20}}>
-        <SubscriptionCard
-          title={'Monthly Package'}
-          price={'3.99'}
-          type={'month'}
-          subscribeNow={() => subscribeNow(false, 'month')}
-        />
-        <SubscriptionCard
-          title={'Yearly Package'}
-          price={'14.99'}
-          type={'yearly'}
-          subscribeNow={() => subscribeNow(false, 'yearly')}
+        <FlatList
+          contentContainerStyle={{gap: 10}}
+          data={subscriptionLocal}
+          renderItem={({item}) => {
+            const priceObjectIndex =
+              item?.subscriptionOfferDetails[0]?.pricingPhases?.pricingPhaseList
+                ?.length;
+            const PriceArray =
+              item?.subscriptionOfferDetails[0]?.pricingPhases
+                ?.pricingPhaseList[priceObjectIndex - 1];
+            return (
+              <SubscriptionCard
+                title={item?.displayName}
+                price={PriceArray?.formattedPrice}
+                type={PriceArray?.billingPeriod == 'P1M' ? 'monthly' : 'yearly'}
+                subscribeNow={() => subscribeNow(item, false, 'month')}
+              />
+            );
+          }}
         />
 
         <TouchableOpacity onPress={() => NoSubscription()}>
@@ -130,7 +178,7 @@ const AppSubscription = ({navigation}) => {
           />
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

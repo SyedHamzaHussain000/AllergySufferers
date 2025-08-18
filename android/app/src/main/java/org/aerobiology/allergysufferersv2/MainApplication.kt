@@ -1,4 +1,4 @@
-package org.aerobiology.allergysufferersv2;
+package org.aerobiology.allergySufferersV2;
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -11,6 +11,7 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
+import org.aerobiology.allergySufferersV2.BuildConfig 
 
 class MainApplication : Application(), ReactApplication {
 

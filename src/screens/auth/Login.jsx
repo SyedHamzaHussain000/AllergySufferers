@@ -114,15 +114,16 @@ const Login = ({navigation}) => {
 
         <View style={{alignItems: 'center', justifyContent: 'center'}}>
           <AppText
-            title={'Getting Started'}
+            title={'Let’s get started'}
             textColor={AppColors.BLACK}
             textSize={2.5}
             textFontWeight
           />
           <AppText
-            title={'Let’s login for explore continues'}
+            title={'Create an account or login to explore the most accurate pollen and spore forecasts in Canada'}
             textColor={AppColors.LIGHTGRAY}
             textSize={1.8}
+            textAlignment={'center'}
           />
         </View>
 

@@ -800,8 +800,6 @@ const Home = ({navigation}) => {
                             contentContainerStyle={{paddingTop: 100}}
                             inverted
                             renderItem={({item, index}) => {
-                              // console.log('past index', index, ispastArray.length);
-
                               const pastPollenAndSpores = item?.current?.sort(
                                 (a, b) => {
                                   if (a.type !== b.type) {
@@ -871,65 +869,113 @@ const Home = ({navigation}) => {
                                     />
                                   </View> */}
 
-                                  <TouchableOpacity
-                                    onPress={() => {
-                                      if (expandedFutureKey === item.key) {
-                                        setExpandedFutureKey(null); // Collapse if already expanded
-                                      } else {
-                                        setExpandedFutureKey(item.key); // Expand only this one
-                                      }
-                                    }}
-                                    style={{
-                                      flexDirection: 'row',
-                                      gap: 10,
-                                      alignItems: 'center',
-                                      justifyContent: 'space-between',
-                                      width: responsiveWidth(80),
-                                    }}>
-                                    <View
+                                  {index >= ispastArray?.length - 5 ? (
+                                    <TouchableOpacity
+                                      onPress={() => {
+                                        if (expandedFutureKey === item.key) {
+                                          setExpandedFutureKey(null); // Collapse if already expanded
+                                        } else {
+                                          setExpandedFutureKey(item.key); // Expand only this one
+                                        }
+                                      }}
                                       style={{
                                         flexDirection: 'row',
+                                        gap: 10,
                                         alignItems: 'center',
-                                        gap: 5,
+                                        justifyContent: 'space-between',
+                                        width: responsiveWidth(80),
                                       }}>
                                       <View
                                         style={{
-                                          height: 20,
-                                          width: 20,
-                                          borderRadius: 200,
-                                          borderWidth: 1,
-                                          borderColor: getThBgColour(
-                                            item?.label,
-                                          ),
+                                          flexDirection: 'row',
                                           alignItems: 'center',
-                                          justifyContent: 'center',
+                                          gap: 5,
                                         }}>
                                         <View
                                           style={{
-                                            height: 15,
-                                            width: 15,
+                                            height: 20,
+                                            width: 20,
                                             borderRadius: 200,
-                                            backgroundColor: getThBgColour(
+                                            borderWidth: 1,
+                                            borderColor: getThBgColour(
                                               item?.label,
                                             ),
-                                          }}
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                          }}>
+                                          <View
+                                            style={{
+                                              height: 15,
+                                              width: 15,
+                                              borderRadius: 200,
+                                              backgroundColor: getThBgColour(
+                                                item?.label,
+                                              ),
+                                            }}
+                                          />
+                                        </View>
+
+                                        <AppText
+                                          title={item.key}
+                                          textSize={2}
+                                          textColor={AppColors.BLACK}
+                                          textFontWeight
                                         />
                                       </View>
-
-                                      <AppText
-                                        title={item.key}
-                                        textSize={2}
-                                        textColor={AppColors.BLACK}
-                                        textFontWeight
+                                      <AntDesign
+                                        name={'plus'}
+                                        size={responsiveFontSize(3)}
+                                        color={AppColors.BLACK}
                                       />
-                                    </View>
+                                    </TouchableOpacity>
+                                  ) : (
+                                    <View
+                                      style={{
+                                        flexDirection: 'row',
+                                        gap: 10,
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        width: responsiveWidth(80),
+                                      }}>
+                                      <View
+                                        style={{
+                                          flexDirection: 'row',
+                                          alignItems: 'center',
+                                          gap: 5,
+                                        }}>
+                                        <View
+                                          style={{
+                                            height: 20,
+                                            width: 20,
+                                            borderRadius: 200,
+                                            borderWidth: 1,
+                                            borderColor: getThBgColour(
+                                              item?.label,
+                                            ),
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                          }}>
+                                          <View
+                                            style={{
+                                              height: 15,
+                                              width: 15,
+                                              borderRadius: 200,
+                                              backgroundColor: getThBgColour(
+                                                item?.label,
+                                              ),
+                                            }}
+                                          />
+                                        </View>
 
-                                    <AntDesign
-                                      name={'plus'}
-                                      size={responsiveFontSize(3)}
-                                      color={AppColors.BLACK}
-                                    />
-                                  </TouchableOpacity>
+                                        <AppText
+                                          title={item.key}
+                                          textSize={2}
+                                          textColor={AppColors.BLACK}
+                                          textFontWeight
+                                        />
+                                      </View>
+                                    </View>
+                                  )}
 
                                   {/* <ScrollView
                                     horizontal

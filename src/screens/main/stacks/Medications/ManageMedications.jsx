@@ -144,6 +144,7 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
 
 
 
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 200}}>

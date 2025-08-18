@@ -65,11 +65,14 @@ const DatavisualizerSample = ({navigation}) => {
   const [type, setType] = useState('allergens');
   const [medicationData, setMedicationsData] = useState();
 
+  const [activeCityLocalState, setactiveCityLocalState] = useState()
+
+
   const [takingMedications, setTakingMedications] = useState([]);
   const [todayPollensData, setTodayPollensData] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
 
-  // console.log('MedicationnRecord', MedicationnRecord);
+  console.log('MedicationnRecord', MedicationnRecord);
 
   const [pollenLoader, setPollenLoader] = useState(false);
 
@@ -177,6 +180,7 @@ const DatavisualizerSample = ({navigation}) => {
       });
   };
 
+
   const getMedicationApi = () => {
     setType('medication');
     setPollenLoader(true);
@@ -219,70 +223,125 @@ const DatavisualizerSample = ({navigation}) => {
 
   const MAX_BARS_PER_DATE = 10;
 
+  // const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
+  //   const end = moment(new Date());
+  //   const start = moment(allActiveMedicationRedux[0].date || new Date());
+
+  //   setStartDate(start);
+  //   setEndDate(end);
+
+  //   const dayNumbers = [];
+  //   let current = start.clone();
+
+  //   while (current.isSameOrBefore(end)) {
+  //     dayNumbers.push(current.date());
+  //     current.add(1, 'day');
+  //   }
+
+  //   setAllDayNumber(dayNumbers);
+
+  //   // ✅ Data from Redux instead of API
+  //   //   const allentriesArr = allActiveMedicationRedux || [];
+
+  //   const groupedByDate = {};
+
+  //   allActiveMedicationRedux.forEach(entry => {
+  //     const formattedDate = moment(entry.date).format('D'); // ✅ outputs just "25", "27", etc.
+  //     if (!groupedByDate[formattedDate]) {
+  //       groupedByDate[formattedDate] = [];
+  //     }
+  //     groupedByDate[formattedDate].push({
+  //       value: parseInt(entry.units) || 0,
+  //       frontColor: entry.frontColor,
+  //     });
+  //   });
+
+  //   const barData = [];
+
+  //   Object.entries(groupedByDate).forEach(([date, bars]) => {
+  //     const group = [];
+
+  //     bars.forEach((bar, index) => {
+  //       group.push({
+  //         value: bar.value,
+  //         frontColor: bar.frontColor,
+  //         label: index === 0 ? date : '',
+  //         labelWidth: chartSpacing,
+  //         labelTextStyle: {color: 'gray'},
+  //         spacing: 0,
+          
+          
+  //       });
+  //     });
+
+  //     const paddingCount = MAX_BARS_PER_DATE - group.length;
+  //     for (let i = 0; i < paddingCount; i++) {
+  //       group.push({
+  //         value: 0,
+  //         frontColor: 'transparent',
+  //         spacing:responsiveWidth(2.5), // → outputs 27.49 in logs
+  //         labelWidth: 0,
+  //       });
+  //     }
+
+  //     barData.push(...group);
+  //   });
+
+  //   setMedicationnRecord(barData);
+  // };
+
   const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
-    const end = moment(new Date());
-    const start = moment(allActiveMedicationRedux[0].date || new Date());
+  if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
+    setMedicationnRecord([]);
+    return;
+  }
 
-    setStartDate(start);
-    setEndDate(end);
+  const end = moment(new Date());
+  const start = moment(allActiveMedicationRedux[0].date || new Date());
 
-    const dayNumbers = [];
-    let current = start.clone();
+  setStartDate(start);
+  setEndDate(end);
 
-    while (current.isSameOrBefore(end)) {
-      dayNumbers.push(current.date());
-      current.add(1, 'day');
+  const dayNumbers = [];
+  let current = start.clone();
+
+  while (current.isSameOrBefore(end)) {
+    dayNumbers.push(current.date());
+    current.add(1, 'day');
+  }
+
+  setAllDayNumber(dayNumbers);
+
+  // ✅ Group by date
+  const grouped = {};
+  allActiveMedicationRedux.forEach(entry => {
+    if (!grouped[entry.date]) {
+      grouped[entry.date] = [];
     }
+    grouped[entry.date].push(entry);
+  });
 
-    setAllDayNumber(dayNumbers);
+  const barData = [];
 
-    // ✅ Data from Redux instead of API
-    //   const allentriesArr = allActiveMedicationRedux || [];
+  Object.keys(grouped).forEach(date => {
+    const group = grouped[date];
+    group.forEach((entry, idx) => {
+      const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
+      const value = parseInt(entry.units) || 0;
+      const isLast = idx === group.length - 1;
 
-    const groupedByDate = {};
-
-    allActiveMedicationRedux.forEach(entry => {
-      const formattedDate = moment(entry.date).format('D'); // ✅ outputs just "25", "27", etc.
-      if (!groupedByDate[formattedDate]) {
-        groupedByDate[formattedDate] = [];
-      }
-      groupedByDate[formattedDate].push({
-        value: parseInt(entry.units) || 0,
-        frontColor: entry.frontColor,
+      barData.push({
+        value,
+        ...(idx === 0 && {label: formattedLabel}), // ✅ only first entry of date gets label
+        spacing: isLast ? responsiveWidth(8) : 0, // ✅ spacing after last entry of that date
+        frontColor: entry.frontColor || '#E23131',
+        labelWidth: 0,
       });
     });
+  });
 
-    const barData = [];
-
-    Object.entries(groupedByDate).forEach(([date, bars]) => {
-      const group = [];
-
-      bars.forEach((bar, index) => {
-        group.push({
-          value: bar.value,
-          frontColor: bar.frontColor,
-          label: index === 0 ? date : '',
-          labelWidth: 0,
-          labelTextStyle: {color: 'gray'},
-          spacing: 0,
-        });
-      });
-
-      const paddingCount = MAX_BARS_PER_DATE - group.length;
-      for (let i = 0; i < paddingCount; i++) {
-        group.push({
-          value: 0,
-          frontColor: 'transparent',
-          spacing: responsiveWidth(6.7), // → outputs 27.49 in logs
-          labelWidth: 0,
-        });
-      }
-
-      barData.push(...group);
-    });
-
-    setMedicationnRecord(barData);
-  };
+  setMedicationnRecord(barData);
+};
 
   const getDataVisualizer = async (selecallergens, city) => {
     // console.log("city ? city : AllCities[0]", city ? city : AllCities[0])
@@ -308,7 +367,7 @@ const DatavisualizerSample = ({navigation}) => {
         item => `scientific_names[]=${encodeURIComponent(item.allergen_name)}`,
       )
       .join('&');
-    // console.log('selecteddate', selecteddate, 'allergenParams', allergenParams);
+
 
     const dateis = moment(allActiveMedicationRedux[0]?.date).format(
       'YYYY-MM-DD',
@@ -325,15 +384,16 @@ const DatavisualizerSample = ({navigation}) => {
       ? activeCity.lng
       : AllCities[0]?.lng;
 
+
     const config = {
       method: 'post',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${
         userData?.id
       }/data_visualizer?lat=${
-        city ? city?.lat : activeCity ? activeCity.lat : AllCities[0]?.lat
+        activeCityLocalState ? activeCityLocalState?.lat : city ? city?.lat : activeCity ? activeCity.lat : AllCities[0]?.lat
       }&lng=${
-        city ? city?.lng : activeCity ? activeCity.lng : AllCities[0]?.lng
+        activeCityLocalState ? activeCityLocalState?.lng : city ? city?.lng : activeCity ? activeCity.lng : AllCities[0]?.lng
       }&start_date=${dateis}&${allergenParams}`,
       headers: {
         'Cache-Control': 'no-cache',
@@ -341,6 +401,7 @@ const DatavisualizerSample = ({navigation}) => {
         Expires: '0',
       },
     };
+
 
     axios
       .request(config)
@@ -550,11 +611,12 @@ const DatavisualizerSample = ({navigation}) => {
 
   const SelectLocation = async city => {
     // await AsyncStorage.setItem('isCity', JSON.stringify(city));
+    setactiveCityLocalState(city)
     dispatch(setActiveCity(city));
     // getSelectedAllergens(city);
   };
 
-  const chartSpacing = responsiveWidth(28); // You can tweak this value as needed
+  const chartSpacing = responsiveWidth(19); // You can tweak this value as needed
 
   // console.log('chartSpacing', chartSpacing);q
 
@@ -631,7 +693,7 @@ const DatavisualizerSample = ({navigation}) => {
                         style={{
                           position: 'absolute',
                           top: 0,
-                          marginLeft: responsiveWidth(15),
+                          marginLeft: responsiveWidth(5),
                           flexDirection: 'row',
                           zIndex: 100,
                         }}>
@@ -652,7 +714,7 @@ const DatavisualizerSample = ({navigation}) => {
                             //   }}>
                             <View
                               style={{
-                                width: responsiveWidth(30),
+                                width: responsiveWidth(20),
 
                                 alignItems: 'flex-start',
                                 // borderWidth:1,
@@ -689,7 +751,7 @@ const DatavisualizerSample = ({navigation}) => {
                           dataPointsColor: colours[0],
                           spacing: chartSpacing,
                           // textColor: 'red',
-                          initialSpacing: responsiveWidth(15),
+                          initialSpacing: responsiveWidth(5),
                         }}
                         lineConfig2={{
                           color: colours[1],
@@ -697,7 +759,7 @@ const DatavisualizerSample = ({navigation}) => {
                           curved: false,
                           dataPointsColor: colours[1],
                           spacing: chartSpacing,
-                          initialSpacing: responsiveWidth(15),
+                          initialSpacing: responsiveWidth(5),
                         }}
                         // xAxisIndicesWidth={responsiveWidth(28)}
                         // yAxisLabelTexts={[
@@ -724,9 +786,11 @@ const DatavisualizerSample = ({navigation}) => {
                         barBorderRadius={2}
                         isAnimated={true}
                         noOfSections={8}
-                        spacing={responsiveWidth(7.5)}
+                        spacing={0}
+                      initialSpacing={responsiveWidth(5)}   // same for all
                         formatYLabel={label => parseFloat(label).toFixed(0)}
                         stepValue={1}
+                        
                       />
 
                       <View
@@ -745,15 +809,15 @@ const DatavisualizerSample = ({navigation}) => {
                           flexDirection: 'row',
                           position: 'absolute',
                           zIndex: 100,
-                          bottom: -5,
-                          marginLeft: responsiveWidth(17.5),
+                          bottom: -0,
+                          marginLeft: responsiveWidth(5),
                         }}>
                         {AllDayNumber?.map(item => {
                           return (
                             <View
                               style={{
                                 backgroundColor: 'white',
-                                width: responsiveWidth(30),
+                                width: responsiveWidth(21),
                               }}>
                               <AppText title={item} textSize={2} />
                             </View>
@@ -938,7 +1002,7 @@ const DatavisualizerSample = ({navigation}) => {
                     }}>
                     <AppText
                       title={
-                        activeCity?.city_name
+                       activeCityLocalState ? activeCityLocalState?.city_name :  activeCity?.city_name
                           ? activeCity?.city_name
                           : AllCities[0]?.city_name
                       }

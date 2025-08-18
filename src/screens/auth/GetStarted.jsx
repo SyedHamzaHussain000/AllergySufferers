@@ -124,7 +124,7 @@ const GetStarted = ({navigation}) => {
 
         <AppButton
           bgColor={AppColors.WHITE}
-          title={'GET STARTED'}
+          title={'Let’s login for explore continues'}
           textColor={AppColors.BTNCOLOURS}
           textSize={2}
           handlePress={() => checkLoginandPremium()}
