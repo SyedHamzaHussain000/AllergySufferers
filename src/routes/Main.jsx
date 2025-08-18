@@ -33,6 +33,7 @@ import MedicationSample from '../screens/main/MedicationSample';
 import DatavisualizerSample from '../screens/main/stacks/DatavisualizerSample';
 import { responsiveHeight } from '../utils/Responsive_Dimensions';
 import AppSubscription from '../screens/main/subscription/AppSubscription';
+import ViewAppGuide from '../screens/main/stacks/Help/ViewAppGuide';
 // import { SafeAreaView, useSafeAreaInsets } from "react-SafeAreaViewnative-safe-area-context";
 
 
@@ -80,6 +81,8 @@ const Main = () => {
       {/* setting screen */}
       <Stack.Screen name="More" component={HomeWithSafeArea(More)} />
       <Stack.Screen name="Account" component={HomeWithSafeArea(Account)} />
+      <Stack.Screen name="ViewAppGuide" component={HomeWithSafeArea(ViewAppGuide)} />
+      
       <Stack.Screen
         name="HelpScreen"
         component={HomeWithSafeArea(HelpScreen)}
