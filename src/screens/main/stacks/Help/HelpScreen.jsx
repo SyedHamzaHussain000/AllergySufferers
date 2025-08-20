@@ -10,7 +10,7 @@ const HelpScreen = ({navigation}) => {
 
   const pollens = [
     {id: 1, name: 'View App Guide & Instruction',onPress: ()=> navigation.navigate("ViewAppGuide"), top: true, },
-    // {id: 2, name: 'View Premium App Guide', },
+    {id: 2, name: 'View Premium App Guide', },
     {id: 2, name: 'Tips & Tricks', onPress: ()=> navigation.navigate("TipsTrick")},
     {id: 3, name: 'Pollen Information for Canada', bottom: true, onPress: ()=> navigation.navigate("PollenInfoForCad")},
   ];
