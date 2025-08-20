@@ -65,14 +65,13 @@ const DatavisualizerSample = ({navigation}) => {
   const [type, setType] = useState('allergens');
   const [medicationData, setMedicationsData] = useState();
 
-  const [activeCityLocalState, setactiveCityLocalState] = useState()
-
+  const [activeCityLocalState, setactiveCityLocalState] = useState();
 
   const [takingMedications, setTakingMedications] = useState([]);
   const [todayPollensData, setTodayPollensData] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
 
-  console.log('MedicationnRecord', MedicationnRecord);
+
 
   const [pollenLoader, setPollenLoader] = useState(false);
 
@@ -114,6 +113,8 @@ const DatavisualizerSample = ({navigation}) => {
 
       if (!activeCity) {
         NewActiveCity();
+      }else{
+        getSelectedAllergens(activeCity);
       }
     });
 
@@ -123,6 +124,10 @@ const DatavisualizerSample = ({navigation}) => {
   useEffect(() => {
     getSelectedAllergens(activeCity);
   }, [activeCity]);
+
+
+
+  // Alert.alert("activeCity",activeCity.city_name)
 
   useEffect(() => {
     if (allActiveMedicationRedux.length > 0) {
@@ -179,7 +184,6 @@ const DatavisualizerSample = ({navigation}) => {
         setPollenLoader(false);
       });
   };
-
 
   const getMedicationApi = () => {
     setType('medication');
@@ -269,8 +273,7 @@ const DatavisualizerSample = ({navigation}) => {
   //         labelWidth: chartSpacing,
   //         labelTextStyle: {color: 'gray'},
   //         spacing: 0,
-          
-          
+
   //       });
   //     });
 
@@ -290,17 +293,85 @@ const DatavisualizerSample = ({navigation}) => {
   //   setMedicationnRecord(barData);
   // };
 
+  // const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
+  //   if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
+  //     setMedicationnRecord([]);
+  //     return;
+  //   }
+
+  //   const end = moment(new Date());
+  //   // const start = moment(allActiveMedicationRedux[0].date || new Date());
+  //   const start = moment().local().subtract(6, 'day');
+
+  //   setStartDate(start);
+  //   setEndDate(end);
+
+  //   // Alert.alert(start)
+
+
+  //   const dayNumbers = [];
+  //   let current = start.clone();
+
+  //   // Alert.alert(current)
+
+
+  //   while (current.isSameOrBefore(end)) {
+  //     dayNumbers.push(current.date());
+  //     current.add(1, 'day');
+  //   }
+
+
+
+  //   setAllDayNumber(dayNumbers);
+
+  //   // ✅ Group by date
+  //   const grouped = {};
+  //   allActiveMedicationRedux.forEach(entry => {
+  //     if (!grouped[entry.date]) {
+  //       grouped[entry.date] = [];
+  //     }
+  //     grouped[entry.date].push(entry);
+  //   });
+
+  //   const barData = [];
+
+  //   Object.keys(grouped).forEach(date => {
+  //     const group = grouped[date];
+  //     group.forEach((entry, idx) => {
+  //       const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
+  //       const value = parseInt(entry.units) || 0;
+  //       const isLast = idx === group.length - 1;
+
+  //       barData.push({
+  //         value,
+  //         ...(idx === 0 && {label: formattedLabel}), // ✅ only first entry of date gets label
+  //         spacing: isLast ? responsiveWidth(9) : 0, // ✅ spacing after last entry of that date
+  //         frontColor: entry.frontColor || '#E23131',
+  //         labelWidth: 0,
+  //       });
+  //     });
+  //   });
+
+  //   setMedicationnRecord(barData);
+  // };
   const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
+
+
   if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
     setMedicationnRecord([]);
     return;
   }
 
-  const end = moment(new Date());
-  const start = moment(allActiveMedicationRedux[0].date || new Date());
+  const end = moment(); // today
+  const start = moment().local().subtract(6, 'day'); // last 7 days
 
   setStartDate(start);
   setEndDate(end);
+
+  // ✅ sirf last 7 din ka data lo
+  const filteredData = allActiveMedicationRedux.filter(entry =>
+    moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]')
+  );
 
   const dayNumbers = [];
   let current = start.clone();
@@ -314,7 +385,7 @@ const DatavisualizerSample = ({navigation}) => {
 
   // ✅ Group by date
   const grouped = {};
-  allActiveMedicationRedux.forEach(entry => {
+  filteredData.forEach(entry => {
     if (!grouped[entry.date]) {
       grouped[entry.date] = [];
     }
@@ -332,8 +403,8 @@ const DatavisualizerSample = ({navigation}) => {
 
       barData.push({
         value,
-        ...(idx === 0 && {label: formattedLabel}), // ✅ only first entry of date gets label
-        spacing: isLast ? responsiveWidth(8) : 0, // ✅ spacing after last entry of that date
+        ...(idx === 0 && { label: formattedLabel }), // ✅ only first entry of date gets label
+        spacing: isLast ? responsiveWidth(9) : 0, // ✅ spacing after last entry of that date
         frontColor: entry.frontColor || '#E23131',
         labelWidth: 0,
       });
@@ -342,6 +413,7 @@ const DatavisualizerSample = ({navigation}) => {
 
   setMedicationnRecord(barData);
 };
+
 
   const getDataVisualizer = async (selecallergens, city) => {
     // console.log("city ? city : AllCities[0]", city ? city : AllCities[0])
@@ -368,10 +440,10 @@ const DatavisualizerSample = ({navigation}) => {
       )
       .join('&');
 
-
-    const dateis = moment(allActiveMedicationRedux[0]?.date).format(
+    const dateis = moment().local().subtract(6, 'day').format(
       'YYYY-MM-DD',
     );
+
 
     const pickLat = city
       ? city?.lat
@@ -384,16 +456,27 @@ const DatavisualizerSample = ({navigation}) => {
       ? activeCity.lng
       : AllCities[0]?.lng;
 
-
     const config = {
       method: 'post',
       maxBodyLength: Infinity,
       url: `${BASE_URL}/allergy_data/v1/user/${
         userData?.id
       }/data_visualizer?lat=${
-        activeCityLocalState ? activeCityLocalState?.lat : city ? city?.lat : activeCity ? activeCity.lat : AllCities[0]?.lat
+        activeCityLocalState
+          ? activeCityLocalState?.lat
+          : city
+          ? city?.lat
+          : activeCity
+          ? activeCity.lat
+          : AllCities[0]?.lat
       }&lng=${
-        activeCityLocalState ? activeCityLocalState?.lng : city ? city?.lng : activeCity ? activeCity.lng : AllCities[0]?.lng
+        activeCityLocalState
+          ? activeCityLocalState?.lng
+          : city
+          ? city?.lng
+          : activeCity
+          ? activeCity.lng
+          : AllCities[0]?.lng
       }&start_date=${dateis}&${allergenParams}`,
       headers: {
         'Cache-Control': 'no-cache',
@@ -401,7 +484,6 @@ const DatavisualizerSample = ({navigation}) => {
         Expires: '0',
       },
     };
-
 
     axios
       .request(config)
@@ -536,9 +618,6 @@ const DatavisualizerSample = ({navigation}) => {
 
     setLoadingItemId(item.id);
 
- 
-
-
     try {
       const data = JSON.stringify({
         allergen_id: item.id,
@@ -556,14 +635,14 @@ const DatavisualizerSample = ({navigation}) => {
 
       await axios.request(config);
 
-          const updatedAllergens = takingMedications.filter(
+      const updatedAllergens = takingMedications.filter(
         med => med.id !== item.id,
       );
 
       setTakingMedications(updatedAllergens);
 
       // console.log('updatedAllergens', updatedAllergens);
-   
+
       // 🧠 Update graph based on remaining allergens
       if (updatedAllergens.length === 0) {
         setPrimaryLineData([]);
@@ -611,7 +690,7 @@ const DatavisualizerSample = ({navigation}) => {
 
   const SelectLocation = async city => {
     // await AsyncStorage.setItem('isCity', JSON.stringify(city));
-    setactiveCityLocalState(city)
+    setactiveCityLocalState(city);
     dispatch(setActiveCity(city));
     // getSelectedAllergens(city);
   };
@@ -786,11 +865,10 @@ const DatavisualizerSample = ({navigation}) => {
                         barBorderRadius={2}
                         isAnimated={true}
                         noOfSections={8}
-                        spacing={0}
-                      initialSpacing={responsiveWidth(5)}   // same for all
+                        spacing={responsiveWidth(10)}
+                        initialSpacing={responsiveWidth(5)} // same for all
                         formatYLabel={label => parseFloat(label).toFixed(0)}
                         stepValue={1}
-                        
                       />
 
                       <View
@@ -919,10 +997,8 @@ const DatavisualizerSample = ({navigation}) => {
               </View>
             )}
 
-        
-
             <View style={{gap: 20}}>
-              <View >
+              <View>
                 <AppText title={'Allergens'} textSize={2} textFontWeight />
                 <FlatList
                   data={takingMedications}
@@ -942,7 +1018,7 @@ const DatavisualizerSample = ({navigation}) => {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         paddingRight: 0,
-                        paddingLeft:5,
+                        paddingLeft: 5,
 
                         borderWidth: 1,
                       }}
@@ -960,9 +1036,11 @@ const DatavisualizerSample = ({navigation}) => {
                       //   paddingHorizontal: 20,
                       // }}
                     >
-
-                      <AppText title={item.allergen_name} textSize={1.5}  textwidth={65}  />
-
+                      <AppText
+                        title={item.allergen_name}
+                        textSize={1.5}
+                        textwidth={65}
+                      />
 
                       {loadingItemId === item.id ? (
                         <ActivityIndicator
@@ -970,7 +1048,15 @@ const DatavisualizerSample = ({navigation}) => {
                           color={AppColors.LIGHTGRAY}
                         />
                       ) : (
-                        <TouchableOpacity onPress={() => deleteAllergens(item)} style={{  padding:10, width:responsiveWidth(25), alignItems:'flex-end', justifyContent:'cennter', paddingRight:30}}>
+                        <TouchableOpacity
+                          onPress={() => deleteAllergens(item)}
+                          style={{
+                            padding: 10,
+                            width: responsiveWidth(25),
+                            alignItems: 'flex-end',
+                            justifyContent: 'cennter',
+                            paddingRight: 30,
+                          }}>
                           <AntDesign
                             name="minus"
                             size={responsiveFontSize(2)}
@@ -1002,7 +1088,9 @@ const DatavisualizerSample = ({navigation}) => {
                     }}>
                     <AppText
                       title={
-                       activeCityLocalState ? activeCityLocalState?.city_name :  activeCity?.city_name
+                        activeCityLocalState
+                          ? activeCityLocalState?.city_name
+                          : activeCity?.city_name
                           ? activeCity?.city_name
                           : AllCities[0]?.city_name
                       }
@@ -1204,7 +1292,11 @@ const DatavisualizerSample = ({navigation}) => {
                   renderItem={({item}) => {
                     return (
                       <TouchableOpacity
-                        onPress={() => pollenLoader == true ? console.log("adding"): addAllergens(item)}
+                        onPress={() =>
+                          pollenLoader == true
+                            ? console.log('adding')
+                            : addAllergens(item)
+                        }
                         style={{
                           // height: responsiveHeight(6),
                           minHeight: responsiveHeight(6),
@@ -1277,32 +1369,32 @@ const DatavisualizerSample = ({navigation}) => {
         )}
       </ScrollView>
 
-          <DatePicker
-              modal
-              open={open}
-              date={date}
-              mode="date"
-              minimumDate={
-                allActiveMedicationRedux.length > 0
-                  ? moment(allActiveMedicationRedux[0]?.date).local()
-                  : moment().local()
-              }
-              // minimumDate={allActiveMedicationRedux[0]?.date ? new Date(allActiveMedicationRedux[0]?.date) :  new Date() }
-              maximumDate={new Date(moment().local())}
-              onConfirm={selectedDate => {
-                setDate(selectedDate);
-                setOpen(false);
-                const today = moment().startOf('day');
-                const picked = moment(selectedDate).startOf('day');
-                const formattedDate = picked.format('YYYY-MM-DD');
+      <DatePicker
+        modal
+        open={open}
+        date={date}
+        mode="date"
+        minimumDate={
+          allActiveMedicationRedux.length > 0
+            ? moment(allActiveMedicationRedux[0]?.date).local()
+            : moment().local()
+        }
+        // minimumDate={allActiveMedicationRedux[0]?.date ? new Date(allActiveMedicationRedux[0]?.date) :  new Date() }
+        maximumDate={new Date(moment().local())}
+        onConfirm={selectedDate => {
+          setDate(selectedDate);
+          setOpen(false);
+          const today = moment().startOf('day');
+          const picked = moment(selectedDate).startOf('day');
+          const formattedDate = picked.format('YYYY-MM-DD');
 
-                setSelectedDate(formattedDate);
-                // getMedicationRecords(formattedDate);
-              }}
-              onCancel={() => {
-                setOpen(false);
-              }}
-            />
+          setSelectedDate(formattedDate);
+          // getMedicationRecords(formattedDate);
+        }}
+        onCancel={() => {
+          setOpen(false);
+        }}
+      />
     </SafeAreaView>
   );
 };
