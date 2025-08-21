@@ -1235,7 +1235,7 @@ const Home = ({navigation}) => {
                         ) : (
                           <View
                             style={{
-                              height: responsiveHeight(30),
+
                               justifyContent: 'center',
                             }}>
                             
@@ -1297,7 +1297,7 @@ const Home = ({navigation}) => {
                           <>
                             <View
                               style={{
-                                height: responsiveHeight(30),
+
                                 justifyContent: 'center',
                               }}>
                            <SubscribeBar
