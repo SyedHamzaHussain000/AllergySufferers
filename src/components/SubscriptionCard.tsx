@@ -50,31 +50,6 @@ const SubscriptionCard = ({price, title, type, subscribeNow}: props) => {
         />
         </View>
 
-      <View style={{marginTop:20}}>
-        <AppText
-          title={`Benefits`}
-          textSize={2}
-          textFontWeight
-          textColor={AppColors.WHITE}
-          />
-
-          <AppText
-          title={`- 3 day forecast for specific pollen/spore.`}
-          textSize={1.8}
-          textColor={AppColors.WHITE}
-          />
-          <AppText
-          title={`- Medication tracking.`}
-          textSize={1.8}
-          textColor={AppColors.WHITE}
-          />
-          <AppText
-          title={`- Graph pollen level, medication & symptom.`}
-          textSize={1.8}
-          textColor={AppColors.WHITE}
-          />
-          
-          </View>
 
         
       </View>

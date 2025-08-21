@@ -1,4 +1,4 @@
-import { View, Text, Image, FlatList } from 'react-native'
+import { View, Text, Image, FlatList, SafeAreaView } from 'react-native'
 import React from 'react'
 import AppHeader from '../../../../components/AppHeader'
 
@@ -48,23 +48,26 @@ const tutArray = [
 ];
 
   return (
-    <View style={{}}>
-        <View style={{paddingHorizontal:10}}>
+    <SafeAreaView style={{flex:1}} >
+        <View style={{paddingHorizontal:10, marginTop:30}}>
 
         <AppHeader goBack={true} heading="View app guide" />
         </View>
 
 
+    <View style={{backgroundColor:'black'}}>
+      
         <FlatList
         data={tutArray}        
         horizontal
         renderItem={({item})=>{
-            return(
-                <Image source={item.img} style={{width:responsiveWidth(100), height:responsiveHeight(89),resizeMode:'contain'}}/>
-            )
+          return(
+            <Image source={item.img} style={{width:responsiveWidth(100), height:responsiveHeight(90),resizeMode:'contain'}}/>
+          )
         }}
         />
-    </View>
+        </View>
+    </SafeAreaView>
   )
 }
 

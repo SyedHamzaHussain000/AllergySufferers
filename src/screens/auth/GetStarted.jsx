@@ -1,5 +1,5 @@
 import {View, Text, Alert, Platform, PermissionsAndroid} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import BackgroundScreen from '../../components/AppTextComps/BackgroundScreen';
 import AppText from '../../components/AppTextComps/AppText';
 import AppColors from '../../utils/AppColors';
@@ -16,9 +16,12 @@ import Geocoder from 'react-native-geocoding';
 import { setAddCity, setAllMedicationFromApi } from '../../redux/Slices/MedicationSlice';
 import GetAllLocation from '../../global/GetAllLocation';
 import { ApiCallWithUserId } from '../../global/ApiCall';
+import { getAvailablePurchases } from 'react-native-iap';
+import { hideNavigationBar } from 'react-native-navigation-bar-color';
 
 const GetStarted = ({navigation}) => {
     const allMyCity = useSelector(state => state?.medications?.allMyCity);
+    const subscribeType = useSelector(state => state?.auth?.SubscriptionType);
   
   const userData = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
@@ -26,8 +29,21 @@ const GetStarted = ({navigation}) => {
   const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
 
   const [subLoader, setSubLoader] = useState(false);
+
+  useEffect(()=>{
+    const nav = navigation.addListener('focus',()=>{
+
+      hideNavigationBar();
+    })
+    return nav
+  },[navigation])
   
   const checkLoginandPremium = async() => {
+
+    hideNavigationBar();
+    try {
+    
+
     if (userData?.email) {
 
 
@@ -66,14 +82,19 @@ const GetStarted = ({navigation}) => {
         navigation.navigate('Main');
         
       }else{
-        dispatch(setSubscription({isExpired: true, expireDate: ""}))
+        dispatch(setSubscription({isExpired: true, expireDate: "", SubscriptionType: ""}))
         navigation.navigate('Main');
       }
 
     } else {
-      navigation.navigate('Subscription');
+
+        navigation.navigate('Subscription');
+    }
+    } catch (error) {
+      console.log("error", error)
     }
   };
+
 
 
 

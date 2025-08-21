@@ -199,7 +199,7 @@ const Symptom = ({navigation}) => {
 
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE, paddingTop:30}}>
       <View style={{ backgroundColor: AppColors.WHITE, flex: 1, }}>
         <View style={{paddingHorizontal:20}}>
         <AppHeader
@@ -389,16 +389,19 @@ const Symptom = ({navigation}) => {
           </>
         ) : (
           <View
-            style={{height: responsiveHeight(30), justifyContent: 'center', padding:20}}>
+            style={{ justifyContent: 'center', padding:20}}>
             <SubscribeBar
-              title="Subscribe Now to Track Your Symptoms"
-              title2={'Unlock Full Access to Symptoms Tracking'}
+              title="Subscribe Now"
+              title2={'Subscribe to premium to track your daily symptoms. This is great to see how pollen and spore levels, medication etc… are affecting your quality of life and great information to share with your doctor.'}
               handlePress={() => navigation.navigate('Subscription')}
             />
           </View>
         )}
 
         <View style={{paddingHorizontal:20}}>
+          {
+            expireDate && (
+
         <View style={{marginTop: 0}}>
           <AppButton
             title={'Go TO DATA VISUALIZER'}
@@ -406,6 +409,8 @@ const Symptom = ({navigation}) => {
             handlePress={() => navigation.navigate('DataVisualizer')}
           />
         </View>
+            )
+          }
         <View style={{marginTop: 10}}>
           <AppText
             title={'Tips & Tricks'}

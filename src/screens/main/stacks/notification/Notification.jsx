@@ -21,8 +21,7 @@ import BASE_URL from '../../../../utils/BASE_URL';
 import {useSelector} from 'react-redux';
 import Toast from 'react-native-toast-message';
 // import MaterialDesignIcons from 'react-native-vector-icons/MaterialDesignIcons'
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const Notification = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
@@ -56,7 +55,6 @@ const Notification = ({navigation}) => {
       .then(response => {
         setALlPollens(response?.data?.pollens_list);
         setLoader(false);
-        
       })
       .catch(error => {
         console.log(error);
@@ -67,7 +65,7 @@ const Notification = ({navigation}) => {
   const setNewNotification = (item, level) => {
     setNotificationLoader(true);
     let data = JSON.stringify({
-      level: level ? level :1,
+      level: level ? level : 1,
       scientific_name: item.name,
     });
 
@@ -90,7 +88,7 @@ const Notification = ({navigation}) => {
           type: 'success',
           text1: 'Notification set successfully',
         });
-        getNewNotification()
+        getNewNotification();
       })
       .catch(error => {
         console.log(error);
@@ -128,28 +126,27 @@ const Notification = ({navigation}) => {
       });
   };
 
-  const deleteNotification = (item) => {
-setNotificationLoader(true);
+  const deleteNotification = item => {
+    setNotificationLoader(true);
 
-let config = {
-  method: 'post',
-  maxBodyLength: Infinity,
-  url: `https://www.allergysufferers.ca/wp-json/allergy_data/v1/user/${userData?.id}/remove_notification?scientific_name=${item.name}`,
-  headers: { }
-};
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `https://www.allergysufferers.ca/wp-json/allergy_data/v1/user/${userData?.id}/remove_notification?scientific_name=${item.name}`,
+      headers: {},
+    };
 
-axios.request(config)
-.then((response) => {
-  console.log(JSON.stringify(response.data));
-  getNewNotification()
-})
-.catch((error) => {
-  console.log(error);
-  setNotificationLoader(false);
-});
-
-
-  }
+    axios
+      .request(config)
+      .then(response => {
+        console.log(JSON.stringify(response.data));
+        getNewNotification();
+      })
+      .catch(error => {
+        console.log(error);
+        setNotificationLoader(false);
+      });
+  };
 
   return (
     <View style={{padding: 20}}>
@@ -163,75 +160,77 @@ axios.request(config)
         <ActivityIndicator size={'large'} color={AppColors.BLACK} />
       ) : (
         <ScrollView>
-          
-        
-        <FlatList
-          data={AllNotification}
-          contentContainerStyle={{gap: 10, paddingBottom: 20}}
-          keyExtractor={(item, index) => index.toString()}
-          inverted
-          renderItem={({item}) => {
-            return (
-              <View
-                style={{
-                  padding: 10,
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  gap: 10,
-                }}>
-
-                {/* Delete Bar */}
-                <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-
-
-                {/* Main Title */}
-                  <AppText title={item.name} textSize={2} textFontWeight />
-                  <TouchableOpacity onPress={()=> deleteNotification(item)}>
+          <FlatList
+            data={AllNotification}
+            contentContainerStyle={{gap: 10, paddingBottom: 20}}
+            keyExtractor={(item, index) => index.toString()}
+            inverted
+            renderItem={({item}) => {
+              return (
+                <View
+                  style={{
+                    padding: 10,
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    gap: 10,
+                  }}>
+                  {/* Delete Bar */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                    }}>
+                    {/* Main Title */}
+                    <AppText title={item.name} textSize={2} textFontWeight />
+                    <TouchableOpacity onPress={() => deleteNotification(item)}>
                       <MaterialIcons
-                      name={"delete"}
-                      size={responsiveFontSize(2.5)}
-                      color={AppColors.BLACK}/>
-                  </TouchableOpacity>
-                </View>
+                        name={'delete'}
+                        size={responsiveFontSize(2.5)}
+                        color={AppColors.BLACK}
+                      />
+                    </TouchableOpacity>
+                  </View>
 
-                {/* Horizontal FlatList inside each notification */}
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={[
-                    {id: 1, name: 'Low'},
-                    {id: 2, name: 'Moderate'},
-                    {id: 3, name: 'High'},
-                    {id: 4, name: 'Very High'},
-                  ]}
-                  keyExtractor={subItem => subItem.id.toString()}
-                  contentContainerStyle={{gap: 5}}
-                  renderItem={({item: subItem}) => {
-                    return (
-                      <TouchableOpacity
-                      onPress={()=>{setNewNotification(item, subItem.id)}}
-                        style={{
-                          height: 30,
-                          paddingHorizontal: 20,
-                          borderColor: AppColors.BLACK,
-                          borderWidth: 1,
-                          borderRadius: 200,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor:
-                            subItem.id === item.count
-                              ? AppColors.BGCOLOURS
-                              : null,
-                        }}>
-                        <AppText title={subItem.name} textSize={1.7} />
-                      </TouchableOpacity>
-                    );
-                  }}
-                />
-              </View>
-            );
-          }}
-        />
+                  {/* Horizontal FlatList inside each notification */}
+                  <FlatList
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    data={[
+                      {id: 1, name: 'Low'},
+                      {id: 2, name: 'Moderate'},
+                      {id: 3, name: 'High'},
+                      {id: 4, name: 'Very High'},
+                    ]}
+                    keyExtractor={subItem => subItem.id.toString()}
+                    contentContainerStyle={{gap: 5}}
+                    renderItem={({item: subItem}) => {
+                      return (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setNewNotification(item, subItem.id);
+                          }}
+                          style={{
+                            height: 30,
+                            paddingHorizontal: 20,
+                            borderColor: AppColors.BLACK,
+                            borderWidth: 1,
+                            borderRadius: 200,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor:
+                              subItem.id === item.count
+                                ? AppColors.BGCOLOURS
+                                : null,
+                          }}>
+                          <AppText title={subItem.name} textSize={1.7} />
+                        </TouchableOpacity>
+                      );
+                    }}
+                  />
+                </View>
+              );
+            }}
+          />
         </ScrollView>
       )}
 

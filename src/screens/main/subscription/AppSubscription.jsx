@@ -5,6 +5,7 @@ import {
   Platform,
   FlatList,
   ScrollView,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../components/AppHeader';
@@ -22,7 +23,14 @@ import {
   Subscription,
   presentCodeRedemptionSheetIOS,
   requestSubscription,
+  purchaseUpdatedListener,
+  finishTransaction,
+  purchaseErrorListener,
+  acknowledgePurchaseAndroid,
 } from 'react-native-iap';
+import Toast from 'react-native-toast-message';
+import moment from 'moment';
+  import { hideNavigationBar } from 'react-native-navigation-bar-color';
 
 const AppSubscription = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
@@ -38,10 +46,13 @@ const AppSubscription = ({navigation}) => {
   const [offerings, setOfferings] = useState(null);
 
   useEffect(() => {
+    
+
     const setup = async () => {
       const result = await initConnection();
       // console.log('IAP connected?', result);
       setConnection(result);
+
 
       if (Platform.OS === 'android') {
         await flushFailedPurchasesCachedAsPendingAndroid();
@@ -64,7 +75,6 @@ const AppSubscription = ({navigation}) => {
   }, [connection]);
 
   const NoSubscription = () => {
-    dispatch(setSubscription({isExpired: true}));
     if (userData?.email) {
       navigation.navigate('Main');
     } else {
@@ -78,7 +88,9 @@ const AppSubscription = ({navigation}) => {
       const subscriptions = await getSubscriptions({
         skus: androidsubscriptionsId,
       });
-      console.log('sussssb', subscriptions);
+
+      
+      // console.log('sussssb', subscriptions);
 
       setSubscriptionLocal(subscriptions); // set subscription information
     } catch (error) {
@@ -89,10 +101,9 @@ const AppSubscription = ({navigation}) => {
   const subscribeNow = async (data, isExpired, type) => {
     if (Platform.OS == 'android') {
       if (userData?.email) {
-
-        navigation.navigate('Home');
-        return 
-        const offerToken = data?.subscriptionOfferDetails[0].offerToken;
+        // navigation.navigate('Home');
+        // return
+        const offerToken = data?.subscriptionOfferDetails[0]?.offerToken;
 
         const purchaseData = await requestSubscription({
           sku: data?.productId,
@@ -100,16 +111,16 @@ const AppSubscription = ({navigation}) => {
             subscriptionOffers: [{sku: data?.productId, offerToken}],
           }),
         });
-        console.log('offerToken', purchaseData);
+        // console.log('offerToken', purchaseData);
 
-        return;
-        if (isExpired == false) {
-          const subscribeApi = await SubscribeNow(type, userData?.id);
-          console.log('userData', userData.email, isExpired, subscribeApi);
+
+        if (purchaseData.length > 0) {
+          const subscribeApi = await SubscribeNow(purchaseData[0]?.productId == "premium_monthly" ? 'monthly' : 'yearly', userData?.id);
+
           dispatch(
             setSubscription({
-              isExpired: isExpired,
-              SubscriptionType: type,
+              isExpired: false,
+              SubscriptionType: purchaseData[0]?.productId,
               expireDate: subscribeApi.expiry,
             }),
           );
@@ -117,24 +128,28 @@ const AppSubscription = ({navigation}) => {
         }
       } else {
 
-        navigation.navigate('Login');
-        return;
-        
-        const offerToken = data?.subscriptionOfferDetails[0].offerToken;
+        const offerToken = data?.subscriptionOfferDetails[0]?.offerToken;
         const purchaseData = await requestSubscription({
           sku: data?.productId,
           ...(offerToken && {
             subscriptionOffers: [{sku: data?.productId, offerToken}],
           }),
         });
-        console.log('offerToken', purchaseData);
-        
-        return;
-        if (isExpired == false) {
-          navigation.navigate('Login');
+
+        if (purchaseData.length > 0) {
+          Toast.show({
+            type: "success",
+             text1: "Please create or login to account to enjoy the subscription"
+            })
+
           dispatch(
-            setSubscription({isExpired: isExpired, SubscriptionType: type}),
+            setSubscription({
+              isExpired: false,
+               SubscriptionType: purchaseData[0]?.productId,
+               expireDate: moment().add(1, 'month').format("YYYY-MM-DD"),
+              }),
           );
+          navigation.navigate('Login');
         }
       }
     }
@@ -142,11 +157,93 @@ const AppSubscription = ({navigation}) => {
     return;
   };
 
+  useEffect(() => {
+    const purchaseUpdateSubscription = purchaseUpdatedListener(
+      async purchase => {
+        const receipt = purchase.transactionReceipt;
+
+        if (receipt) {
+          try {
+
+            if (Platform.OS === 'android') {
+              if (!purchase.isAcknowledgedAndroid) {
+                await acknowledgePurchaseAndroid({
+                  token: purchase.purchaseToken,
+                });
+                await finishTransaction({purchase, isConsumable: false});
+              }
+            } else {
+              await finishTransaction({
+                purchase: purchase,
+                isConsumable: false,
+              });
+            }
+
+            console.log('Purchase finished/acknowledged ✅');
+          } catch (err) {
+            console.warn('finishTransaction error', err);
+          }
+        }
+      },
+    );
+
+    const purchaseErrorSubscription = purchaseErrorListener(error => {
+      console.warn('purchaseErrorListener', error);
+    });
+
+    return () => {
+      purchaseUpdateSubscription.remove();
+      purchaseErrorSubscription.remove();
+    };
+  }, []);
+
   return (
-    <ScrollView contentContainerStyle={{flexGrow: 1, padding: 20}}>
+    <ScrollView contentContainerStyle={{flexGrow: 1, padding: 20, paddingBottom:200}}>
       <AppHeader goBack={true} heading="Subscription" />
 
       <View style={{gap: 20}}>
+
+
+
+      <View style={{marginTop:0, gap:2}}>
+        <AppText
+          title={`Benefits`}
+          textSize={2}
+          textFontWeight
+          textColor={AppColors.BLACK}
+          />
+
+          <AppText
+          title={`- Get 4 day forecasts including today for all pollen and spores in the air`}
+          textSize={1.8}
+          textColor={AppColors.BLACK}
+          />
+          <AppText
+          title={`- See past forecasts up to 14 days (5 days with everything in the air)`}
+          textSize={1.8}
+          textColor={AppColors.BLACK}
+          />
+          <AppText
+          title={`- Get push notifications for the pollen and spores you want and levels`}
+          textSize={1.8}
+          textColor={AppColors.BLACK}
+          />
+
+          <AppText
+          title={`- Log your symptoms, medication and graph in the data visualizer`}
+          textSize={1.8}
+          textColor={AppColors.BLACK}
+          />
+          
+          <AppText
+          title={`- Your choice of a yearly subscription ( whole pollen and spore season) or monthly option aswell`}
+          textSize={1.8}
+          textColor={AppColors.BLACK}
+          />
+          
+          </View>
+
+
         <FlatList
           contentContainerStyle={{gap: 10}}
           data={subscriptionLocal}

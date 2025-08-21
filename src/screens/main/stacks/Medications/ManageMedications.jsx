@@ -259,8 +259,8 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
                         justifyContent: 'center',
                       }}>
                       <SubscribeBar
-                        title="Subscribe now to add medication"
-                        title2={'Unlock full access to medication'}
+                        title="Subscribe Now"
+                        title2={'Subscribe to Premium now to add and manage the medication you take. You can also add any unique medication or home remedies you use to the lists.'}
                         handlePress={() => navigation.navigate('Subscription')}
                       />
                     </View>
@@ -270,7 +270,8 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
 
               <View style={{marginTop: 20, gap: 10}}>
                 <AppButton
-                  title={'Add MEDICATION'}
+                  title={'Click here to see medication list'}
+                  
                   bgColor={AppColors.BTNCOLOURS}
                   RightColour={AppColors.rightArrowCOlor}
                   handlePress={() => navigation.navigate('AddMedications')}

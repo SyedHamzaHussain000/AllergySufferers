@@ -54,14 +54,17 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import {setSubscription} from '../../redux/Slices/AuthSlice';
+import SubscribeNow from '../../global/SubscribeNow';
 const Home = ({navigation}) => {
   Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
 
   const dispatch = useDispatch();
   const userData = useSelector(state => state.auth.user);
   const AllCities = useSelector(state => state?.medications?.allMyCity);
+  const subscriptionType = useSelector(state => state?.auth?.SubscriptionType);
+  const subscriptionExpire = useSelector(state => state?.auth?.expireDate);
+  
 
-  // console.log('userData', AllCities);
 
   const sortCities = [...AllCities].sort((a, b) => {
     return (
@@ -157,20 +160,24 @@ const Home = ({navigation}) => {
     }, [AllCities]),
   );
 
+  // useEffect(() => {
+  //   if (expireDate) {
+  //     if (moment(expireDate).isAfter(new Date())) {
+  //       console.log('Subscription is valid');
+  //     } else {
+  //       dispatch(
+  //         setSubscription({
+  //           isExpired: true,
+  //           expireDate: '',
+  //           SubscriptionType: null,
+  //         }),
+  //       );
+  //     }
+  //   }
+  // }, [expireDate]);
+
   useEffect(() => {
-    if (expireDate) {
-      if (moment(expireDate).isAfter(new Date())) {
-        console.log('Subscription is valid');
-      } else {
-        dispatch(
-          setSubscription({
-            isExpired: true,
-            expireDate: '',
-            SubscriptionType: null,
-          }),
-        );
-      }
-    }
+    SubscribeSubscription();
   }, [expireDate]);
 
   const GetLocationFromApi = async () => {
@@ -320,6 +327,27 @@ const Home = ({navigation}) => {
         console.log(error);
         setActiveLoader(false);
       });
+  };
+
+
+  const SubscribeSubscription = async () => {
+    if(subscriptionType){
+
+      const subscribeApi = await SubscribeNow(
+        subscriptionType == 'premium_monthly' ? 'monthly' : 'yearly',
+        userData?.id,
+      );
+      
+      
+      
+      dispatch(
+        setSubscription({
+          isExpired: false,
+          SubscriptionType: subscriptionType,
+          expireDate: subscribeApi.expiry,
+        }),
+      );
+    }
   };
 
   const PollenCurrentTodayData = useMemo(() => {
@@ -1210,13 +1238,14 @@ const Home = ({navigation}) => {
                               height: responsiveHeight(30),
                               justifyContent: 'center',
                             }}>
+                            
                             <SubscribeBar
-                              title="Subscribe now to look at the past data"
-                              title2={'Unlock full access to past data'}
-                              handlePress={() =>
-                                navigation.navigate('Subscription')
-                              }
-                            />
+                                title="Subscribe now to look at the past data."
+                                title2={'Upgrade to a premium subscription today to unlock past forecasts for all pollen and spores in the air today for the past 14 days (5 first days include all pollen and spores in the air. Next 9 days for those you specify in settings.'}
+                                handlePress={() =>
+                                  navigation.navigate('Subscription')
+                                }
+                              />
                           </View>
                         )}
                       </>
@@ -1271,13 +1300,13 @@ const Home = ({navigation}) => {
                                 height: responsiveHeight(30),
                                 justifyContent: 'center',
                               }}>
-                              <SubscribeBar
-                                title="Subscribe now to look at the today data"
-                                title2={'Unlock full access to today data'}
-                                handlePress={() =>
-                                  navigation.navigate('Subscription')
-                                }
-                              />
+                           <SubscribeBar
+                              title="Subscribe now to look at the today data."
+                              title2={'Upgrade to a premium subscription today to unlock forecasts for all pollen and spores in the air today and the next 3 days (example birch, grass, ragweed, Cladosporium, Alternaria and 70 more pollen and spore types)'}
+                              handlePress={() =>
+                                navigation.navigate('Subscription')
+                              }
+                            />
                             </View>
                           </>
                         )}

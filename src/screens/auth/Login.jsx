@@ -30,10 +30,17 @@ const Login = ({navigation}) => {
 
   const loading = useSelector(state => state.auth.loader);
   const userData = useSelector(state => state.auth.user);
+  const expireDate = useSelector(state => state.auth.expireDate);
+  
+    console.log('expireDate', expireDate);
+
+  
+
 
   const dispatch = useDispatch();
 
   useEffect(() => {
+
     if (userData?.email) {
       navigation.navigate('Main');
     }
@@ -89,14 +96,7 @@ const Login = ({navigation}) => {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS == "ios" ? 'padding': 'height'} style={{flex:1}}>
-    <View
-      style={{
-        // flex: 1,
-        backgroundColor: AppColors.WHITE,
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 20,
-      }}>
+    
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
@@ -169,7 +169,7 @@ const Login = ({navigation}) => {
           </View>
         </View>
       </ScrollView>
-    </View>
+
     </KeyboardAvoidingView>
   );
 };

@@ -10,6 +10,7 @@ const PrivacyPolicy = () => {
   const source = {
     html: `
       <h1>Privacy Policy</h1>
+      <p>Last updated: August 05 2025</p>
       <p>This privacy policy has been compiled to better
 serve those who are concerned with how their
 ‘Personally Identifiable Information’ (PII) is being

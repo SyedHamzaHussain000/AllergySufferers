@@ -202,6 +202,7 @@ export const CurrentLogin = createAsyncThunk(
     try {
       const { data } = await axios.request(config);
       
+     
       // const subData = await CheckSubscription(data.id);
       return data;
     } catch (error) {
@@ -221,6 +222,7 @@ const AuthSlice = createSlice({
       state.isExpired = true;
       state.currentLocation.Lat = null;
       state.currentLocation.Lng = null;
+      state.SubscriptionType = null
     },
     setCurrentUserData: (state, action) => {
       state.user = action.payload;
@@ -244,8 +246,12 @@ const AuthSlice = createSlice({
         // Alert.alert("action.payload.expiry",action.payload.expiry)
         state.user = action.payload;
         state.loader = false;
-        state.expireDate = action.payload.expiry;
-        state.isExpired = false;
+
+        if(action.payload.expiry){
+          state.expireDate = action.payload.expiry;
+          state.isExpired = false;
+        }
+
       })
       .addCase(CurrentLogin.pending, state => {
         state.loader = true;

@@ -105,6 +105,8 @@ const DatavisualizerSample = ({navigation}) => {
 
   // console.log("allCities",AllCities[0])
 
+  // let loadingItemId = null;
+
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       getAllAllergens();
@@ -608,20 +610,27 @@ const DatavisualizerSample = ({navigation}) => {
   };
 
   const deleteAllergens = async item => {
-    // console.log("item", item, takingMedications,"Primarylinedata", PrimaryLineData, "SecondaryLineData", SecondaryLineData)
-    // Alert.alert("alldsadlsaldas")
-    // return
+
+
+
+    setLoadingItemId(item.id);
     if (!item?.id) {
       console.warn('Invalid allergen item. Skipping delete.');
       return;
     }
 
-    setLoadingItemId(item.id);
+       const updatedAllergens = takingMedications.filter(
+        med => med.id !== item.id,
+      );
+
+      setTakingMedications(updatedAllergens);
+    
 
     try {
       const data = JSON.stringify({
         allergen_id: item.id,
       });
+      
 
       const config = {
         method: 'post',
@@ -635,11 +644,7 @@ const DatavisualizerSample = ({navigation}) => {
 
       await axios.request(config);
 
-      const updatedAllergens = takingMedications.filter(
-        med => med.id !== item.id,
-      );
-
-      setTakingMedications(updatedAllergens);
+   
 
       // console.log('updatedAllergens', updatedAllergens);
 
@@ -696,8 +701,6 @@ const DatavisualizerSample = ({navigation}) => {
   };
 
   const chartSpacing = responsiveWidth(19); // You can tweak this value as needed
-
-  // console.log('chartSpacing', chartSpacing);q
 
   const emojiMap = {
     1: AppImages.Hello,
@@ -793,7 +796,7 @@ const DatavisualizerSample = ({navigation}) => {
                             //   }}>
                             <View
                               style={{
-                                width: responsiveWidth(20),
+                                width: responsiveWidth(20.6),
 
                                 alignItems: 'flex-start',
                                 // borderWidth:1,
@@ -1008,7 +1011,6 @@ const DatavisualizerSample = ({navigation}) => {
                       style={{
                         minHeight: responsiveHeight(6),
                         width: responsiveWidth(90),
-                        // maxWidth: 400,
                         paddingVertical: 10,
                         borderRadius: 10,
                         borderColor: AppColors.LIGHTGRAY,
@@ -1019,22 +1021,8 @@ const DatavisualizerSample = ({navigation}) => {
                         alignItems: 'center',
                         paddingRight: 0,
                         paddingLeft: 5,
-
                         borderWidth: 1,
                       }}
-                      // style={{
-                      //   height: responsiveHeight(6),
-                      //   width: responsiveWidth(90),
-                      //   borderWidth: 1,
-                      //   borderRadius: 10,
-                      //   borderColor: AppColors.LIGHTGRAY,
-                      //   marginTop: 5,
-                      //   backgroundColor: colours[index],
-                      //   flexDirection: 'row',
-                      //   justifyContent: 'space-between',
-                      //   alignItems: 'center',
-                      //   paddingHorizontal: 20,
-                      // }}
                     >
                       <AppText
                         title={item.allergen_name}
@@ -1042,28 +1030,35 @@ const DatavisualizerSample = ({navigation}) => {
                         textwidth={65}
                       />
 
-                      {loadingItemId === item.id ? (
-                        <ActivityIndicator
-                          size="small"
-                          color={AppColors.LIGHTGRAY}
-                        />
-                      ) : (
+                      {
+
+                        loadingItemId == item?.id ?
+                        <View style={{paddingRight:20}}>
+                        <ActivityIndicator size={'large'} color={AppColors.WHITE}/>
+                        </View>
+                        :
+
                         <TouchableOpacity
                           onPress={() => deleteAllergens(item)}
                           style={{
                             padding: 10,
                             width: responsiveWidth(25),
                             alignItems: 'flex-end',
-                            justifyContent: 'cennter',
+                            justifyContent: 'center',
                             paddingRight: 30,
+                            minHeight: responsiveHeight(6),
                           }}>
+
                           <AntDesign
                             name="minus"
-                            size={responsiveFontSize(2)}
+                            size={responsiveFontSize(3)}
                             color={AppColors.LIGHTGRAY}
                           />
+
                         </TouchableOpacity>
-                      )}
+                      }
+
+
                     </View>
                   )}
                 />
@@ -1113,8 +1108,6 @@ const DatavisualizerSample = ({navigation}) => {
                 <TouchableOpacity
                   onPress={() => getAllAllergens()}
                   style={{
-                    // height: responsiveHeight(5),
-                    // width: responsiveWidth(44),
                     minHeight: responsiveHeight(5.5),
                     paddingVertical: 10,
                     width: '48%',
@@ -1359,10 +1352,10 @@ const DatavisualizerSample = ({navigation}) => {
           </>
         ) : (
           <View
-            style={{height: responsiveHeight(30), justifyContent: 'center'}}>
+            style={{ justifyContent: 'center'}}>
             <SubscribeBar
-              title="Subscribe Now to access data visualizer"
-              title2={'Unlock Full Access to data visualizer'}
+              title="Subscribe Now"
+              title2={'With a Premium subscription, overlay daily symptoms and medication intake with local pollen and spore data, which can help you uncover hidden connections between environmental triggers and your health. By analyzing these correlations, you can see what might be causing your allergies. Understanding these patterns is key to managing your symptoms more effectively and improving your quality of life.'}
               handlePress={() => navigation.navigate('Subscription')}
             />
           </View>

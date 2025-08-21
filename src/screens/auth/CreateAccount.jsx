@@ -76,24 +76,18 @@ const CreateAccount = ({navigation}) => {
 
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS == "ios" ? 'padding': 'height'} style={{flex:1}}>
-    <View
-      style={{
-        // flex: 1,
-        backgroundColor: AppColors.WHITE,
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 20,
-        paddingTop:20
-      }}>
+    <KeyboardAvoidingView behavior={Platform.OS == "ios" ? 'padding': 'height'} style={{flex:1, }}>
+      {/* <View style={{marginTop:30}}>  */}
       <ScrollView
       showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          flexGrow: 1,
+
           alignItems: 'center',
           justifyContent: 'center',
           gap: 20,
-          padding:20
+          padding:20,
+          // backgroundColor:AppColors.WHITE,
+          marginTop:30
         }}>
         <View style={{alignItems: 'center', justifyContent: 'center'}}>
           <AppText
@@ -213,7 +207,8 @@ const CreateAccount = ({navigation}) => {
           </View>
         </View>
       </ScrollView>
-    </View>
+      {/* </View> */}
+
     </KeyboardAvoidingView>
   );
 };

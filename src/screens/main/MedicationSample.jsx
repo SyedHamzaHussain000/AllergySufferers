@@ -797,7 +797,7 @@ const MedicationSample = ({navigation}) => {
 
   // console.log("MedicationnRecord", MedicationnRecord.length)
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE, paddingTop:20}}>
       <StatusBar barStyle={'dark-content'} />
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
         <AppHeader
@@ -855,22 +855,27 @@ const MedicationSample = ({navigation}) => {
             </>
           ) : (
             <View
-              style={{height: responsiveHeight(30), justifyContent: 'center'}}>
+              style={{ justifyContent: 'center', marginTop:20}}>
               <SubscribeBar
-                title="Subscribe Now to Track Your Medications"
-                title2={'Unlock Full Access to Medication Tracking'}
+                title="Subscribe Now"
+                title2={'Upgrade to Premium to log your medications and keep track of daily dosage. This is great information to see how medication is affecting your quality of life, if your developing a tolerance and also great information to share with your doctor.'}
                 handlePress={() => navigation.navigate('Subscription')}
               />
             </View>
           )}
 
+            {
+              expireDate && (
           <View style={{marginTop: 20}}>
-            <AppButton
-              title={'GO TO DATA VISUALIZER'}
-              RightColour={AppColors.rightArrowCOlor}
-              handlePress={() => navigation.navigate('DataVisualizer')}
-            />
+
+                <AppButton
+                  title={'GO TO DATA VISUALIZER'}
+                  RightColour={AppColors.rightArrowCOlor}
+                  handlePress={() => navigation.navigate('DataVisualizer')}
+                />
           </View>
+              )
+            }
         </ScrollView>
       </View>
     </SafeAreaView>

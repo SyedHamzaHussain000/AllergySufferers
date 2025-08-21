@@ -16,7 +16,7 @@ const SubscribeBar = ({title,title2 , handlePress}:props) => {
   return (
     <View style={{padding:20, borderWidth:1, borderRadius:20, borderColor:AppColors.BLACK, gap:20}}>
         <AppText title={title} textSize={2} textColor={AppColors.BLACK} textFontWeight/>
-        <AppText title={title2} textSize={1.7} textColor={AppColors.BLACK}/>
+        <AppText title={title2} textSize={1.8} textColor={AppColors.BLACK}/>
         <AppButton title={"Subscribe"} buttoWidth={80} handlePress={handlePress}/>
     </View>
   )

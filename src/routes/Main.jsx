@@ -136,7 +136,7 @@ function MyTabs() {
       
         tabBarStyle: {
           backgroundColor: AppColors.BTNCOLOURS,
-          height: responsiveHeight(13),
+          height: 90,
           paddingTop: 10,
           position:'absolute',
           // paddingBottom: insets.bottom + 80 ,
