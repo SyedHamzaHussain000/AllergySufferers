@@ -205,8 +205,8 @@ const ManagePollens = ({navigation}) => {
                               justifyContent: 'center',
                             }}>
                             <SubscribeBar
-                              title="Subscribe Now"
-                              title2={'Subscribe to Premium now to add and manage the pollen and spores you specifically want to monitor in the quick access area of the forecasts.'}
+                              title="Subscribe now to see forecasts for all individual pollen and spores"
+                              title2={'With a premium subscription you can add and manage the pollen and spores you specifically want to monitor in the quick access area of the forecasts. You can choose up to 7 pollen and spores.'}
                               handlePress={() =>
                                 navigation.navigate('Subscription')
                               }
@@ -221,7 +221,7 @@ const ManagePollens = ({navigation}) => {
 
 
           <View style={{marginTop: 20, gap: 10, }}>
-            <TouchableOpacity style={{backgroundColor:AppColors.BTNCOLOURS, padding:10, borderRadius:10, flexDirection:'row' ,alignItems:'center', justifyContent:'space-between'}}>
+            <TouchableOpacity onPress={()=> navigation.navigate("AddPollens")} style={{backgroundColor:AppColors.BTNCOLOURS, padding:10, borderRadius:10, flexDirection:'row' ,alignItems:'center', justifyContent:'space-between'}}>
               <AppText title={"Click here to see all pollen and spores we analyze and forecast"} textColor={AppColors.WHITE} textSize={2} textwidth={70}/>
 
                 <FontAwesome6

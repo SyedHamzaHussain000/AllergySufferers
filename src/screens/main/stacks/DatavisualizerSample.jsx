@@ -1354,9 +1354,10 @@ const DatavisualizerSample = ({navigation}) => {
           <View
             style={{ justifyContent: 'center'}}>
             <SubscribeBar
-              title="Subscribe Now"
-              title2={'With a Premium subscription, overlay daily symptoms and medication intake with local pollen and spore data, which can help you uncover hidden connections between environmental triggers and your health. By analyzing these correlations, you can see what might be causing your allergies. Understanding these patterns is key to managing your symptoms more effectively and improving your quality of life.'}
+              title="Subscribe now to correlate pollen and spore levels with medication and symptoms"
+              title2={'With a premium subscription, overlay daily symptoms and mediation intake with local pollen and spore data, which can help you uncover hidden connections between environmental triggers and your health. By analyzing these correlations, you can see what might be causing your allergies. Understanding these patterns is key to managing your symptoms more effectively and improving your quality of life.'}
               handlePress={() => navigation.navigate('Subscription')}
+              img={AppImages.MedicationGraph}
             />
           </View>
         )}

@@ -24,7 +24,9 @@ import Toast from 'react-native-toast-message';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const Notification = ({navigation}) => {
-  const userData = useSelector(state => state.auth.user);
+  const userData = useSelector(state => state?.auth?.user);
+    const expireDate = useSelector(state => state?.auth?.expireDate);
+  
   const [allPollens, setALlPollens] = useState([]);
   const [search, setSearch] = useState('');
   const [loader, setLoader] = useState(false);
@@ -34,7 +36,10 @@ const Notification = ({navigation}) => {
   const [PollenLoader, setPollenApiLoader] = useState(false);
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
-      getAllPollens();
+      if(expireDate){
+
+        getAllPollens();
+      }
       getNewNotification();
     });
 
@@ -148,6 +153,14 @@ const Notification = ({navigation}) => {
       });
   };
 
+
+  const freeUserNotifications = [
+    {id:1, name: "Total Spores" },
+    {id:2, name: "Total Trees" },
+    {id:3, name: "Total Grasses" },
+    {id:4, name: "Total Weeds" },
+  ]
+
   return (
     <View style={{padding: 20}}>
       <AppHeader heading="Push Notification" goBack={true} />
@@ -161,7 +174,7 @@ const Notification = ({navigation}) => {
       ) : (
         <ScrollView>
           <FlatList
-            data={AllNotification}
+            data={  AllNotification }
             contentContainerStyle={{gap: 10, paddingBottom: 20}}
             keyExtractor={(item, index) => index.toString()}
             inverted
@@ -262,11 +275,11 @@ const Notification = ({navigation}) => {
       )}
 
       <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 100}}>
-        {allPollens
+        {expireDate ?  allPollens :  freeUserNotifications
           .filter(
             item =>
-              item.name.toLowerCase().includes(search.toLowerCase()) ||
-              item.common_name.toLowerCase().includes(search.toLowerCase()),
+              item?.name?.toLowerCase().includes(search.toLowerCase()) ||
+              item?.common_name?.toLowerCase().includes(search.toLowerCase()),
           )
           .map((item, index) => (
             <TouchableOpacity

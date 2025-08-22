@@ -39,6 +39,7 @@ import {
   setAllMedicationFromApi,
 } from '../../redux/Slices/MedicationSlice';
 import {useFocusEffect} from '@react-navigation/native';
+import AppImages from '../../assets/images/AppImages';
 
 const MedicationSample = ({navigation}) => {
   const sliderRef = useRef(null);
@@ -857,9 +858,10 @@ const MedicationSample = ({navigation}) => {
             <View
               style={{ justifyContent: 'center', marginTop:20}}>
               <SubscribeBar
-                title="Subscribe Now"
-                title2={'Upgrade to Premium to log your medications and keep track of daily dosage. This is great information to see how medication is affecting your quality of life, if your developing a tolerance and also great information to share with your doctor.'}
+                title="Subscribe now to log your daily medication intake"
+                title2={'Upgrade to a premium to log you medication and keep track of your daily dosage. This is great information to see how medication is affecting you quality of like. You can see if you are developing a tolerance to certain medications and it is great information to share with your doctor. You can also track your own medication for things like home remedies.'}
                 handlePress={() => navigation.navigate('Subscription')}
+                img={AppImages.MedicationGraph}
               />
             </View>
           )}

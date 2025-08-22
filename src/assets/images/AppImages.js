@@ -30,7 +30,11 @@ export default AppImages = {
   updown: require('./up-down.png'),
 
   spores: require('./spore.png'),
-  pollen: require('./pollen.png')
+  pollen: require('./pollen.png'),
+
+  SymtomsGraph: require('./FreeAppGrapgh/Symptom.png'),
+  MedicationGraph: require('./FreeAppGrapgh/Medication.png'),
+
   
 
 };

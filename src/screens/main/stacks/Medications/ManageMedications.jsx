@@ -255,13 +255,13 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
                   <>
                     <View
                       style={{
-                        height: responsiveHeight(30),
                         justifyContent: 'center',
                       }}>
                       <SubscribeBar
-                        title="Subscribe Now"
-                        title2={'Subscribe to Premium now to add and manage the medication you take. You can also add any unique medication or home remedies you use to the lists.'}
+                        title="Subscribe now log you medication intake as well as your own personal home remedies"
+                        title2={'With a premium subscription you can add and input the medications you take. You can also add any unique medication or home remedies you use to the lists. You choose up to 7 medications.'}
                         handlePress={() => navigation.navigate('Subscription')}
+
                       />
                     </View>
                   </>

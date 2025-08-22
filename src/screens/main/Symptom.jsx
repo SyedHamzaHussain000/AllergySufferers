@@ -391,9 +391,10 @@ const Symptom = ({navigation}) => {
           <View
             style={{ justifyContent: 'center', padding:20}}>
             <SubscribeBar
-              title="Subscribe Now"
-              title2={'Subscribe to premium to track your daily symptoms. This is great to see how pollen and spore levels, medication etc… are affecting your quality of life and great information to share with your doctor.'}
+              title="Subscribe now to log how you feel in the Symptom Tracker"
+              title2={'Tracking you daily symptoms is great as you can see how pollen and spore levels and medication are affecting how you feel and your quality of life. It is also great information to share with your doctor.'}
               handlePress={() => navigation.navigate('Subscription')}
+              img={AppImages.SymtomsGraph}
             />
           </View>
         )}

@@ -63,8 +63,6 @@ const Home = ({navigation}) => {
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const subscriptionType = useSelector(state => state?.auth?.SubscriptionType);
   const subscriptionExpire = useSelector(state => state?.auth?.expireDate);
-  
-
 
   const sortCities = [...AllCities].sort((a, b) => {
     return (
@@ -329,17 +327,13 @@ const Home = ({navigation}) => {
       });
   };
 
-
   const SubscribeSubscription = async () => {
-    if(subscriptionType){
-
+    if (subscriptionType) {
       const subscribeApi = await SubscribeNow(
         subscriptionType == 'premium_monthly' ? 'monthly' : 'yearly',
         userData?.id,
       );
-      
-      
-      
+
       dispatch(
         setSubscription({
           isExpired: false,
@@ -1235,17 +1229,17 @@ const Home = ({navigation}) => {
                         ) : (
                           <View
                             style={{
-
                               justifyContent: 'center',
                             }}>
-                            
                             <SubscribeBar
-                                title="Subscribe now to look at the past data."
-                                title2={'Upgrade to a premium subscription today to unlock past forecasts for all pollen and spores in the air today for the past 14 days (5 first days include all pollen and spores in the air. Next 9 days for those you specify in settings.'}
-                                handlePress={() =>
-                                  navigation.navigate('Subscription')
-                                }
-                              />
+                              title="Subscribe now to look at the past data."
+                              title2={
+                                'Upgrade to a premium subscription today to unlock past forecasts for all pollen and spores in the air for the past 14 days (First 5 days include all pollen and spores in the air. The next 9 days will show past forecasts for pollen and spores in the quick access dials).'
+                              }
+                              handlePress={() =>
+                                navigation.navigate('Subscription')
+                              }
+                            />
                           </View>
                         )}
                       </>
@@ -1297,16 +1291,17 @@ const Home = ({navigation}) => {
                           <>
                             <View
                               style={{
-
                                 justifyContent: 'center',
                               }}>
-                           <SubscribeBar
-                              title="Subscribe now to look at the today data."
-                              title2={'Upgrade to a premium subscription today to unlock forecasts for all pollen and spores in the air today and the next 3 days (example birch, grass, ragweed, Cladosporium, Alternaria and 70 more pollen and spore types)'}
-                              handlePress={() =>
-                                navigation.navigate('Subscription')
-                              }
-                            />
+                              <SubscribeBar
+                                title="Subscribe now to see all individual pollen and spores in the air today."
+                                title2={
+                                  'Upgrade to a premium subscription today to unlock forecasts for all pollen and spores in the air today and the next 3 days (example birch, grass, ragweed, Cladosporium, Alternaria and 70 more pollen and spore types).'
+                                }
+                                handlePress={() =>
+                                  navigation.navigate('Subscription')
+                                }
+                              />
                             </View>
                           </>
                         )}
