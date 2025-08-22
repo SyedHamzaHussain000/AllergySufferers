@@ -1232,7 +1232,7 @@ const Home = ({navigation}) => {
                               justifyContent: 'center',
                             }}>
                             <SubscribeBar
-                              title="Subscribe now to look at the past data."
+                              title="Subscribe now to see past forecasts"
                               title2={
                                 'Upgrade to a premium subscription today to unlock past forecasts for all pollen and spores in the air for the past 14 days (First 5 days include all pollen and spores in the air. The next 9 days will show past forecasts for pollen and spores in the quick access dials).'
                               }
