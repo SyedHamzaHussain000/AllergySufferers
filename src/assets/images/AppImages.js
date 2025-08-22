@@ -34,6 +34,7 @@ export default AppImages = {
 
   SymtomsGraph: require('./FreeAppGrapgh/Symptom.png'),
   MedicationGraph: require('./FreeAppGrapgh/Medication.png'),
+  Datavisiualizer: require('./FreeAppGrapgh/Datavisiualizer.png')
 
   
 

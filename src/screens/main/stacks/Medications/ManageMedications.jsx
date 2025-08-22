@@ -77,7 +77,7 @@ const ManageMedications = ({navigation}) => {
   const [open, setOpen] = useState(false);
 
   const [loader, setLoader] = useState(false)
-
+  
   useEffect(() => {
     setLoader(false)
   }, [ActiveMedications]);

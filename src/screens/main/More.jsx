@@ -12,7 +12,7 @@ import { useSelector } from 'react-redux';
 const More = ({navigation}) => {
     const userData = useSelector(state => state.auth.user);
 
-    console.log("userData",userData)
+    
 
   const pollens = [
     {id: 1, name: 'App Settings', top: true, onPress: ()=> navigation.navigate("AppSetting")},

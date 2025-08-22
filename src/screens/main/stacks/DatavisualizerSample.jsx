@@ -229,133 +229,6 @@ const DatavisualizerSample = ({navigation}) => {
 
   const MAX_BARS_PER_DATE = 10;
 
-  // const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
-  //   const end = moment(new Date());
-  //   const start = moment(allActiveMedicationRedux[0].date || new Date());
-
-  //   setStartDate(start);
-  //   setEndDate(end);
-
-  //   const dayNumbers = [];
-  //   let current = start.clone();
-
-  //   while (current.isSameOrBefore(end)) {
-  //     dayNumbers.push(current.date());
-  //     current.add(1, 'day');
-  //   }
-
-  //   setAllDayNumber(dayNumbers);
-
-  //   // ✅ Data from Redux instead of API
-  //   //   const allentriesArr = allActiveMedicationRedux || [];
-
-  //   const groupedByDate = {};
-
-  //   allActiveMedicationRedux.forEach(entry => {
-  //     const formattedDate = moment(entry.date).format('D'); // ✅ outputs just "25", "27", etc.
-  //     if (!groupedByDate[formattedDate]) {
-  //       groupedByDate[formattedDate] = [];
-  //     }
-  //     groupedByDate[formattedDate].push({
-  //       value: parseInt(entry.units) || 0,
-  //       frontColor: entry.frontColor,
-  //     });
-  //   });
-
-  //   const barData = [];
-
-  //   Object.entries(groupedByDate).forEach(([date, bars]) => {
-  //     const group = [];
-
-  //     bars.forEach((bar, index) => {
-  //       group.push({
-  //         value: bar.value,
-  //         frontColor: bar.frontColor,
-  //         label: index === 0 ? date : '',
-  //         labelWidth: chartSpacing,
-  //         labelTextStyle: {color: 'gray'},
-  //         spacing: 0,
-
-  //       });
-  //     });
-
-  //     const paddingCount = MAX_BARS_PER_DATE - group.length;
-  //     for (let i = 0; i < paddingCount; i++) {
-  //       group.push({
-  //         value: 0,
-  //         frontColor: 'transparent',
-  //         spacing:responsiveWidth(2.5), // → outputs 27.49 in logs
-  //         labelWidth: 0,
-  //       });
-  //     }
-
-  //     barData.push(...group);
-  //   });
-
-  //   setMedicationnRecord(barData);
-  // };
-
-  // const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
-  //   if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
-  //     setMedicationnRecord([]);
-  //     return;
-  //   }
-
-  //   const end = moment(new Date());
-  //   // const start = moment(allActiveMedicationRedux[0].date || new Date());
-  //   const start = moment().local().subtract(6, 'day');
-
-  //   setStartDate(start);
-  //   setEndDate(end);
-
-  //   // Alert.alert(start)
-
-
-  //   const dayNumbers = [];
-  //   let current = start.clone();
-
-  //   // Alert.alert(current)
-
-
-  //   while (current.isSameOrBefore(end)) {
-  //     dayNumbers.push(current.date());
-  //     current.add(1, 'day');
-  //   }
-
-
-
-  //   setAllDayNumber(dayNumbers);
-
-  //   // ✅ Group by date
-  //   const grouped = {};
-  //   allActiveMedicationRedux.forEach(entry => {
-  //     if (!grouped[entry.date]) {
-  //       grouped[entry.date] = [];
-  //     }
-  //     grouped[entry.date].push(entry);
-  //   });
-
-  //   const barData = [];
-
-  //   Object.keys(grouped).forEach(date => {
-  //     const group = grouped[date];
-  //     group.forEach((entry, idx) => {
-  //       const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
-  //       const value = parseInt(entry.units) || 0;
-  //       const isLast = idx === group.length - 1;
-
-  //       barData.push({
-  //         value,
-  //         ...(idx === 0 && {label: formattedLabel}), // ✅ only first entry of date gets label
-  //         spacing: isLast ? responsiveWidth(9) : 0, // ✅ spacing after last entry of that date
-  //         frontColor: entry.frontColor || '#E23131',
-  //         labelWidth: 0,
-  //       });
-  //     });
-  //   });
-
-  //   setMedicationnRecord(barData);
-  // };
   const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
 
 
@@ -406,8 +279,9 @@ const DatavisualizerSample = ({navigation}) => {
       barData.push({
         value,
         ...(idx === 0 && { label: formattedLabel }), // ✅ only first entry of date gets label
-        spacing: isLast ? responsiveWidth(9) : 0, // ✅ spacing after last entry of that date
+        spacing: isLast ? responsiveWidth(8.5) : 0, // ✅ spacing after last entry of that date
         frontColor: entry.frontColor || '#E23131',
+        
         labelWidth: 0,
       });
     });
@@ -731,7 +605,11 @@ const DatavisualizerSample = ({navigation}) => {
           setOpen={() => setOpen(true)}
         />
 
-        {startDate && endDate && (
+       
+
+        {expireDate ? (
+          <>
+           {startDate && endDate && (
           <View style={{marginTop: 20, marginBottom: 20}}>
             <AppText
               title={`${moment(startDate).format('MMM DD')} - ${moment(
@@ -744,8 +622,6 @@ const DatavisualizerSample = ({navigation}) => {
           </View>
         )}
 
-        {expireDate ? (
-          <>
             {DataVisualizerLoader == true ? (
               <View
                 style={{
@@ -817,6 +693,10 @@ const DatavisualizerSample = ({navigation}) => {
                       <BarChart
                         data={MedicationnRecord || []}
                         barWidth={7}
+                        
+                        barStyle={{
+                          backgroundColor:'gray'
+                        }}
                         frontColor="#E23131" // bar color
                         showLine={
                           // true
@@ -868,8 +748,8 @@ const DatavisualizerSample = ({navigation}) => {
                         barBorderRadius={2}
                         isAnimated={true}
                         noOfSections={8}
-                        spacing={responsiveWidth(10)}
-                        initialSpacing={responsiveWidth(5)} // same for all
+                        spacing={responsiveWidth(9)}
+                        initialSpacing={responsiveWidth(0)} // same for all
                         formatYLabel={label => parseFloat(label).toFixed(0)}
                         stepValue={1}
                       />
@@ -1352,12 +1232,12 @@ const DatavisualizerSample = ({navigation}) => {
           </>
         ) : (
           <View
-            style={{ justifyContent: 'center'}}>
+            style={{ justifyContent: 'center', marginTop:20}}>
             <SubscribeBar
               title="Subscribe now to correlate pollen and spore levels with medication and symptoms"
               title2={'With a premium subscription, overlay daily symptoms and mediation intake with local pollen and spore data, which can help you uncover hidden connections between environmental triggers and your health. By analyzing these correlations, you can see what might be causing your allergies. Understanding these patterns is key to managing your symptoms more effectively and improving your quality of life.'}
               handlePress={() => navigation.navigate('Subscription')}
-              img={AppImages.MedicationGraph}
+              img={AppImages.Datavisiualizer}
             />
           </View>
         )}

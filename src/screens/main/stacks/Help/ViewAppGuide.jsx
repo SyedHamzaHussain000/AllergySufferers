@@ -55,18 +55,21 @@ const tutArray = [
         </View>
 
 
-    <View style={{backgroundColor:'black'}}>
+
       
         <FlatList
         data={tutArray}        
         horizontal
+
         renderItem={({item})=>{
           return(
+            <View style={{flexDirection:'row', alignItems:'center'}}>
             <Image source={item.img} style={{width:responsiveWidth(100), height:responsiveHeight(90),resizeMode:'contain'}}/>
+            <View style={{height:responsiveHeight(90), width:1, backgroundColor:AppColors.BLACK, marginLeft:5, marginRight:5}}/>
+            </View>
           )
         }}
         />
-        </View>
     </SafeAreaView>
   )
 }

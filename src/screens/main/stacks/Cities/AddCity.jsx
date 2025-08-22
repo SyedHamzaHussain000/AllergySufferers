@@ -48,9 +48,9 @@ const AddCity = ({navigation}) => {
         }
     }
 
-    if(allMyCity.length == 5 || allMyCity.length > 5){
+    if(allMyCity.length == 4 || allMyCity.length > 4){
 
-      Alert.alert('You can only add 5 cities');
+      Alert.alert('You can only add 4 cities');
       return
     }
     

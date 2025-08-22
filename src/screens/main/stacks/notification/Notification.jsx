@@ -68,6 +68,10 @@ const Notification = ({navigation}) => {
   };
 
   const setNewNotification = (item, level) => {
+
+
+
+    
     setNotificationLoader(true);
     let data = JSON.stringify({
       level: level ? level : 1,

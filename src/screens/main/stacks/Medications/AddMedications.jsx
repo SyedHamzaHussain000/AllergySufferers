@@ -45,6 +45,18 @@ const AddMedications = ({navigation}) => {
   const allActiveMedicationRedux = useSelector(
     state => state.medications.MyCurrentMeds,
   );
+
+  const ActiveMedications = useSelector(
+    state => state.medications.ActiveMedications,
+  );
+
+  const currentDate = moment().local().format('YYYY-MM-DD')
+    const currentDateMeds = ActiveMedications?.filter(
+  item => item.date === currentDate,
+);
+
+console.log("currentDateMeds",currentDateMeds.length)
+
     const expireDate = useSelector(state => state.auth.expireDate);
   
   const [medicationData, setMedicationsData] = useState([]);
@@ -277,6 +289,7 @@ const AddMedications = ({navigation}) => {
       });
   };
 
+  
   // local functionality
    const AddMedicationActiveToLocal  = async (medData) => {
 
@@ -306,8 +319,8 @@ const AddMedications = ({navigation}) => {
       return;
     }
 
-    if(allActiveMedicationRedux.length == 7 || allActiveMedicationRedux.length > 7 ){
-      Toast.show({
+    if(currentDateMeds.length == 7 ||allActiveMedicationRedux.length > 7 ){
+        Toast.show({
         type: 'error',
         text1: 'You can only add 7 medications at a time',
         position:'bottom',
@@ -315,6 +328,16 @@ const AddMedications = ({navigation}) => {
       });
       return
     }
+    
+    // if(allActiveMedicationRedux.length == 7 || allActiveMedicationRedux.length > 7 ){
+    //   Toast.show({
+    //     type: 'error',
+    //     text1: 'You can only add 7 medications at a time',
+    //     position:'bottom',
+    //     visibilityTime:800
+    //   });
+    //   return
+    // }
     AddMedicationToPreviousDates(medData)
 
     dispatch(setCurrentActiveMedication(medData));
