@@ -90,7 +90,7 @@ const AppSubscription = ({navigation}) => {
       });
 
       
-      // console.log('sussssb', subscriptions);
+      console.log('sussssb', subscriptions);
 
       setSubscriptionLocal(subscriptions); // set subscription information
     } catch (error) {

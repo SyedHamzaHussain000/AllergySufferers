@@ -72,6 +72,8 @@ const GetStarted = ({navigation}) => {
 
         const response = await ApiCallWithUserId('post', 'get_medications_active', userData?.id, )
 
+        // Alert.alert("calling in getStarted")
+
         if(response?.data?.length > 0){
           console.log("get_medications_active....",response?.data)
 
@@ -127,13 +129,21 @@ const GetStarted = ({navigation}) => {
   return (
     <BackgroundScreen>
       <View style={{flex: 0.98, justifyContent: 'space-between'}}>
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', gap:10}}>
           <AppText
             title={'Allergy Sufferers'}
             textColor={AppColors.WHITE}
             textSize={4}
             textFontWeight
           />
+
+          <AppText
+            title={'Login for the most accurate pollen & spore forecasts in Canada'}
+            textColor={AppColors.WHITE}
+            textSize={2}
+            textAlignment={'center'}
+          />
+          
           {
           fetchingCurrentLocation && (
             <AppText title={"Fetching current location please wait..."} textSize={2} textColor={AppColors.WHITE}/>
@@ -145,7 +155,7 @@ const GetStarted = ({navigation}) => {
 
         <AppButton
           bgColor={AppColors.WHITE}
-          title={'Let’s login for explore continues'}
+          title={'Login'}
           textColor={AppColors.BTNCOLOURS}
           textSize={2}
           handlePress={() => checkLoginandPremium()}

@@ -24,7 +24,7 @@ const SubscribeBar = ({title,title2 , handlePress,img}:props) => {
             <Image source={img} style={{width:responsiveWidth(80), resizeMode:'contain', height:responsiveHeight(30)}}/>
           )
         }
-        <AppButton title={"Subscribe"} buttoWidth={80} handlePress={handlePress}/>
+        <AppButton title={"Subscribe"} buttoWidth={80} handlePress={handlePress} textSize={1.8}/>
     </View>
   )
 }

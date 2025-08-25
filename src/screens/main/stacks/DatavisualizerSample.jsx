@@ -46,14 +46,22 @@ import {
   addUnitToActiveMedicaton,
   removeUnitToActiveMedicaton,
   setActiveCity,
+  setActiveMedication,
 } from '../../../redux/Slices/MedicationSlice';
 import {useFocusEffect} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import Svg, {Circle, Polyline} from 'react-native-svg';
 
 const DatavisualizerSample = ({navigation}) => {
   const dispatch = useDispatch();
   const screenWidth = Dimensions.get('window').width;
+
+  
   const screenHeight = Dimensions.get('window').height;
+
+
+
+
   const userData = useSelector(state => state.auth.user);
   const expireDate = useSelector(state => state.auth.expireDate);
   const allActiveMedicationRedux = useSelector(
@@ -70,8 +78,6 @@ const DatavisualizerSample = ({navigation}) => {
   const [takingMedications, setTakingMedications] = useState([]);
   const [todayPollensData, setTodayPollensData] = useState([]);
   const [MedicationnRecord, setMedicationnRecord] = useState([]);
-
-
 
   const [pollenLoader, setPollenLoader] = useState(false);
 
@@ -103,30 +109,43 @@ const DatavisualizerSample = ({navigation}) => {
   const [AllDayNumber, setAllDayNumber] = useState([]);
   const [activeDate, setActiveDate] = useState(null);
 
-  // console.log("allCities",AllCities[0])
+    const [savingDataLoader, setSavingDataLoader] = useState(false);
+  
+
+  console.log("allSymtoms",allSymtoms)
 
   // let loadingItemId = null;
 
+  
+
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
-      getAllAllergens();
+      // getAllAllergens();
 
       // getSelectedAllergens(activeCity);
 
       if (!activeCity) {
         NewActiveCity();
-      }else{
-        getSelectedAllergens(activeCity);
+      } else {
+        // getSelectedAllergens(activeCity);
       }
     });
 
     return nav;
   }, [navigation]);
 
-  useEffect(() => {
-    getSelectedAllergens(activeCity);
-  }, [activeCity]);
+useEffect(() => {
+  // const nav = navigation.addListener('focus', () => {
+    // if(allActiveMedicationRedux.length > 0) {
 
+      getSelectedAllergens(activeCity);
+    // }
+  // });
+
+  // return nav; // cleanup
+}, [activeCity, MedicationnRecord]);
+
+// console.log("allActiveMedicationRedux",allActiveMedicationRedux)
 
 
   // Alert.alert("activeCity",activeCity.city_name)
@@ -158,9 +177,33 @@ const DatavisualizerSample = ({navigation}) => {
     }
   };
 
-  const setMedicationLoading = (id, isLoading) => {
-    setMedicationLoadingMap(prev => ({...prev, [id]: isLoading}));
-  };
+    const getApiDataAndSaveToRedux = async () => {
+      if (allActiveMedicationRedux.length === 0) {
+        setSavingDataLoader(true);
+  
+        // Alert.alert("This function calls getApiDataAndSaveToRedux")
+        const getActiveMedicationData = await ApiCallWithUserId(
+          'post',
+          'get_medication_records',
+          userData?.id,
+        );
+  
+  
+  
+        if (getActiveMedicationData?.entries?.items?.length > 0) {
+          console.log(
+            'getActiveMedicationData',
+            getActiveMedicationData?.entries?.items,
+          );
+          dispatch(setActiveMedication(getActiveMedicationData?.entries?.items));
+          setSavingDataLoader(false);
+        } else {
+          setSavingDataLoader(false);
+        }
+        return;
+      }
+    };
+  
 
   const getAllAllergens = () => {
     setType('allergens');
@@ -227,69 +270,66 @@ const DatavisualizerSample = ({navigation}) => {
       });
   };
 
-  const MAX_BARS_PER_DATE = 10;
-
   const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
-
-
-  if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
-    setMedicationnRecord([]);
-    return;
-  }
-
-  const end = moment(); // today
-  const start = moment().local().subtract(6, 'day'); // last 7 days
-
-  setStartDate(start);
-  setEndDate(end);
-
-  // ✅ sirf last 7 din ka data lo
-  const filteredData = allActiveMedicationRedux.filter(entry =>
-    moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]')
-  );
-
-  const dayNumbers = [];
-  let current = start.clone();
-
-  while (current.isSameOrBefore(end)) {
-    dayNumbers.push(current.date());
-    current.add(1, 'day');
-  }
-
-  setAllDayNumber(dayNumbers);
-
-  // ✅ Group by date
-  const grouped = {};
-  filteredData.forEach(entry => {
-    if (!grouped[entry.date]) {
-      grouped[entry.date] = [];
+    if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
+      setMedicationnRecord([]);
+      return;
     }
-    grouped[entry.date].push(entry);
-  });
 
-  const barData = [];
+    const end = moment(); // today
+    const start = moment().local().subtract(6, 'day'); // last 7 days
 
-  Object.keys(grouped).forEach(date => {
-    const group = grouped[date];
-    group.forEach((entry, idx) => {
-      const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
-      const value = parseInt(entry.units) || 0;
-      const isLast = idx === group.length - 1;
+    setStartDate(start);
+    setEndDate(end);
 
-      barData.push({
-        value,
-        ...(idx === 0 && { label: formattedLabel }), // ✅ only first entry of date gets label
-        spacing: isLast ? responsiveWidth(8.5) : 0, // ✅ spacing after last entry of that date
-        frontColor: entry.frontColor || '#E23131',
-        
-        labelWidth: 0,
+    // ✅ sirf last 7 din ka data lo
+    const filteredData = allActiveMedicationRedux.filter(entry =>
+      moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
+    );
+
+    const dayNumbers = [];
+    let current = start.clone();
+
+    while (current.isSameOrBefore(end)) {
+      dayNumbers.push(current.date());
+      current.add(1, 'day');
+    }
+
+    setAllDayNumber(dayNumbers);
+
+    // ✅ Group by date
+    const grouped = {};
+    filteredData.forEach(entry => {
+      if (!grouped[entry.date]) {
+        grouped[entry.date] = [];
+      }
+      grouped[entry.date].push(entry);
+    });
+
+    const barData = [];
+
+    Object.keys(grouped).forEach(date => {
+      const group = grouped[date];
+      group.forEach((entry, idx) => {
+        const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
+        const value = parseInt(entry.units) || 0;
+        const isLast = idx === group.length - 1;
+
+        barData.push({
+          value,
+          ...(idx === 0 && {label: formattedLabel}), // ✅ only first entry of date gets label
+          spacing: isLast ? responsiveWidth(8.5) : 0, // ✅ spacing after last entry of that date
+          frontColor: entry.frontColor || '#E23131',
+
+          labelWidth: 30,
+        });
       });
     });
-  });
 
-  setMedicationnRecord(barData);
-};
+    setMedicationnRecord(barData);
+  };
 
+  // console.log("medicationRecord",MedicationnRecord)
 
   const getDataVisualizer = async (selecallergens, city) => {
     // console.log("city ? city : AllCities[0]", city ? city : AllCities[0])
@@ -316,10 +356,7 @@ const DatavisualizerSample = ({navigation}) => {
       )
       .join('&');
 
-    const dateis = moment().local().subtract(6, 'day').format(
-      'YYYY-MM-DD',
-    );
-
+    const dateis = moment().local().subtract(6, 'day').format('YYYY-MM-DD');
 
     const pickLat = city
       ? city?.lat
@@ -361,25 +398,43 @@ const DatavisualizerSample = ({navigation}) => {
       },
     };
 
+    console.log("config",config)
+
     axios
       .request(config)
       .then(response => {
         const apiData = response.data;
         console.log('api data of symptoms', apiData);
-        setAllSymtoms(apiData.symptom_level);
         const chartLineData = {};
         Object.keys(apiData).forEach(key => {
           if (key !== 'dates' && key !== 'symptom_level') {
             chartLineData[key] = apiData[key].map(val => ({value: val}));
           }
         });
-
+        
         //edited code
         const first = selecallergens[0];
         const second = selecallergens[1];
+        
+        console.log("first",first, second )
+        
+        const ambrosiaData = buildLineData(
+          chartLineData[first?.allergen_name],
+          MedicationnRecord,
+        );
+        const miscData = buildLineData(
+          chartLineData[second?.allergen_name],
+          MedicationnRecord,
+        );
 
-        setPrimaryLineData(chartLineData[first?.allergen_name] || []);
-        setSecondaryLineData(chartLineData[second?.allergen_name] || []);
+        const getSymtomsData = buildSymtomsData(apiData.symptom_level, MedicationnRecord )
+        
+        // setAllSymtoms(apiData.symptom_level);
+        setAllSymtoms(getSymtomsData);
+        // console.log( " ambrosiaData",  ambrosiaData, "miscData",miscData )
+
+        setPrimaryLineData(ambrosiaData || []);
+        setSecondaryLineData(miscData || []);
 
         colours[0] = first?.chartColor || 'lightblue';
         colours[1] = second?.chartColor || 'lightgreen';
@@ -400,6 +455,56 @@ const DatavisualizerSample = ({navigation}) => {
     // } else {
     //   console.log('add city');
     // }
+  };
+
+  const buildLineData = (pollenArray, medicationRecord) => {
+    const lineData = [];
+    let pollenIndex = 0;
+    let currentDateMeds = 0;
+
+    medicationRecord.forEach(bar => {
+      currentDateMeds++;
+
+      if (bar.label) {
+        // ✅ New date ka point banate hain
+        if (pollenArray && pollenArray[pollenIndex] !== undefined) {
+          lineData.push({
+            value: pollenArray[pollenIndex].value, // 👈 yaha .value add karo
+            spacing: currentDateMeds == 1 ? 0 : currentDateMeds, // meds count for this date
+          });
+        }
+        pollenIndex++;
+        currentDateMeds = 0; // reset counter for next date
+      }
+    });
+
+    return lineData;
+  };
+
+  const buildSymtomsData = (pollenArray, medicationRecord) => {
+
+
+    const lineData = [];
+    let pollenIndex = 0;
+    let currentDateMeds = 0;
+
+    medicationRecord.forEach(bar => {
+      currentDateMeds++;
+
+      if (bar.label) {
+        // ✅ New date ka point banate hain
+        if (pollenArray && pollenArray[pollenIndex] !== undefined) {
+          lineData.push({
+            value: pollenArray[pollenIndex], // 👈 yaha .value add karo
+            spacing: currentDateMeds == 1 ? 0 : currentDateMeds, // meds count for this date
+          });
+        }
+        pollenIndex++;
+        currentDateMeds = 0; // reset counter for next date
+      }
+    });
+
+    return lineData;
   };
 
   const addAllergens = item => {
@@ -463,7 +568,7 @@ const DatavisualizerSample = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log('allergens', response.data.allergens);
+        console.log(' my aal allergens', response.data.allergens, city);
 
         //edited code
         const coloredAllergens = assignColorsToAllergens(
@@ -484,27 +589,22 @@ const DatavisualizerSample = ({navigation}) => {
   };
 
   const deleteAllergens = async item => {
-
-
-
     setLoadingItemId(item.id);
     if (!item?.id) {
       console.warn('Invalid allergen item. Skipping delete.');
       return;
     }
 
-       const updatedAllergens = takingMedications.filter(
-        med => med.id !== item.id,
-      );
+    const updatedAllergens = takingMedications.filter(
+      med => med.id !== item.id,
+    );
 
-      setTakingMedications(updatedAllergens);
-    
+    setTakingMedications(updatedAllergens);
 
     try {
       const data = JSON.stringify({
         allergen_id: item.id,
       });
-      
 
       const config = {
         method: 'post',
@@ -517,8 +617,6 @@ const DatavisualizerSample = ({navigation}) => {
       };
 
       await axios.request(config);
-
-   
 
       // console.log('updatedAllergens', updatedAllergens);
 
@@ -574,7 +672,7 @@ const DatavisualizerSample = ({navigation}) => {
     // getSelectedAllergens(city);
   };
 
-  const chartSpacing = responsiveWidth(19); // You can tweak this value as needed
+  const chartSpacing = responsiveWidth(20); // You can tweak this value as needed
 
   const emojiMap = {
     1: AppImages.Hello,
@@ -586,6 +684,33 @@ const DatavisualizerSample = ({navigation}) => {
 
   const NewPro = [{value: 0}, {value: 2}, {value: 3}];
 
+
+
+  // Chart height in px (same as <Svg height>)
+  const chartHeight = 200;
+
+  // Y scale → converts value (0–8) to pixel (bottom → top)
+  const maxYValue = 8; // highest pollen/medication level
+  const scaleY = value => chartHeight - (value / maxYValue) * chartHeight;
+
+
+
+const lineData = PrimaryLineData?.map((d, i) => ({
+  x: i * (d.spacing +  85),
+  y: scaleY(d.value),
+}));
+
+  // Convert to string for Polyline
+  const points = lineData?.map(p => `${p.x},${p.y}`).join(' ');
+
+
+  const secondLineData = SecondaryLineData?.map((d, i) => ({
+  x: i * (d.spacing +  85),
+  y: scaleY(d.value),
+}));
+  const secondpoints = secondLineData?.map(p => `${p.x},${p.y}`).join(' ');
+
+  // console.log("medication record", MedicationnRecord)
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <ScrollView
@@ -605,22 +730,24 @@ const DatavisualizerSample = ({navigation}) => {
           setOpen={() => setOpen(true)}
         />
 
-       
+             {savingDataLoader && (
+            <ActivityIndicator size={'small'} color={AppColors.BLACK} />
+          )}
 
         {expireDate ? (
           <>
-           {startDate && endDate && (
-          <View style={{marginTop: 20, marginBottom: 20}}>
-            <AppText
-              title={`${moment(startDate).format('MMM DD')} - ${moment(
-                endDate,
-              ).format('MMM DD')}`}
-              textSize={2}
-              textColor={AppColors.BLACK}
-              textAlignment={'center'}
-            />
-          </View>
-        )}
+            {startDate && endDate && (
+              <View style={{marginTop: 20, marginBottom: 20}}>
+                <AppText
+                  title={`${moment(startDate).format('MMM DD')} - ${moment(
+                    endDate,
+                  ).format('MMM DD')}`}
+                  textSize={2}
+                  textColor={AppColors.BLACK}
+                  textAlignment={'center'}
+                />
+              </View>
+            )}
 
             {DataVisualizerLoader == true ? (
               <View
@@ -672,13 +799,13 @@ const DatavisualizerSample = ({navigation}) => {
                             //   }}>
                             <View
                               style={{
-                                width: responsiveWidth(20.6),
+                                width: (responsiveWidth(20.6) + item.spacing) ,
 
                                 alignItems: 'flex-start',
                                 // borderWidth:1,
                               }}>
                               <Image
-                                source={emojiMap[item]}
+                                source={emojiMap[item.value]}
                                 style={{
                                   height: 30,
                                   width: 30,
@@ -693,36 +820,37 @@ const DatavisualizerSample = ({navigation}) => {
                       <BarChart
                         data={MedicationnRecord || []}
                         barWidth={7}
-                        
                         barStyle={{
-                          backgroundColor:'gray'
+                          backgroundColor: 'gray',
                         }}
+                        
                         frontColor="#E23131" // bar color
-                        showLine={
-                          // true
-                          PrimaryLineData.length > 0 ||
-                          SecondaryLineData.length > 0
-                        }
-                        // xAxisLabelTexts={[]}
-                        lineData={PrimaryLineData || []}
-                        lineData2={SecondaryLineData || []}
-                        lineConfig={{
-                          color: colours[0],
-                          thickness: 2,
-                          curved: false,
-                          dataPointsColor: colours[0],
-                          spacing: chartSpacing,
-                          // textColor: 'red',
-                          initialSpacing: responsiveWidth(5),
-                        }}
-                        lineConfig2={{
-                          color: colours[1],
-                          thickness: 2,
-                          curved: false,
-                          dataPointsColor: colours[1],
-                          spacing: chartSpacing,
-                          initialSpacing: responsiveWidth(5),
-                        }}
+                        // showLine={
+                        //   // true
+                        //   PrimaryLineData.length > 0 ||
+                        //   SecondaryLineData.length > 0
+                        // }
+                        // // xAxisLabelTexts={[]}
+                        // lineData={primaryLanecustom || []}
+                        // lineData2={SecondaryLineData || []}
+                        showLine={false}
+                        // lineConfig={{
+                        //   color: colours[0],
+                        //   thickness: 2,
+                        //   curved: false,
+                        //   dataPointsColor: colours[0],
+                        //   // spacing: chartSpacing,
+                        //   // textColor: 'red',
+                        //   initialSpacing: responsiveWidth(5),
+                        // }}
+                        // lineConfig2={{
+                        //   color: colours[1],
+                        //   thickness: 2,
+                        //   curved: false,
+                        //   dataPointsColor: colours[1],
+                        //   // spacing: chartSpacing,
+                        //   initialSpacing: responsiveWidth(5),
+                        // }}
                         // xAxisIndicesWidth={responsiveWidth(28)}
                         // yAxisLabelTexts={[
                         //   '0',
@@ -748,7 +876,7 @@ const DatavisualizerSample = ({navigation}) => {
                         barBorderRadius={2}
                         isAnimated={true}
                         noOfSections={8}
-                        spacing={responsiveWidth(9)}
+                        // spacing={responsiveWidth(9)}
                         initialSpacing={responsiveWidth(0)} // same for all
                         formatYLabel={label => parseFloat(label).toFixed(0)}
                         stepValue={1}
@@ -757,15 +885,68 @@ const DatavisualizerSample = ({navigation}) => {
                       <View
                         style={{
                           position: 'absolute',
+                          zIndex: 11,
+                          marginLeft:responsiveWidth(4)
+                          
+                        }}>
+                        <Svg width={responsiveWidth(200)} height={responsiveHeight(28)}>
+                          <Polyline
+                            points={points}
+                            stroke={colours[0]}
+                            strokeWidth="2"
+                            fill="none"
+                          />
+                          {lineData.map((p, i) => (
+                            <Circle
+                              key={i}
+                              cx={p.x}
+                              cy={p.y}
+                              r="4"
+                              fill={colours[0]}
+                            />
+                          ))}
+                        </Svg>
+                      </View>
+
+
+                         <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 11,
+                          marginLeft:responsiveWidth(4)
+                          
+                        }}>
+                        <Svg width={responsiveWidth(200)} height={responsiveHeight(28)}>
+                          <Polyline
+                            points={secondpoints}
+                            stroke={colours[1]}
+                            strokeWidth="2"
+                            fill="none"
+                          />
+                          {secondLineData.map((p, i) => (
+                            <Circle
+                              key={i}
+                              cx={p.x}
+                              cy={p.y}
+                              r="4"
+                              fill={colours[1]}
+                            />
+                          ))}
+                        </Svg>
+                      </View>
+
+                      {/* <View
+                        style={{
+                          position: 'absolute',
                           zIndex: 10,
                           bottom: Platform.OS == 'ios' ? 0 : -5,
                           backgroundColor: AppColors.WHITE,
                           width: responsiveWidth(100),
                           height: responsiveHeight(2),
                         }}
-                      />
+                      /> */}
 
-                      <View
+                      {/* <View
                         style={{
                           flexDirection: 'row',
                           position: 'absolute',
@@ -784,7 +965,7 @@ const DatavisualizerSample = ({navigation}) => {
                             </View>
                           );
                         })}
-                      </View>
+                      </View> */}
                     </ScrollView>
 
                     <View
@@ -836,8 +1017,8 @@ const DatavisualizerSample = ({navigation}) => {
                         // paddingVertical: responsiveHeight(1),
                         // justifyContent: 'flex-start',,
                         height: responsiveHeight(30),
-                        top: '37%',
-                        gap: 10,
+                        top: '39%',
+                        gap: 8,
                       }}>
                       <AppText
                         // style={{
@@ -902,22 +1083,21 @@ const DatavisualizerSample = ({navigation}) => {
                         paddingRight: 0,
                         paddingLeft: 5,
                         borderWidth: 1,
-                      }}
-                    >
+                      }}>
                       <AppText
                         title={item.allergen_name}
                         textSize={1.5}
                         textwidth={65}
                       />
 
-                      {
-
-                        loadingItemId == item?.id ?
-                        <View style={{paddingRight:20}}>
-                        <ActivityIndicator size={'large'} color={AppColors.WHITE}/>
+                      {loadingItemId == item?.id ? (
+                        <View style={{paddingRight: 20}}>
+                          <ActivityIndicator
+                            size={'large'}
+                            color={AppColors.WHITE}
+                          />
                         </View>
-                        :
-
+                      ) : (
                         <TouchableOpacity
                           onPress={() => deleteAllergens(item)}
                           style={{
@@ -928,17 +1108,13 @@ const DatavisualizerSample = ({navigation}) => {
                             paddingRight: 30,
                             minHeight: responsiveHeight(6),
                           }}>
-
                           <AntDesign
                             name="minus"
                             size={responsiveFontSize(3)}
                             color={AppColors.LIGHTGRAY}
                           />
-
                         </TouchableOpacity>
-                      }
-
-
+                      )}
                     </View>
                   )}
                 />
@@ -1231,11 +1407,12 @@ const DatavisualizerSample = ({navigation}) => {
             )}
           </>
         ) : (
-          <View
-            style={{ justifyContent: 'center', marginTop:20}}>
+          <View style={{justifyContent: 'center', marginTop: 20}}>
             <SubscribeBar
               title="Subscribe now to correlate pollen and spore levels with medication and symptoms"
-              title2={'With a premium subscription, overlay daily symptoms and mediation intake with local pollen and spore data, which can help you uncover hidden connections between environmental triggers and your health. By analyzing these correlations, you can see what might be causing your allergies. Understanding these patterns is key to managing your symptoms more effectively and improving your quality of life.'}
+              title2={
+                'With a premium subscription, overly daily symptoms and medication intake with local pollen and spore data, which can help you uncover hidden connections between environmental triggers and your health. By analyzing these correlations, you can see what might be causing your allergies or triggers. Understanding these patterns is key to managing your symptoms more effectively and improving your quality of life.'
+              }
               handlePress={() => navigation.navigate('Subscription')}
               img={AppImages.Datavisiualizer}
             />

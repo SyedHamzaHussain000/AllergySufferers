@@ -6,7 +6,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
 import {
@@ -18,15 +18,15 @@ import axios from 'axios';
 import AppTextInput from '../../../../components/AppTextInput';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import BASE_URL from '../../../../utils/BASE_URL';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import Toast from 'react-native-toast-message';
 // import MaterialDesignIcons from 'react-native-vector-icons/MaterialDesignIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-const Notification = ({navigation}) => {
+const Notification = ({ navigation }) => {
   const userData = useSelector(state => state?.auth?.user);
-    const expireDate = useSelector(state => state?.auth?.expireDate);
-  
+  const expireDate = useSelector(state => state?.auth?.expireDate);
+
   const [allPollens, setALlPollens] = useState([]);
   const [search, setSearch] = useState('');
   const [loader, setLoader] = useState(false);
@@ -36,7 +36,7 @@ const Notification = ({navigation}) => {
   const [PollenLoader, setPollenApiLoader] = useState(false);
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
-      if(expireDate){
+      if (expireDate) {
 
         getAllPollens();
       }
@@ -71,7 +71,7 @@ const Notification = ({navigation}) => {
 
 
 
-    
+
     setNotificationLoader(true);
     let data = JSON.stringify({
       level: level ? level : 1,
@@ -121,7 +121,7 @@ const Notification = ({navigation}) => {
 
         const objectConvertArr = Object.entries(response.data.data).map(
           ([key, value]) => {
-            return {name: key, count: value};
+            return { name: key, count: value };
           },
         );
 
@@ -159,30 +159,33 @@ const Notification = ({navigation}) => {
 
 
   const freeUserNotifications = [
-    {id:1, name: "Total Spores" },
-    {id:2, name: "Total Trees" },
-    {id:3, name: "Total Grasses" },
-    {id:4, name: "Total Weeds" },
+    { id: 1, name: "Total Spores" },
+    { id: 2, name: "Total Trees" },
+    { id: 3, name: "Total Grasses" },
+    { id: 4, name: "Total Weeds" },
   ]
 
+  console.log('all pollens list =====>', allPollens)
+
   return (
-    <View style={{padding: 20}}>
+    <View style={{ padding: 20 }}>
       <AppHeader heading="Push Notification" goBack={true} />
 
       {/* <FlatList
     data={[]}
     
     /> */}
+    <ScrollView contentContainerStyle={{flexGrow:1, paddingBottom:200}} showsVerticalScrollIndicator={false} nestedScrollEnabled> 
       {NotificationLoader == true ? (
         <ActivityIndicator size={'large'} color={AppColors.BLACK} />
       ) : (
-        <ScrollView>
+        <View>
           <FlatList
-            data={  AllNotification }
-            contentContainerStyle={{gap: 10, paddingBottom: 20}}
+            data={AllNotification}
+            contentContainerStyle={{ gap: 10, paddingBottom: 20 }}
             keyExtractor={(item, index) => index.toString()}
             inverted
-            renderItem={({item}) => {
+            renderItem={({ item }) => {
               return (
                 <View
                   style={{
@@ -213,14 +216,14 @@ const Notification = ({navigation}) => {
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     data={[
-                      {id: 1, name: 'Low'},
-                      {id: 2, name: 'Moderate'},
-                      {id: 3, name: 'High'},
-                      {id: 4, name: 'Very High'},
+                      { id: 1, name: 'Low' },
+                      { id: 2, name: 'Moderate' },
+                      { id: 3, name: 'High' },
+                      { id: 4, name: 'Very High' },
                     ]}
                     keyExtractor={subItem => subItem.id.toString()}
-                    contentContainerStyle={{gap: 5}}
-                    renderItem={({item: subItem}) => {
+                    contentContainerStyle={{ gap: 5 }}
+                    renderItem={({ item: subItem }) => {
                       return (
                         <TouchableOpacity
                           onPress={() => {
@@ -248,10 +251,10 @@ const Notification = ({navigation}) => {
               );
             }}
           />
-        </ScrollView>
+        </View>
       )}
 
-      <View style={{marginTop: 20}} />
+      <View style={{ marginTop: 20 }} />
 
       <AppTextInput
         inputPlaceHolder={'Search Pollens'}
@@ -261,7 +264,7 @@ const Notification = ({navigation}) => {
       />
 
       {loader && (
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <ActivityIndicator size={'large'} color={AppColors.BLACK} />
         </View>
       )}
@@ -277,16 +280,19 @@ const Notification = ({navigation}) => {
           <ActivityIndicator size={'large'} color={AppColors.BLACK} />
         </View>
       )}
-
-      <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 100}}>
-        {expireDate ?  allPollens :  freeUserNotifications
-          .filter(
-            item =>
-              item?.name?.toLowerCase().includes(search.toLowerCase()) ||
-              item?.common_name?.toLowerCase().includes(search.toLowerCase()),
-          )
-          .map((item, index) => (
+      <View contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
+        {(expireDate ? allPollens : freeUserNotifications)
+          .filter(item => {
+            const searchLower = search.toLowerCase();
+            return (
+              item?.name?.toLowerCase().includes(searchLower) ||
+              (item?.common_name &&
+                item.common_name.toLowerCase().includes(searchLower))
+            );
+          })
+          .map(item => (
             <TouchableOpacity
+              key={item.id}
               onPress={() => setNewNotification(item)}
               style={{
                 padding: 20,
@@ -305,11 +311,13 @@ const Notification = ({navigation}) => {
                   textFontWeight
                   textwidth={70}
                 />
-                <AppText
-                  title={item.common_name}
-                  textSize={1.8}
-                  textwidth={70}
-                />
+                {item?.common_name && (
+                  <AppText
+                    title={item.common_name}
+                    textSize={1.8}
+                    textwidth={70}
+                  />
+                )}
               </View>
 
               <View>
@@ -321,8 +329,11 @@ const Notification = ({navigation}) => {
               </View>
             </TouchableOpacity>
           ))}
-      </ScrollView>
+      </View>
+
       <Toast />
+
+      </ScrollView>
     </View>
   );
 };

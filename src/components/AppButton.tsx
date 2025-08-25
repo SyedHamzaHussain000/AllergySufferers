@@ -54,7 +54,7 @@ const AppButton = ({
             backgroundColor: bgColor ? bgColor : AppColors.BTNCOLOURS,
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: 10,
+            padding: 8,
             borderRadius: 10,
             flexDirection: 'row',
             width: responsiveWidth(buttoWidth),

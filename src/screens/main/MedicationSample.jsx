@@ -87,13 +87,13 @@ const MedicationSample = ({navigation}) => {
     generateMedicationSlides(selecteddate, allActiveMedicationRedux);
   }, [selecteddate, allActiveMedicationRedux]);
 
-  useEffect(() => {
-    // const nav = navigation.addListener('focus', () => {
-    getApiDataAndSaveToRedux(allActiveMedicationRedux);
-    // getMedApiDataAndSaveToRedux();
-    // });
-    // return nav;
-  }, [allActiveMedicationRedux]);
+  // useEffect(() => {
+  //   // const nav = navigation.addListener('focus', () => {
+  //   getApiDataAndSaveToRedux(allActiveMedicationRedux);
+  //   // getMedApiDataAndSaveToRedux();
+  //   // });
+  //   // return nav;
+  // }, [allActiveMedicationRedux]);
 
   useFocusEffect(
     useCallback(() => {
@@ -101,6 +101,10 @@ const MedicationSample = ({navigation}) => {
         setAllMedicationToRedux();
       }else{
         getMedApiDataAndSaveToRedux(allMyCurrentMeds, allActiveMedicationRedux);
+
+        if(allActiveMedicationRedux.length === 0){
+          getApiDataAndSaveToRedux(allActiveMedicationRedux);
+        }
       }
 
       // Alert.alert("runninnng use focus")
@@ -109,6 +113,7 @@ const MedicationSample = ({navigation}) => {
 
   const getMedApiDataAndSaveToRedux = async () => {
 
+
     const currentDate = moment().local().format('YYYY-MM-DD');
 
     if (allMyCurrentMeds.length > 0 ||  moment(allActiveMedicationRedux[allActiveMedicationRedux.length - 1].date).format("YYYY-MM-DD") === currentDate  ) {
@@ -116,14 +121,13 @@ const MedicationSample = ({navigation}) => {
       return;
     }
 
-    // Alert.alert("Called After")
     const response = await ApiCallWithUserId(
       'post',
       'get_medications_active',
       userData?.id,
     );
 
-    // console.log("response........",response)
+
 
     if (response?.data?.length > 0) {
       // console.log('get_medications_active....');
@@ -135,12 +139,14 @@ const MedicationSample = ({navigation}) => {
     if (allActiveMedicationRedux.length === 0) {
       setSavingDataLoader(true);
 
-      // Alert.alert("called allActiveMedicationRedux")
+      // Alert.alert("This function calls getApiDataAndSaveToRedux")
       const getActiveMedicationData = await ApiCallWithUserId(
         'post',
         'get_medication_records',
         userData?.id,
       );
+
+
 
       if (getActiveMedicationData?.entries?.items?.length > 0) {
         console.log(
@@ -183,6 +189,8 @@ const MedicationSample = ({navigation}) => {
     const currentDate = moment().local().format('YYYY-MM-DD');
 
     setLoader(true);
+
+    console.log("currentDate",currentDate)
 
     // Alert.alert('currentDate', currentDate,       allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date );
     // return
@@ -262,8 +270,6 @@ const MedicationSample = ({navigation}) => {
     } else {
       const activeDateStr = moment(new Date()).format('YYYY-MM-DD');
       const dateArray = generateDateRangeArray(activeDateStr, currentDate);
-
-      console.log('dateArray', dateArray);
 
       const toAdd = [];
 
@@ -859,7 +865,7 @@ const MedicationSample = ({navigation}) => {
               style={{ justifyContent: 'center', marginTop:20}}>
               <SubscribeBar
                 title="Subscribe now to log your daily medication intake"
-                title2={'Upgrade to a premium to log you medication and keep track of your daily dosage. This is great information to see how medication is affecting you quality of like. You can see if you are developing a tolerance to certain medications and it is great information to share with your doctor. You can also track your own medication for things like home remedies.'}
+                title2={"Upgrade to premium and start logging your medication to better understand its impact on your daily life. By tracking your dosage, you can easily see how your medication is affecting your quality of life. This information is also valuable to share with your doctors, helping them identify if you're developing a tolerance to certain medications. You can even use this feature to track your home remedies."}
                 handlePress={() => navigation.navigate('Subscription')}
                 img={AppImages.MedicationGraph}
               />

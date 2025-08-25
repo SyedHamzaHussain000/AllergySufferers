@@ -392,7 +392,7 @@ const Symptom = ({navigation}) => {
             style={{ justifyContent: 'center', padding:20}}>
             <SubscribeBar
               title="Subscribe now to log how you feel in the Symptom Tracker"
-              title2={'Tracking you daily symptoms is great as you can see how pollen and spore levels and medication are affecting how you feel and your quality of life. It is also great information to share with your doctor.'}
+              title2={'Tracking your daily symptoms is a great way to see how pollen, spore levels, and medication affect your well-being. This is also valuable information to share with your doctor.'}
               handlePress={() => navigation.navigate('Subscription')}
               img={AppImages.SymtomsGraph}
             />
