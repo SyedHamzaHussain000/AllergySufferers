@@ -16,7 +16,7 @@ type props = {
 
 const SubscribeBar = ({title,title2 , handlePress,img}:props) => {
   return (
-    <View style={{padding:20, borderWidth:1, borderRadius:20, borderColor:AppColors.BLACK, gap:20}}>
+    <View style={{paddingVertical:10, paddingHorizontal:20, borderWidth:1, borderRadius:20, borderColor:AppColors.BLACK, gap:0}}>
         <AppText title={title} textSize={2} textColor={AppColors.BLACK} textFontWeight/>
         <AppText title={title2} textSize={1.8} textColor={AppColors.BLACK}/>
         {
@@ -24,7 +24,9 @@ const SubscribeBar = ({title,title2 , handlePress,img}:props) => {
             <Image source={img} style={{width:responsiveWidth(80), resizeMode:'contain', height:responsiveHeight(30)}}/>
           )
         }
+        <View style={{marginTop:10}}>
         <AppButton title={"Subscribe"} buttoWidth={80} handlePress={handlePress} textSize={1.8}/>
+        </View>
     </View>
   )
 }

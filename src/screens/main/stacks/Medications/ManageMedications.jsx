@@ -60,8 +60,9 @@ const ManageMedications = ({navigation}) => {
   );
 
   const expireDate = useSelector(state => state.auth.expireDate);
-
-  // console.log('ActiveMedications', ActiveMedications);
+      const [savingDataLoader, setSavingDataLoader] = useState(false);
+  
+  // console.log('ActiveMedications', ActiveMedications); 
 
   // const [activeMedication, setActiveMedication] = useState(
   //   allActiveMedicationRedux,
@@ -76,11 +77,21 @@ const ManageMedications = ({navigation}) => {
   );
   const [open, setOpen] = useState(false);
 
-  const [loader, setLoader] = useState(false)
+  const [loader, setLoader] = useState(true)
+  const [OtherLoader, setOtherLoader] = useState(false)
   
   useEffect(() => {
     setLoader(false)
+
   }, [ActiveMedications]);
+
+  useEffect(()=>{
+    if(expireDate){ 
+      if(ActiveMedications?.length === 0){  
+        getApiDataAndSaveToRedux()
+      }
+    }
+  },[ActiveMedications])
 
   const deleteActiveMedicationRedux = async medData => {
     // dispatch( deleteActiveMedication(medData))
@@ -106,11 +117,15 @@ const ManageMedications = ({navigation}) => {
     });
   };
 
+  
   const sortMedication = async data => {
-
-    setLoader(true)
+    // Alert.alert("draged?")
+    setOtherLoader(true)
+    
+    
     const sortnow = await updateSortedCurrentDateMedsInList(ActiveMedications, data)
     dispatch(setActiveMedication(sortnow))
+    setOtherLoader(false)
   }
 
 
@@ -140,7 +155,37 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
   item => item.date === selecteddate,
 );
 
+  
 
+
+      const getApiDataAndSaveToRedux = async () => {
+        if (allActiveMedicationRedux.length === 0) {
+          setSavingDataLoader(true);
+    
+          // Alert.alert("This function calls getApiDataAndSaveToRedux")
+          const getActiveMedicationData = await ApiCallWithUserId(
+            'post',
+            'get_medication_records',
+            userData?.id,
+          );
+    
+    
+    
+          if (getActiveMedicationData?.entries?.items?.length > 0) {
+            console.log(
+              'getActiveMedicationData',
+              getActiveMedicationData?.entries?.items,
+            );
+            dispatch(setActiveMedication(getActiveMedicationData?.entries?.items));
+            setSavingDataLoader(false);
+          } else {
+            setSavingDataLoader(false);
+          }
+          return;
+        }else{
+          setSavingDataLoader(false);
+        }
+      };
 
 
 
@@ -149,28 +194,19 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
     <SafeAreaView style={{flex: 1}}>
       <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 200}}>
         <View>
+          {
+            savingDataLoader && (
+              <View>
+                <ActivityIndicator size={'large'} color={AppColors.BLACK}/>
+              </View>
+            )
+          }
+
           <GestureHandlerRootView style={{flex: 1}}>
             <View style={{padding: 20}}>
               <AppHeader heading={`Manage ${'\n'}Medications`} goBack />
 
-              <DatePicker
-                modal
-                open={open}
-                date={date}
-                mode="date"
-                minimumDate={activeDate ? activeDate : new Date()}
-                maximumDate={new Date()}
-                onConfirm={selectedDate => {
-                  setDate(selectedDate);
-                  setOpen(false);
-                  const picked = moment(selectedDate).startOf('day');
-                  const formattedDate = picked.format('YYYY-MM-DD');
-                  setSelectedDate(formattedDate);
-                }}
-                onCancel={() => {
-                  setOpen(false);
-                }}
-              />
+           
 
               <View style={{gap: 10}}>
                 <AppText
@@ -244,7 +280,7 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
                             );
                           }}
                           keyExtractor={(item, index) => index.toString()}
-                          onDragEnd={({data}) => sortMedication(data)}
+                          onDragEnd={({data}) =>  sortMedication(data)}
                           dragEnabled={true}
                           activationDistance={10}
                         />
@@ -258,8 +294,8 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
                         justifyContent: 'center',
                       }}>
                       <SubscribeBar
-                        title="Subscribe now log you medication intake as well as your own personal home remedies"
-                        title2={'With a premium subscription you can add and input the medications you take. You can also add any unique medication or home remedies you use to the lists. You choose up to 7 medications.'}
+                        title="Subscribe now to log your medication intake as well as your own personal remedies"
+                        title2={'With a premium subscription you can add and input medication you take. You can also add any unique medication or home remedies you use to the list. You can choose up to 7 medications.'}
                         handlePress={() => navigation.navigate('Subscription')}
 
                       />
@@ -275,6 +311,7 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
                   bgColor={AppColors.BTNCOLOURS}
                   RightColour={AppColors.rightArrowCOlor}
                   handlePress={() => navigation.navigate('AddMedications')}
+                  isLoading={savingDataLoader}
                 />
               </View>
             </View>
@@ -286,3 +323,5 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
 };
 
 export default ManageMedications;
+
+

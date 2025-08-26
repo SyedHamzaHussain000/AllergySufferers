@@ -34,6 +34,7 @@ import DatavisualizerSample from '../screens/main/stacks/DatavisualizerSample';
 import { responsiveHeight } from '../utils/Responsive_Dimensions';
 import AppSubscription from '../screens/main/subscription/AppSubscription';
 import ViewAppGuide from '../screens/main/stacks/Help/ViewAppGuide';
+import ViewFreeAppGuide from '../screens/main/stacks/Help/ViewFreeAppGuide';
 // import { SafeAreaView, useSafeAreaInsets } from "react-SafeAreaViewnative-safe-area-context";
 
 
@@ -82,6 +83,8 @@ const Main = () => {
       <Stack.Screen name="More" component={HomeWithSafeArea(More)} />
       <Stack.Screen name="Account" component={HomeWithSafeArea(Account)} />
       <Stack.Screen name="ViewAppGuide" component={HomeWithSafeArea(ViewAppGuide)} />
+      <Stack.Screen name="ViewFreeAppGuide" component={HomeWithSafeArea(ViewFreeAppGuide)} />
+      
       
       <Stack.Screen
         name="HelpScreen"

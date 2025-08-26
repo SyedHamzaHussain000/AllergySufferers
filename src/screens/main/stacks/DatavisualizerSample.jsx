@@ -112,7 +112,6 @@ const DatavisualizerSample = ({navigation}) => {
     const [savingDataLoader, setSavingDataLoader] = useState(false);
   
 
-  console.log("allSymtoms",allSymtoms)
 
   // let loadingItemId = null;
 
@@ -650,6 +649,8 @@ useEffect(() => {
     }));
   };
 
+
+
   const getLocation = async type => {
     setType(type);
 
@@ -696,7 +697,7 @@ useEffect(() => {
 
 
 const lineData = PrimaryLineData?.map((d, i) => ({
-  x: i * (d.spacing +  85),
+  x: i * (d.spacing +  82),
   y: scaleY(d.value),
 }));
 
@@ -705,12 +706,20 @@ const lineData = PrimaryLineData?.map((d, i) => ({
 
 
   const secondLineData = SecondaryLineData?.map((d, i) => ({
-  x: i * (d.spacing +  85),
+  x: i * (d.spacing +  82),
   y: scaleY(d.value),
 }));
   const secondpoints = secondLineData?.map(p => `${p.x},${p.y}`).join(' ');
 
-  // console.log("medication record", MedicationnRecord)
+
+  const symtomsData = allSymtoms?.map((d, i)=>({
+    value: d?.value,
+    spacing: (d?.spacing + 80),
+  }))
+
+  
+  // console.log("medication record",secondLineData, symtomsData)
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <ScrollView
@@ -727,7 +736,7 @@ const lineData = PrimaryLineData?.map((d, i) => ({
           subheading="Your Data, Visualized"
           goBack
           selecteddate={selecteddate}
-          setOpen={() => setOpen(true)}
+          
         />
 
              {savingDataLoader && (
@@ -778,11 +787,11 @@ const lineData = PrimaryLineData?.map((d, i) => ({
                         style={{
                           position: 'absolute',
                           top: 0,
-                          marginLeft: responsiveWidth(5),
+                          marginLeft: responsiveWidth(3),
                           flexDirection: 'row',
                           zIndex: 100,
                         }}>
-                        {allSymtoms.map(item => {
+                        {symtomsData.map((item, index) => {
                           const emojiMap = {
                             1: AppImages.Mask,
                             2: AppImages.Pain,
@@ -799,10 +808,10 @@ const lineData = PrimaryLineData?.map((d, i) => ({
                             //   }}>
                             <View
                               style={{
-                                width: (responsiveWidth(20.6) + item.spacing) ,
-
+                                width: (item.spacing) ,
                                 alignItems: 'flex-start',
                                 // borderWidth:1,
+                                // backgroundColor:'red'
                               }}>
                               <Image
                                 source={emojiMap[item.value]}

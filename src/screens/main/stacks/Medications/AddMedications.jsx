@@ -51,9 +51,10 @@ const AddMedications = ({navigation}) => {
   );
 
   const currentDate = moment().local().format('YYYY-MM-DD')
-    const currentDateMeds = ActiveMedications?.filter(
-  item => item.date === currentDate,
-);
+  const currentDateMeds = ActiveMedications?.filter(
+    item => item.date === currentDate,
+  );
+  console.log("ActiveMedications",currentDateMeds)
 
 console.log("currentDateMeds",currentDateMeds.length)
 
@@ -319,7 +320,7 @@ console.log("currentDateMeds",currentDateMeds.length)
       return;
     }
 
-    if(currentDateMeds.length == 7 ||allActiveMedicationRedux.length > 7 ){
+    if(currentDateMeds.length >= 7 ){
         Toast.show({
         type: 'error',
         text1: 'You can only add 7 medications at a time',
@@ -436,7 +437,7 @@ console.log("currentDateMeds",currentDateMeds.length)
           <ScrollView
             contentContainerStyle={{
               flexGrow: 1,
-              paddingBottom: responsiveHeight(50),
+              paddingBottom: responsiveHeight(80),
             }}>
             {medicationData?.length > 0 ? (
               <>

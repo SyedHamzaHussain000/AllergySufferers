@@ -73,7 +73,6 @@ const Home = ({navigation}) => {
 
   const expireDate = useSelector(state => state.auth.expireDate);
 
-  console.log('expireDate', expireDate);
 
   const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
 
@@ -156,23 +155,7 @@ const Home = ({navigation}) => {
         getPollensData(sortCities, 0);
       }
     }, [AllCities]),
-  );
-
-  // useEffect(() => {
-  //   if (expireDate) {
-  //     if (moment(expireDate).isAfter(new Date())) {
-  //       console.log('Subscription is valid');
-  //     } else {
-  //       dispatch(
-  //         setSubscription({
-  //           isExpired: true,
-  //           expireDate: '',
-  //           SubscriptionType: null,
-  //         }),
-  //       );
-  //     }
-  //   }
-  // }, [expireDate]);
+  )
 
   useEffect(() => {
     SubscribeSubscription();
@@ -393,7 +376,6 @@ const Home = ({navigation}) => {
     {id: 4, name: 'Total Weeds', value: todayPollensData?.total_weeds},
   ];
 
-  // console.log("isfutureArray",isfutureArray)
 
   return (
     <>
@@ -606,6 +588,7 @@ const Home = ({navigation}) => {
                   />
                 )}
 
+                
                 <View style={{flexDirection: 'row', gap: 5}}>
                   {activeLoader == true ? (
                     <View
@@ -730,6 +713,7 @@ const Home = ({navigation}) => {
                             data={freeData}
                             horizontal
                             renderItem={({item}) => {
+                              console.log("ite", item)
                               return (
                                 <View style={{gap: 10}}>
                                   <AppText
@@ -758,7 +742,7 @@ const Home = ({navigation}) => {
                                         ? 'Very High'
                                         : 'None'
                                     }
-                                    isPollenorSpores={''}
+                                    isPollenorSpores={'pollen'}
                                     TempreaturePriorityFontSize={1.6}
                                   />
                                 </View>
@@ -1342,7 +1326,7 @@ const Home = ({navigation}) => {
                               id: 4,
                               name: 'Total Weeds',
                               value: item?.total_weeds,
-                            },
+                            }
                           ];
 
                           const pollenHeaderIndex =
@@ -1521,7 +1505,7 @@ const Home = ({navigation}) => {
                                                 ? 'Very High'
                                                 : 'None'
                                             }
-                                            isPollenorSpores={''}
+                                            isPollenorSpores={'pollen'}
                                             TempreaturePriorityFontSize={1.6}
                                           />
                                         </View>
