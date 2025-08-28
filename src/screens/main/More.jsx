@@ -11,6 +11,9 @@ import Entypo from 'react-native-vector-icons/Entypo'
 import { useSelector } from 'react-redux';
 const More = ({navigation}) => {
     const userData = useSelector(state => state.auth.user);
+    const expiry = useSelector(state => state.auth.expireDate)
+
+    // console.log('exipiry',expiry ? 'hello' : 'no')
 
     
 
@@ -44,7 +47,7 @@ const More = ({navigation}) => {
             marginBottom: 20,
           }}>
           <AppText
-            title={'Subscription Status: Premium'}
+            title={`Subscription Status: ${expiry ? 'Premium' : 'Free'}`}
             textColor={AppColors.WHITE}
             textSize={2}
             textFontWeight

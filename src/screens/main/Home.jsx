@@ -139,7 +139,7 @@ const Home = ({navigation}) => {
 
       if (userData) {
         getActivePollens();
-        GetLocationFromApi();
+        
         // getAllCities();
         // getCurrentLocation();
       } else {
@@ -153,9 +153,13 @@ const Home = ({navigation}) => {
     useCallback(() => {
       if (AllCities && AllCities.length > 0) {
         getPollensData(sortCities, 0);
+      }else{
+        GetLocationFromApi();
       }
     }, [AllCities]),
   )
+
+  console.log("AllCities",AllCities)
 
   useEffect(() => {
     SubscribeSubscription();

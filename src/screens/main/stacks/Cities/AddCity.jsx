@@ -42,13 +42,17 @@ const AddCity = ({navigation}) => {
 
       const isManualAddedCount = allMyCity.filter((state) =>   state?.currentLocation == false) 
 
-        if(isManualAddedCount?.length == 2 || isManualAddedCount?.length > 2){
+        if(isManualAddedCount?.length >= 2){
             Alert.alert('You can only add 2 cities to add more please subscribe');
             return
         }
     }
 
-    if(allMyCity.length == 4 || allMyCity.length > 4){
+    const allMyCityFilter = allMyCity?.filter((res) => res.currentLocation != true)
+
+    
+
+    if(allMyCityFilter.length >= 4){
 
       Alert.alert('You can only add 4 cities');
       return
@@ -81,7 +85,7 @@ const AddCity = ({navigation}) => {
           lat: JSON.stringify(detail?.location?.latitude),
           lng: JSON.stringify(detail?.location?.longitude),
           city_name: detail?.displayName?.text,
-          currentLocation: false,
+          currentLocation: true,
         // },
       });
 

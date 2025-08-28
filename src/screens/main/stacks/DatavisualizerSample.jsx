@@ -49,16 +49,10 @@ import {
   setActiveMedication,
 } from '../../../redux/Slices/MedicationSlice';
 import {useFocusEffect} from '@react-navigation/native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Svg, {Circle, Polyline} from 'react-native-svg';
 
 const DatavisualizerSample = ({navigation}) => {
   const dispatch = useDispatch();
-  const screenWidth = Dimensions.get('window').width;
-
-  
-  const screenHeight = Dimensions.get('window').height;
-
 
 
 
@@ -87,7 +81,6 @@ const DatavisualizerSample = ({navigation}) => {
   );
 
   const colours = ['lightblue', 'lightgreen'];
-  const insets = useSafeAreaInsets();
 
   const [open, setOpen] = useState(false);
 
@@ -104,7 +97,6 @@ const DatavisualizerSample = ({navigation}) => {
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
 
-  const [allCities, setAllCities] = useState([]);
   const [pickedCity, setPickedCity] = useState();
   const [AllDayNumber, setAllDayNumber] = useState([]);
   const [activeDate, setActiveDate] = useState(null);
@@ -142,7 +134,17 @@ useEffect(() => {
   // });
 
   // return nav; // cleanup
-}, [activeCity, MedicationnRecord]);
+}, [activeCity, MedicationnRecord,allActiveMedicationRedux]);
+
+
+  useFocusEffect(
+    useCallback(() => {
+        getSelectedAllergens(activeCity);
+
+      // Alert.alert("runninnng use focus")
+    }, [activeCity, allActiveMedicationRedux, MedicationnRecord]),
+  );
+
 
 // console.log("allActiveMedicationRedux",allActiveMedicationRedux)
 

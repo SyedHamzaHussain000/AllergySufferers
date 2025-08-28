@@ -163,7 +163,7 @@ const AddPollens = ({navigation}) => {
           </View>
         )}
 
-        <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 100}}>
+        <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: responsiveHeight(35)}}>
           {allPollens
             .filter(
               item =>

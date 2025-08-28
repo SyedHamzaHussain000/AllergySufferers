@@ -26,6 +26,9 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 const Notification = ({ navigation }) => {
   const userData = useSelector(state => state?.auth?.user);
   const expireDate = useSelector(state => state?.auth?.expireDate);
+  const allMyCity = useSelector(state => state?.medications?.allMyCity);
+
+  
 
   const [allPollens, setALlPollens] = useState([]);
   const [search, setSearch] = useState('');
@@ -165,7 +168,7 @@ const Notification = ({ navigation }) => {
     { id: 4, name: "Total Weeds" },
   ]
 
-  console.log('all pollens list =====>', allPollens)
+  // console.log('all pollens list =====>', allPollens)
 
   return (
     <View style={{ padding: 20 }}>
@@ -287,7 +290,7 @@ const Notification = ({ navigation }) => {
             return (
               item?.name?.toLowerCase().includes(searchLower) ||
               (item?.common_name &&
-                item.common_name.toLowerCase().includes(searchLower))
+                item?.common_name?.toLowerCase()?.includes(searchLower))
             );
           })
           .map(item => (

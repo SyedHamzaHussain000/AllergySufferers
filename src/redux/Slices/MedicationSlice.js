@@ -144,10 +144,7 @@ const MedicationSlice = createSlice({
     setAddCity: (state, action) => {
       const newCity = action.payload;
 
-      if (!Array.isArray(state.allMyCity)) {
-        state.allMyCity = [];
-      }
-
+      console.log("state.allMyCity",state.allMyCity)
       if (newCity.currentLocation === true) {
         // ✅ Remove old current location
         state.allMyCity = state.allMyCity.filter(
@@ -189,7 +186,7 @@ const MedicationSlice = createSlice({
     },
     setSortCity:(state, action) => {
 
-      console.log("actui", action.payload)
+      
       state.allMyCity = action.payload
     },
     

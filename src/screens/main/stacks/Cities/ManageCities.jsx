@@ -37,7 +37,7 @@ import AppImages from '../../../../assets/images/AppImages';
 import Toast from 'react-native-toast-message';
 import { setRemoveCity, setSortCity } from '../../../../redux/Slices/MedicationSlice';
 import { ApiCallWithUserId } from '../../../../global/ApiCall';
-
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 const ManageCities = ({navigation}) => {
   const dispatch = useDispatch();
   const userdata = useSelector(state => state.auth.user);
@@ -45,6 +45,9 @@ const ManageCities = ({navigation}) => {
   const [loader, setLoader] = useState(false);
   const [cities, setCities] = useState([])
   const [activeMedication, setActiveMedication] = useState();
+
+
+console.log('myAllCities ====>',allMyCity)
 
   useEffect(()=>{
     const nav = navigation.addListener('focus', ()=>{
@@ -54,6 +57,7 @@ const ManageCities = ({navigation}) => {
     return nav
   },[navigation])
 
+  console.log("filterCities",allMyCity)
   const getAllCities = () => {
 
     
@@ -71,8 +75,33 @@ const ManageCities = ({navigation}) => {
         console.log(JSON.stringify(response.data));
 
         // dispatch()
-        setLoader(false);
-        setActiveMedication(response?.data?.cities);
+
+        // const filterCities = allMyCity.filter((res)=> res.currentLocation == true)
+
+
+        // setLoader(false);
+        // setActiveMedication([...filterCities ,...response?.data?.cities]);
+
+        const filterCities = allMyCity.filter(res => res.currentLocation === true);
+
+setLoader(false);
+
+const apiCities = response?.data?.cities || [];
+
+// check if currentLocation already exists in API
+const mergedCities = filterCities.length
+  ? [
+      ...filterCities.filter(
+        city =>
+          !apiCities.some(apiCity => apiCity.city_name === city.city_name)
+      ),
+      ...apiCities,
+    ]
+  : apiCities;
+
+setActiveMedication(mergedCities);
+
+
       })
       .catch(error => {
         console.log(error);
@@ -113,13 +142,69 @@ const ManageCities = ({navigation}) => {
   };
 
   const sortingCities  = async (data) => {
-    
+
     const sortCitiesApi = await ApiCallWithUserId('post', 'sort_cities', userdata?.id, {"data": data} )
     dispatch(setSortCity(data))
 
-    console.log("sortCitiesApi", sortCitiesApi)
-
   }
+
+  //   const sortingCities = async (data) => {
+  //     // return console.log(data)
+  //   try {
+  //     const updatedCities = data.map((city, index) => ({
+  //       ...city,
+  //       currentLocation: index === 0, 
+  //     }));
+
+  //     const sortPayload = { data: updatedCities };
+  //     const sortRes = await ApiCallWithUserId(
+  //       'post',
+  //       'sort_cities',
+  //       userdata?.id,
+  //       sortPayload,
+  //     );
+
+  //     console.log("sort_cities response:", sortRes);
+
+  //     const topCity = updatedCities[0];
+  //     const setCityPayload = JSON.stringify({
+  //       lat: topCity.lat,
+  //       lng: topCity.lng,
+  //       city_name: topCity.city_name,
+  //       currentLocation: true,
+  //     });
+
+  //     let config = {
+  //       method: 'post',
+  //       maxBodyLength: Infinity,
+  //       url: `${BASE_URL}/allergy_data/v1/user/${userdata?.id}/set_cities`,
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       data: setCityPayload,
+  //     };
+
+  //     const setCityRes = await axios.request(config);
+  //     console.log("set_cities response:", setCityRes.data);
+
+  //     dispatch(setSortCity(updatedCities));
+  //     setActiveMedication(updatedCities);
+
+  //     Toast.show({
+  //       type: 'success',
+  //       text1: `Current city updated to ${topCity.city_name}`,
+  //       position: 'bottom',
+  //     });
+
+  //   } catch (err) {
+  //     console.log("Error in sortingCities:", err);
+  //     Toast.show({
+  //       type: 'error',
+  //       text1: 'Failed to update cities',
+  //     });
+  //   }
+  // };
+
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -143,13 +228,13 @@ const ManageCities = ({navigation}) => {
             <NestableDraggableFlatList
               data={activeMedication}
               contentContainerStyle={{gap: 10}}
-              renderItem={({item, drag, isActive}) => {
-                // console.log('itemmm', item);
+              renderItem={({item,index, drag, isActive,}) => {
+
                 return (
                   <TouchableOpacity onLongPress={drag}>
                     <AppTextInput
                       inputPlaceHolder={item.city_name}
-                      inputWidth={75}
+                      inputWidth={70}
                       arrowDelete={
                         <TouchableOpacity
                           onPress={() =>
@@ -178,7 +263,16 @@ const ManageCities = ({navigation}) => {
                         </TouchableOpacity>
                       }
                       rightLogo={
-                        <View style={{marginTop: 4}}>
+                        <View style={{marginTop: 4, flexDirection:'row'}}>
+                          {
+
+                          }
+                          <FontAwesome
+                          
+                          name={"bell"}
+                          size={responsiveFontSize(2)}
+                          color={AppColors.BLACK}
+                          />
                           <Image
                             source={AppImages.updown}
                             style={{

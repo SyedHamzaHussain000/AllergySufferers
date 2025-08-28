@@ -1,4 +1,15 @@
-import {View, Text, TextInput, ToastAndroid, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  ToastAndroid,
+  ScrollView,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
+  Keyboard,
+} from 'react-native';
 import React, {useState} from 'react';
 import AppHeader from '../../../../components/AppHeader';
 import AppText from '../../../../components/AppTextComps/AppText';
@@ -7,8 +18,12 @@ import {responsiveHeight} from '../../../../utils/Responsive_Dimensions';
 import AppButton from '../../../../components/AppButton';
 import axios from 'axios';
 import BASE_URL from '../../../../utils/BASE_URL';
+import {useSelector} from 'react-redux';
 
 const FeedBack = () => {
+  const userData = useSelector(state => state.auth.user);
+  const expireDate = useSelector(state => state.auth.expireDate);
+
   const [feedBackData, setFeedBackData] = useState({
     name: '',
     email: '',
@@ -17,7 +32,7 @@ const FeedBack = () => {
   const [isLoader, setIsLaoder] = useState(false);
 
   const setFeedBack = () => {
-    if(!feedBackData.name && !feedBackData.email && !feedBackData.message){ 
+    if (!feedBackData.name && !feedBackData.email && !feedBackData.message) {
       ToastAndroid.show('Please enter your name', ToastAndroid.SHORT);
       return;
     }
@@ -27,6 +42,10 @@ const FeedBack = () => {
       name: feedBackData.name,
       email: feedBackData.email,
       message: feedBackData.message,
+      device_os: Platform.OS,
+      app_version: '5.9.8',
+      account_level: expireDate ? 'Paid' : 'Free',
+      account_number: userData?.id,
     });
 
     let config = {
@@ -49,8 +68,11 @@ const FeedBack = () => {
             name: '',
             email: '',
             message: '',
-          })
-          ToastAndroid.show('Feedback submitted successfully', ToastAndroid.SHORT);
+          });
+          ToastAndroid.show(
+            'Feedback submitted successfully',
+            ToastAndroid.SHORT,
+          );
         } else {
           setIsLaoder(false);
         }
@@ -63,115 +85,122 @@ const FeedBack = () => {
 
   return (
     // <SafeAreaView style={{flex:1}}>
-      <KeyboardAvoidingView behavior={Platform.OS == "ios" ?'padding': 'height'} style={{flex:1}}>
-        <TouchableOpacity activeOpacity={1} onPress={()=> Keyboard.dismiss()}>
-    <ScrollView  contentContainerStyle={{flexGrow:1, padding: 20, paddingBottom:20}}>
-      <AppHeader heading="Aerobiology" subheading="Feedback" goBack={true} />
-
-      <View  style={{gap: 10, marginTop: 20}}>
-        <AppText
-          title={
-            'Please complete the form below and a member of our team will reach out to you as soon as possible.'
-          }
-          textSize={1.8}
-          textColor={AppColors.LIGHTGRAY}
-          textwidth={80}
-        />
-
-        <AppText
-          title={
-            'Your account number, level (free or premium), and operating system (iOS or Android) will be sent along with the data you enter.'
-          }
-          textSize={1.8}
-          textColor={AppColors.LIGHTGRAY}
-          textwidth={80}
-        />
-      </View>
-
-      <View style={{gap: 10, marginTop: 20}}>
-        <View>
-          <AppText
-            title={'Full Name'}
-            textColor={AppColors.BLACK}
-            textSize={2}
-            textFontWeight
+    <KeyboardAvoidingView
+      behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+      style={{flex: 1}}>
+      <TouchableOpacity activeOpacity={1} onPress={() => Keyboard.dismiss()}>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1, padding: 20, paddingBottom: 20}}>
+          <AppHeader
+            heading="Aerobiology"
+            subheading="Feedback"
+            goBack={true}
           />
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderRadius: 10,
-              borderColor: AppColors.LIGHTGRAY,
-              paddingHorizontal: 10,
-              
-              padding:10,
-            }}
-            multiline
-            onChangeText={text =>
-              setFeedBackData({...feedBackData, name: text})
-            }
-            value={feedBackData.name}
-          />
-        </View>
 
-        <View>
-          <AppText
-            title={'Email'}
-            textColor={AppColors.BLACK}
-            textSize={2}
-            textFontWeight
-          />
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderRadius: 10,
-              borderColor: AppColors.LIGHTGRAY,
-              paddingHorizontal: 10,
-              padding:10,
-            }}
-            onChangeText={text =>
-              setFeedBackData({...feedBackData, email: text})
-            }
-            value={feedBackData.email}
-          />
-        </View>
+          <View style={{gap: 10, marginTop: 20}}>
+            <AppText
+              title={
+                'Please complete the form below and a member of our team will reach out to you as soon as possible.'
+              }
+              textSize={1.8}
+              textColor={AppColors.LIGHTGRAY}
+              textwidth={80}
+            />
 
-        <View>
-          <AppText
-            title={'Message'}
-            textColor={AppColors.BLACK}
-            textSize={2}
-            textFontWeight
-          />
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderRadius: 10,
-              borderColor: AppColors.LIGHTGRAY,
-              // paddingHorizontal: 10,
-              height: responsiveHeight(20),
-              textAlign:'left',
-              textAlignVertical: 'top',
-              padding:10
-            }}
-            multiline={true}
-            onChangeText={text =>
-              setFeedBackData({...feedBackData, message: text})
-            }
-            value={feedBackData.message}
-          />
-        </View>
+            <AppText
+              title={
+                'Your account number, level (free or premium), and operating system (iOS or Android) will be sent along with the data you enter.'
+              }
+              textSize={1.8}
+              textColor={AppColors.LIGHTGRAY}
+              textwidth={80}
+            />
+          </View>
 
-        <AppButton
-          title={'SUBMIT'}
-          handlePress={() => setFeedBack()}
-          RightColour={AppColors.rightArrowCOlor}
-          isLoading={isLoader}
-        />
-      </View>
-    </ScrollView>
-    </TouchableOpacity>
+          <View style={{gap: 10, marginTop: 20}}>
+            <View>
+              <AppText
+                title={'Full Name'}
+                textColor={AppColors.BLACK}
+                textSize={2}
+                textFontWeight
+              />
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  borderColor: AppColors.LIGHTGRAY,
+                  paddingHorizontal: 10,
+
+                  padding: 10,
+                }}
+                multiline
+                onChangeText={text =>
+                  setFeedBackData({...feedBackData, name: text})
+                }
+                value={feedBackData.name}
+              />
+            </View>
+
+            <View>
+              <AppText
+                title={'Email'}
+                textColor={AppColors.BLACK}
+                textSize={2}
+                textFontWeight
+              />
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  borderColor: AppColors.LIGHTGRAY,
+                  paddingHorizontal: 10,
+                  padding: 10,
+                }}
+                onChangeText={text =>
+                  setFeedBackData({...feedBackData, email: text})
+                }
+                value={feedBackData.email}
+              />
+            </View>
+
+            <View>
+              <AppText
+                title={'Message'}
+                textColor={AppColors.BLACK}
+                textSize={2}
+                textFontWeight
+              />
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  borderColor: AppColors.LIGHTGRAY,
+                  // paddingHorizontal: 10,
+                  height: responsiveHeight(20),
+                  textAlign: 'left',
+                  textAlignVertical: 'top',
+                  padding: 10,
+                }}
+                multiline={true}
+                onChangeText={text =>
+                  setFeedBackData({...feedBackData, message: text})
+                }
+                value={feedBackData.message}
+              />
+            </View>
+
+            <AppButton
+              title={'SUBMIT'}
+              handlePress={() => setFeedBack()}
+              RightColour={AppColors.rightArrowCOlor}
+              isLoading={isLoader}
+            />
+          </View>
+        </ScrollView>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
-    //  </SafeAreaView> 
+    //  </SafeAreaView>
   );
 };
 
