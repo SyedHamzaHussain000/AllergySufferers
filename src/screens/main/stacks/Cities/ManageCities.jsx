@@ -35,32 +35,32 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AppImages from '../../../../assets/images/AppImages';
 import Toast from 'react-native-toast-message';
-import { setRemoveCity, setSortCity } from '../../../../redux/Slices/MedicationSlice';
-import { ApiCallWithUserId } from '../../../../global/ApiCall';
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import {
+  setRemoveCity,
+  setSortCity,
+} from '../../../../redux/Slices/MedicationSlice';
+import {ApiCallWithUserId} from '../../../../global/ApiCall';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 const ManageCities = ({navigation}) => {
   const dispatch = useDispatch();
   const userdata = useSelector(state => state.auth.user);
   const allMyCity = useSelector(state => state?.medications?.allMyCity);
   const [loader, setLoader] = useState(false);
-  const [cities, setCities] = useState([])
+  const [cities, setCities] = useState([]);
   const [activeMedication, setActiveMedication] = useState();
 
+  console.log('myAllCities ====>', allMyCity);
 
-console.log('myAllCities ====>',allMyCity)
+  useEffect(() => {
+    const nav = navigation.addListener('focus', () => {
+      getAllCities();
+    });
 
-  useEffect(()=>{
-    const nav = navigation.addListener('focus', ()=>{
-      getAllCities()
-    })
+    return nav;
+  }, [navigation]);
 
-    return nav
-  },[navigation])
-
-  console.log("filterCities",allMyCity)
+  console.log('filterCities', allMyCity);
   const getAllCities = () => {
-
-    
     setLoader(true);
     let config = {
       method: 'get',
@@ -78,30 +78,31 @@ console.log('myAllCities ====>',allMyCity)
 
         // const filterCities = allMyCity.filter((res)=> res.currentLocation == true)
 
-
         // setLoader(false);
         // setActiveMedication([...filterCities ,...response?.data?.cities]);
 
-        const filterCities = allMyCity.filter(res => res.currentLocation === true);
+        const filterCities = allMyCity.filter(
+          res => res.currentLocation === true,
+        );
 
-setLoader(false);
+        setLoader(false);
 
-const apiCities = response?.data?.cities || [];
+        const apiCities = response?.data?.cities || [];
 
-// check if currentLocation already exists in API
-const mergedCities = filterCities.length
-  ? [
-      ...filterCities.filter(
-        city =>
-          !apiCities.some(apiCity => apiCity.city_name === city.city_name)
-      ),
-      ...apiCities,
-    ]
-  : apiCities;
+        // check if currentLocation already exists in API
+        const mergedCities = filterCities.length
+          ? [
+              ...filterCities.filter(
+                city =>
+                  !apiCities.some(
+                    apiCity => apiCity.city_name === city.city_name,
+                  ),
+              ),
+              ...apiCities,
+            ]
+          : apiCities;
 
-setActiveMedication(mergedCities);
-
-
+        setActiveMedication(mergedCities);
       })
       .catch(error => {
         console.log(error);
@@ -110,9 +111,8 @@ setActiveMedication(mergedCities);
   };
 
   const deleteActiveMedication = item => {
-
     setLoader(true);
-    dispatch(setRemoveCity(item))
+    dispatch(setRemoveCity(item));
 
     let data = JSON.stringify({
       city_id: item.id,
@@ -141,19 +141,22 @@ setActiveMedication(mergedCities);
       });
   };
 
-  const sortingCities  = async (data) => {
-
-    const sortCitiesApi = await ApiCallWithUserId('post', 'sort_cities', userdata?.id, {"data": data} )
-    dispatch(setSortCity(data))
-
-  }
+  const sortingCities = async data => {
+    const sortCitiesApi = await ApiCallWithUserId(
+      'post',
+      'sort_cities',
+      userdata?.id,
+      {data: data},
+    );
+    dispatch(setSortCity(data));
+  };
 
   //   const sortingCities = async (data) => {
   //     // return console.log(data)
   //   try {
   //     const updatedCities = data.map((city, index) => ({
   //       ...city,
-  //       currentLocation: index === 0, 
+  //       currentLocation: index === 0,
   //     }));
 
   //     const sortPayload = { data: updatedCities };
@@ -205,10 +208,9 @@ setActiveMedication(mergedCities);
   //   }
   // };
 
-
   return (
     <SafeAreaView style={{flex: 1}}>
-      <ScrollView contentContainerStyle={{padding: 20, paddingBottom:200}}>
+      <ScrollView contentContainerStyle={{padding: 20, paddingBottom: 200}}>
         <AppHeader
           heading="Manage City"
           icon={
@@ -228,13 +230,18 @@ setActiveMedication(mergedCities);
             <NestableDraggableFlatList
               data={activeMedication}
               contentContainerStyle={{gap: 10}}
-              renderItem={({item,index, drag, isActive,}) => {
-
+              renderItem={({item, drag, isActive}, index) => {
                 return (
                   <TouchableOpacity onLongPress={drag}>
                     <AppTextInput
-                      inputPlaceHolder={item.city_name}
-                      inputWidth={70}
+                      inputPlaceHolder={item?.city_name}
+                      isNotification={activeMedication[0]?.city_name == item?.city_name && (
+                            <FontAwesome
+                              name={'bell'}
+                              size={responsiveFontSize(2)}
+                              color={AppColors.BLACK}
+                            />
+                          )}
                       arrowDelete={
                         <TouchableOpacity
                           onPress={() =>
@@ -255,6 +262,8 @@ setActiveMedication(mergedCities);
                               {cancelable: false},
                             )
                           }>
+
+                            
                           <MaterialCommunityIcons
                             name={'delete'}
                             size={responsiveFontSize(2.5)}
@@ -263,16 +272,8 @@ setActiveMedication(mergedCities);
                         </TouchableOpacity>
                       }
                       rightLogo={
-                        <View style={{marginTop: 4, flexDirection:'row'}}>
-                          {
-
-                          }
-                          <FontAwesome
+                        <View style={{marginTop: 4, flexDirection: 'row'}}>
                           
-                          name={"bell"}
-                          size={responsiveFontSize(2)}
-                          color={AppColors.BLACK}
-                          />
                           <Image
                             source={AppImages.updown}
                             style={{
@@ -288,7 +289,9 @@ setActiveMedication(mergedCities);
                 );
               }}
               keyExtractor={(item, index) => index.toString()}
-              onDragEnd={({data}) => {sortingCities(data), setActiveMedication(data)} }
+              onDragEnd={({data}) => {
+                sortingCities(data), setActiveMedication(data);
+              }}
               dragEnabled={true}
               activationDistance={10}
             />

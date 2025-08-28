@@ -5,7 +5,6 @@ import {
   responsiveWidth,
 } from '../utils/Responsive_Dimensions';
 import AppColors from '../utils/AppColors';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import AppText from './AppTextComps/AppText';
 type props = {
   logo?: any;
@@ -20,6 +19,7 @@ type props = {
   secure?: boolean;
   arrowDelete?: any;
   textInput?: boolean;
+  isNotification?: boolean
 };
 const AppTextInput = ({
   logo,
@@ -34,6 +34,7 @@ const AppTextInput = ({
   onChangeText,
   arrowDelete,
   textInput,
+  isNotification
 }: props) => {
   return (
     <View style={{gap: 5}}>
@@ -66,7 +67,7 @@ const AppTextInput = ({
           <AppText
             title={inputPlaceHolder}
             textColor={AppColors.LIGHTGRAY}
-            textwidth={70}
+            textwidth={65}
             textSize={2}
           />
         )}
@@ -75,6 +76,7 @@ const AppTextInput = ({
       null
       :
         <View style={{flexDirection: 'row', gap: 5, marginRight: 100, }}>
+          {isNotification}
           {rightLogo}
           {arrowDelete}
         </View>
