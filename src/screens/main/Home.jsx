@@ -63,52 +63,35 @@ const Home = ({navigation}) => {
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const subscriptionType = useSelector(state => state?.auth?.SubscriptionType);
   const subscriptionExpire = useSelector(state => state?.auth?.expireDate);
+const sliderRef = useRef(null);
 
+  
   const sortCities = [...AllCities].sort((a, b) => {
     return (
       (b.currentLocation || b.isCurrentLocation ? 1 : 0) -
       (a.currentLocation || a.isCurrentLocation ? 1 : 0)
     );
   });
-
+  
   const expireDate = useSelector(state => state.auth.expireDate);
-
-
+  
+  
   const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
-
-  const slides = [
-    {
-      key: 1,
-      title: 'Title 1',
-      text: 'Description.\nSay something cool',
-      backgroundColor: '#59b2ab',
-    },
-    {
-      key: 2,
-      title: 'Title 2',
-      text: 'Other cool stuff',
-      backgroundColor: '#febe29',
-    },
-    {
-      key: 3,
-      title: 'Rocket guy',
-      text: "I'm already out of descriptions\n\nLorem ipsum bla bla bla",
-      backgroundColor: '#22bcb5',
-    },
-  ];
-
+  
+  
+  
   const [selected, setSelected] = useState('Today');
   const [PastPollenData, setPastPollenData] = useState();
   const [pollenData, setPollenData] = useState();
   const [FuturePollenData, setFuturePollenData] = useState();
-
+  
   const [todayPollensData, setTodayPollensData] = useState();
   const [pollenLoader, setPollenLoader] = useState(false);
-
+  
   //data states
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
-
+  
   const [activePollen, setActivePollen] = useState([]);
   const [activeLoader, setActiveLoader] = useState(false);
 
@@ -132,6 +115,7 @@ const Home = ({navigation}) => {
 
   const [message, setMessage] = useState('');
 
+   
   // console.log('allcities', AllCities);
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -149,34 +133,52 @@ const Home = ({navigation}) => {
     return nav;
   }, [navigation, hasFetchedOnce, userData]);
 
+    const getActivePollens = () => {
+    setActiveLoader(true);
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_pollens`,
+      headers: {},
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+        setActivePollen(response.data.data);
+        setActiveLoader(false);
+      })
+      .catch(error => {
+        console.log(error);
+        setActiveLoader(false);
+      });
+  };
+
+
+ 
+
+
   useFocusEffect(
     useCallback(() => {
       if (AllCities && AllCities.length > 0) {
         getPollensData(sortCities, 0);
+
+        const findTheIndex = sortCities?.findIndex(res => res.currentLocation == true)
+
+
+        if(findTheIndex !== -1 && sliderRef?.current){
+          sliderRef?.current?.goToSlide(findTheIndex, false);
+
+        }
       }else{
         GetLocationFromApi();
       }
     }, [AllCities]),
+    
   )
 
-  console.log("AllCities",AllCities)
-
-  useEffect(() => {
-    SubscribeSubscription();
-  }, [expireDate]);
-
-  const GetLocationFromApi = async () => {
-    // console.log("AllCities.........",AllCities)
-    if (AllCities.length == 0) {
-      const getLocationFromApi = await GetAllLocation(userData?.id);
-      // Alert.alert("fetching from current lat lng")
-      dispatch(setAllCityFromApi(getLocationFromApi.cities));
-    }
-  };
-
-  const getPollensData = (allcities, newindex) => {
-    console.log('allcities', allcities);
-    console.log('newindex', newindex);
+    const getPollensData = (allcities, newindex) => {
+      // Alert.alert("this is getPollensData ?")
     // console.log("allcities[newindex ? newindex : 0]",allcities[newindex ? newindex : 0])
     setPollenLoader(true);
     let data = new FormData();
@@ -253,6 +255,36 @@ const Home = ({navigation}) => {
       });
   };
 
+    const GetLocationFromApi = async () => {
+
+    if (AllCities.length == 0) {
+      const getLocationFromApi = await GetAllLocation(userData?.id);
+
+      console.log("getLocationFromApi.cities",getLocationFromApi)
+      if(getLocationFromApi?.cities?.length > 0){
+
+        dispatch(setAllCityFromApi(getLocationFromApi.cities));
+      }else{
+        console.log("no cities found in cities")
+      }
+    }
+  };
+
+
+
+//     return(
+//     <View>
+// <Text>dajsndkjasnkdjas</Text>
+//     </View>
+//   )
+
+  useEffect(() => {
+    SubscribeSubscription();
+  }, [expireDate]);
+
+
+
+
   const getCurrentLocation = async () => {
     // console.log('----------------------------');
     setFechingCurrentLocation(true);
@@ -263,8 +295,16 @@ const Home = ({navigation}) => {
       gettingCurrentLatlng.longitude,
     );
 
-    console.log('getCityName', getCityName);
-    setFechingCurrentLocation(false);
+
+
+     const findTheIndex = sortCities?.findIndex(res => res?.city_name === getCityName)
+
+    console.log("findTheIndex",findTheIndex)
+        if(findTheIndex !== -1 && sliderRef?.current){
+          sliderRef?.current?.goToSlide(findTheIndex, false);
+
+        }
+
 
     dispatch(
       setAddCity({
@@ -293,26 +333,6 @@ const Home = ({navigation}) => {
     }
   };
 
-  const getActivePollens = () => {
-    setActiveLoader(true);
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `${BASE_URL}/allergy_data/v1/user/${userData?.id}/get_pollens`,
-      headers: {},
-    };
-
-    axios
-      .request(config)
-      .then(response => {
-        setActivePollen(response.data.data);
-        setActiveLoader(false);
-      })
-      .catch(error => {
-        console.log(error);
-        setActiveLoader(false);
-      });
-  };
 
   const SubscribeSubscription = async () => {
     if (subscriptionType) {
@@ -477,6 +497,7 @@ const Home = ({navigation}) => {
                   </>
                 ) : (
                   <AppIntroSlider
+                  ref={sliderRef}
                     data={sortCities}
                     activeDotStyle={{
                       backgroundColor: AppColors.BLUE,

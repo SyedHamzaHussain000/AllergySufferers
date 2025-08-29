@@ -71,16 +71,19 @@ import { persistReducer, persistStore } from 'redux-persist';
 
 import AuthReducer from './Slices/AuthSlice';
 import MedicationReducer from './Slices/MedicationSlice';
+import BlackListSlice from './Slices/BlackListSlice'
 
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
   whitelist: ['auth', 'medications'], // ✅ Persist both slices
+  blacklist: ['blacklist'], // ✅ exclude medications from persistence
 };
 
 const rootReducer = combineReducers({
   auth: AuthReducer,
   medications: MedicationReducer,
+  blacklist: BlackListSlice
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

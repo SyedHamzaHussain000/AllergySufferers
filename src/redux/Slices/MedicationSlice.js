@@ -143,8 +143,8 @@ const MedicationSlice = createSlice({
 
     setAddCity: (state, action) => {
       const newCity = action.payload;
-
-      console.log("state.allMyCity",state.allMyCity)
+      
+      console.log("state.allMyCity",newCity)
       if (newCity.currentLocation === true) {
         // ✅ Remove old current location
         state.allMyCity = state.allMyCity.filter(

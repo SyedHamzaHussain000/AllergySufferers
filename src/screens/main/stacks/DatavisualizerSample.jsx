@@ -64,6 +64,8 @@ const DatavisualizerSample = ({navigation}) => {
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const activeCity = useSelector(state => state?.medications?.ActiveCity);
 
+
+
   const [type, setType] = useState('allergens');
   const [medicationData, setMedicationsData] = useState();
 
@@ -136,6 +138,13 @@ useEffect(() => {
   // return nav; // cleanup
 }, [activeCity, MedicationnRecord,allActiveMedicationRedux]);
 
+  useEffect(()=>{
+    if(expireDate){ 
+      if(allActiveMedicationRedux?.length === 0){  
+        getApiDataAndSaveToRedux()
+      }
+    }
+  },[allActiveMedicationRedux])
 
   useFocusEffect(
     useCallback(() => {

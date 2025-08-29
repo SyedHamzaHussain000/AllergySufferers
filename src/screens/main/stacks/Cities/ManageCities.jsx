@@ -49,7 +49,7 @@ const ManageCities = ({navigation}) => {
   const [cities, setCities] = useState([]);
   const [activeMedication, setActiveMedication] = useState();
 
-  console.log('myAllCities ====>', allMyCity);
+  console.log('myAllCities ====>', activeMedication);
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -59,7 +59,6 @@ const ManageCities = ({navigation}) => {
     return nav;
   }, [navigation]);
 
-  console.log('filterCities', allMyCity);
   const getAllCities = () => {
     setLoader(true);
     let config = {
@@ -74,6 +73,9 @@ const ManageCities = ({navigation}) => {
       .then(response => {
         console.log(JSON.stringify(response.data));
 
+        
+        console.log("response",response.data)
+
         // dispatch()
 
         // const filterCities = allMyCity.filter((res)=> res.currentLocation == true)
@@ -84,6 +86,8 @@ const ManageCities = ({navigation}) => {
         const filterCities = allMyCity.filter(
           res => res.currentLocation === true,
         );
+
+        
 
         setLoader(false);
 
@@ -101,6 +105,9 @@ const ManageCities = ({navigation}) => {
               ...apiCities,
             ]
           : apiCities;
+
+
+          console.log("filterCitmergedCitiesies",mergedCities)
 
         setActiveMedication(mergedCities);
       })
@@ -142,6 +149,9 @@ const ManageCities = ({navigation}) => {
   };
 
   const sortingCities = async data => {
+
+      console.log("data",data)
+
     const sortCitiesApi = await ApiCallWithUserId(
       'post',
       'sort_cities',

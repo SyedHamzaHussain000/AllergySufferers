@@ -95,6 +95,7 @@ const MedicationSample = ({navigation}) => {
   //   // return nav;
   // }, [allActiveMedicationRedux]);
 
+  
   useFocusEffect(
     useCallback(() => {
       if (allMyCurrentMeds && allMyCurrentMeds.length > 0) {
@@ -487,6 +488,8 @@ const MedicationSample = ({navigation}) => {
     const filteredMedication = allActiveMedicationRedux.filter(
       item => item.date === selecteddate,
     );
+
+    console.log("filteredMedication",filteredMedication)
 
     return (
       <FlatList
