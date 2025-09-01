@@ -408,7 +408,6 @@ useEffect(() => {
       },
     };
 
-    console.log("config",config)
 
     axios
       .request(config)

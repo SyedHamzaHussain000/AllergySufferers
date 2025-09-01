@@ -53,8 +53,9 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import {setSubscription} from '../../redux/Slices/AuthSlice';
+import {setSubscription, setWatchFreeTut, setWatchPaidTut} from '../../redux/Slices/AuthSlice';
 import SubscribeNow from '../../global/SubscribeNow';
+import {ApiCallWithUserId} from '../../global/ApiCall';
 const Home = ({navigation}) => {
   Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
 
@@ -63,35 +64,36 @@ const Home = ({navigation}) => {
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const subscriptionType = useSelector(state => state?.auth?.SubscriptionType);
   const subscriptionExpire = useSelector(state => state?.auth?.expireDate);
-const sliderRef = useRef(null);
 
-  
+  const watchFreeTut = useSelector(state => state?.auth?.WatchFreeTut);
+  const watchPaidTut = useSelector(state => state?.auth?.WatchPaidTut);
+
+
+  const sliderRef = useRef(null);
+
   const sortCities = [...AllCities].sort((a, b) => {
     return (
       (b.currentLocation || b.isCurrentLocation ? 1 : 0) -
       (a.currentLocation || a.isCurrentLocation ? 1 : 0)
     );
   });
-  
+
   const expireDate = useSelector(state => state.auth.expireDate);
-  
-  
+
   const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
-  
-  
-  
+
   const [selected, setSelected] = useState('Today');
   const [PastPollenData, setPastPollenData] = useState();
   const [pollenData, setPollenData] = useState();
   const [FuturePollenData, setFuturePollenData] = useState();
-  
+
   const [todayPollensData, setTodayPollensData] = useState();
   const [pollenLoader, setPollenLoader] = useState(false);
-  
+
   //data states
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
-  
+
   const [activePollen, setActivePollen] = useState([]);
   const [activeLoader, setActiveLoader] = useState(false);
 
@@ -115,7 +117,40 @@ const sliderRef = useRef(null);
 
   const [message, setMessage] = useState('');
 
-   
+
+//  if (expireDate) {
+//       if (!watchPaidTut) {
+//         navigation.navigate('ViewAppGuide');
+//         dispatch(setWatchPaidTut(true))
+//       }
+//     } else {
+//       console.log("watchFreeTut",watchFreeTut)
+//       if (!watchFreeTut) {
+//         navigation.navigate('ViewFreeAppGuide');
+//         dispatch(setWatchFreeTut(true))
+//       }
+//     }
+
+
+  useEffect(() => {
+
+    if (expireDate) {
+      if (!watchPaidTut) {
+        navigation.navigate('ViewAppGuide');
+        dispatch(setWatchPaidTut(true))
+      }
+    } else {
+      console.log("watchFreeTut",watchFreeTut)
+      if (!watchFreeTut) {
+        navigation.navigate('ViewFreeAppGuide');
+        dispatch(setWatchFreeTut(true))
+      }
+    }
+  }, [expireDate]);
+        // dispatch(setWatchFreeTut(false))
+        // dispatch(setWatchPaidTut(false))
+
+  
   // console.log('allcities', AllCities);
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -123,7 +158,7 @@ const sliderRef = useRef(null);
 
       if (userData) {
         getActivePollens();
-        
+
         // getAllCities();
         // getCurrentLocation();
       } else {
@@ -133,7 +168,7 @@ const sliderRef = useRef(null);
     return nav;
   }, [navigation, hasFetchedOnce, userData]);
 
-    const getActivePollens = () => {
+  const getActivePollens = () => {
     setActiveLoader(true);
     let config = {
       method: 'post',
@@ -154,31 +189,26 @@ const sliderRef = useRef(null);
       });
   };
 
-
- 
-
-
   useFocusEffect(
     useCallback(() => {
       if (AllCities && AllCities.length > 0) {
         getPollensData(sortCities, 0);
 
-        const findTheIndex = sortCities?.findIndex(res => res.currentLocation == true)
+        const findTheIndex = sortCities?.findIndex(
+          res => res.currentLocation == true,
+        );
 
-
-        if(findTheIndex !== -1 && sliderRef?.current){
+        if (findTheIndex !== -1 && sliderRef?.current) {
           sliderRef?.current?.goToSlide(findTheIndex, false);
-
         }
-      }else{
+      } else {
         GetLocationFromApi();
       }
     }, [AllCities]),
-    
-  )
+  );
 
-    const getPollensData = (allcities, newindex) => {
-      // Alert.alert("this is getPollensData ?")
+  const getPollensData = (allcities, newindex) => {
+    // Alert.alert("this is getPollensData ?")
     // console.log("allcities[newindex ? newindex : 0]",allcities[newindex ? newindex : 0])
     setPollenLoader(true);
     let data = new FormData();
@@ -255,35 +285,28 @@ const sliderRef = useRef(null);
       });
   };
 
-    const GetLocationFromApi = async () => {
-
+  const GetLocationFromApi = async () => {
     if (AllCities.length == 0) {
       const getLocationFromApi = await GetAllLocation(userData?.id);
 
-      console.log("getLocationFromApi.cities",getLocationFromApi)
-      if(getLocationFromApi?.cities?.length > 0){
-
+      console.log('getLocationFromApi.cities', getLocationFromApi);
+      if (getLocationFromApi?.cities?.length > 0) {
         dispatch(setAllCityFromApi(getLocationFromApi.cities));
-      }else{
-        console.log("no cities found in cities")
+      } else {
+        console.log('no cities found in cities');
       }
     }
   };
 
-
-
-//     return(
-//     <View>
-// <Text>dajsndkjasnkdjas</Text>
-//     </View>
-//   )
+  //     return(
+  //     <View>
+  // <Text>dajsndkjasnkdjas</Text>
+  //     </View>
+  //   )
 
   useEffect(() => {
     SubscribeSubscription();
   }, [expireDate]);
-
-
-
 
   const getCurrentLocation = async () => {
     // console.log('----------------------------');
@@ -295,16 +318,22 @@ const sliderRef = useRef(null);
       gettingCurrentLatlng.longitude,
     );
 
+    let data = JSON.stringify({
+      lat: JSON.stringify(gettingCurrentLatlng?.latitude),
+      lng: JSON.stringify(gettingCurrentLatlng?.longitude),
+      city_name: getCityName,
+      currentLocation: true,
+    });
 
+    await ApiCallWithUserId('post', 'set_cities', userData?.id, data);
 
-     const findTheIndex = sortCities?.findIndex(res => res?.city_name === getCityName)
+    const findTheIndex = sortCities?.findIndex(
+      res => res?.city_name === getCityName,
+    );
 
-    console.log("findTheIndex",findTheIndex)
-        if(findTheIndex !== -1 && sliderRef?.current){
-          sliderRef?.current?.goToSlide(findTheIndex, false);
-
-        }
-
+    if (findTheIndex !== -1 && sliderRef?.current) {
+      sliderRef?.current?.goToSlide(findTheIndex, false);
+    }
 
     dispatch(
       setAddCity({
@@ -332,7 +361,6 @@ const sliderRef = useRef(null);
         return '#99C817';
     }
   };
-
 
   const SubscribeSubscription = async () => {
     if (subscriptionType) {
@@ -399,7 +427,6 @@ const sliderRef = useRef(null);
     {id: 3, name: 'Total Grasses', value: todayPollensData?.total_grasses},
     {id: 4, name: 'Total Weeds', value: todayPollensData?.total_weeds},
   ];
-
 
   return (
     <>
@@ -497,7 +524,7 @@ const sliderRef = useRef(null);
                   </>
                 ) : (
                   <AppIntroSlider
-                  ref={sliderRef}
+                    ref={sliderRef}
                     data={sortCities}
                     activeDotStyle={{
                       backgroundColor: AppColors.BLUE,
@@ -613,7 +640,6 @@ const sliderRef = useRef(null);
                   />
                 )}
 
-                
                 <View style={{flexDirection: 'row', gap: 5}}>
                   {activeLoader == true ? (
                     <View
@@ -738,7 +764,6 @@ const sliderRef = useRef(null);
                             data={freeData}
                             horizontal
                             renderItem={({item}) => {
-                              console.log("ite", item)
                               return (
                                 <View style={{gap: 10}}>
                                   <AppText
@@ -1351,7 +1376,7 @@ const sliderRef = useRef(null);
                               id: 4,
                               name: 'Total Weeds',
                               value: item?.total_weeds,
-                            }
+                            },
                           ];
 
                           const pollenHeaderIndex =

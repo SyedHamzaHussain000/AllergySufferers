@@ -2,6 +2,7 @@ import axios from 'axios';
 import BASE_URL from '../utils/BASE_URL';
 
 export default async function GetAllLocation(userId) {
+  console.log("get_cities",userId)
   try {
     let config = {
       method: 'get',

@@ -6,6 +6,7 @@ import {
   FlatList,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AppHeader from '../../../components/AppHeader';
@@ -27,10 +28,11 @@ import {
   finishTransaction,
   purchaseErrorListener,
   acknowledgePurchaseAndroid,
+  getAvailablePurchases,
 } from 'react-native-iap';
 import Toast from 'react-native-toast-message';
 import moment from 'moment';
-  import { hideNavigationBar } from 'react-native-navigation-bar-color';
+import {hideNavigationBar} from 'react-native-navigation-bar-color';
 
 const AppSubscription = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
@@ -44,15 +46,12 @@ const AppSubscription = ({navigation}) => {
   const [connection, setConnection] = useState(false); // set in-app purchase is connected or not
   const [subscriptionLocal, setSubscriptionLocal] = useState([]);
   const [offerings, setOfferings] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
-    
-
     const setup = async () => {
       const result = await initConnection();
       // console.log('IAP connected?', result);
       setConnection(result);
-
 
       if (Platform.OS === 'android') {
         await flushFailedPurchasesCachedAsPendingAndroid();
@@ -74,6 +73,68 @@ const AppSubscription = ({navigation}) => {
     }
   }, [connection]);
 
+  const onRestorePurchase = async () => {
+    if (Platform.OS == 'android') {
+      setLoading(true);
+      try {
+        // const purchases = await RNIap.getAvailablePurchases();
+        const purchases = await getAvailablePurchases();
+
+        console.log("purchase", purchases)
+
+        if (purchases.length > 0) {
+          navigation.navigate('Login');
+        } else {
+          Alert.alert(
+            'Please buy the subscription',
+            'You have to buy the subscription first to continue',
+          );
+        }
+      } catch (e) {
+        console.error('Failed to restore purchases:', e);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // setLoading(true);
+      // try {
+      //   const customerInfo = await Purchases.restorePurchases();
+      //   console.log('restore', customerInfo.entitlements.active);
+      //   if (
+      //     Object.keys(customerInfo.entitlements.active).length > 0 &&
+      //     !context?.token
+      //   ) {
+      //     // note('Purchases Restored!', 'Your subscription has been restored successfully');
+      //     navigation.navigate('Message', {
+      //       theme: 'light',
+      //       title: 'Login Required',
+      //       message:
+      //         'To access your subscription benefits, please create or log in to your account',
+      //       screen: 'Login',
+      //     });
+      //     // navigation.replace('Home');
+      //   } else if (
+      //     Object.keys(customerInfo.entitlements.active).length > 0 &&
+      //     context?.token
+      //   ) {
+      //     note(
+      //       'Purchases Restored!',
+      //       'Your subscription has been restored successfully',
+      //     );
+      //   } else {
+      //     note(
+      //       'Please buy the subscription',
+      //       'You have to buy the subscription first to continue',
+      //     );
+      //   }
+      // } catch (e) {
+      //   console.error('Failed to restore purchases:', e);
+      // } finally {
+      //   setLoading(false);
+      // }
+    }
+  };
+
   const NoSubscription = () => {
     if (userData?.email) {
       navigation.navigate('Main');
@@ -89,7 +150,6 @@ const AppSubscription = ({navigation}) => {
         skus: androidsubscriptionsId,
       });
 
-      
       console.log('sussssb', subscriptions);
 
       setSubscriptionLocal(subscriptions); // set subscription information
@@ -113,9 +173,13 @@ const AppSubscription = ({navigation}) => {
         });
         // console.log('offerToken', purchaseData);
 
-
         if (purchaseData.length > 0) {
-          const subscribeApi = await SubscribeNow(purchaseData[0]?.productId == "premium_monthly" ? 'monthly' : 'yearly', userData?.id);
+          const subscribeApi = await SubscribeNow(
+            purchaseData[0]?.productId == 'premium_monthly'
+              ? 'monthly'
+              : 'yearly',
+            userData?.id,
+          );
 
           dispatch(
             setSubscription({
@@ -127,7 +191,6 @@ const AppSubscription = ({navigation}) => {
           navigation.navigate('Home');
         }
       } else {
-
         const offerToken = data?.subscriptionOfferDetails[0]?.offerToken;
         const purchaseData = await requestSubscription({
           sku: data?.productId,
@@ -138,16 +201,17 @@ const AppSubscription = ({navigation}) => {
 
         if (purchaseData.length > 0) {
           Toast.show({
-            type: "success",
-             text1: "Please create or login to account to enjoy the subscription"
-            })
+            type: 'success',
+            text1:
+              'Please create or login to account to enjoy the subscription',
+          });
 
           dispatch(
             setSubscription({
               isExpired: false,
-               SubscriptionType: purchaseData[0]?.productId,
-               expireDate: moment().add(1, 'month').format("YYYY-MM-DD"),
-              }),
+              SubscriptionType: purchaseData[0]?.productId,
+              expireDate: moment().add(1, 'month').format('YYYY-MM-DD'),
+            }),
           );
           navigation.navigate('Login');
         }
@@ -164,7 +228,6 @@ const AppSubscription = ({navigation}) => {
 
         if (receipt) {
           try {
-
             if (Platform.OS === 'android') {
               if (!purchase.isAcknowledgedAndroid) {
                 await acknowledgePurchaseAndroid({
@@ -198,51 +261,47 @@ const AppSubscription = ({navigation}) => {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={{flexGrow: 1, padding: 20, paddingBottom:200}}>
+    <ScrollView
+      contentContainerStyle={{flexGrow: 1, padding: 20, paddingBottom: 200}}>
       <AppHeader goBack={true} heading="Subscription" />
 
       <View style={{gap: 20}}>
-
-
-
-      <View style={{marginTop:0, gap:2}}>
-        <AppText
-          title={`Benefits`}
-          textSize={2}
-          textFontWeight
-          textColor={AppColors.BLACK}
+        <View style={{marginTop: 0, gap: 2}}>
+          <AppText
+            title={`Benefits`}
+            textSize={2}
+            textFontWeight
+            textColor={AppColors.BLACK}
           />
 
           <AppText
-          title={`- Get 4 day forecasts including today for all pollen and spores in the air`}
-          textSize={1.8}
-          textColor={AppColors.BLACK}
+            title={`- Get 4 day forecasts including today for all pollen and spores in the air`}
+            textSize={1.8}
+            textColor={AppColors.BLACK}
           />
           <AppText
-          title={`- See past forecasts up to 14 days (5 days with everything in the air)`}
-          textSize={1.8}
-          textColor={AppColors.BLACK}
+            title={`- See past forecasts up to 14 days (5 days with everything in the air)`}
+            textSize={1.8}
+            textColor={AppColors.BLACK}
           />
           <AppText
-          title={`- Get push notifications for the pollen and spores you want and levels`}
-          textSize={1.8}
-          textColor={AppColors.BLACK}
+            title={`- Get push notifications for the pollen and spores you want and levels`}
+            textSize={1.8}
+            textColor={AppColors.BLACK}
           />
 
           <AppText
-          title={`- Log your symptoms, medication and graph in the data visualizer`}
-          textSize={1.8}
-          textColor={AppColors.BLACK}
+            title={`- Log your symptoms, medication and graph in the data visualizer`}
+            textSize={1.8}
+            textColor={AppColors.BLACK}
           />
-          
-          <AppText
-          title={`- Your choice of a yearly subscription ( whole pollen and spore season) or monthly option aswell`}
-          textSize={1.8}
-          textColor={AppColors.BLACK}
-          />
-          
-          </View>
 
+          <AppText
+            title={`- Your choice of a yearly subscription ( whole pollen and spore season) or monthly option aswell`}
+            textSize={1.8}
+            textColor={AppColors.BLACK}
+          />
+        </View>
 
         <FlatList
           contentContainerStyle={{gap: 10}}
@@ -264,8 +323,30 @@ const AppSubscription = ({navigation}) => {
             );
           }}
         />
+        
+        {
+          Platform.OS == "ios" ** (
+           <>
+           
+           {loading == true ? (
+             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+           ) : (
+             <TouchableOpacity onPress={() => onRestorePurchase()}>
+               <AppText
+                 title={'Restore Purchase'}
+                 textSize={2}
+                 textAlignment={'center'}
+                 textColor={AppColors.BLUE}
+               />
+             </TouchableOpacity>
+           )}
+           </> 
+          )
+        }
 
-        <TouchableOpacity onPress={() => NoSubscription()}>
+        <TouchableOpacity
+          onPress={() => NoSubscription()}
+          style={{marginTop: 20}}>
           <AppText
             title={'Continue without subscription'}
             textSize={2}

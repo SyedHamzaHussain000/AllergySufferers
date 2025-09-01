@@ -211,7 +211,7 @@ function MyTabs() {
       />
 
        <Tab.Screen
-        name="DataVisualizer"
+        name="Data Visualizer"
         component={DatavisualizerSample}
         options={{
           tabBarIcon: () => {

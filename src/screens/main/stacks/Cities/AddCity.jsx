@@ -24,12 +24,12 @@ import GooglePlacesTextInput from 'react-native-google-places-textinput';
 import BASE_URL from '../../../../utils/BASE_URL';
 import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
-import { setAddCity } from '../../../../redux/Slices/MedicationSlice';
+import {setAddCity} from '../../../../redux/Slices/MedicationSlice';
 import Toast from 'react-native-toast-message';
 import moment from 'moment';
 
 const AddCity = ({navigation}) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const userdata = useSelector(state => state.auth.user);
   const allMyCity = useSelector(state => state?.medications?.allMyCity);
   const expireDate = useSelector(state => state.auth.expireDate);
@@ -37,55 +37,54 @@ const AddCity = ({navigation}) => {
   const [cityLoader, setCityLoader] = useState(false);
 
   const addNewCity = () => {
+    if (!expireDate) {
+      const isManualAddedCount = allMyCity.filter(
+        state => state?.currentLocation == false,
+      );
 
-    if(!expireDate){
-
-      const isManualAddedCount = allMyCity.filter((state) =>   state?.currentLocation == false) 
-
-        if(isManualAddedCount?.length >= 2){
-            Alert.alert('You can only add 2 cities to add more please subscribe');
-            return
-        }
+      if (isManualAddedCount?.length >= 2) {
+        Alert.alert('You can only add 2 cities to add more please subscribe');
+        return;
+      }
     }
 
-    const allMyCityFilter = allMyCity?.filter((res) => res.currentLocation != true)
+    const allMyCityFilter = allMyCity?.filter(
+      res => res.currentLocation != true,
+    );
 
-    
-
-    if(allMyCityFilter.length >= 4){
-
+    if (allMyCityFilter?.length >= 4) {
       Alert.alert('You can only add 4 cities');
-      return
+      return;
     }
-    
-    setCityLoader(true);
-    if(detail){
 
-      dispatch(setAddCity({
-        lat: JSON.stringify(detail?.location?.latitude),
-        lng: JSON.stringify(detail?.location?.longitude),
-        city_name: detail?.displayName?.text,
-        currentLocation: false,
-      }))
+    setCityLoader(true);
+    if (detail) {
+      dispatch(
+        setAddCity({
+          lat: JSON.stringify(detail?.location?.latitude),
+          lng: JSON.stringify(detail?.location?.longitude),
+          city_name: detail?.displayName?.text,
+          currentLocation: false,
+        }),
+      );
 
       Toast.show({
         type: 'success',
         text1: 'City added successfully',
-        position:'bottom'
-      })
+        position: 'bottom',
+      });
       // setCityLoader(false);
     }
     // setCityLoader(false);
-
 
     if (detail) {
       // Alert.alert("city error")
       let data = JSON.stringify({
         // data: {
-          lat: JSON.stringify(detail?.location?.latitude),
-          lng: JSON.stringify(detail?.location?.longitude),
-          city_name: detail?.displayName?.text,
-          currentLocation: false,
+        lat: JSON.stringify(detail?.location?.latitude),
+        lng: JSON.stringify(detail?.location?.longitude),
+        city_name: detail?.displayName?.text,
+        currentLocation: false,
         // },
       });
 
@@ -143,8 +142,6 @@ const AddCity = ({navigation}) => {
           placeHolderText="Enter city"
           fetchDetails={true}
           includedRegionCodes={['CA']}
-          
-          
         />
 
         <View

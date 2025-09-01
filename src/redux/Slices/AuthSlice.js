@@ -194,6 +194,8 @@ const initialState = {
     Lat: null,
     Lng: null,
   },
+  WatchFreeTut: false,
+  WatchPaidTut: false,
 };
 
 export const CurrentLogin = createAsyncThunk(
@@ -239,6 +241,12 @@ const AuthSlice = createSlice({
       state.currentLocation.Lat = action.payload.Lat;
       state.currentLocation.Lng = action.payload.Lng;
     },
+    setWatchFreeTut: (state, action) => {
+      state.WatchFreeTut = action.payload
+    },
+    setWatchPaidTut: (state, action) => {
+      state.WatchPaidTut = action.payload
+    },
   },
   extraReducers: builder => {
     builder
@@ -268,6 +276,8 @@ export const {
   setLoader,
   setSubscription,
   setCurrentLatLng,
+  setWatchFreeTut,
+  setWatchPaidTut,
 } = AuthSlice.actions;
 
 export default AuthSlice.reducer;

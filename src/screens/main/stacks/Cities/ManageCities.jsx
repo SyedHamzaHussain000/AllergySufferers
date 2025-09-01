@@ -49,7 +49,6 @@ const ManageCities = ({navigation}) => {
   const [cities, setCities] = useState([]);
   const [activeMedication, setActiveMedication] = useState();
 
-  console.log('myAllCities ====>', activeMedication);
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -58,6 +57,8 @@ const ManageCities = ({navigation}) => {
 
     return nav;
   }, [navigation]);
+
+
 
   const getAllCities = () => {
     setLoader(true);
@@ -73,8 +74,7 @@ const ManageCities = ({navigation}) => {
       .then(response => {
         console.log(JSON.stringify(response.data));
 
-        
-        console.log("response",response.data)
+        setActiveMedication(response?.data?.cities );
 
         // dispatch()
 
@@ -86,8 +86,6 @@ const ManageCities = ({navigation}) => {
         const filterCities = allMyCity.filter(
           res => res.currentLocation === true,
         );
-
-        
 
         setLoader(false);
 
@@ -107,16 +105,14 @@ const ManageCities = ({navigation}) => {
           : apiCities;
 
 
-          console.log("filterCitmergedCitiesies",mergedCities)
-
-        setActiveMedication(mergedCities);
       })
       .catch(error => {
         console.log(error);
         setLoader(false);
       });
   };
-
+  
+  // setLoader(false);
   const deleteActiveMedication = item => {
     setLoader(true);
     dispatch(setRemoveCity(item));
@@ -138,8 +134,10 @@ const ManageCities = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
-        getAllCities();
+        console.log("delete response",JSON.stringify(response.data));
+        setActiveMedication(response?.data?.cities );
+        setLoader(false);
+        // getAllCities();
         Alert.alert('Success', 'City deleted successfully');
       })
       .catch(error => {
@@ -149,8 +147,6 @@ const ManageCities = ({navigation}) => {
   };
 
   const sortingCities = async data => {
-
-      console.log("data",data)
 
     const sortCitiesApi = await ApiCallWithUserId(
       'post',
