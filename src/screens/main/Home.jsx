@@ -60,6 +60,7 @@ const Home = ({navigation}) => {
   Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
 
   const dispatch = useDispatch();
+  const LoggedIn = useSelector(state => state?.auth?.LoggedIn);
   const userData = useSelector(state => state.auth.user);
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const subscriptionType = useSelector(state => state?.auth?.SubscriptionType);
@@ -134,16 +135,20 @@ const Home = ({navigation}) => {
 
   useEffect(() => {
 
+    
     if (expireDate) {
+      if(LoggedIn){
       if (!watchPaidTut) {
         navigation.navigate('ViewAppGuide');
         dispatch(setWatchPaidTut(true))
       }
+      }
     } else {
-      console.log("watchFreeTut",watchFreeTut)
-      if (!watchFreeTut) {
-        navigation.navigate('ViewFreeAppGuide');
-        dispatch(setWatchFreeTut(true))
+      if(LoggedIn){
+        if (!watchFreeTut) {
+          navigation.navigate('ViewFreeAppGuide');
+          dispatch(setWatchFreeTut(true))
+        }
       }
     }
   }, [expireDate]);

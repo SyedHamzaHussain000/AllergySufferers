@@ -19,7 +19,7 @@ const More = ({navigation}) => {
 
   const pollens = [
     {id: 1, name: 'App Settings', top: true, onPress: ()=> navigation.navigate("AppSetting")},
-    {id: 2, name: 'Data Visualizer', onPress: ()=> navigation.navigate("DataVisualizer")},
+    {id: 2, name: 'Data Visualizer', onPress: ()=> navigation.navigate("Data Visualizer")},
     {id: 3, name: 'Help', onPress: ()=> navigation.navigate("HelpScreen")},
     {id: 4, name: 'Send Feedback', onPress: ()=> navigation.navigate("FeedBack")},
     {id: 5, name: 'Account',bottom: true, onPress: ()=> navigation.navigate("Account")},

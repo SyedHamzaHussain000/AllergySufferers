@@ -407,7 +407,7 @@ const Symptom = ({navigation}) => {
           <AppButton
             title={'Go TO DATA VISUALIZER'}
             RightColour={AppColors.rightArrowCOlor}
-            handlePress={() => navigation.navigate('DataVisualizer')}
+            handlePress={() => navigation.navigate('Data Visualizer')}
           />
         </View>
             )

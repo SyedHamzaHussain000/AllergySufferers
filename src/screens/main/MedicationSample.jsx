@@ -882,7 +882,7 @@ const MedicationSample = ({navigation}) => {
                 <AppButton
                   title={'GO TO DATA VISUALIZER'}
                   RightColour={AppColors.rightArrowCOlor}
-                  handlePress={() => navigation.navigate('DataVisualizer')}
+                  handlePress={() => navigation.navigate('Data Visualizer')}
                 />
           </View>
               )

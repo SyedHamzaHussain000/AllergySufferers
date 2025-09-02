@@ -56,15 +56,20 @@ const DatavisualizerSample = ({navigation}) => {
 
 
 
-  const userData = useSelector(state => state.auth.user);
-  const expireDate = useSelector(state => state.auth.expireDate);
+  const userData = useSelector(state => state?.auth?.user);
+  const expireDate = useSelector(state => state?.auth?.expireDate);
   const allActiveMedicationRedux = useSelector(
-    state => state.medications.ActiveMedications,
+    state => state?.medications?.ActiveMedications,
   );
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const activeCity = useSelector(state => state?.medications?.ActiveCity);
 
 
+  // console.log("userData", userData)
+  // console.log("expireDate", expireDate)
+  // console.log("allActiveMedicationRedux", allActiveMedicationRedux)
+  // console.log("AllCities", AllCities)
+  // console.log("activeCity", activeCity)
 
   const [type, setType] = useState('allergens');
   const [medicationData, setMedicationsData] = useState();
@@ -103,13 +108,9 @@ const DatavisualizerSample = ({navigation}) => {
   const [AllDayNumber, setAllDayNumber] = useState([]);
   const [activeDate, setActiveDate] = useState(null);
 
-    const [savingDataLoader, setSavingDataLoader] = useState(false);
-  
+  const [savingDataLoader, setSavingDataLoader] = useState(false);
 
 
-  // let loadingItemId = null;
-
-  
 
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
@@ -127,16 +128,9 @@ const DatavisualizerSample = ({navigation}) => {
     return nav;
   }, [navigation]);
 
-useEffect(() => {
-  // const nav = navigation.addListener('focus', () => {
-    // if(allActiveMedicationRedux.length > 0) {
-
+  useEffect(() => {
       getSelectedAllergens(activeCity);
-    // }
-  // });
-
-  // return nav; // cleanup
-}, [activeCity, MedicationnRecord,allActiveMedicationRedux]);
+  }, [activeCity, MedicationnRecord,allActiveMedicationRedux]);
 
   useEffect(()=>{
     if(expireDate){ 
@@ -230,7 +224,7 @@ useEffect(() => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         setPollenLoader(false);
         setTodayPollensData(response.data);
       })
@@ -408,12 +402,14 @@ useEffect(() => {
       },
     };
 
+    console.log("config",config)
+
 
     axios
       .request(config)
       .then(response => {
         const apiData = response.data;
-        console.log('api data of symptoms', apiData);
+        // console.log('api data of symptoms', apiData);
         const chartLineData = {};
         Object.keys(apiData).forEach(key => {
           if (key !== 'dates' && key !== 'symptom_level') {
@@ -425,7 +421,7 @@ useEffect(() => {
         const first = selecallergens[0];
         const second = selecallergens[1];
         
-        console.log("first",first, second )
+        // console.log("first",first, second )
         
         const ambrosiaData = buildLineData(
           chartLineData[first?.allergen_name],
@@ -577,7 +573,7 @@ useEffect(() => {
     axios
       .request(config)
       .then(response => {
-        console.log(' my aal allergens', response.data.allergens, city);
+
 
         //edited code
         const coloredAllergens = assignColorsToAllergens(

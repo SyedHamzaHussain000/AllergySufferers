@@ -196,6 +196,7 @@ const initialState = {
   },
   WatchFreeTut: false,
   WatchPaidTut: false,
+  LoggedIn: false
 };
 
 export const CurrentLogin = createAsyncThunk(
@@ -219,6 +220,7 @@ const AuthSlice = createSlice({
   initialState,
   reducers: {
     setLogout: state => {
+      state.LoggedIn = false
       state.user = null;
       state.expireDate = '';
       state.isExpired = true;
@@ -254,6 +256,7 @@ const AuthSlice = createSlice({
         // Alert.alert("action.payload.expiry",action.payload.expiry)
         state.user = action.payload;
         state.loader = false;
+        state.LoggedIn = true
 
         if(action.payload.expiry){
           state.expireDate = action.payload.expiry;
