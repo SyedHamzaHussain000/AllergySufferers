@@ -40,7 +40,7 @@
 // export default App;
 
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import Routes from './src/routes/Routes';
 import { Provider } from 'react-redux';
@@ -48,9 +48,13 @@ import { store } from './src/redux/store';
 import Toast from 'react-native-toast-message';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
-import { Platform, SafeAreaView, StatusBar } from 'react-native';
-
+import { Platform, SafeAreaView, StatusBar, View } from 'react-native';
+import AppColors from './src/utils/AppColors';
+import { responsiveWidth } from './src/utils/Responsive_Dimensions';
+import NetInfo from '@react-native-community/netinfo'
+import AppText from './src/components/AppTextComps/AppText';
 const App = () => {
+  const [isInternetConnected, settInterenetConnected] = useState(true)
   useEffect(() => {
     // Create channel on start
     async function setup() {
@@ -86,11 +90,38 @@ const App = () => {
     return unsubscribe;
   }, []);
 
+
+
+  
+    useEffect(() => {
+      const unsubscribe = NetInfo.addEventListener(state => {
+        // dispatch(setInternet(state.isConnected))
+          console.log("is",state.isConnected)
+          settInterenetConnected(state.isConnected)
+        // setIsConnected(state.isConnected);
+      });
+  
+      return () => {
+        unsubscribe();
+      };
+    }, []);
+  
+
   return (
 
     <Provider store={store}>
       <StatusBar  barStyle={'dark-content'}/>
       <NavigationContainer>
+        {
+          isInternetConnected == false && (
+
+            <View style={{height:40, position:'absolute', zIndex:1, bottom:0, backgroundColor:AppColors.DARKGRAY, width:responsiveWidth(100), alignItems:'center', justifyContent:'center'}}>
+              <AppText title={"No Internet connection"} textColor={AppColors.WHITE}  textSize={2}/>
+            </View>
+          )
+        }
+        
+
         <Routes />
         <Toast />
       </NavigationContainer>

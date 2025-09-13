@@ -26,18 +26,11 @@ const Routes = () => {
   }, []);
 
   return (
-    <Stack.Navigator  screenOptions={{headerShown:false}}>
-      {
-        internetConnection == false ? (
-          <Stack.Screen name="InternetConnection" component={InternetConnection} />
-        )
-        :(
-          <>
+    <Stack.Navigator initialRouteName='Auth'  screenOptions={{headerShown:false}}>
+      
           <Stack.Screen name="Auth" component={Auth} />
           <Stack.Screen name="Main" component={Main} />
-          </>
-        )
-      }
+         
       
     </Stack.Navigator>
   );

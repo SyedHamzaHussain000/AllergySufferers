@@ -344,9 +344,28 @@ const AppSubscription = ({navigation}) => {
           )
         }
 
+         <TouchableOpacity
+          onPress={() => NoSubscription()}
+          style={{marginTop: 5, flexDirection:'row', alignSelf:'center', gap:10}}>
+          <AppText
+            title={'If you already subscribe please'}
+            textSize={2}
+            textAlignment={'center'}
+            textColor={AppColors.BLACK}
+          />
+          <AppText
+            title={'Login'}
+            textSize={2}
+            textAlignment={'center'}
+            textFontWeight
+
+            textColor={AppColors.BLACK}
+          />
+        </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() => NoSubscription()}
-          style={{marginTop: 20}}>
+          style={{marginTop: 10}}>
           <AppText
             title={'Continue without subscription'}
             textSize={2}
