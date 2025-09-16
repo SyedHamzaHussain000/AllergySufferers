@@ -95,14 +95,12 @@ const MedicationSample = ({navigation}) => {
   //   // return nav;
   // }, [allActiveMedicationRedux]);
 
-  
   useFocusEffect(
     useCallback(() => {
       if (allMyCurrentMeds && allMyCurrentMeds.length > 0) {
         setAllMedicationToRedux();
       }else{
         getMedApiDataAndSaveToRedux(allMyCurrentMeds, allActiveMedicationRedux);
-
         if(allActiveMedicationRedux.length === 0){
           getApiDataAndSaveToRedux(allActiveMedicationRedux);
         }
@@ -191,7 +189,6 @@ const MedicationSample = ({navigation}) => {
 
     setLoader(true);
 
-    console.log("currentDate",currentDate)
 
     // Alert.alert('currentDate', currentDate,       allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date );
     // return
@@ -272,6 +269,8 @@ const MedicationSample = ({navigation}) => {
       const activeDateStr = moment(new Date()).format('YYYY-MM-DD');
       const dateArray = generateDateRangeArray(activeDateStr, currentDate);
 
+
+      
       const toAdd = [];
 
       dateArray.forEach(date => {
@@ -839,6 +838,12 @@ const MedicationSample = ({navigation}) => {
             // generateMedicationSlides(formattedDate);
           }}
           onCancel={() => {
+            setOpen(false);
+          }}
+          onTouchCancel={()=>{
+            setOpen(false);
+          }}
+          onPointerCancel={()=>{
             setOpen(false);
           }}
         />

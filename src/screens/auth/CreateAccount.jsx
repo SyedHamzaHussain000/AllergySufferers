@@ -1,4 +1,4 @@
-import {View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform} from 'react-native';
+import {View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ToastAndroid} from 'react-native';
 import React, { useState } from 'react';
 import AppColors from '../../utils/AppColors';
 import AppText from '../../components/AppTextComps/AppText';
@@ -11,14 +11,17 @@ import {
 import axios from 'axios';
 import BASE_URL from '../../utils/BASE_URL';
 import messaging from '@react-native-firebase/messaging'
+import ShowError from '../../utils/ShowError';
+import { useSelector } from 'react-redux';
 
 const CreateAccount = ({navigation}) => {
-
+const internetConnection = useSelector(state => state?.blacklist?.isInternetConnected)
   const [userData, setUserData] = useState({
     full_name: "",
     user_name: "",
     email: "",
     password: "",
+    confirm_password: "",
     gender: "",
     phone: "",
   })
@@ -31,14 +34,30 @@ const CreateAccount = ({navigation}) => {
   const [loader, setLoader] = useState(false)
 
 
-  console.log("ul", fullDob)
 
   const SignUpUser = async() => {
 
-    setLoader(true)
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    
+    if(userData.password !== userData.confirm_password){
+
+      ShowError("Your password and current passowrd does not match", 1000)
+      return
+    }
+
+    if(!regex.test(userData.email)){
+     return  ShowError("Please enter a valid email", 1000)
+    }
+
+    if(!internetConnection){
+
+      return ShowError("No Internet connection", 2000)
+    }
+
+    
     const token = await messaging().getToken();
-
+    setLoader(true)
     let data = JSON.stringify({
       // full_name: userData.full_name,
       user_name: userData.user_name,
@@ -64,11 +83,13 @@ const CreateAccount = ({navigation}) => {
       .request(config)
       .then(response => {
         console.log(JSON.stringify(response.data));
+        ShowError("Account created successfully", 1000)
         navigation.navigate("Login")
         setLoader(false)
       })
       .catch(error => {
-        console.log(error);
+        console.log(error.response.data.message);
+        ShowError(error?.response?.data?.message, 1000)
         setLoader(false)
       });
   };
@@ -110,14 +131,15 @@ const CreateAccount = ({navigation}) => {
             onChangeText={(text)=>  setUserData({...userData, full_name: text})} value={userData.full_name}
             textInput
           /> */}
-          <AppTextInput title="Username" inputPlaceHolder={'Input Username'} onChangeText={(text)=>  setUserData({...userData, user_name: text})} value={userData.user_name} textInput/>
+          <AppTextInput title="Username" inputPlaceHolder={'Name'} onChangeText={(text)=>  setUserData({...userData, user_name: text})} value={userData.user_name} textInput/>
           <AppTextInput
             title="Email Address"
-            inputPlaceHolder={'Input email'}
+            inputPlaceHolder={'Email'}
             onChangeText={(text)=>  setUserData({...userData, email: text})} value={userData.email}
             textInput
           />
-          <AppTextInput title="Password" inputPlaceHolder={'Input password'} onChangeText={(text)=>  setUserData({...userData, password: text})} value={userData.password} textInput/>
+          <AppTextInput title="Password" inputPlaceHolder={'Password'} onChangeText={(text)=>  setUserData({...userData, password: text})} value={userData.password} textInput/>
+            <AppTextInput title="Confirm Password" inputPlaceHolder={'Confirm Password'} onChangeText={(text)=>  setUserData({...userData, confirm_password: text})} value={userData.confirm_password} textInput/>
 
           <AppText
             title={'Date of Birth'}
@@ -191,7 +213,7 @@ const CreateAccount = ({navigation}) => {
           </View>
 
           <AppTextInput title="Gender" textInput inputPlaceHolder={'Male'} onChangeText={(text)=>  setUserData({...userData, gender: text})} value={userData.gender}/>
-          <AppTextInput title="Phone" textInput inputPlaceHolder={'123-456-7890'} onChangeText={(text)=>  setUserData({...userData, phone: text})} value={userData.phone}/>
+          <AppTextInput title="Phone" textInput inputPlaceHolder={'123-456-7890'} onChangeText={(text)=>  setUserData({...userData, phone: text})} value={userData.phone} keyboardType={'number-pad'}/>
 
           <View style={{gap: 10}}>
             <AppButton title={'Sign up'} RightColour={AppColors.WHITE} handlePress={()=> SignUpUser()} isLoading={loader} loadingColour={AppColors.WHITE}/>

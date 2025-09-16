@@ -16,6 +16,7 @@ import {
 } from '../../../utils/Responsive_Dimensions';
 import BASE_URL from '../../../utils/BASE_URL';
 import axios from 'axios';
+import ShowError from '../../../utils/ShowError';
 
 const EnterOtp = ({navigation, route}) => {
   const {email} = route.params;
@@ -27,15 +28,14 @@ const EnterOtp = ({navigation, route}) => {
     value,
     setValue,
   });
-  const [loader, setLoader] = useState(false)
+  const [loader, setLoader] = useState(false);
 
   const VerifyOtpApi = () => {
-
     if (value.length != 6) {
       Alert.alert('Otp Required', 'Please enter your otp');
       return;
     }
-    setLoader(true)
+    setLoader(true);
 
     let data = new FormData();
     data.append('email', email);
@@ -54,17 +54,20 @@ const EnterOtp = ({navigation, route}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+        console.log('res', JSON.stringify(response.data));
         if (response.data.status == 'success') {
-          navigation.navigate('EnternewPassword',{email:email});
-          setLoader(false)
-        }else{
-          setLoader(false)
+          ShowError(response.data.message, 1000);
+          navigation.navigate('EnternewPassword', {email: email});
+          setLoader(false);
+        } else {
+          ShowError('Please enter a correct code', 1000);
+          setLoader(false);
         }
       })
       .catch(error => {
-        setLoader(false)
-        console.log(error);
+        ShowError(error?.response?.data?.message, 1000);
+        setLoader(false);
+        console.log(error.response);
       });
   };
 
@@ -74,7 +77,8 @@ const EnterOtp = ({navigation, route}) => {
         padding: 20,
         backgroundColor: AppColors.WHITE,
         flex: 1,
-        justifyContent: 'space-between',
+        justifyContent: 'center',
+        gap: 30,
       }}>
       <View style={{alignItems: 'center', justifyContent: 'center'}}>
         <AppText
@@ -84,7 +88,7 @@ const EnterOtp = ({navigation, route}) => {
           textFontWeight
         />
         <AppText
-          title={'We can help to recover your account'}
+          title={'Reset your password'}
           textColor={AppColors.LIGHTGRAY}
           textSize={1.8}
         />

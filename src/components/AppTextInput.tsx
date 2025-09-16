@@ -1,4 +1,4 @@
-import {View, Text, TextInput} from 'react-native';
+import {View, Text, TextInput, TouchableOpacity} from 'react-native';
 import React from 'react';
 import {
   responsiveFontSize,
@@ -20,6 +20,10 @@ type props = {
   arrowDelete?: any;
   textInput?: boolean;
   isNotification?: boolean
+  keyboardType?:any
+  password?:any
+  onEyePress?:() => void
+  eye?: boolean
 };
 const AppTextInput = ({
   logo,
@@ -34,7 +38,11 @@ const AppTextInput = ({
   onChangeText,
   arrowDelete,
   textInput,
-  isNotification
+  isNotification,
+  keyboardType,
+  password,
+  onEyePress,
+  eye
 }: props) => {
   return (
     <View style={{gap: 5}}>
@@ -51,10 +59,12 @@ const AppTextInput = ({
           borderWidth: 1,
           borderColor: AppColors.LIGHTGRAY,
           height: 50,
+          
         }}>
         {logo}
 
         {textInput == true ? (
+          <>
           <TextInput
             placeholder={inputPlaceHolder}
             placeholderTextColor={AppColors.LIGHTGRAY}
@@ -62,7 +72,12 @@ const AppTextInput = ({
             onChangeText={onChangeText}
             value={value}
             secureTextEntry={secure}
+            keyboardType={keyboardType}
           />
+
+          
+            </>
+          
         ) : (
           <AppText
             title={inputPlaceHolder}
@@ -71,6 +86,20 @@ const AppTextInput = ({
             textSize={2}
           />
         )}
+
+        <>
+        {
+
+        
+            password && (
+              <TouchableOpacity onPress={onEyePress}>
+        {        
+                  password
+                }
+              </TouchableOpacity>
+            )
+            }
+          </>
 
     {textInput == true ? 
       null

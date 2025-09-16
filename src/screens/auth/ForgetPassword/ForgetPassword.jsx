@@ -1,4 +1,4 @@
-import {View, Text, ToastAndroid, Alert} from 'react-native';
+import {View, Text, ToastAndroid, Alert, ScrollView} from 'react-native';
 import React, { useState } from 'react';
 import AppText from '../../../components/AppTextComps/AppText';
 import AppColors from '../../../utils/AppColors';
@@ -6,6 +6,7 @@ import AppTextInput from '../../../components/AppTextInput';
 import AppButton from '../../../components/AppButton';
 import BASE_URL from '../../../utils/BASE_URL';
 import axios from 'axios';
+import ShowError from '../../../utils/ShowError';
 
 const ForgetPassword = ({navigation}) => {
 
@@ -39,26 +40,31 @@ const ForgetPassword = ({navigation}) => {
         console.log(JSON.stringify(response.data));
         if(response?.data?.status == "success"){
           setLoader(false)
+          ShowError(response.data.message, 1000)
           navigation.navigate('EnterOtp', {email: email})
         }else{
           setLoader(false)
+          ShowError(response.data.message, 1000)
         }
       })
       .catch(error => {
+        ShowError(error?.response?.data?.message, 1000)
         console.log(error);
         setLoader(false)
       });
   };
 
   return (
-    <View
-      style={{
+    <ScrollView
+      contentContainerStyle={{
         padding: 20,
         backgroundColor: AppColors.WHITE,
-        flex: 1,
-        justifyContent: 'space-between',
+        flexGrow: 1,
+        alignItems:'center',
+        justifyContent:'center',
+        gap:50
       }}>
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{alignItems:'center', justifyContent:'center', gap:5}}>
         <AppText
           title={'Forgot Password'}
           textColor={AppColors.BLACK}
@@ -70,8 +76,7 @@ const ForgetPassword = ({navigation}) => {
           textColor={AppColors.LIGHTGRAY}
           textSize={1.8}
         />
-      </View>
-
+        </View>
       <AppTextInput
         title="Email Address"
         inputPlaceHolder={'Enter Email'}
@@ -85,7 +90,9 @@ const ForgetPassword = ({navigation}) => {
         handlePress={() => ForgetPassword() }
         isLoading={loader}
       />
-    </View>
+
+
+    </ScrollView>
   );
 };
 

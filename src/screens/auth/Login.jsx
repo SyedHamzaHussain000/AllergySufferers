@@ -24,20 +24,22 @@ import {
   getToken,
   registerDeviceForRemoteMessages,
 } from '@react-native-firebase/messaging';
+import { responsiveFontSize } from '../../utils/Responsive_Dimensions';
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import ShowError from '../../utils/ShowError';
 const Login = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
+  const [SecurePassword, setSecurePassword] = useState(true)
   const loading = useSelector(state => state.auth.loader);
   const userData = useSelector(state => state.auth.user);
   const expireDate = useSelector(state => state.auth.expireDate);
+    const internetConnection = useSelector(state => state?.blacklist?.isInternetConnected)
   
-    console.log('expireDate', expireDate);
-
-  
-
 
   const dispatch = useDispatch();
+
+
 
   useEffect(() => {
 
@@ -49,6 +51,7 @@ const Login = ({navigation}) => {
   // dispatch(setLoader(false))
 
   const LoginUser = async () => {
+
     if (email === '' || password === '') {
       if (Platform.OS === 'android') {
         ToastAndroid.show('Please fill all fields', ToastAndroid.SHORT);
@@ -57,15 +60,19 @@ const Login = ({navigation}) => {
       }
       return;
     }
+    
+    if(!internetConnection){
+
+      return ShowError("No Internet connection", 2000)
+    }
+    try {
+
     // await messaging().registerDeviceForRemoteMessages();
     await registerDeviceForRemoteMessages(getMessaging());
     
     // const token = await messaging().getToken();
     const token = await getToken(getMessaging());
-    console.log("token")
-
-    console.log('fcm token',token)
-
+ 
     dispatch(setLoader(true));
     let data = new FormData();
     data.append('email', email);
@@ -92,6 +99,10 @@ const Login = ({navigation}) => {
     }
 
     dispatch(CurrentLogin(config));
+          
+    } catch (error) {
+     console.log("error", error) 
+    }
   };
 
   return (
@@ -127,7 +138,7 @@ const Login = ({navigation}) => {
           />
         </View>
 
-        <View style={{gap: 20}}>
+        <View style={{gap: 20,}}>
           <AppTextInput
             title="Email Address"
             inputPlaceHolder={'Enter email'}
@@ -141,16 +152,21 @@ const Login = ({navigation}) => {
               inputPlaceHolder={'Enter password'}
               onChangeText={txt => setPassword(txt)}
               value={password}
-              secure={true}
+              inputWidth={72}
+              secure={SecurePassword}
               textInput={true}
+              password={<Ionicons name={ !SecurePassword == true ?  "eye" : "eye-off"} size={responsiveFontSize(2)}/>}
+              onEyePress={()=> setSecurePassword(!SecurePassword)}
+              eye={SecurePassword}
             />
             <TouchableOpacity
               onPress={() => navigation.navigate('ForgetPassword')}>
               <AppText
-                title={'Forget Password'}
+                title={'Forgot Password'}
                 textColor={AppColors.BLUE}
                 textSize={1.8}
                 textAlignment={'flex-end'}
+                
               />
             </TouchableOpacity>
           </View>

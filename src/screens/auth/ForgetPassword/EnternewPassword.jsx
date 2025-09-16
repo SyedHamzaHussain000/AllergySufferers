@@ -5,6 +5,7 @@ import AppColors from '../../../utils/AppColors';
 import AppTextInput from '../../../components/AppTextInput';
 import AppButton from '../../../components/AppButton';
 import axios from 'axios';
+import ShowError from '../../../utils/ShowError';
 
 const EnternewPassword = ({navigation, route}) => {
   const {email} = route.params;
@@ -41,12 +42,15 @@ const EnternewPassword = ({navigation, route}) => {
         if (response?.data?.status == 'success') {
           Alert.alert('Successfull', response?.data?.message);
           navigation.navigate('Login', {email: email});
+          ShowError(response?.data?.message, 1000)
           setLoader(false)
         }else{
+          ShowError(response?.data?.message, 1000)
           setLoader(false)
         }
       })
       .catch(error => {
+        ShowError(error?.response?.data?.message, 1000)
         console.log(error);
         setLoader(false)
       });
@@ -58,9 +62,11 @@ const EnternewPassword = ({navigation, route}) => {
         padding: 20,
         backgroundColor: AppColors.WHITE,
         flex: 1,
-        justifyContent: 'space-between',
+        alignItems:'center',
+        justifyContent:'center',
+        gap:40
       }}>
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+      <View style={{alignItems: 'center', justifyContent: 'center', gap:10}}>
         <AppText
           title={'Enter a New Password'}
           textColor={AppColors.BLACK}

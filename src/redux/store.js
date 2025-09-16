@@ -76,8 +76,8 @@ import BlackListSlice from './Slices/BlackListSlice'
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['auth', 'medications'], // ✅ Persist both slices
-  blacklist: ['blacklist'], // ✅ exclude medications from persistence
+  whitelist: ['auth', 'medications'],
+  blacklist: ['blacklist'],
 };
 
 const rootReducer = combineReducers({
