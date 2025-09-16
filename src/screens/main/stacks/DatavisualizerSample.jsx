@@ -24,6 +24,7 @@ import {
 } from '../../../utils/Responsive_Dimensions';
 import AppText from '../../../components/AppTextComps/AppText';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import BASE_URL from '../../../utils/BASE_URL';
 import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
@@ -49,12 +50,10 @@ import {
   setActiveMedication,
 } from '../../../redux/Slices/MedicationSlice';
 import {useFocusEffect} from '@react-navigation/native';
-import Svg, {Circle, Polyline} from 'react-native-svg';
+import Svg, {Circle, G, Polyline, Rect} from 'react-native-svg';
 
 const DatavisualizerSample = ({navigation}) => {
   const dispatch = useDispatch();
-
-
 
   const userData = useSelector(state => state?.auth?.user);
   const expireDate = useSelector(state => state?.auth?.expireDate);
@@ -63,7 +62,6 @@ const DatavisualizerSample = ({navigation}) => {
   );
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const activeCity = useSelector(state => state?.medications?.ActiveCity);
-
 
   // console.log("userData", userData)
   // console.log("expireDate", expireDate)
@@ -110,8 +108,6 @@ const DatavisualizerSample = ({navigation}) => {
 
   const [savingDataLoader, setSavingDataLoader] = useState(false);
 
-
-
   useEffect(() => {
     const nav = navigation.addListener('focus', () => {
       // getAllAllergens();
@@ -129,28 +125,26 @@ const DatavisualizerSample = ({navigation}) => {
   }, [navigation]);
 
   useEffect(() => {
-      getSelectedAllergens(activeCity);
-  }, [activeCity, MedicationnRecord,allActiveMedicationRedux]);
+    getSelectedAllergens(activeCity);
+  }, [activeCity, MedicationnRecord, allActiveMedicationRedux]);
 
-  useEffect(()=>{
-    if(expireDate){ 
-      if(allActiveMedicationRedux?.length === 0){  
-        getApiDataAndSaveToRedux()
+  useEffect(() => {
+    if (expireDate) {
+      if (allActiveMedicationRedux?.length === 0) {
+        getApiDataAndSaveToRedux();
       }
     }
-  },[allActiveMedicationRedux])
+  }, [allActiveMedicationRedux]);
 
   useFocusEffect(
     useCallback(() => {
-        getSelectedAllergens(activeCity);
+      getSelectedAllergens(activeCity);
 
       // Alert.alert("runninnng use focus")
     }, [activeCity, allActiveMedicationRedux, MedicationnRecord]),
   );
 
-
-// console.log("allActiveMedicationRedux",allActiveMedicationRedux)
-
+  // console.log("allActiveMedicationRedux",allActiveMedicationRedux)
 
   // Alert.alert("activeCity",activeCity.city_name)
 
@@ -181,33 +175,30 @@ const DatavisualizerSample = ({navigation}) => {
     }
   };
 
-    const getApiDataAndSaveToRedux = async () => {
-      if (allActiveMedicationRedux.length === 0) {
-        setSavingDataLoader(true);
-  
-        // Alert.alert("This function calls getApiDataAndSaveToRedux")
-        const getActiveMedicationData = await ApiCallWithUserId(
-          'post',
-          'get_medication_records',
-          userData?.id,
+  const getApiDataAndSaveToRedux = async () => {
+    if (allActiveMedicationRedux.length === 0) {
+      setSavingDataLoader(true);
+
+      // Alert.alert("This function calls getApiDataAndSaveToRedux")
+      const getActiveMedicationData = await ApiCallWithUserId(
+        'post',
+        'get_medication_records',
+        userData?.id,
+      );
+
+      if (getActiveMedicationData?.entries?.items?.length > 0) {
+        console.log(
+          'getActiveMedicationData',
+          getActiveMedicationData?.entries?.items,
         );
-  
-  
-  
-        if (getActiveMedicationData?.entries?.items?.length > 0) {
-          console.log(
-            'getActiveMedicationData',
-            getActiveMedicationData?.entries?.items,
-          );
-          dispatch(setActiveMedication(getActiveMedicationData?.entries?.items));
-          setSavingDataLoader(false);
-        } else {
-          setSavingDataLoader(false);
-        }
-        return;
+        dispatch(setActiveMedication(getActiveMedicationData?.entries?.items));
+        setSavingDataLoader(false);
+      } else {
+        setSavingDataLoader(false);
       }
-    };
-  
+      return;
+    }
+  };
 
   const getAllAllergens = () => {
     setType('allergens');
@@ -274,66 +265,123 @@ const DatavisualizerSample = ({navigation}) => {
       });
   };
 
-  const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
-    if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
-      setMedicationnRecord([]);
-      return;
-    }
 
-    const end = moment(); // today
-    const start = moment().local().subtract(6, 'day'); // last 7 days
+  // working ********
+  // const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
+  //   if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
+  //     setMedicationnRecord([]);
+  //     return;
+  //   }
 
-    setStartDate(start);
-    setEndDate(end);
+  //   const end = moment(); // today
+  //   const start = moment().local().subtract(6, 'day'); // last 7 days
 
-    // ✅ sirf last 7 din ka data lo
-    const filteredData = allActiveMedicationRedux.filter(entry =>
-      moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
-    );
+  //   setStartDate(start);
+  //   setEndDate(end);
 
-    const dayNumbers = [];
-    let current = start.clone();
+  //   // ✅ sirf last 7 din ka data lo
+  //   const filteredData = allActiveMedicationRedux.filter(entry =>
+  //     moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
+  //   );
 
-    while (current.isSameOrBefore(end)) {
-      dayNumbers.push(current.date());
-      current.add(1, 'day');
-    }
+  //   setStartDate(filteredData[0]?.date);
+  //   // console.log('filteredData', filteredData);
 
-    setAllDayNumber(dayNumbers);
+  //   const dayNumbers = [];
+  //   let current = start.clone();
 
-    // ✅ Group by date
-    const grouped = {};
-    filteredData.forEach(entry => {
-      if (!grouped[entry.date]) {
-        grouped[entry.date] = [];
-      }
-      grouped[entry.date].push(entry);
-    });
+  //   while (current.isSameOrBefore(end)) {
+  //     dayNumbers.push(current.date());
+  //     current.add(1, 'day');
+  //   }
 
-    const barData = [];
+  //   setAllDayNumber(dayNumbers);
 
-    Object.keys(grouped).forEach(date => {
-      const group = grouped[date];
-      group.forEach((entry, idx) => {
-        const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
-        const value = parseInt(entry.units) || 0;
-        const isLast = idx === group.length - 1;
+  //   // ✅ Group by date
+  //   const grouped = {};
+  //   filteredData.forEach(entry => {
+  //     if (!grouped[entry.date]) {
+  //       grouped[entry.date] = [];
+  //     }
+  //     grouped[entry.date].push(entry);
+  //   });
 
-        barData.push({
-          value,
-          ...(idx === 0 && {label: formattedLabel}), // ✅ only first entry of date gets label
-          spacing: isLast ? responsiveWidth(8.5) : 0, // ✅ spacing after last entry of that date
-          frontColor: entry.frontColor || '#E23131',
+  //   const barData = [];
 
-          labelWidth: 30,
-        });
-      });
-    });
+  //   Object.keys(grouped).forEach(date => {
+  //     const group = grouped[date];
+  //     group.forEach((entry, idx) => {
+  //       const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
+  //       const value = parseInt(entry.units) || 0;
+  //       const isLast = idx === group.length - 1;
 
-    setMedicationnRecord(barData);
-  };
+  //       barData.push({
+  //         value,
+  //         ...(idx === 0 && {label: formattedLabel}), // ✅ only first entry of date gets label
+  //         spacing: isLast ? 30 : 0, // ✅ spacing after last entry of that date
+  //         frontColor: entry.frontColor || '#E23131',
 
+  //         labelWidth: 30,
+  //       });
+  //     });
+  //   });
+
+  //   setMedicationnRecord(barData);
+  // };
+
+
+
+  
+  
   // console.log("medicationRecord",MedicationnRecord)
+
+  const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
+  if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
+    setMedicationnRecord([]);
+    return;
+  }
+
+  const end = moment(); // today
+  const start = moment().local().subtract(6, 'day'); // last 7 days
+
+  setStartDate(start);
+  setEndDate(end);
+
+  // ✅ sirf last 7 din ka data lo
+  const filteredData = allActiveMedicationRedux.filter(entry =>
+    moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
+  );
+
+  setStartDate(filteredData[0]?.date);
+
+  // ✅ Group by date
+  const grouped = {};
+  filteredData.forEach(entry => {
+    if (!grouped[entry.date]) {
+      grouped[entry.date] = [];
+    }
+    grouped[entry.date].push(entry);
+  });
+
+  // ✅ Ab proper grouped structure banao
+  const barData = Object.keys(grouped).map(date => {
+    const group = grouped[date];
+    const formattedLabel = moment(date, 'YYYY-MM-DD').format('D');
+
+    return {
+      label: formattedLabel,
+      meds: group.map((entry, idx) => ({
+        value: parseInt(entry.units) || 0,
+        spacing: idx === group.length - 1 ? 30 : 0,
+        frontColor: entry.frontColor || '#E23131',
+        labelWidth: 30,
+      })),
+    };
+  });
+
+  setMedicationnRecord(barData);
+};
+
 
   const getDataVisualizer = async (selecallergens, city) => {
     // console.log("city ? city : AllCities[0]", city ? city : AllCities[0])
@@ -350,6 +398,8 @@ const DatavisualizerSample = ({navigation}) => {
     // const getCity = await AsyncStorage.getItem('isCity');
     // const parseCity = JSON.parse(getCity);
 
+    console.log('first', allActiveMedicationRedux);
+
     setPickedCity(AllCities[0]);
 
     // if (getCity) {
@@ -360,7 +410,17 @@ const DatavisualizerSample = ({navigation}) => {
       )
       .join('&');
 
-    const dateis = moment().local().subtract(6, 'day').format('YYYY-MM-DD');
+    // Get date 7 days ago (start point)
+    const previousSevenDate = moment().local().subtract(6, 'days');
+    // Convert your API date to moment
+    const targetDate = moment(allActiveMedicationRedux[0]?.date).local();
+    // Check if it's before 7 days ago
+    const checkDateIsBefore = targetDate.isBefore(previousSevenDate);
+
+    const dateis =
+      allActiveMedicationRedux.length > 0 && !checkDateIsBefore
+        ? moment(allActiveMedicationRedux[0]?.date).local().format('YYYY-MM-DD')
+        : moment().local().subtract(6, 'day').format('YYYY-MM-DD');
 
     const pickLat = city
       ? city?.lat
@@ -402,27 +462,24 @@ const DatavisualizerSample = ({navigation}) => {
       },
     };
 
-    console.log("config",config)
-
-
     axios
       .request(config)
       .then(response => {
         const apiData = response.data;
-        // console.log('api data of symptoms', apiData);
+        console.log('api data of symptoms', apiData);
         const chartLineData = {};
         Object.keys(apiData).forEach(key => {
           if (key !== 'dates' && key !== 'symptom_level') {
             chartLineData[key] = apiData[key].map(val => ({value: val}));
           }
         });
-        
+
         //edited code
         const first = selecallergens[0];
         const second = selecallergens[1];
-        
+
         // console.log("first",first, second )
-        
+
         const ambrosiaData = buildLineData(
           chartLineData[first?.allergen_name],
           MedicationnRecord,
@@ -432,8 +489,11 @@ const DatavisualizerSample = ({navigation}) => {
           MedicationnRecord,
         );
 
-        const getSymtomsData = buildSymtomsData(apiData.symptom_level, MedicationnRecord )
-        
+        const getSymtomsData = buildSymtomsData(
+          apiData.symptom_level,
+          MedicationnRecord,
+        );
+
         // setAllSymtoms(apiData.symptom_level);
         setAllSymtoms(getSymtomsData);
         // console.log( " ambrosiaData",  ambrosiaData, "miscData",miscData )
@@ -487,8 +547,6 @@ const DatavisualizerSample = ({navigation}) => {
   };
 
   const buildSymtomsData = (pollenArray, medicationRecord) => {
-
-
     const lineData = [];
     let pollenIndex = 0;
     let currentDateMeds = 0;
@@ -573,8 +631,6 @@ const DatavisualizerSample = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-
-
         //edited code
         const coloredAllergens = assignColorsToAllergens(
           response.data.allergens,
@@ -655,8 +711,6 @@ const DatavisualizerSample = ({navigation}) => {
     }));
   };
 
-
-
   const getLocation = async type => {
     setType(type);
 
@@ -691,8 +745,6 @@ const DatavisualizerSample = ({navigation}) => {
 
   const NewPro = [{value: 0}, {value: 2}, {value: 3}];
 
-
-
   // Chart height in px (same as <Svg height>)
   const chartHeight = 200;
 
@@ -700,32 +752,28 @@ const DatavisualizerSample = ({navigation}) => {
   const maxYValue = 8; // highest pollen/medication level
   const scaleY = value => chartHeight - (value / maxYValue) * chartHeight;
 
-
-
-const lineData = PrimaryLineData?.map((d, i) => ({
-  x: i * (d.spacing +  82),
-  y: scaleY(d.value),
-}));
+  const lineData = PrimaryLineData?.map((d, i) => ({
+    x: i == 0 ? 0.1 * responsiveWidth(30) : i * responsiveWidth(30),
+    y: scaleY(d.value),
+  }));
 
   // Convert to string for Polyline
   const points = lineData?.map(p => `${p.x},${p.y}`).join(' ');
 
-
   const secondLineData = SecondaryLineData?.map((d, i) => ({
-  x: i * (d.spacing +  82),
-  y: scaleY(d.value),
-}));
+    x: i == 0 ? 0.1 * responsiveWidth(30) : i * responsiveWidth(30),
+    y: scaleY(d.value),
+  }));
   const secondpoints = secondLineData?.map(p => `${p.x},${p.y}`).join(' ');
 
-
-  const symtomsData = allSymtoms?.map((d, i)=>({
+  const symtomsData = allSymtoms?.map((d, i) => ({
     value: d?.value,
-    spacing: (d?.spacing + 80),
-  }))
+    spacing: d?.spacing + 80,
+  }));
+  {
 
-  
-  // console.log("medication record",secondLineData, symtomsData)
-
+    console.log("MedicationnRecord",MedicationnRecord)
+  }
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <ScrollView
@@ -742,17 +790,16 @@ const lineData = PrimaryLineData?.map((d, i) => ({
           subheading="Your Data, Visualized"
           goBack
           selecteddate={selecteddate}
-          
         />
 
-             {savingDataLoader && (
-            <ActivityIndicator size={'small'} color={AppColors.BLACK} />
-          )}
+        {savingDataLoader && (
+          <ActivityIndicator size={'small'} color={AppColors.BLACK} />
+        )}
 
         {expireDate ? (
           <>
             {startDate && endDate && (
-              <View style={{marginTop: 20, marginBottom: 20}}>
+              <View style={{marginTop: 20, marginBottom: 20, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
                 <AppText
                   title={`${moment(startDate).format('MMM DD')} - ${moment(
                     endDate,
@@ -761,6 +808,14 @@ const lineData = PrimaryLineData?.map((d, i) => ({
                   textColor={AppColors.BLACK}
                   textAlignment={'center'}
                 />
+
+                <TouchableOpacity style={{padding:20,}} onPress={()=> getSelectedAllergens(activeCity)}>
+                        <Ionicons
+                            name="reload"
+                            size={responsiveFontSize(3)}
+                            color={AppColors.BLACK}
+                          />
+                </TouchableOpacity>
               </View>
             )}
 
@@ -786,7 +841,7 @@ const lineData = PrimaryLineData?.map((d, i) => ({
                 {MedicationnRecord?.length > 0 ? (
                   <View>
                     <ScrollView
-                      contentContainerStyle={{minWidth: responsiveWidth(100)}}
+                      contentContainerStyle={{}}
                       style={{marginLeft: 10}}
                       horizontal={true}>
                       <View
@@ -814,7 +869,7 @@ const lineData = PrimaryLineData?.map((d, i) => ({
                             //   }}>
                             <View
                               style={{
-                                width: (item.spacing) ,
+                                width: responsiveWidth(29),
                                 alignItems: 'flex-start',
                                 // borderWidth:1,
                                 // backgroundColor:'red'
@@ -832,13 +887,12 @@ const lineData = PrimaryLineData?.map((d, i) => ({
                         })}
                       </View>
 
-                      <BarChart
+                      {/* <BarChart
                         data={MedicationnRecord || []}
                         barWidth={7}
                         barStyle={{
                           backgroundColor: 'gray',
                         }}
-                        
                         frontColor="#E23131" // bar color
                         // showLine={
                         //   // true
@@ -895,16 +949,158 @@ const lineData = PrimaryLineData?.map((d, i) => ({
                         initialSpacing={responsiveWidth(0)} // same for all
                         formatYLabel={label => parseFloat(label).toFixed(0)}
                         stepValue={1}
-                      />
+                      /> */}
+
+                      {/* <View
+                        style={{
+                          marginTop: 20,
+                          
+                          // backgroundColor: 'green',
+                        }}>
+                        <Svg
+                          height={responsiveHeight(28)}
+                          width={responsiveWidth(200)} // adjust depending on scroll
+                        >
+                          {MedicationnRecord.map((item, index) => {
+                            console.log("item.spacing",item.spacing)
+                            const barWidth = 7;
+                            const spacing = item.spacing;
+                            const chartHeight = responsiveHeight(25); // total chart height
+                            const maxValue = 8; // since you show 0,2,4,6,8
+                            const scaleY = chartHeight / maxValue;
+
+                            const barHeight = item?.value * scaleY;
+                            // const x = index * (barWidth + spacing);
+
+                            const x = index * (barWidth );
+                            const y = chartHeight - barHeight;
+
+                            return (
+                              <Rect
+                                key={index}
+                                x={x}
+                                y={y}
+                                width={barWidth}
+                                height={barHeight}
+                                fill={item.frontColor}
+                                rx={2}
+                              />
+                            );
+                          })}
+                        </Svg>
+                      </View> */}
+
+                      {/* <Svg
+                        height={responsiveHeight(28)}
+                        width={responsiveWidth(200)}>
+                        {MedicationnRecord.map((item, index) => {
+                          console.log("item.label",item.label)
+                          const barWidth = 7;
+                          const chartHeight = responsiveHeight(25);
+                          const maxValue = 8;
+                          const scaleY = chartHeight / maxValue;
+
+                          const barHeight = item.value * scaleY;
+
+                          // --- calculate X with group gap ---
+                          const spacing = 10; // normal spacing between bars
+                          const groupGap = 40; // gap after each date group
+
+                          // Find how many groups have already passed
+                          const groupsBefore = Math.floor(index / 8); // since max 8 bars per date
+                          const x =  index * item.spacing
+                          const y = chartHeight - barHeight;
+
+                          return (
+                            <Rect
+                              key={index}
+                              x={x}
+                              y={y}
+                              width={barWidth}
+                              height={barHeight}
+                              fill={item.frontColor}
+                              rx={2}
+                            />
+                          );
+                        })}
+                      </Svg> */}
+
+                      <View>
+                        {/* <FlatList
+                          data={MedicationnRecord}
+                          horizontal
+                          contentContainerStyle={{
+                            width: responsiveWidth(200),
+                            spacing: 20,
+                            height: 220,
+                            alignItems: 'flex-end',
+                            marginBottom: 20,
+                            marginLeft: responsiveWidth(3.5),
+                          }}
+                          renderItem={({item, index}) => {
+                            // console.log("itemm", item)
+                            return (
+                              <View
+                                style={{
+                                  height: responsiveHeight(item?.value * 3.4),
+                                  width: 8,
+                                  marginRight: item.spacing,
+                                  backgroundColor: item?.frontColor,
+                                }}
+                              />
+                            );
+                          }}
+                        /> */}
+                        <FlatList
+  data={MedicationnRecord} // [{label: '11', meds: [...]}, {label: '12', meds: [...]}]
+  horizontal
+  keyExtractor={(item) => item.label}
+        contentContainerStyle={{
+                            width: responsiveWidth(200),
+                            spacing: 20,
+                            height: 220,
+                            alignItems: 'flex-end',
+                            marginBottom: 20,
+                            marginLeft: responsiveWidth(3.5),
+                          }}
+  renderItem={({ item }) => (
+    <View
+      style={{
+        width: responsiveWidth(29), // fixed slot per day
+        alignItems: 'center',
+        
+
+      }}
+    >
+      {/* Bars */}
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+        {item?.meds?.map((m, idx) => (
+          <View
+            key={idx}
+            style={{
+              height: m.value > 0 ? responsiveHeight(m.value * 3.4) : 0,
+              width: 8,
+              marginRight: m.spacing,
+              backgroundColor: m.value > 0 ? m.frontColor : 'transparent',
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  )}
+/>
+
+                      </View>
 
                       <View
                         style={{
                           position: 'absolute',
                           zIndex: 11,
-                          marginLeft:responsiveWidth(4)
-                          
+                          marginLeft: responsiveWidth(4),
                         }}>
-                        <Svg width={responsiveWidth(200)} height={responsiveHeight(28)}>
+                        <Svg
+                          width={responsiveWidth(200)}
+                          height={responsiveHeight(28)}>
                           <Polyline
                             points={points}
                             stroke={colours[0]}
@@ -923,15 +1119,38 @@ const lineData = PrimaryLineData?.map((d, i) => ({
                         </Svg>
                       </View>
 
+                      <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 100,
+                          marginLeft: responsiveWidth(3),
+                          bottom: -0,
+                        }}>
+                        <FlatList
+                          data={MedicationnRecord?.filter(res => res.label)}
+                          contentContainerStyle={{
+                            marginLeft: responsiveWidth(3),
+                          }}
+                          horizontal
+                          renderItem={({item, index}) => {
+                            return (
+                              <View style={{width: responsiveWidth(30)}}>
+                                <AppText title={item.label} textSize={2} />
+                              </View>
+                            );
+                          }}
+                        />
+                      </View>
 
-                         <View
+                      <View
                         style={{
                           position: 'absolute',
                           zIndex: 11,
-                          marginLeft:responsiveWidth(4)
-                          
+                          marginLeft: responsiveWidth(4),
                         }}>
-                        <Svg width={responsiveWidth(200)} height={responsiveHeight(28)}>
+                        <Svg
+                          width={responsiveWidth(200)}
+                          height={responsiveHeight(28)}>
                           <Polyline
                             points={secondpoints}
                             stroke={colours[1]}
@@ -950,37 +1169,6 @@ const lineData = PrimaryLineData?.map((d, i) => ({
                         </Svg>
                       </View>
 
-                      {/* <View
-                        style={{
-                          position: 'absolute',
-                          zIndex: 10,
-                          bottom: Platform.OS == 'ios' ? 0 : -5,
-                          backgroundColor: AppColors.WHITE,
-                          width: responsiveWidth(100),
-                          height: responsiveHeight(2),
-                        }}
-                      /> */}
-
-                      {/* <View
-                        style={{
-                          flexDirection: 'row',
-                          position: 'absolute',
-                          zIndex: 100,
-                          bottom: -0,
-                          marginLeft: responsiveWidth(5),
-                        }}>
-                        {AllDayNumber?.map(item => {
-                          return (
-                            <View
-                              style={{
-                                backgroundColor: 'white',
-                                width: responsiveWidth(21),
-                              }}>
-                              <AppText title={item} textSize={2} />
-                            </View>
-                          );
-                        })}
-                      </View> */}
                     </ScrollView>
 
                     <View
@@ -1032,8 +1220,8 @@ const lineData = PrimaryLineData?.map((d, i) => ({
                         // paddingVertical: responsiveHeight(1),
                         // justifyContent: 'flex-start',,
                         height: responsiveHeight(30),
-                        top: '39%',
-                        gap: 8,
+                        top: '30%',
+                        gap: 10,
                       }}>
                       <AppText
                         // style={{

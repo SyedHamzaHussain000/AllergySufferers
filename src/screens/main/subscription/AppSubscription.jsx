@@ -29,6 +29,8 @@ import {
   purchaseErrorListener,
   acknowledgePurchaseAndroid,
   getAvailablePurchases,
+  useIAP,
+  getProducts,
 } from 'react-native-iap';
 import Toast from 'react-native-toast-message';
 import moment from 'moment';
@@ -42,11 +44,43 @@ const AppSubscription = ({navigation}) => {
   const isAndroid = Platform.OS === 'android'; // check platform is android or not
 
   const androidsubscriptionsId = ['premium_oneyear', 'premium_monthly'];
+  const iosProductIds = ['allergy_month', 'allergy_year'];
 
   const [connection, setConnection] = useState(false); // set in-app purchase is connected or not
   const [subscriptionLocal, setSubscriptionLocal] = useState([]);
   const [offerings, setOfferings] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // const {
+  //     connected,
+  //     products,
+  //     fetchProducts,
+  //     requestPurchase,
+  //     validateReceipt,
+  //   } = useIAP({
+  //     // onPurchaseSuccess: (purchase) => {
+  //     //   console.log('Purchase successful:', purchase)
+  //     //   // Handle successful purchase
+  //     //   validatePurchase(purchase)
+  //     // },
+  //    onPurchaseError: (error) => {
+  //     console.error("❌ Purchase failed:", error);
+  //     if (error.code === "E_USER_CANCELLED") {
+  //       Alert.alert("Purchase cancelled", "You cancelled the subscription.");
+  //     } else {
+  //       Alert.alert("Purchase failed", error.message || "Something went wrong");
+  //     }
+  //   },
+  //   })
+
+  // console.log('products ====>',products)
+
+  // useEffect(() => {
+  //   if (Platform.OS === 'ios' && connected) {
+  //     fetchProducts({ skus: iosProductIds });
+  //   }
+  // }, [connected]);
+
   useEffect(() => {
     const setup = async () => {
       const result = await initConnection();
@@ -66,21 +100,23 @@ const AppSubscription = ({navigation}) => {
   }, []);
 
   useEffect(() => {
-    if (isAndroid) {
-      if (connection) {
+    if (connection) {
+      if (isAndroid) {
         getSubscriptionInfo();
+      } else {
+        getSubscriptionInfoIOS();
       }
     }
   }, [connection]);
 
   const onRestorePurchase = async () => {
-    if (Platform.OS == 'android') {
+    // if (Platform.OS == 'android') {
       setLoading(true);
       try {
         // const purchases = await RNIap.getAvailablePurchases();
         const purchases = await getAvailablePurchases();
 
-        console.log("purchase", purchases)
+      return  console.log('purchase', purchases);
 
         if (purchases.length > 0) {
           navigation.navigate('Login');
@@ -95,7 +131,7 @@ const AppSubscription = ({navigation}) => {
       } finally {
         setLoading(false);
       }
-    } else {
+    // } else {
       // setLoading(true);
       // try {
       //   const customerInfo = await Purchases.restorePurchases();
@@ -132,7 +168,7 @@ const AppSubscription = ({navigation}) => {
       // } finally {
       //   setLoading(false);
       // }
-    }
+    // }
   };
 
   const NoSubscription = () => {
@@ -143,7 +179,16 @@ const AppSubscription = ({navigation}) => {
     }
   };
 
-  // To get Subscription information
+  const getSubscriptionInfoIOS = async () => {
+    try {
+      const products = await getSubscriptions({skus: iosProductIds});
+      console.log('products from appstore ===>', products);
+      setSubscriptionLocal(products);
+    } catch (error) {
+      console.error('Error fetching iOS products:', error);
+    }
+  };
+
   const getSubscriptionInfo = async () => {
     try {
       const subscriptions = await getSubscriptions({
@@ -152,13 +197,14 @@ const AppSubscription = ({navigation}) => {
 
       console.log('sussssb', subscriptions);
 
-      setSubscriptionLocal(subscriptions); // set subscription information
+      setSubscriptionLocal(subscriptions);
     } catch (error) {
       console.error('Error fetching products: ', error);
     }
   };
 
   const subscribeNow = async (data, isExpired, type) => {
+  //  return console.log('item ===>',data) 
     if (Platform.OS == 'android') {
       if (userData?.email) {
         // navigation.navigate('Home');
@@ -211,6 +257,46 @@ const AppSubscription = ({navigation}) => {
               isExpired: false,
               SubscriptionType: purchaseData[0]?.productId,
               expireDate: moment().add(1, 'month').format('YYYY-MM-DD'),
+            }),
+          );
+          navigation.navigate('Login');
+        }
+      }
+    } else {
+       const purchaseData = await requestSubscription({
+        sku: data?.productId,
+      });
+
+      if (purchaseData) {
+        console.log("📦 iOS purchase data =>", purchaseData);
+
+        if (userData?.email) {
+          const subscribeApi = await SubscribeNow(
+            data?.productId === 'allergy_month' ? 'monthly' : 'yearly',
+            userData?.id,
+            purchaseData?.transactionId
+          );
+          dispatch(
+            setSubscription({
+              isExpired: false,
+              SubscriptionType: data?.productId,
+              expireDate: subscribeApi.expiry,
+              transactionId: purchaseData?.transactionId
+            }),
+          );
+          navigation.navigate('Home');
+        } else {
+          Toast.show({
+            type: 'success',
+            text1: 'Please create or login to enjoy the subscription',
+          });
+
+          dispatch(
+            setSubscription({
+              isExpired: false,
+              SubscriptionType: data?.productId,
+              expireDate: moment().add(1, 'month').format('YYYY-MM-DD'),
+              transactionId: purchaseData?.transactionId
             }),
           );
           navigation.navigate('Login');
@@ -303,46 +389,72 @@ const AppSubscription = ({navigation}) => {
           />
         </View>
 
-        <FlatList
-          contentContainerStyle={{gap: 10}}
-          data={subscriptionLocal}
-          renderItem={({item}) => {
-            const priceObjectIndex =
-              item?.subscriptionOfferDetails[0]?.pricingPhases?.pricingPhaseList
-                ?.length;
-            const PriceArray =
-              item?.subscriptionOfferDetails[0]?.pricingPhases
-                ?.pricingPhaseList[priceObjectIndex - 1];
-            return (
-              <SubscriptionCard
-                title={item?.displayName}
-                price={PriceArray?.formattedPrice}
-                type={PriceArray?.billingPeriod == 'P1M' ? 'monthly' : 'yearly'}
-                subscribeNow={() => subscribeNow(item, false, 'month')}
-              />
-            );
-          }}
-        />
-        
-        {
-          Platform.OS == "ios" ** (
-           <>
-           
-           {loading == true ? (
-             <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-           ) : (
-             <TouchableOpacity onPress={() => onRestorePurchase()}>
-               <AppText
-                 title={'Restore Purchase'}
-                 textSize={2}
-                 textAlignment={'center'}
-                 textColor={AppColors.BLUE}
-               />
-             </TouchableOpacity>
-           )}
-           </> 
-          )
-        }
+        {isAndroid ? (
+          <FlatList
+            contentContainerStyle={{gap: 10}}
+            data={subscriptionLocal}
+            renderItem={({item}) => {
+              const priceObjectIndex =
+                item?.subscriptionOfferDetails[0]?.pricingPhases
+                  ?.pricingPhaseList?.length;
+              const PriceArray =
+                item?.subscriptionOfferDetails[0]?.pricingPhases
+                  ?.pricingPhaseList[priceObjectIndex - 1];
+              return (
+                <SubscriptionCard
+                  title={item?.displayName}
+                  price={PriceArray?.formattedPrice}
+                  type={
+                    PriceArray?.billingPeriod == 'P1M' ? 'monthly' : 'yearly'
+                  }
+                  subscribeNow={() => subscribeNow(item, false, 'month')}
+                />
+              );
+            }}
+          />
+        ) : (
+          <FlatList
+            contentContainerStyle={{gap: 10}}
+            data={subscriptionLocal}
+            renderItem={({item}) => {
+              const displayName =
+                item?.title === '1 month localization'
+                  ? 'AllergySufferers - One Month Premium Membership'
+                  : 'AllergySufferers - One Year Premium Membership';
+              return (
+                <SubscriptionCard
+                  title={displayName}
+                  price={item?.currency + ' ' + item?.price}
+                  type={
+                    item?.productId === 'allergy_month'
+                      ? 'monthly'
+                      : 'yearly'
+                  }
+                  subscribeNow={() => subscribeNow(item, false, 'month')}
+                />
+              );
+            }}
+          />
+        )}
+
+        {Platform.OS ==
+          'ios' &&
+          (
+            <>
+              {loading == true ? (
+                <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+              ) : (
+                <TouchableOpacity onPress={() => onRestorePurchase()}>
+                  <AppText
+                    title={'Restore Purchase'}
+                    textSize={2}
+                    textAlignment={'center'}
+                    textColor={AppColors.BLUE}
+                  />
+                </TouchableOpacity>
+              )}
+            </>
+          )} 
 
         <TouchableOpacity
           onPress={() => NoSubscription()}

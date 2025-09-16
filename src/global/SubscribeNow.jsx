@@ -1,11 +1,12 @@
 import axios from "axios";
 import BASE_URL from "../utils/BASE_URL";
 
-const SubscribeNow = async(subscriptionType, userId) => {
+const SubscribeNow = async(subscriptionType, userId,transactionId) => {
 
 
   let data = new FormData();
   data.append('duration', subscriptionType);
+  data.append('transactionId',transactionId)
 
   let config = {
     method: 'post',
