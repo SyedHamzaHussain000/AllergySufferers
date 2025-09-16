@@ -162,7 +162,7 @@ const Login = ({navigation}) => {
             <TouchableOpacity
               onPress={() => navigation.navigate('ForgetPassword')}>
               <AppText
-                title={'Forget Password'}
+                title={'Forgot Password'}
                 textColor={AppColors.BLUE}
                 textSize={1.8}
                 textAlignment={'flex-end'}

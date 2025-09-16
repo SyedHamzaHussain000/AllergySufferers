@@ -346,7 +346,7 @@ const AppSubscription = ({navigation}) => {
 
          <TouchableOpacity
           onPress={() => NoSubscription()}
-          style={{marginTop: 5, flexDirection:'row', alignSelf:'center', gap:10}}>
+          style={{marginTop: 5, flexDirection:'row', alignSelf:'center', gap:4}}>
           <AppText
             title={'If you already have a subscription please'}
             textSize={2}
