@@ -66,7 +66,7 @@ const ForgetPassword = ({navigation}) => {
       }}>
         <View style={{alignItems:'center', justifyContent:'center', gap:5}}>
         <AppText
-          title={'Forget Password'}
+          title={'Forgot Password'}
           textColor={AppColors.BLACK}
           textSize={2.5}
           textFontWeight

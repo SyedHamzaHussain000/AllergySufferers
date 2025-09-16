@@ -166,6 +166,7 @@ const Login = ({navigation}) => {
                 textColor={AppColors.BLUE}
                 textSize={1.8}
                 textAlignment={'flex-end'}
+                
               />
             </TouchableOpacity>
           </View>

@@ -840,6 +840,12 @@ const MedicationSample = ({navigation}) => {
           onCancel={() => {
             setOpen(false);
           }}
+          onTouchCancel={()=>{
+            setOpen(false);
+          }}
+          onPointerCancel={()=>{
+            setOpen(false);
+          }}
         />
 
         <ScrollView

@@ -348,7 +348,7 @@ const AppSubscription = ({navigation}) => {
           onPress={() => NoSubscription()}
           style={{marginTop: 5, flexDirection:'row', alignSelf:'center', gap:10}}>
           <AppText
-            title={'If you already subscribe please'}
+            title={'If you already have a subscription please'}
             textSize={2}
             textAlignment={'center'}
             textColor={AppColors.BLACK}

@@ -24,6 +24,7 @@ import {
 } from '../../../utils/Responsive_Dimensions';
 import AppText from '../../../components/AppTextComps/AppText';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import BASE_URL from '../../../utils/BASE_URL';
 import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
@@ -264,69 +265,123 @@ const DatavisualizerSample = ({navigation}) => {
       });
   };
 
-  const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
-    if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
-      setMedicationnRecord([]);
-      return;
-    }
 
-    const end = moment(); // today
-    const start = moment().local().subtract(6, 'day'); // last 7 days
+  // working ********
+  // const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
+  //   if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
+  //     setMedicationnRecord([]);
+  //     return;
+  //   }
 
-    setStartDate(start);
-    setEndDate(end);
+  //   const end = moment(); // today
+  //   const start = moment().local().subtract(6, 'day'); // last 7 days
 
-    // ✅ sirf last 7 din ka data lo
-    const filteredData = allActiveMedicationRedux.filter(entry =>
-      moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
-    );
+  //   setStartDate(start);
+  //   setEndDate(end);
 
-    setStartDate(filteredData[0]?.date);
-    // console.log('filteredData', filteredData);
+  //   // ✅ sirf last 7 din ka data lo
+  //   const filteredData = allActiveMedicationRedux.filter(entry =>
+  //     moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
+  //   );
 
-    const dayNumbers = [];
-    let current = start.clone();
+  //   setStartDate(filteredData[0]?.date);
+  //   // console.log('filteredData', filteredData);
 
-    while (current.isSameOrBefore(end)) {
-      dayNumbers.push(current.date());
-      current.add(1, 'day');
-    }
+  //   const dayNumbers = [];
+  //   let current = start.clone();
 
-    setAllDayNumber(dayNumbers);
+  //   while (current.isSameOrBefore(end)) {
+  //     dayNumbers.push(current.date());
+  //     current.add(1, 'day');
+  //   }
 
-    // ✅ Group by date
-    const grouped = {};
-    filteredData.forEach(entry => {
-      if (!grouped[entry.date]) {
-        grouped[entry.date] = [];
-      }
-      grouped[entry.date].push(entry);
-    });
+  //   setAllDayNumber(dayNumbers);
 
-    const barData = [];
+  //   // ✅ Group by date
+  //   const grouped = {};
+  //   filteredData.forEach(entry => {
+  //     if (!grouped[entry.date]) {
+  //       grouped[entry.date] = [];
+  //     }
+  //     grouped[entry.date].push(entry);
+  //   });
 
-    Object.keys(grouped).forEach(date => {
-      const group = grouped[date];
-      group.forEach((entry, idx) => {
-        const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
-        const value = parseInt(entry.units) || 0;
-        const isLast = idx === group.length - 1;
+  //   const barData = [];
 
-        barData.push({
-          value,
-          ...(idx === 0 && {label: formattedLabel}), // ✅ only first entry of date gets label
-          spacing: isLast ? 30 : 0, // ✅ spacing after last entry of that date
-          frontColor: entry.frontColor || '#E23131',
+  //   Object.keys(grouped).forEach(date => {
+  //     const group = grouped[date];
+  //     group.forEach((entry, idx) => {
+  //       const formattedLabel = moment(entry.date, 'YYYY-MM-DD').format('D');
+  //       const value = parseInt(entry.units) || 0;
+  //       const isLast = idx === group.length - 1;
 
-          labelWidth: 30,
-        });
-      });
-    });
+  //       barData.push({
+  //         value,
+  //         ...(idx === 0 && {label: formattedLabel}), // ✅ only first entry of date gets label
+  //         spacing: isLast ? 30 : 0, // ✅ spacing after last entry of that date
+  //         frontColor: entry.frontColor || '#E23131',
 
-    setMedicationnRecord(barData);
-  };
+  //         labelWidth: 30,
+  //       });
+  //     });
+  //   });
 
+  //   setMedicationnRecord(barData);
+  // };
+
+
+
+  
+  
   // console.log("medicationRecord",MedicationnRecord)
+
+  const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
+  if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
+    setMedicationnRecord([]);
+    return;
+  }
+
+  const end = moment(); // today
+  const start = moment().local().subtract(6, 'day'); // last 7 days
+
+  setStartDate(start);
+  setEndDate(end);
+
+  // ✅ sirf last 7 din ka data lo
+  const filteredData = allActiveMedicationRedux.filter(entry =>
+    moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
+  );
+
+  setStartDate(filteredData[0]?.date);
+
+  // ✅ Group by date
+  const grouped = {};
+  filteredData.forEach(entry => {
+    if (!grouped[entry.date]) {
+      grouped[entry.date] = [];
+    }
+    grouped[entry.date].push(entry);
+  });
+
+  // ✅ Ab proper grouped structure banao
+  const barData = Object.keys(grouped).map(date => {
+    const group = grouped[date];
+    const formattedLabel = moment(date, 'YYYY-MM-DD').format('D');
+
+    return {
+      label: formattedLabel,
+      meds: group.map((entry, idx) => ({
+        value: parseInt(entry.units) || 0,
+        spacing: idx === group.length - 1 ? 30 : 0,
+        frontColor: entry.frontColor || '#E23131',
+        labelWidth: 30,
+      })),
+    };
+  });
+
+  setMedicationnRecord(barData);
+};
+
 
   const getDataVisualizer = async (selecallergens, city) => {
     // console.log("city ? city : AllCities[0]", city ? city : AllCities[0])
@@ -744,7 +799,7 @@ const DatavisualizerSample = ({navigation}) => {
         {expireDate ? (
           <>
             {startDate && endDate && (
-              <View style={{marginTop: 20, marginBottom: 20}}>
+              <View style={{marginTop: 20, marginBottom: 20, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
                 <AppText
                   title={`${moment(startDate).format('MMM DD')} - ${moment(
                     endDate,
@@ -753,6 +808,14 @@ const DatavisualizerSample = ({navigation}) => {
                   textColor={AppColors.BLACK}
                   textAlignment={'center'}
                 />
+
+                <TouchableOpacity style={{padding:20,}} onPress={()=> getSelectedAllergens(activeCity)}>
+                        <Ionicons
+                            name="reload"
+                            size={responsiveFontSize(3)}
+                            color={AppColors.BLACK}
+                          />
+                </TouchableOpacity>
               </View>
             )}
 
@@ -963,7 +1026,7 @@ const DatavisualizerSample = ({navigation}) => {
                       </Svg> */}
 
                       <View>
-                        <FlatList
+                        {/* <FlatList
                           data={MedicationnRecord}
                           horizontal
                           contentContainerStyle={{
@@ -987,7 +1050,46 @@ const DatavisualizerSample = ({navigation}) => {
                               />
                             );
                           }}
-                        />
+                        /> */}
+                        <FlatList
+  data={MedicationnRecord} // [{label: '11', meds: [...]}, {label: '12', meds: [...]}]
+  horizontal
+  keyExtractor={(item) => item.label}
+        contentContainerStyle={{
+                            width: responsiveWidth(200),
+                            spacing: 20,
+                            height: 220,
+                            alignItems: 'flex-end',
+                            marginBottom: 20,
+                            marginLeft: responsiveWidth(3.5),
+                          }}
+  renderItem={({ item }) => (
+    <View
+      style={{
+        width: responsiveWidth(29), // fixed slot per day
+        alignItems: 'center',
+        
+
+      }}
+    >
+      {/* Bars */}
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+        {item?.meds?.map((m, idx) => (
+          <View
+            key={idx}
+            style={{
+              height: m.value > 0 ? responsiveHeight(m.value * 3.4) : 0,
+              width: 8,
+              marginRight: m.spacing,
+              backgroundColor: m.value > 0 ? m.frontColor : 'transparent',
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  )}
+/>
+
                       </View>
 
                       <View
