@@ -64,6 +64,7 @@ const Home = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const subscriptionType = useSelector(state => state?.auth?.SubscriptionType);
+  const transactionId = useSelector(state => state?.auth?.transactionId);
   const subscriptionExpire = useSelector(state => state?.auth?.expireDate);
 
   const watchFreeTut = useSelector(state => state?.auth?.WatchFreeTut);
@@ -117,6 +118,8 @@ const Home = ({navigation}) => {
   const [myLocation, setMyLocation] = useState();
 
   const [message, setMessage] = useState('');
+
+  console.log('exipire date ===>',expireDate)
 
 
 //  if (expireDate) {
@@ -368,11 +371,16 @@ const Home = ({navigation}) => {
   };
 
   const SubscribeSubscription = async () => {
-    if (subscriptionType) {
+    if (subscriptionType && transactionId) {
       const subscribeApi = await SubscribeNow(
         subscriptionType == 'premium_monthly' ? 'monthly' : 'yearly',
         userData?.id,
+        transactionId
       );
+
+    //  alert('hello')
+
+      // console.log('subscribe api response ===>',subscribeApi)
 
       dispatch(
         setSubscription({

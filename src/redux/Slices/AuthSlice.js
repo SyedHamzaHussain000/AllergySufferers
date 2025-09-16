@@ -190,7 +190,7 @@ const initialState = {
   loader: false,
   isExpired: true,
   expireDate: '',
-  transactionId: '',
+  transactionId: null,
   SubscriptionType: '',
   currentLocation: {
     Lat: null,
@@ -235,7 +235,8 @@ const AuthSlice = createSlice({
       state.isExpired = true;
       state.currentLocation.Lat = null;
       state.currentLocation.Lng = null;
-      state.SubscriptionType = null
+      state.SubscriptionType = null,
+      state.transactionId = null
     },
     setCurrentUserData: (state, action) => {
       state.user = action.payload;

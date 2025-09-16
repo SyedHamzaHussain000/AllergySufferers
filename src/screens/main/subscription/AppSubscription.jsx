@@ -35,6 +35,7 @@ import {
 import Toast from 'react-native-toast-message';
 import moment from 'moment';
 import {hideNavigationBar} from 'react-native-navigation-bar-color';
+import ShowError from '../../../utils/ShowError';
 
 const AppSubscription = ({navigation}) => {
   const userData = useSelector(state => state.auth.user);
@@ -109,66 +110,132 @@ const AppSubscription = ({navigation}) => {
     }
   }, [connection]);
 
+  // const onRestorePurchase = async () => {
+  //   // if (Platform.OS == 'android') {
+  //     setLoading(true);
+  //     try {
+  //       // const purchases = await RNIap.getAvailablePurchases();
+  //       const purchases = await getAvailablePurchases();
+
+  //     return  console.log('purchase', purchases);
+
+  //       if (purchases.length > 0) {
+  //         navigation.navigate('Login');
+  //       } else {
+  //         Alert.alert(
+  //           'Please buy the subscription',
+  //           'You have to buy the subscription first to continue',
+  //         );
+  //       }
+  //     } catch (e) {
+  //       console.error('Failed to restore purchases:', e);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   // } else {
+  //     // setLoading(true);
+  //     // try {
+  //     //   const customerInfo = await Purchases.restorePurchases();
+  //     //   console.log('restore', customerInfo.entitlements.active);
+  //     //   if (
+  //     //     Object.keys(customerInfo.entitlements.active).length > 0 &&
+  //     //     !context?.token
+  //     //   ) {
+  //     //     // note('Purchases Restored!', 'Your subscription has been restored successfully');
+  //     //     navigation.navigate('Message', {
+  //     //       theme: 'light',
+  //     //       title: 'Login Required',
+  //     //       message:
+  //     //         'To access your subscription benefits, please create or log in to your account',
+  //     //       screen: 'Login',
+  //     //     });
+  //     //     // navigation.replace('Home');
+  //     //   } else if (
+  //     //     Object.keys(customerInfo.entitlements.active).length > 0 &&
+  //     //     context?.token
+  //     //   ) {
+  //     //     note(
+  //     //       'Purchases Restored!',
+  //     //       'Your subscription has been restored successfully',
+  //     //     );
+  //     //   } else {
+  //     //     note(
+  //     //       'Please buy the subscription',
+  //     //       'You have to buy the subscription first to continue',
+  //     //     );
+  //     //   }
+  //     // } catch (e) {
+  //     //   console.error('Failed to restore purchases:', e);
+  //     // } finally {
+  //     //   setLoading(false);
+  //     // }
+  //   // }
+  // };
+
   const onRestorePurchase = async () => {
-    // if (Platform.OS == 'android') {
-      setLoading(true);
-      try {
-        // const purchases = await RNIap.getAvailablePurchases();
-        const purchases = await getAvailablePurchases();
+    setLoading(true);
+    try {
+      const purchases = await getAvailablePurchases({
+        onlyIncludeActiveItemsIOS: true,
+      });
 
-      return  console.log('purchase', purchases);
+      console.log('purchases response', purchases);
 
-        if (purchases.length > 0) {
-          navigation.navigate('Login');
+      if (purchases.length > 0) {
+        // const validPurchases = purchases.filter((p) =>
+        //   iosProductIds.includes(p.productId)
+        // );
+        // for (let purchase of validPurchases) {
+        if (userData?.email) {
+          try {
+            const subscribeApi = await SubscribeNow(
+              purchases[0].productId === 'allergy_month' ? 'monthly' : 'yearly',
+              userData?.id,
+              purchases[0].originalTransactionIdentifierIOS,
+            );
+            dispatch(
+              setSubscription({
+                isExpired: false,
+                SubscriptionType: purchases[0]?.productId,
+                expireDate: subscribeApi.expiry,
+                transactionId: purchases[0]?.originalTransactionIdentifierIOS,
+              }),
+            );
+            Toast.show({
+              type: 'success',
+              text1: 'Your subscription has been restored!',
+            });
+            navigation.navigate('Home');
+          } catch (error) {
+            ShowError(error)
+          }
         } else {
-          Alert.alert(
-            'Please buy the subscription',
-            'You have to buy the subscription first to continue',
+          Toast.show({
+            type: 'success',
+            text1: 'Please create or login to enjoy the subscription',
+          });
+          dispatch(
+            setSubscription({
+              isExpired: false,
+              SubscriptionType: purchases[0].productId,
+              expireDate: moment().add(1, 'month').format('YYYY-MM-DD'),
+              transactionId: purchases[0].originalTransactionIdentifierIOS,
+            }),
           );
+          navigation.navigate('Login');
         }
-      } catch (e) {
-        console.error('Failed to restore purchases:', e);
-      } finally {
-        setLoading(false);
+      } else {
+        Alert.alert(
+          'No Purchases',
+          'Please buy a subscription first to continue.',
+        );
       }
-    // } else {
-      // setLoading(true);
-      // try {
-      //   const customerInfo = await Purchases.restorePurchases();
-      //   console.log('restore', customerInfo.entitlements.active);
-      //   if (
-      //     Object.keys(customerInfo.entitlements.active).length > 0 &&
-      //     !context?.token
-      //   ) {
-      //     // note('Purchases Restored!', 'Your subscription has been restored successfully');
-      //     navigation.navigate('Message', {
-      //       theme: 'light',
-      //       title: 'Login Required',
-      //       message:
-      //         'To access your subscription benefits, please create or log in to your account',
-      //       screen: 'Login',
-      //     });
-      //     // navigation.replace('Home');
-      //   } else if (
-      //     Object.keys(customerInfo.entitlements.active).length > 0 &&
-      //     context?.token
-      //   ) {
-      //     note(
-      //       'Purchases Restored!',
-      //       'Your subscription has been restored successfully',
-      //     );
-      //   } else {
-      //     note(
-      //       'Please buy the subscription',
-      //       'You have to buy the subscription first to continue',
-      //     );
-      //   }
-      // } catch (e) {
-      //   console.error('Failed to restore purchases:', e);
-      // } finally {
-      //   setLoading(false);
-      // }
-    // }
+    } catch (e) {
+      console.error('Failed to restore purchases:', e);
+      Alert.alert('Error', 'Could not restore purchases.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const NoSubscription = () => {
@@ -204,7 +271,7 @@ const AppSubscription = ({navigation}) => {
   };
 
   const subscribeNow = async (data, isExpired, type) => {
-  //  return console.log('item ===>',data) 
+    //  return console.log('item ===>',data)
     if (Platform.OS == 'android') {
       if (userData?.email) {
         // navigation.navigate('Home');
@@ -263,25 +330,25 @@ const AppSubscription = ({navigation}) => {
         }
       }
     } else {
-       const purchaseData = await requestSubscription({
+      const purchaseData = await requestSubscription({
         sku: data?.productId,
       });
 
       if (purchaseData) {
-        console.log("📦 iOS purchase data =>", purchaseData);
+        console.log('📦 iOS purchase data =>', purchaseData);
 
         if (userData?.email) {
           const subscribeApi = await SubscribeNow(
             data?.productId === 'allergy_month' ? 'monthly' : 'yearly',
             userData?.id,
-            purchaseData?.transactionId
+            purchaseData?.originalTransactionIdentifierIOS,
           );
           dispatch(
             setSubscription({
               isExpired: false,
               SubscriptionType: data?.productId,
               expireDate: subscribeApi.expiry,
-              transactionId: purchaseData?.transactionId
+              transactionId: purchaseData?.originalTransactionIdentifierIOS,
             }),
           );
           navigation.navigate('Home');
@@ -296,7 +363,7 @@ const AppSubscription = ({navigation}) => {
               isExpired: false,
               SubscriptionType: data?.productId,
               expireDate: moment().add(1, 'month').format('YYYY-MM-DD'),
-              transactionId: purchaseData?.transactionId
+              transactionId: purchaseData?.originalTransactionIdentifierIOS,
             }),
           );
           navigation.navigate('Login');
@@ -426,9 +493,7 @@ const AppSubscription = ({navigation}) => {
                   title={displayName}
                   price={item?.currency + ' ' + item?.price}
                   type={
-                    item?.productId === 'allergy_month'
-                      ? 'monthly'
-                      : 'yearly'
+                    item?.productId === 'allergy_month' ? 'monthly' : 'yearly'
                   }
                   subscribeNow={() => subscribeNow(item, false, 'month')}
                 />
@@ -437,28 +502,31 @@ const AppSubscription = ({navigation}) => {
           />
         )}
 
-        {Platform.OS ==
-          'ios' &&
-          (
-            <>
-              {loading == true ? (
-                <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-              ) : (
-                <TouchableOpacity onPress={() => onRestorePurchase()}>
-                  <AppText
-                    title={'Restore Purchase'}
-                    textSize={2}
-                    textAlignment={'center'}
-                    textColor={AppColors.BLUE}
-                  />
-                </TouchableOpacity>
-              )}
-            </>
-          )} 
+        {Platform.OS == 'ios' && (
+          <>
+            {loading == true ? (
+              <ActivityIndicator size={'large'} color={AppColors.BLACK} />
+            ) : (
+              <TouchableOpacity onPress={() => onRestorePurchase()}>
+                <AppText
+                  title={'Restore Purchase'}
+                  textSize={2}
+                  textAlignment={'center'}
+                  textColor={AppColors.BLUE}
+                />
+              </TouchableOpacity>
+            )}
+          </>
+        )}
 
-         <TouchableOpacity
+        <TouchableOpacity
           onPress={() => NoSubscription()}
-          style={{marginTop: 5, flexDirection:'row', alignSelf:'center', gap:4}}>
+          style={{
+            marginTop: 5,
+            flexDirection: 'row',
+            alignSelf: 'center',
+            gap: 4,
+          }}>
           <AppText
             title={'If you already have a subscription please'}
             textSize={2}
@@ -470,7 +538,6 @@ const AppSubscription = ({navigation}) => {
             textSize={2}
             textAlignment={'center'}
             textFontWeight
-
             textColor={AppColors.BLACK}
           />
         </TouchableOpacity>
