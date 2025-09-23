@@ -370,7 +370,7 @@ const Home = ({navigation}) => {
   const SubscribeSubscription = async () => {
     if (subscriptionType) {
       const subscribeApi = await SubscribeNow(
-        subscriptionType == 'premium_monthly' ? 'monthly' : 'yearly',
+        subscriptionType == 'premium_monthly'  ? 'monthly' : 'yearly',
         userData?.id,
       );
 

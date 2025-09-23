@@ -80,14 +80,53 @@ const AppSubscription = ({navigation}) => {
         // const purchases = await RNIap.getAvailablePurchases();
         const purchases = await getAvailablePurchases();
 
-        console.log("purchase", purchases)
-
+        console.log("getAvailablePurchases", purchases)
+        // GPA.3367-3679-0099-64031
         if (purchases.length > 0) {
-          navigation.navigate('Login');
+           if (userData?.email) {
+          try {
+            const subscribeApi = await SubscribeNow(
+              purchases[0].productId === "premium_monthly" ? "monthly" : "yearly",
+              userData?.id,
+              purchases[0].orderId,
+            );
+            dispatch(
+              setSubscription({
+                isExpired: false,
+                SubscriptionType: purchases[0]?.productId,
+                expireDate: subscribeApi.expiry,
+                transactionId: purchases[0]?.orderId,
+              }),
+            );
+            Toast.show({
+              type:"success",
+              text1: "Your subscription has been restored!",
+            });
+            navigation.navigate("Home");
+          } catch (error) {
+            ShowError(error)
+          }
+        } else {
+          Toast.show({
+            type: "success",
+            text1: "Please create or login to enjoy the subscription",
+          });
+          dispatch(
+            setSubscription({
+              isExpired: false,
+              SubscriptionType: purchases[0].productId,
+              expireDate: moment().add(1, "month").format("YYYY-MM-DD"),
+              transactionId: purchases[0].orderId,
+            }),
+          );
+          navigation.navigate("Login");
+        }
+
+          // navigation.navigate('Login');
         } else {
           Alert.alert(
             'Please buy the subscription',
-            'You have to buy the subscription first to continue',
+            'To continue, please purchase a subscription.',
           );
         }
       } catch (e) {
@@ -150,7 +189,6 @@ const AppSubscription = ({navigation}) => {
         skus: androidsubscriptionsId,
       });
 
-      console.log('sussssb', subscriptions);
 
       setSubscriptionLocal(subscriptions); // set subscription information
     } catch (error) {
@@ -160,6 +198,10 @@ const AppSubscription = ({navigation}) => {
 
   const subscribeNow = async (data, isExpired, type) => {
     if (Platform.OS == 'android') {
+
+      try {
+        
+      
       if (userData?.email) {
         // navigation.navigate('Home');
         // return
@@ -171,7 +213,7 @@ const AppSubscription = ({navigation}) => {
             subscriptionOffers: [{sku: data?.productId, offerToken}],
           }),
         });
-        // console.log('offerToken', purchaseData);
+        console.log('offerToken', purchaseData);
 
         if (purchaseData.length > 0) {
           const subscribeApi = await SubscribeNow(
@@ -216,7 +258,11 @@ const AppSubscription = ({navigation}) => {
           navigation.navigate('Login');
         }
       }
+    } catch (error) {
+        console.log("error", error)
+      }
     }
+
 
     return;
   };
@@ -324,9 +370,7 @@ const AppSubscription = ({navigation}) => {
           }}
         />
         
-        {
-          Platform.OS == "ios" ** (
-           <>
+        
            
            {loading == true ? (
              <ActivityIndicator size={'large'} color={AppColors.BLACK} />
@@ -340,9 +384,8 @@ const AppSubscription = ({navigation}) => {
                />
              </TouchableOpacity>
            )}
-           </> 
-          )
-        }
+      
+        
 
          <TouchableOpacity
           onPress={() => NoSubscription()}
