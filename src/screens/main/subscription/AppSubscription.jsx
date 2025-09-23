@@ -111,6 +111,7 @@ const AppSubscription = ({navigation}) => {
             type: "success",
             text1: "Please create or login to enjoy the subscription",
           });
+
           dispatch(
             setSubscription({
               isExpired: false,
