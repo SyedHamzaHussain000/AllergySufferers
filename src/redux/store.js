@@ -73,10 +73,11 @@ import AuthReducer from './Slices/AuthSlice';
 import MedicationReducer from './Slices/MedicationSlice';
 import BlackListSlice from './Slices/BlackListSlice'
 import ForecastSlice from './Slices/ForecastSlice'
+import SymtomsSlice from './Slices/SymtomsSlice'
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['auth', 'medications','forecast'],
+  whitelist: ['auth', 'medications','forecast','symtoms'],
   blacklist: ['blacklist'],
 };
 
@@ -84,7 +85,8 @@ const rootReducer = combineReducers({
   auth: AuthReducer,
   medications: MedicationReducer,
   blacklist: BlackListSlice,
-  forecast: ForecastSlice
+  forecast: ForecastSlice,
+  symtoms: SymtomsSlice
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

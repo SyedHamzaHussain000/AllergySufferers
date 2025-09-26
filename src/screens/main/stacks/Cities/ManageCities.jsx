@@ -244,6 +244,7 @@ const ManageCities = ({navigation}) => {
                     <AppTextInput
                       inputPlaceHolder={item?.city_name}
                       onNotificationPress={()=> NoifyCity(item)}
+                      cities={true}
                       arrowDelete={
                         <TouchableOpacity
                           onPress={() =>

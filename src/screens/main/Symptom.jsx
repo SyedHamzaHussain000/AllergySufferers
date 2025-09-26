@@ -24,18 +24,23 @@ import AppButton from '../../components/AppButton';
 import axios from 'axios';
 import BASE_URL from '../../utils/BASE_URL';
 import moment from 'moment';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import LoaderMode from '../../components/LoaderMode';
 import DatePicker from 'react-native-date-picker';
 import {AllergyTips} from '../../utils/AllergyTips';
 import AppIntroSlider from 'react-native-app-intro-slider';
 import SubscribeBar from '../../components/SubscribeBar';
+import { setAllSymtomsToReduxFromApi } from '../../redux/Slices/SymtomsSlice';
 
 const Symptom = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
   const sliderRef = useRef(null);
+  const dispatch = useDispatch()
 
   const expireDate = useSelector(state => state.auth.expireDate);
+  const AllSymtomsDataFromRedux = useSelector( state => state?.symtoms?.AllSymtoms)
+
+  
 
   const [randomTip, setRandomTip] = useState(null);
 
@@ -83,22 +88,24 @@ const Symptom = ({navigation}) => {
   };
 
 
-useEffect(() => {
-  const nav = navigation.addListener('focus', () => {
-    setLoader(true);
-    generateGraphSlides();
+  useEffect(()=>{
 
-    let randomIndex;
-    do {
-      randomIndex = Math.floor(Math.random() * AllergyTips.length);
-    } while (randomIndex === 26); // 👈 skip 26
+    setGraphSlides(AllSymtomsDataFromRedux)
+  },[AllSymtomsDataFromRedux])
 
-    setRandomTip(AllergyTips[randomIndex]);
-  });
+  useEffect(() => {
+    const nav = navigation.addListener('focus', () => {
+      // setLoader(true);
+      generateGraphSlides(); // 👈
+      // getSymtomsData();
 
-  return nav;
-}, [navigation]);
+      const random =
+        AllergyTips[Math.floor(Math.random() * AllergyTips.length)];
+      setRandomTip(random);
+    });
 
+    return nav;
+  }, [navigation]);
 
   useEffect(() => {
     if (sliderRef.current && graphSlides.length > 0) {
@@ -108,6 +115,25 @@ useEffect(() => {
   }, [graphSlides]);
 
   const setApiSymtomsData = id => {
+
+    
+    const day = moment(selecteddate).format('D'); // returns "26"
+
+
+    const updateDatalocal =  updateData(AllSymtomsDataFromRedux, day, id)
+
+    if(updateDatalocal.length > 0){
+      dispatch(setAllSymtomsToReduxFromApi(updateDatalocal))
+      setSymtomsNumber(id);
+
+      sliderRef?.current?.goToSlide(graphSlides?.length - 1, false);
+
+
+      return
+    }
+
+    // console.log("emoji id", id)
+    // return
     setSymtomsNumber(id);
 
     setLoader(true);
@@ -117,7 +143,7 @@ useEffect(() => {
       let data = JSON.stringify({
         level: id,
         date: selecteddate,
-      });
+      })
 
       let config = {
         method: 'post',
@@ -143,7 +169,18 @@ useEffect(() => {
     }
   };
 
+  // console.log("AllSymtomsDataFromRedux",AllSymtomsDataFromRedux)
   const generateGraphSlides = async selectedDate => {
+    //  console.log(" inn er funcAllSymtomsDataFromRedux",AllSymtomsDataFromRedux)
+
+    setLoader(false)
+    // if(AllSymtomsDataFromRedux.length > 0){
+
+    //   // setGraphSlides(AllSymtomsDataFromRedux)
+    //   setLoader(false)
+    //   return
+    // }
+
     setLoader(true);
     const slides = [];
     const today = moment(selectedDate ? selectedDate : new Date());
@@ -168,7 +205,7 @@ useEffect(() => {
           },
         },
       );
-
+      
       const data = response?.data?.symptoms || [];
 
       const labels = data.map(item =>
@@ -195,9 +232,47 @@ useEffect(() => {
       });
     }
 
+
+    const toDayDate = moment(new Date()).local().format('D')
+    const selectedDateCopy = moment(selectedDate).local().format('D')
+
+    
+
+    // if( slides[2]?.chartData?.labels[6] != toDayDate || slides[2]?.chartData?.labels[6] != selectedDateCopy ){
+      dispatch(setAllSymtomsToReduxFromApi(slides))
+    // }
+
     setGraphSlides(slides);
     setLoader(false);
+
+
   }
+
+
+  const updateData = (allData, targetDate, newValue) => {
+  return allData.map(item => {
+    const index = item.chartData.labels.indexOf(String(targetDate));
+    if (index !== -1) {
+      return {
+        ...item,
+        chartData: {
+          ...item.chartData,
+          datasets: item.chartData.datasets.map((dataset, i) => {
+            // Only update dataset[0], keep others as they are
+            if (i === 0) {
+              const newData = [...dataset.data];
+              newData[index] = newValue;
+              return { ...dataset, data: newData };
+            }
+            return dataset;
+          })
+        }
+      };
+    }
+    return item;
+  });
+};
+
 
 
 
@@ -232,7 +307,7 @@ useEffect(() => {
             setSelectedDate(formattedDate);
 
             // getSymtomsData(formattedDate);
-            generateGraphSlides(formattedDate);
+            // generateGraphSlides(formattedDate);
           }}
           onCancel={() => {
             setOpen(false);
@@ -266,9 +341,9 @@ useEffect(() => {
         {expireDate ? (
           <>
             <View style={{padding:20}}>
-              {loader ? (
+              {/* {loader ? (
                 <ActivityIndicator size={'large'} color={AppColors.BLACK} />
-              ) : (
+              ) : ( */}
                 <FlatList
                   data={mojis}
                   horizontal
@@ -301,7 +376,7 @@ useEffect(() => {
                     );
                   }}
                 />
-              )}
+              {/* )} */}
             </View>
             
 
@@ -315,7 +390,10 @@ useEffect(() => {
                 activeDotStyle={{backgroundColor: AppColors.PRIMARY}}
                 dotStyle={{backgroundColor: AppColors.LIGHTGRAY}}
                 style={{width:responsiveWidth(90), alignSelf:'center',}}
-                renderItem={({item}) => {
+                onSlideChange={(index,)=> console.log("index ii", index)}
+                renderItem={({item, index}) => {
+
+
 
 
                   return (
@@ -425,7 +503,7 @@ useEffect(() => {
           />
         </View>
 
-         
+        {randomTip?.id == 26 ? null : (
           <View style={{marginTop: 10}}>
             <Text
               style={{
@@ -439,7 +517,7 @@ useEffect(() => {
               {randomTip?.tip}
             </Text>
           </View>
-
+        )}
         </View>
         </ScrollView>
       </View>

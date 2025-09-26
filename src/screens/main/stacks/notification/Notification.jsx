@@ -176,7 +176,7 @@ const Notification = ({navigation}) => {
         showsVerticalScrollIndicator={false}
         nestedScrollEnabled>
         <AppButton
-          title={'City to Notify'}
+          title={'Pick your city for push notification'}
           handlePress={() => navigation.navigate('ManageCities')}
         />
         {NotificationLoader == true ? (

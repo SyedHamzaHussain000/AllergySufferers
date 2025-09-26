@@ -93,8 +93,8 @@ android {
         applicationId "org.aerobiology.allergySufferersV2"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 73
-        versionName "6.0.1"
+        versionCode 74
+        versionName "6.0.2"
         missingDimensionStrategy "store", "play"
     }
     signingConfigs {
