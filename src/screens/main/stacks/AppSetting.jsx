@@ -8,6 +8,7 @@ import AppColors from '../../../utils/AppColors';
 import { useDispatch } from 'react-redux';
 import { setLogout } from '../../../redux/Slices/AuthSlice';
 import { deleteAllData } from '../../../redux/Slices/MedicationSlice';
+import { clearForaCastSlive } from '../../../redux/Slices/ForecastSlice';
 const AppSetting = ({navigation}) => {
 
   const dispatch = useDispatch()
@@ -21,6 +22,7 @@ const AppSetting = ({navigation}) => {
 
   const logoutFunction = () => {
     dispatch(setLogout())
+    dispatch(clearForaCastSlive())
     dispatch(deleteAllData())
     navigation.navigate("Auth")
   }

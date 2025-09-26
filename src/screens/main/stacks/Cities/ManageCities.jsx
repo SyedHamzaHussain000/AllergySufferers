@@ -41,6 +41,7 @@ import {
 } from '../../../../redux/Slices/MedicationSlice';
 import {ApiCallWithUserId} from '../../../../global/ApiCall';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { clearForaCastSlive, removeForeCastSlice } from '../../../../redux/Slices/ForecastSlice';
 const ManageCities = ({navigation}) => {
   const dispatch = useDispatch();
   const userdata = useSelector(state => state.auth.user);
@@ -48,17 +49,27 @@ const ManageCities = ({navigation}) => {
   const [loader, setLoader] = useState(false);
   const [cities, setCities] = useState([]);
   const [activeMedication, setActiveMedication] = useState();
+  const [NotifiedCity, setNotifiedCity] = useState()
+  const [NotifyLoader, setNotifyLoader] = useState(false)
 
+  const AllForcast = useSelector(state => state?.forecast?.AllForcast);
+
+  console.log("AllForcast",AllForcast.length)
+  // dispatch(clearForaCastSlive())
 
   useEffect(() => {
-    const nav = navigation.addListener('focus', () => {
+    const nav = navigation.addListener('focus',async () => {
       getAllCities();
+      const getNotiRes =  await ApiCallWithUserId("post", "get_notification_city", userdata?.id  )
+      setNotifiedCity(getNotiRes.data)
     });
 
     return nav;
   }, [navigation]);
 
-
+  useEffect(()=>{
+    setActiveMedication(allMyCity)
+  },[allMyCity])
 
   const getAllCities = () => {
     setLoader(true);
@@ -74,14 +85,7 @@ const ManageCities = ({navigation}) => {
       .then(response => {
         console.log(JSON.stringify(response.data));
 
-        setActiveMedication(response?.data?.cities );
-
-        // dispatch()
-
-        // const filterCities = allMyCity.filter((res)=> res.currentLocation == true)
-
-        // setLoader(false);
-        // setActiveMedication([...filterCities ,...response?.data?.cities]);
+        setActiveMedication(response?.data?.cities);
 
         const filterCities = allMyCity.filter(
           res => res.currentLocation === true,
@@ -103,17 +107,19 @@ const ManageCities = ({navigation}) => {
               ...apiCities,
             ]
           : apiCities;
-
-
       })
       .catch(error => {
         console.log(error);
         setLoader(false);
       });
   };
-  
+
   // setLoader(false);
   const deleteActiveMedication = item => {
+
+
+    dispatch(removeForeCastSlice(item.city_name))
+
     setLoader(true);
     dispatch(setRemoveCity(item));
 
@@ -134,8 +140,8 @@ const ManageCities = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log("delete response",JSON.stringify(response.data));
-        setActiveMedication(response?.data?.cities );
+        console.log('delete response', JSON.stringify(response.data));
+        setActiveMedication(response?.data?.cities);
         setLoader(false);
         // getAllCities();
         Alert.alert('Success', 'City deleted successfully');
@@ -147,7 +153,6 @@ const ManageCities = ({navigation}) => {
   };
 
   const sortingCities = async data => {
-
     const sortCitiesApi = await ApiCallWithUserId(
       'post',
       'sort_cities',
@@ -157,62 +162,25 @@ const ManageCities = ({navigation}) => {
     dispatch(setSortCity(data));
   };
 
-  //   const sortingCities = async (data) => {
-  //     // return console.log(data)
-  //   try {
-  //     const updatedCities = data.map((city, index) => ({
-  //       ...city,
-  //       currentLocation: index === 0,
-  //     }));
+  const NoifyCity = async (cityProps) => {
+    setNotifyLoader(true)
+    const data = {
+       lat: cityProps?.lat,
+        lng: cityProps?.lng,
+        city_name: cityProps?.city_name,
+    }
 
-  //     const sortPayload = { data: updatedCities };
-  //     const sortRes = await ApiCallWithUserId(
-  //       'post',
-  //       'sort_cities',
-  //       userdata?.id,
-  //       sortPayload,
-  //     );
+    const response = await ApiCallWithUserId("post", "set_notification_city", userdata?.id, data )
 
-  //     console.log("sort_cities response:", sortRes);
+    if(response.status == 'success'){
+      const getNotiRes =  await ApiCallWithUserId("post", "get_notification_city", userdata?.id  )
+      setNotifiedCity(getNotiRes.data)
+      // console.log("get", getNotiRes.data)
+    }
 
-  //     const topCity = updatedCities[0];
-  //     const setCityPayload = JSON.stringify({
-  //       lat: topCity.lat,
-  //       lng: topCity.lng,
-  //       city_name: topCity.city_name,
-  //       currentLocation: true,
-  //     });
+    setNotifyLoader(false)
 
-  //     let config = {
-  //       method: 'post',
-  //       maxBodyLength: Infinity,
-  //       url: `${BASE_URL}/allergy_data/v1/user/${userdata?.id}/set_cities`,
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       data: setCityPayload,
-  //     };
-
-  //     const setCityRes = await axios.request(config);
-  //     console.log("set_cities response:", setCityRes.data);
-
-  //     dispatch(setSortCity(updatedCities));
-  //     setActiveMedication(updatedCities);
-
-  //     Toast.show({
-  //       type: 'success',
-  //       text1: `Current city updated to ${topCity.city_name}`,
-  //       position: 'bottom',
-  //     });
-
-  //   } catch (err) {
-  //     console.log("Error in sortingCities:", err);
-  //     Toast.show({
-  //       type: 'error',
-  //       text1: 'Failed to update cities',
-  //     });
-  //   }
-  // };
+  }
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -231,6 +199,40 @@ const ManageCities = ({navigation}) => {
 
         {loader && <ActivityIndicator size={'large'} color={AppColors.BLACK} />}
 
+        <View style={{marginBottom: 20, gap: 10}}>
+          <AppText
+            title="Active Notification City"
+            textSize={2}
+            textFontWeight
+          />
+          {
+            NotifiedCity ? (
+              <>
+              {
+                NotifyLoader ? (
+                  <ActivityIndicator size={'small'} color={AppColors.BLACK}/>
+                ):(
+                  <AppText
+                    title={NotifiedCity?.city_name}
+                    textSize={3}
+                    />
+
+                )
+              }
+                </>
+            ):(
+
+              <AppText
+                title="No city selected for notifications"
+                textSize={2}
+                textAlignment="center"
+              />
+            )
+          }
+        </View>
+
+        <AppText title={'Cities'} textSize={2} textFontWeight />
+
         {activeMedication ? (
           <NestableScrollContainer>
             <NestableDraggableFlatList
@@ -241,13 +243,7 @@ const ManageCities = ({navigation}) => {
                   <TouchableOpacity onLongPress={drag}>
                     <AppTextInput
                       inputPlaceHolder={item?.city_name}
-                      isNotification={activeMedication[0]?.city_name == item?.city_name && (
-                            <FontAwesome
-                              name={'bell'}
-                              size={responsiveFontSize(2)}
-                              color={AppColors.BLACK}
-                            />
-                          )}
+                      onNotificationPress={()=> NoifyCity(item)}
                       arrowDelete={
                         <TouchableOpacity
                           onPress={() =>
@@ -268,8 +264,6 @@ const ManageCities = ({navigation}) => {
                               {cancelable: false},
                             )
                           }>
-
-                            
                           <MaterialCommunityIcons
                             name={'delete'}
                             size={responsiveFontSize(2.5)}
@@ -279,7 +273,6 @@ const ManageCities = ({navigation}) => {
                       }
                       rightLogo={
                         <View style={{marginTop: 4, flexDirection: 'row'}}>
-                          
                           <Image
                             source={AppImages.updown}
                             style={{
@@ -305,11 +298,12 @@ const ManageCities = ({navigation}) => {
         ) : null}
 
         <View style={{marginTop: 20, gap: 10}}>
+            
           <AppButton
             title={'Add city'}
             bgColor={AppColors.BTNCOLOURS}
             RightColour={AppColors.rightArrowCOlor}
-            handlePress={() => navigation.navigate('AddCity')}
+            handlePress={() =>  navigation.navigate('AddCity')}
           />
           <AppButton
             title={'Manage pollens'}

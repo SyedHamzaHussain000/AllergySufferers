@@ -24,6 +24,7 @@ type props = {
   password?:any
   onEyePress?:() => void
   eye?: boolean
+  onNotificationPress?:() => void
 };
 const AppTextInput = ({
   logo,
@@ -42,7 +43,8 @@ const AppTextInput = ({
   keyboardType,
   password,
   onEyePress,
-  eye
+  eye,
+  onNotificationPress
 }: props) => {
   return (
     <View style={{gap: 5}}>
@@ -82,7 +84,7 @@ const AppTextInput = ({
           <AppText
             title={inputPlaceHolder}
             textColor={AppColors.LIGHTGRAY}
-            textwidth={65}
+            textwidth={50}
             textSize={2}
           />
         )}
@@ -104,8 +106,10 @@ const AppTextInput = ({
     {textInput == true ? 
       null
       :
-        <View style={{flexDirection: 'row', gap: 5, marginRight: 100, }}>
-          {isNotification}
+        <View style={{flexDirection: 'row', gap: 5, alignItems:'center' }}>
+          <TouchableOpacity onPress={onNotificationPress} style={{backgroundColor:AppColors.PRIMARY, paddingHorizontal:10, borderRadius:100, alignItems:'center', justifyContent:'center', paddingVertical:7}}>
+            <AppText title={"Notify"} textColor={AppColors.WHITE} textFontWeight textSize={1.8}/>
+          </TouchableOpacity>
           {rightLogo}
           {arrowDelete}
         </View>

@@ -7,21 +7,21 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import AppText from '../../../../components/AppTextComps/AppText';
 const Account = ({navigation}) => {
   const pollens = [
-    {
-      id: 1,
-      name: 'Cancel Subscription',
-      top: true,
+    // {
+    //   id: 1,
+    //   name: 'Cancel Subscription',
+    //   top: true,
 
-    },
+    // },
     
-    {
-      id: 2,
-      name: 'Refresh Data From Server',
+    // {
+    //   id: 2,
+    //   name: 'Refresh Data From Server',
 
       
-    },
+    // },
     {
-      id: 3,
+      id: 1,
       name: 'Delete All Data',
       onPress: () => navigation.navigate('DeleteAllData'),
       bottom: true

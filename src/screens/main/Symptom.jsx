@@ -83,19 +83,22 @@ const Symptom = ({navigation}) => {
   };
 
 
-  useEffect(() => {
-    const nav = navigation.addListener('focus', () => {
-      setLoader(true);
-      generateGraphSlides(); // 👈
-      // getSymtomsData();
+useEffect(() => {
+  const nav = navigation.addListener('focus', () => {
+    setLoader(true);
+    generateGraphSlides();
 
-      const random =
-        AllergyTips[Math.floor(Math.random() * AllergyTips.length)];
-      setRandomTip(random);
-    });
+    let randomIndex;
+    do {
+      randomIndex = Math.floor(Math.random() * AllergyTips.length);
+    } while (randomIndex === 26); // 👈 skip 26
 
-    return nav;
-  }, [navigation]);
+    setRandomTip(AllergyTips[randomIndex]);
+  });
+
+  return nav;
+}, [navigation]);
+
 
   useEffect(() => {
     if (sliderRef.current && graphSlides.length > 0) {
@@ -422,7 +425,7 @@ const Symptom = ({navigation}) => {
           />
         </View>
 
-        {randomTip?.id == 26 ? null : (
+         
           <View style={{marginTop: 10}}>
             <Text
               style={{
@@ -436,7 +439,7 @@ const Symptom = ({navigation}) => {
               {randomTip?.tip}
             </Text>
           </View>
-        )}
+
         </View>
         </ScrollView>
       </View>

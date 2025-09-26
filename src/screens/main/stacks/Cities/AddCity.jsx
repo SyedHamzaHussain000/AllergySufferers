@@ -36,14 +36,18 @@ const AddCity = ({navigation}) => {
   const [detail, setDetil] = useState();
   const [cityLoader, setCityLoader] = useState(false);
 
+
+
+
   const addNewCity = () => {
     if (!expireDate) {
+      
       const isManualAddedCount = allMyCity.filter(
         state => state?.currentLocation == false,
       );
-
+      
       if (isManualAddedCount?.length >= 2) {
-        Alert.alert('You can only add 2 cities to add more please subscribe');
+        Alert.alert('You can only add 2 cities with the free version','To add up to 5 cities please subscribe to Premium.');
         return;
       }
     }

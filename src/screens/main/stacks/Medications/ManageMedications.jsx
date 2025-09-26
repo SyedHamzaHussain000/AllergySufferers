@@ -305,6 +305,8 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
               </View>
 
               <View style={{marginTop: 20, gap: 10}}>
+                {expireDate && (
+
                 <AppButton
                   title={'Click here to see medication list'}
                   
@@ -313,6 +315,7 @@ const updateSortedCurrentDateMedsInList = async (fullList, sortedCurrentMeds) =>
                   handlePress={() => navigation.navigate('AddMedications')}
                   isLoading={savingDataLoader}
                 />
+                ) }
               </View>
             </View>
           </GestureHandlerRootView>
