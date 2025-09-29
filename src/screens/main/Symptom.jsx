@@ -129,7 +129,7 @@ const Symptom = ({navigation}) => {
       sliderRef?.current?.goToSlide(graphSlides?.length - 1, false);
 
 
-      return
+      // return
     }
 
     // console.log("emoji id", id)
@@ -160,6 +160,7 @@ const Symptom = ({navigation}) => {
         .then(response => {
           // getSymtomsData();
           generateGraphSlides(selecteddate);
+          console.log("response", response.data)
         })
         .catch(error => {
           console.log(error);
@@ -174,12 +175,12 @@ const Symptom = ({navigation}) => {
     //  console.log(" inn er funcAllSymtomsDataFromRedux",AllSymtomsDataFromRedux)
 
     setLoader(false)
-    // if(AllSymtomsDataFromRedux.length > 0){
+    if(AllSymtomsDataFromRedux.length > 0){
 
-    //   // setGraphSlides(AllSymtomsDataFromRedux)
-    //   setLoader(false)
-    //   return
-    // }
+      // setGraphSlides(AllSymtomsDataFromRedux)
+      setLoader(false)
+      return
+    }
 
     setLoader(true);
     const slides = [];

@@ -135,18 +135,21 @@ const MedicationSample = ({navigation}) => {
   };
 
   const getApiDataAndSaveToRedux = async () => {
+
     if (allActiveMedicationRedux.length === 0) {
       setSavingDataLoader(true);
-
+      
       // Alert.alert("This function calls getApiDataAndSaveToRedux")
       const getActiveMedicationData = await ApiCallWithUserId(
         'post',
         'get_medication_records',
         userData?.id,
       );
-
-
-
+      setSavingDataLoader(false);
+      // const filt =getActiveMedicationData?.entries?.items.filter(med => moment(med.date).format("YYYY MM DD") === moment(new Date()).local().format("YYYY MM DD"))
+      // console.log("filt", filt)
+      // const filt = getActiveMedicationData.filter(med => med.date == moment("2025-09-29").local().format("YYYY MM DD"))
+      
       if (getActiveMedicationData?.entries?.items?.length > 0) {
         console.log(
           'getActiveMedicationData',

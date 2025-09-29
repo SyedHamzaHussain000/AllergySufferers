@@ -1,15 +1,20 @@
-import { View, Text, FlatList, TouchableOpacity, SafeAreaView } from 'react-native'
-import React from 'react'
+import { View, Text, FlatList, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native'
+import React, { useState } from 'react'
 import AppHeader from '../../../components/AppHeader'
 import AppText from '../../../components/AppTextComps/AppText';
 import { responsiveFontSize } from '../../../utils/Responsive_Dimensions';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 import AppColors from '../../../utils/AppColors';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setLogout } from '../../../redux/Slices/AuthSlice';
 import { deleteAllData } from '../../../redux/Slices/MedicationSlice';
 import { clearForaCastSlive } from '../../../redux/Slices/ForecastSlice';
+import { ApiCallWithUserId } from '../../../global/ApiCall';
 const AppSetting = ({navigation}) => {
+
+  const userData = useSelector(state => state?.auth?.user);
+  const [loader, setLoader] = useState()
+  console.log("userDat", userData)
 
   const dispatch = useDispatch()
      const pollens = [
@@ -17,14 +22,23 @@ const AppSetting = ({navigation}) => {
     {id: 2, name: 'Pollen and Spores types', onPress: ()=> navigation.navigate("ManagePollens")},
     {id: 3, name: 'Medications', onPress: ()=> navigation.navigate("ManageMedications")},
     {id: 4, name: 'Push Notifications', onPress: ()=> navigation.navigate("Notification") },
-    {id: 5, name: 'Logout',bottom: true, onPress: ()=>  logoutFunction()},
+    {id: 5, name: loader == true ? <ActivityIndicator/> : 'Logout',bottom: true, onPress: ()=>  logoutFunction()},
   ];
 
-  const logoutFunction = () => {
-    dispatch(setLogout())
-    dispatch(clearForaCastSlive())
-    dispatch(deleteAllData())
-    navigation.navigate("Auth")
+  const logoutFunction = async() => {
+    setLoader(true)
+    const res =  await ApiCallWithUserId('post', 'logout', userData?.id, )
+
+
+    if(res?.success == true){
+      setLoader(false)
+      dispatch(setLogout())
+      dispatch(clearForaCastSlive())
+      dispatch(deleteAllData())
+      navigation.navigate("Auth")
+    }else{
+      setLoader(false)
+    }
   }
   
   
@@ -33,6 +47,7 @@ const AppSetting = ({navigation}) => {
     <View style={{padding:20}}>
 
       <AppHeader heading='App Settings'  goBack={true}/>
+      
 
         <FlatList
             data={pollens}

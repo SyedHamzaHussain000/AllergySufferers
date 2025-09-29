@@ -54,8 +54,8 @@ const ManageCities = ({navigation}) => {
 
   const AllForcast = useSelector(state => state?.forecast?.AllForcast);
 
-  console.log("AllForcast",AllForcast.length)
-  // dispatch(clearForaCastSlive())
+
+
 
   useEffect(() => {
     const nav = navigation.addListener('focus',async () => {
@@ -163,6 +163,10 @@ const ManageCities = ({navigation}) => {
   };
 
   const NoifyCity = async (cityProps) => {
+
+    console.log(cityProps)
+
+
     setNotifyLoader(true)
     const data = {
        lat: cityProps?.lat,
@@ -171,6 +175,8 @@ const ManageCities = ({navigation}) => {
     }
 
     const response = await ApiCallWithUserId("post", "set_notification_city", userdata?.id, data )
+
+    setNotifyLoader(false)
 
     if(response.status == 'success'){
       const getNotiRes =  await ApiCallWithUserId("post", "get_notification_city", userdata?.id  )

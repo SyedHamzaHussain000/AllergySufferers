@@ -257,6 +257,7 @@ const AuthSlice = createSlice({
     setWatchPaidTut: (state, action) => {
       state.WatchPaidTut = action.payload
     },
+     
   },
   extraReducers: builder => {
     builder
