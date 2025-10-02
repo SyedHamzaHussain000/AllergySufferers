@@ -36,11 +36,25 @@ const ForecastSlice = createSlice({
 
       console.log(`🗑️ Removed forecast for ${cityPayload}`);
     },
+    updateYesterdaySavedForcast: (state, action) => {
+  const cityToUpdate = action.payload.city;
+  const newForecastData = action.payload.data;
 
+  const index = state.AllForcast.findIndex(
+    f => f?.user?.locations?.closest?.name === cityToUpdate
+  );
+
+  if (index !== -1) {
+    // Replace the existing forecast at this index
+    state.AllForcast[index] = JSON.parse(JSON.stringify(newForecastData));
+    console.log(`🔄 Updated forecast for ${cityToUpdate}`);
+  } else {
+    console.log(`⚠️ No forecast found for ${cityToUpdate} to update`);
+  }
+},
     clearForaCastSlive: state => {
       state.AllForcast = [];
     },
-
     //Set active 
     setAndUpdateActivePollen: (state, action) => {
         
@@ -48,7 +62,6 @@ const ForecastSlice = createSlice({
   },
 });
 
-export const {setForeCastSlice, removeForeCastSlice, clearForaCastSlive} =
-  ForecastSlice.actions;
+export const {setForeCastSlice, removeForeCastSlice, clearForaCastSlive, updateYesterdaySavedForcast} = ForecastSlice.actions;
 
 export default ForecastSlice.reducer;

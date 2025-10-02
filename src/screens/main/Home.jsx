@@ -64,6 +64,7 @@ import {
   clearForaCastSlive,
   removeForeCastSlice,
   setForeCastSlice,
+  updateYesterdaySavedForcast,
 } from '../../redux/Slices/ForecastSlice';
 const Home = ({navigation}) => {
   Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
@@ -211,24 +212,39 @@ const Home = ({navigation}) => {
   const getPollensData = (allcities, newindex) => {
     // Alert.alert("this is getPollensData ?")
 
-    if(AllForcast.length > 0){
 
-    
-    const isExistInArray = AllForcast?.filter(
-      res =>
-        res?.user?.locations?.closest?.name ==
-        allcities[newindex ? newindex : 0]?.city_name,
-    )
 
-    console.log("isExistInArray",isExistInArray[0]?.user?.locations?.closest?.name,  allcities[newindex ? newindex : 0]?.city_name)
 
-    if (isExistInArray.length > 0) {
-        const localData = JSON.parse(JSON.stringify(isExistInArray[0]));
+    const userLocation = AllForcast[newindex]?.user?.locations?.closest?.name
+    const LocalSavedUserDate = AllForcast[newindex]?.forecast[userLocation]?.today?.date_label
+    const currentDatet = moment().local().format('MMMM Do, YYYY')
 
-      setForcastLocal(localData);
-      return;
-    }
-    }
+    if(LocalSavedUserDate == currentDatet){
+
+
+      if(AllForcast.length > 0){
+  
+      
+      const isExistInArray = AllForcast?.filter(
+        res =>
+          res?.user?.locations?.closest?.name ==
+          allcities[newindex ? newindex : 0]?.city_name,
+      )
+  
+      console.log("isExistInArray",isExistInArray[0]?.user?.locations?.closest?.name,  allcities[newindex ? newindex : 0]?.city_name)
+  
+      if (isExistInArray.length > 0) {
+          const localData = JSON.parse(JSON.stringify(isExistInArray[0]));
+  
+        setForcastLocal(localData);
+        return;
+      }
+      }
+      return
+    } 
+
+
+
 
     setPollenLoader(true);
     let data = new FormData();
@@ -257,10 +273,19 @@ const Home = ({navigation}) => {
         const today = response?.data?.forecast?.[city]?.today;
         const future = response?.data?.forecast?.[city]?.future;
 
-        console.log("city",city)
 
-        if (!AllForcast.some(f => f?.user?.locations?.closest?.name === city)) {
-          dispatch(setForeCastSlice({data: res, city}));
+        if(LocalSavedUserDate == currentDatet){
+
+          if (AllForcast.some(f => f?.user?.locations?.closest?.name === city)) {
+            dispatch(updateYesterdaySavedForcast({ data: res, city }));
+          }
+
+
+
+        }else{
+          if (!AllForcast.some(f => f?.user?.locations?.closest?.name === city)) {
+            dispatch(setForeCastSlice({data: res, city}));
+          }
         }
 
 

@@ -24,7 +24,7 @@ import {
 } from '../../../utils/Responsive_Dimensions';
 import AppText from '../../../components/AppTextComps/AppText';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Ionicons from 'react-native-vector-icons/Ionicons'
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import BASE_URL from '../../../utils/BASE_URL';
 import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
@@ -85,12 +85,23 @@ const DatavisualizerSample = ({navigation}) => {
     moment().local().format('YYYY-MM-DD'),
   );
 
-  const colours = ['lightblue', 'lightgreen'];
+  const colours = [
+    '#4A90E2', // Blue
+    '#50E3C2', // Teal
+    '#F5A623', // Orange
+    '#D0021B', // Red
+    '#7ED321', // Green
+  ];
 
   const [open, setOpen] = useState(false);
 
   const [PrimaryLineData, setPrimaryLineData] = useState([]);
   const [SecondaryLineData, setSecondaryLineData] = useState([]);
+
+  // ew
+  const [thirdLineData, setthirdLineData] = useState([]);
+  const [fourthLineData, setfourthLineData] = useState([]);
+  const [FifthLineData, setFifthLineData] = useState([]);
 
   const [medicationLoadingMap, setMedicationLoadingMap] = useState({});
 
@@ -265,7 +276,6 @@ const DatavisualizerSample = ({navigation}) => {
       });
   };
 
-
   // working ********
   // const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
   //   if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
@@ -329,59 +339,54 @@ const DatavisualizerSample = ({navigation}) => {
   //   setMedicationnRecord(barData);
   // };
 
-
-
-  
-  
   // console.log("medicationRecord",MedicationnRecord)
 
   const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
-  if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
-    setMedicationnRecord([]);
-    return;
-  }
-
-  const end = moment(); // today
-  const start = moment().local().subtract(6, 'day'); // last 7 days
-
-  setStartDate(start);
-  setEndDate(end);
-
-  // ✅ sirf last 7 din ka data lo
-  const filteredData = allActiveMedicationRedux.filter(entry =>
-    moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
-  );
-
-  setStartDate(filteredData[0]?.date);
-
-  // ✅ Group by date
-  const grouped = {};
-  filteredData.forEach(entry => {
-    if (!grouped[entry.date]) {
-      grouped[entry.date] = [];
+    if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
+      setMedicationnRecord([]);
+      return;
     }
-    grouped[entry.date].push(entry);
-  });
 
-  // ✅ Ab proper grouped structure banao
-  const barData = Object.keys(grouped).map(date => {
-    const group = grouped[date];
-    const formattedLabel = moment(date, 'YYYY-MM-DD').format('D');
+    const end = moment(); // today
+    const start = moment().local().subtract(6, 'day'); // last 7 days
 
-    return {
-      label: formattedLabel,
-      meds: group.map((entry, idx) => ({
-        value: parseInt(entry.units) || 0,
-        spacing: idx === group.length - 1 ? 30 : 0,
-        frontColor: entry.frontColor || '#E23131',
-        labelWidth: 30,
-      })),
-    };
-  });
+    setStartDate(start);
+    setEndDate(end);
 
-  setMedicationnRecord(barData);
-};
+    // ✅ sirf last 7 din ka data lo
+    const filteredData = allActiveMedicationRedux.filter(entry =>
+      moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
+    );
 
+    setStartDate(filteredData[0]?.date);
+
+    // ✅ Group by date
+    const grouped = {};
+    filteredData.forEach(entry => {
+      if (!grouped[entry.date]) {
+        grouped[entry.date] = [];
+      }
+      grouped[entry.date].push(entry);
+    });
+
+    // ✅ Ab proper grouped structure banao
+    const barData = Object.keys(grouped).map(date => {
+      const group = grouped[date];
+      const formattedLabel = moment(date, 'YYYY-MM-DD').format('D');
+
+      return {
+        label: formattedLabel,
+        meds: group.map((entry, idx) => ({
+          value: parseInt(entry.units) || 0,
+          spacing: idx === group.length - 1 ? 30 : 0,
+          frontColor: entry.frontColor || '#E23131',
+          labelWidth: 30,
+        })),
+      };
+    });
+
+    setMedicationnRecord(barData);
+  };
 
   const getDataVisualizer = async (selecallergens, city) => {
     // console.log("city ? city : AllCities[0]", city ? city : AllCities[0])
@@ -391,6 +396,9 @@ const DatavisualizerSample = ({navigation}) => {
       // no allergens selected, clear chart data
       setPrimaryLineData([]);
       setSecondaryLineData([]);
+      setthirdLineData([]);
+      setfourthLineData([]);
+      setFifthLineData([]);
       setLoadingItemId(null);
       return;
     }
@@ -474,9 +482,13 @@ const DatavisualizerSample = ({navigation}) => {
           }
         });
 
+        console.log('selecallergens', selecallergens);
         //edited code
         const first = selecallergens[0];
         const second = selecallergens[1];
+        const third = selecallergens[2];
+        const fourth = selecallergens[3];
+        const fifth = selecallergens[4];
 
         // console.log("first",first, second )
 
@@ -486,6 +498,19 @@ const DatavisualizerSample = ({navigation}) => {
         );
         const miscData = buildLineData(
           chartLineData[second?.allergen_name],
+          MedicationnRecord,
+        );
+        // new
+        const FRAXINUSData = buildLineData(
+          chartLineData[third?.allergen_name],
+          MedicationnRecord,
+        );
+        const HELICOMYCESData = buildLineData(
+          chartLineData[fourth?.allergen_name],
+          MedicationnRecord,
+        );
+        const MISCELLANEOUSData = buildLineData(
+          chartLineData[fifth?.allergen_name],
           MedicationnRecord,
         );
 
@@ -500,9 +525,16 @@ const DatavisualizerSample = ({navigation}) => {
 
         setPrimaryLineData(ambrosiaData || []);
         setSecondaryLineData(miscData || []);
+        setthirdLineData(FRAXINUSData || []);
+        setfourthLineData(HELICOMYCESData || []);
+        setFifthLineData(MISCELLANEOUSData || []);
 
-        colours[0] = first?.chartColor || 'lightblue';
-        colours[1] = second?.chartColor || 'lightgreen';
+        colours[0] = first?.chartColor || '#4A90E2';
+        colours[1] = second?.chartColor || '#50E3C2';
+        colours[2] = third?.chartColor || '#F5A623';
+        colours[3] = fourth?.chartColor || '#D0021B';
+        colours[4] = fifth?.chartColor || '#7ED321';
+
         setLoadingItemId(null);
         // ....................
 
@@ -573,11 +605,11 @@ const DatavisualizerSample = ({navigation}) => {
   const addAllergens = item => {
     setPollenLoader(true);
 
-    if (takingMedications.length == 2) {
+    if (takingMedications.length == 5) {
       setPollenLoader(false);
       return Alert.alert(
         'Limit Reached',
-        `You can only view 2 allergens at a time. Please remove one of: ${takingMedications
+        `You can only view 5 allergens at a time. Please remove one of: ${takingMedications
           .map(item => item.allergen_name)
           .join(', ')}.`,
       );
@@ -766,14 +798,32 @@ const DatavisualizerSample = ({navigation}) => {
   }));
   const secondpoints = secondLineData?.map(p => `${p.x},${p.y}`).join(' ');
 
+  //third
+  const newthirdLineData = thirdLineData?.map((d, i) => ({
+    x: i == 0 ? 0.1 * responsiveWidth(30) : i * responsiveWidth(30),
+    y: scaleY(d.value),
+  }));
+  const thirdpoints = newthirdLineData?.map(p => `${p.x},${p.y}`).join(' ');
+
+  //fourth
+  const newfourthLineData = fourthLineData?.map((d, i) => ({
+    x: i == 0 ? 0.1 * responsiveWidth(30) : i * responsiveWidth(30),
+    y: scaleY(d.value),
+  }));
+  const fourthpoints = newfourthLineData?.map(p => `${p.x},${p.y}`).join(' ');
+
+  //fifth
+  const newfifithLineData = FifthLineData?.map((d, i) => ({
+    x: i == 0 ? 0.1 * responsiveWidth(30) : i * responsiveWidth(30),
+    y: scaleY(d.value),
+  }));
+  const fifthpoints = newfifithLineData?.map(p => `${p.x},${p.y}`).join(' ');
+
   const symtomsData = allSymtoms?.map((d, i) => ({
     value: d?.value,
     spacing: d?.spacing + 80,
   }));
-  {
 
-    console.log("MedicationnRecord",MedicationnRecord)
-  }
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <ScrollView
@@ -799,7 +849,14 @@ const DatavisualizerSample = ({navigation}) => {
         {expireDate ? (
           <>
             {startDate && endDate && (
-              <View style={{marginTop: 20, marginBottom: 20, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
+              <View
+                style={{
+                  marginTop: 20,
+                  marginBottom: 20,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
                 <AppText
                   title={`${moment(startDate).format('MMM DD')} - ${moment(
                     endDate,
@@ -809,12 +866,14 @@ const DatavisualizerSample = ({navigation}) => {
                   textAlignment={'center'}
                 />
 
-                <TouchableOpacity style={{padding:20,}} onPress={()=> getSelectedAllergens(activeCity)}>
-                        <Ionicons
-                            name="reload"
-                            size={responsiveFontSize(3)}
-                            color={AppColors.BLACK}
-                          />
+                <TouchableOpacity
+                  style={{padding: 20}}
+                  onPress={() => getSelectedAllergens(activeCity)}>
+                  <Ionicons
+                    name="reload"
+                    size={responsiveFontSize(3)}
+                    color={AppColors.BLACK}
+                  />
                 </TouchableOpacity>
               </View>
             )}
@@ -1052,10 +1111,10 @@ const DatavisualizerSample = ({navigation}) => {
                           }}
                         /> */}
                         <FlatList
-  data={MedicationnRecord} // [{label: '11', meds: [...]}, {label: '12', meds: [...]}]
-  horizontal
-  keyExtractor={(item) => item.label}
-        contentContainerStyle={{
+                          data={MedicationnRecord} // [{label: '11', meds: [...]}, {label: '12', meds: [...]}]
+                          horizontal
+                          keyExtractor={item => item.label}
+                          contentContainerStyle={{
                             width: responsiveWidth(200),
                             spacing: 20,
                             height: 220,
@@ -1063,33 +1122,39 @@ const DatavisualizerSample = ({navigation}) => {
                             marginBottom: 20,
                             marginLeft: responsiveWidth(3.5),
                           }}
-  renderItem={({ item }) => (
-    <View
-      style={{
-        width: responsiveWidth(29), // fixed slot per day
-        alignItems: 'center',
-        
-
-      }}
-    >
-      {/* Bars */}
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-        {item?.meds?.map((m, idx) => (
-          <View
-            key={idx}
-            style={{
-              height: m.value > 0 ? responsiveHeight(m.value * 3.4) : 0,
-              width: 8,
-              marginRight: m.spacing,
-              backgroundColor: m.value > 0 ? m.frontColor : 'transparent',
-            }}
-          />
-        ))}
-      </View>
-    </View>
-  )}
-/>
-
+                          renderItem={({item}) => (
+                            <View
+                              style={{
+                                width: responsiveWidth(29), // fixed slot per day
+                                alignItems: 'center',
+                              }}>
+                              {/* Bars */}
+                              <View
+                                style={{
+                                  flexDirection: 'row',
+                                  alignItems: 'flex-end',
+                                }}>
+                                {item?.meds?.map((m, idx) => (
+                                  <View
+                                    key={idx}
+                                    style={{
+                                      height:
+                                        m.value > 0
+                                          ? responsiveHeight(m.value * 3.4)
+                                          : 0,
+                                      width: 8,
+                                      marginRight: m.spacing,
+                                      backgroundColor:
+                                        m.value > 0
+                                          ? m.frontColor
+                                          : 'transparent',
+                                    }}
+                                  />
+                                ))}
+                              </View>
+                            </View>
+                          )}
+                        />
                       </View>
 
                       <View
@@ -1164,6 +1229,97 @@ const DatavisualizerSample = ({navigation}) => {
                               cy={p.y}
                               r="4"
                               fill={colours[1]}
+                            />
+                          ))}
+                        </Svg>
+                      </View>
+
+                      {
+                        //third graph lines
+                      }
+                      <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 11,
+                          marginLeft: responsiveWidth(4),
+                        }}>
+                        <Svg
+                          width={responsiveWidth(200)}
+                          height={responsiveHeight(28)}>
+                          <Polyline
+                            points={thirdpoints}
+                            stroke={colours[2]}
+                            strokeWidth="2"
+                            fill="none"
+                          />
+                          {thirdLineData.map((p, i) => (
+                            <Circle
+                              key={i}
+                              cx={p.x}
+                              cy={p.y}
+                              r="4"
+                              fill={colours[2]}
+                            />
+                          ))}
+                        </Svg>
+                      </View>
+
+                       {
+                        //fourth graph lines
+                      }
+                      <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 11,
+                          marginLeft: responsiveWidth(4),
+                        }}>
+                        <Svg
+                          width={responsiveWidth(200)}
+                          height={responsiveHeight(28)}>
+                          <Polyline
+                            points={fourthpoints}
+                            stroke={colours[3]}
+                            strokeWidth="2"
+                            fill="none"
+                          />
+                          {fourthLineData.map((p, i) => (
+                            <Circle
+                              key={i}
+                              cx={p.x}
+                              cy={p.y}
+                              r="4"
+                              fill={colours[3]}
+                            />
+                          ))}
+                        </Svg>
+                      </View>
+
+
+                        {
+                        //fifth graph lines
+                      }
+                      <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 11,
+                          marginLeft: responsiveWidth(4),
+                        }}>
+                        <Svg
+                          width={responsiveWidth(200)}
+                          height={responsiveHeight(28)}>
+                          <Polyline
+                            points={fifthpoints}
+                            stroke={colours[4]}
+                            strokeWidth="2"
+                            fill="none"
+                          />
+                          {FifthLineData.map((p, i) => (
+                            <Circle
+                              key={i}
+                              cx={p.x}
+                              cy={p.y}
+                              r="4"
+                              fill={colours[4]}
                             />
                           ))}
                         </Svg>
