@@ -86,11 +86,12 @@ const DatavisualizerSample = ({navigation}) => {
   );
 
   const colours = [
-    '#4A90E2', // Blue
-    '#50E3C2', // Teal
-    '#F5A623', // Orange
-    '#D0021B', // Red
-    '#7ED321', // Green
+  
+   "#FF9999",  
+  "#66B2FF",  
+  "#99FF66",  
+  "#FFD966",  
+  "#CC99FF"  
   ];
 
   const [open, setOpen] = useState(false);
@@ -482,7 +483,7 @@ const DatavisualizerSample = ({navigation}) => {
           }
         });
 
-        console.log('selecallergens', selecallergens);
+        // console.log('selecallergens', selecallergens);
         //edited code
         const first = selecallergens[0];
         const second = selecallergens[1];
@@ -805,6 +806,8 @@ const DatavisualizerSample = ({navigation}) => {
   }));
   const thirdpoints = newthirdLineData?.map(p => `${p.x},${p.y}`).join(' ');
 
+
+
   //fourth
   const newfourthLineData = fourthLineData?.map((d, i) => ({
     x: i == 0 ? 0.1 * responsiveWidth(30) : i * responsiveWidth(30),
@@ -946,170 +949,7 @@ const DatavisualizerSample = ({navigation}) => {
                         })}
                       </View>
 
-                      {/* <BarChart
-                        data={MedicationnRecord || []}
-                        barWidth={7}
-                        barStyle={{
-                          backgroundColor: 'gray',
-                        }}
-                        frontColor="#E23131" // bar color
-                        // showLine={
-                        //   // true
-                        //   PrimaryLineData.length > 0 ||
-                        //   SecondaryLineData.length > 0
-                        // }
-                        // // xAxisLabelTexts={[]}
-                        // lineData={primaryLanecustom || []}
-                        // lineData2={SecondaryLineData || []}
-                        showLine={false}
-                        // lineConfig={{
-                        //   color: colours[0],
-                        //   thickness: 2,
-                        //   curved: false,
-                        //   dataPointsColor: colours[0],
-                        //   // spacing: chartSpacing,
-                        //   // textColor: 'red',
-                        //   initialSpacing: responsiveWidth(5),
-                        // }}
-                        // lineConfig2={{
-                        //   color: colours[1],
-                        //   thickness: 2,
-                        //   curved: false,
-                        //   dataPointsColor: colours[1],
-                        //   // spacing: chartSpacing,
-                        //   initialSpacing: responsiveWidth(5),
-                        // }}
-                        // xAxisIndicesWidth={responsiveWidth(28)}
-                        // yAxisLabelTexts={[
-                        //   '0',
-                        //   ' ',
-                        //   '2',
-                        //   ' ',
-                        //   '4',
-                        //   ' ',
-                        //   '6',
-                        //   ' ',
-                        //   '8',
-                        // ]}
-                        showYAxisIndices={false}
-                        showVerticalLines={false}
-                        hideYAxisText={true}
-                        yAxisThickness={0}
-                        // hideXAxisText={true}
-                        // xAxisLabelTexts={[]} // extra safety
-                        // xAxisLabelTextStyle={{
-                        //   color: 'transparent',
-                        //   fontSize: 0,
-                        // }}
-                        barBorderRadius={2}
-                        isAnimated={true}
-                        noOfSections={8}
-                        // spacing={responsiveWidth(9)}
-                        initialSpacing={responsiveWidth(0)} // same for all
-                        formatYLabel={label => parseFloat(label).toFixed(0)}
-                        stepValue={1}
-                      /> */}
-
-                      {/* <View
-                        style={{
-                          marginTop: 20,
-                          
-                          // backgroundColor: 'green',
-                        }}>
-                        <Svg
-                          height={responsiveHeight(28)}
-                          width={responsiveWidth(200)} // adjust depending on scroll
-                        >
-                          {MedicationnRecord.map((item, index) => {
-                            console.log("item.spacing",item.spacing)
-                            const barWidth = 7;
-                            const spacing = item.spacing;
-                            const chartHeight = responsiveHeight(25); // total chart height
-                            const maxValue = 8; // since you show 0,2,4,6,8
-                            const scaleY = chartHeight / maxValue;
-
-                            const barHeight = item?.value * scaleY;
-                            // const x = index * (barWidth + spacing);
-
-                            const x = index * (barWidth );
-                            const y = chartHeight - barHeight;
-
-                            return (
-                              <Rect
-                                key={index}
-                                x={x}
-                                y={y}
-                                width={barWidth}
-                                height={barHeight}
-                                fill={item.frontColor}
-                                rx={2}
-                              />
-                            );
-                          })}
-                        </Svg>
-                      </View> */}
-
-                      {/* <Svg
-                        height={responsiveHeight(28)}
-                        width={responsiveWidth(200)}>
-                        {MedicationnRecord.map((item, index) => {
-                          console.log("item.label",item.label)
-                          const barWidth = 7;
-                          const chartHeight = responsiveHeight(25);
-                          const maxValue = 8;
-                          const scaleY = chartHeight / maxValue;
-
-                          const barHeight = item.value * scaleY;
-
-                          // --- calculate X with group gap ---
-                          const spacing = 10; // normal spacing between bars
-                          const groupGap = 40; // gap after each date group
-
-                          // Find how many groups have already passed
-                          const groupsBefore = Math.floor(index / 8); // since max 8 bars per date
-                          const x =  index * item.spacing
-                          const y = chartHeight - barHeight;
-
-                          return (
-                            <Rect
-                              key={index}
-                              x={x}
-                              y={y}
-                              width={barWidth}
-                              height={barHeight}
-                              fill={item.frontColor}
-                              rx={2}
-                            />
-                          );
-                        })}
-                      </Svg> */}
-
                       <View>
-                        {/* <FlatList
-                          data={MedicationnRecord}
-                          horizontal
-                          contentContainerStyle={{
-                            width: responsiveWidth(200),
-                            spacing: 20,
-                            height: 220,
-                            alignItems: 'flex-end',
-                            marginBottom: 20,
-                            marginLeft: responsiveWidth(3.5),
-                          }}
-                          renderItem={({item, index}) => {
-                            // console.log("itemm", item)
-                            return (
-                              <View
-                                style={{
-                                  height: responsiveHeight(item?.value * 3.4),
-                                  width: 8,
-                                  marginRight: item.spacing,
-                                  backgroundColor: item?.frontColor,
-                                }}
-                              />
-                            );
-                          }}
-                        /> */}
                         <FlatList
                           data={MedicationnRecord} // [{label: '11', meds: [...]}, {label: '12', meds: [...]}]
                           horizontal
@@ -1160,6 +1000,29 @@ const DatavisualizerSample = ({navigation}) => {
                       <View
                         style={{
                           position: 'absolute',
+                          zIndex: 100,
+                          marginLeft: responsiveWidth(3),
+                          bottom: -0,
+                        }}>
+                        <FlatList
+                          data={MedicationnRecord?.filter(res => res.label)}
+                          contentContainerStyle={{
+                            marginLeft: responsiveWidth(3),
+                          }}
+                          horizontal
+                          renderItem={({item, index}) => {
+                            return (
+                              <View style={{width: responsiveWidth(30)}}>
+                                <AppText title={item.label} textSize={2} />
+                              </View>
+                            );
+                          }}
+                        />
+                      </View>
+
+                      <View
+                        style={{
+                          position: 'absolute',
                           zIndex: 11,
                           marginLeft: responsiveWidth(4),
                         }}>
@@ -1182,29 +1045,6 @@ const DatavisualizerSample = ({navigation}) => {
                             />
                           ))}
                         </Svg>
-                      </View>
-
-                      <View
-                        style={{
-                          position: 'absolute',
-                          zIndex: 100,
-                          marginLeft: responsiveWidth(3),
-                          bottom: -0,
-                        }}>
-                        <FlatList
-                          data={MedicationnRecord?.filter(res => res.label)}
-                          contentContainerStyle={{
-                            marginLeft: responsiveWidth(3),
-                          }}
-                          horizontal
-                          renderItem={({item, index}) => {
-                            return (
-                              <View style={{width: responsiveWidth(30)}}>
-                                <AppText title={item.label} textSize={2} />
-                              </View>
-                            );
-                          }}
-                        />
                       </View>
 
                       <View
@@ -1252,19 +1092,21 @@ const DatavisualizerSample = ({navigation}) => {
                             strokeWidth="2"
                             fill="none"
                           />
-                          {thirdLineData.map((p, i) => (
+                          {newthirdLineData.map((p, i) => (
+                            <>
                             <Circle
                               key={i}
                               cx={p.x}
                               cy={p.y}
                               r="4"
                               fill={colours[2]}
-                            />
+                              />
+                              </>
                           ))}
                         </Svg>
                       </View>
 
-                       {
+                      {
                         //fourth graph lines
                       }
                       <View
@@ -1282,7 +1124,7 @@ const DatavisualizerSample = ({navigation}) => {
                             strokeWidth="2"
                             fill="none"
                           />
-                          {fourthLineData.map((p, i) => (
+                          {newfourthLineData.map((p, i) => (
                             <Circle
                               key={i}
                               cx={p.x}
@@ -1294,8 +1136,7 @@ const DatavisualizerSample = ({navigation}) => {
                         </Svg>
                       </View>
 
-
-                        {
+                      {
                         //fifth graph lines
                       }
                       <View
@@ -1313,7 +1154,7 @@ const DatavisualizerSample = ({navigation}) => {
                             strokeWidth="2"
                             fill="none"
                           />
-                          {FifthLineData.map((p, i) => (
+                          {newfifithLineData.map((p, i) => (
                             <Circle
                               key={i}
                               cx={p.x}
@@ -1324,7 +1165,6 @@ const DatavisualizerSample = ({navigation}) => {
                           ))}
                         </Svg>
                       </View>
-
                     </ScrollView>
 
                     <View
