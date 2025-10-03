@@ -65,6 +65,7 @@ const Home = ({navigation}) => {
   const AllCities = useSelector(state => state?.medications?.allMyCity);
   const subscriptionType = useSelector(state => state?.auth?.SubscriptionType);
   const transactionId = useSelector(state => state?.auth?.transactionId);
+  const transactionDate = useSelector(state => state?.auth?.transactionDate);
   const subscriptionExpire = useSelector(state => state?.auth?.expireDate);
 
   const watchFreeTut = useSelector(state => state?.auth?.WatchFreeTut);
@@ -373,9 +374,10 @@ const Home = ({navigation}) => {
   const SubscribeSubscription = async () => {
     if (subscriptionType && transactionId) {
       const subscribeApi = await SubscribeNow(
-        subscriptionType == 'premium_monthly' ? 'monthly' : 'yearly',
+        subscriptionType == 'premium_monthly' || 'allergy_month' ? 'monthly' : 'yearly',
         userData?.id,
-        transactionId
+        transactionId,
+        transactionDate
       );
 
     //  alert('hello')
@@ -523,13 +525,12 @@ const Home = ({navigation}) => {
                       textColor={AppColors.BLUE}
                     />
                   </TouchableOpacity>
-
-                  <Ionicons
+                  {/* <Ionicons
                     name={'notifications-outline'}
                     size={responsiveFontSize(3)}
                     color={AppColors.BLUE}
                     style={{alignSelf: 'flex-end'}}
-                  />
+                  /> */}
                 </View>
                 {loadCities == true ? (
                   <>
