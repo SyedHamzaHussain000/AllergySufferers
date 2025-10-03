@@ -987,40 +987,7 @@ const Home = ({navigation}) => {
                                     justifyContent: 'space-between',
                                     borderBottomWidth: index == 0 ? 1 : 0,
                                   }}>
-                                  {/* <View
-                                    style={{
-                                      flexDirection: 'row',
-                                      gap: 10,
-                                      alignItems: 'center',
-                                    }}>
-                                    <View
-                                      style={{
-                                        height: 20,
-                                        width: 20,
-                                        borderRadius: 200,
-                                        borderWidth: 1,
-                                        borderColor: '#4C9E00',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                      }}>
-                                      <View
-                                        style={{
-                                          height: 15,
-                                          width: 15,
-                                          borderRadius: 200,
-                                          backgroundColor: '#4C9E00',
-                                        }}
-                                      />
-                                    </View>
-    
-                                    <AppText
-                                      title={item.key}
-                                      textSize={2}
-                                      textColor={AppColors.BLACK}
-                                      textFontWeight
-                                    />
-                                  </View> */}
-
+                                
                                   {index >= ispastArray?.length - 5 ? (
                                     <TouchableOpacity
                                       onPress={() => {

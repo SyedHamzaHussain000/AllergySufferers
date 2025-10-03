@@ -99,9 +99,9 @@ const MedicationSample = ({navigation}) => {
     useCallback(() => {
       if (allMyCurrentMeds && allMyCurrentMeds.length > 0) {
         setAllMedicationToRedux();
-      }else{
+      } else {
         getMedApiDataAndSaveToRedux(allMyCurrentMeds, allActiveMedicationRedux);
-        if(allActiveMedicationRedux.length === 0){
+        if (allActiveMedicationRedux.length === 0) {
           getApiDataAndSaveToRedux(allActiveMedicationRedux);
         }
       }
@@ -111,12 +111,15 @@ const MedicationSample = ({navigation}) => {
   );
 
   const getMedApiDataAndSaveToRedux = async () => {
-
-
     const currentDate = moment().local().format('YYYY-MM-DD');
 
-    if (allMyCurrentMeds.length > 0 ||  moment(allActiveMedicationRedux[allActiveMedicationRedux.length - 1].date).format("YYYY-MM-DD") === currentDate  ) {
-          // Alert.alert("Called in return")
+    if (
+      allMyCurrentMeds.length > 0 ||
+      moment(
+        allActiveMedicationRedux[allActiveMedicationRedux.length - 1].date,
+      ).format('YYYY-MM-DD') === currentDate
+    ) {
+      // Alert.alert("Called in return")
       return;
     }
 
@@ -126,8 +129,6 @@ const MedicationSample = ({navigation}) => {
       userData?.id,
     );
 
-
-
     if (response?.data?.length > 0) {
       // console.log('get_medications_active....');
       dispatch(setAllMedicationFromApi(response?.data));
@@ -135,10 +136,9 @@ const MedicationSample = ({navigation}) => {
   };
 
   const getApiDataAndSaveToRedux = async () => {
-
     if (allActiveMedicationRedux.length === 0) {
       setSavingDataLoader(true);
-      
+
       // Alert.alert("This function calls getApiDataAndSaveToRedux")
       const getActiveMedicationData = await ApiCallWithUserId(
         'post',
@@ -149,7 +149,7 @@ const MedicationSample = ({navigation}) => {
       // const filt =getActiveMedicationData?.entries?.items.filter(med => moment(med.date).format("YYYY MM DD") === moment(new Date()).local().format("YYYY MM DD"))
       // console.log("filt", filt)
       // const filt = getActiveMedicationData.filter(med => med.date == moment("2025-09-29").local().format("YYYY MM DD"))
-      
+
       if (getActiveMedicationData?.entries?.items?.length > 0) {
         console.log(
           'getActiveMedicationData',
@@ -191,7 +191,6 @@ const MedicationSample = ({navigation}) => {
     const currentDate = moment().local().format('YYYY-MM-DD');
 
     setLoader(true);
-
 
     // Alert.alert('currentDate', currentDate,       allActiveMedicationRedux[allActiveMedicationRedux?.length - 1]?.date );
     // return
@@ -272,8 +271,6 @@ const MedicationSample = ({navigation}) => {
       const activeDateStr = moment(new Date()).format('YYYY-MM-DD');
       const dateArray = generateDateRangeArray(activeDateStr, currentDate);
 
-
-      
       const toAdd = [];
 
       dateArray.forEach(date => {
@@ -491,7 +488,7 @@ const MedicationSample = ({navigation}) => {
       item => item.date === selecteddate,
     );
 
-    console.log("filteredMedication",filteredMedication)
+    console.log('filteredMedication', filteredMedication);
 
     return (
       <FlatList
@@ -739,7 +736,6 @@ const MedicationSample = ({navigation}) => {
             <AppText title={0} textSize={1.5} textColor={AppColors.LIGHTGRAY} />
           </View>
 
-
           {/* Chart */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <BarChart
@@ -809,7 +805,8 @@ const MedicationSample = ({navigation}) => {
 
   // console.log("MedicationnRecord", MedicationnRecord.length)
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE, paddingTop:20}}>
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: AppColors.WHITE, paddingTop: 20}}>
       <StatusBar barStyle={'dark-content'} />
       <View style={{padding: 20, backgroundColor: AppColors.WHITE, flex: 1}}>
         <AppHeader
@@ -843,10 +840,10 @@ const MedicationSample = ({navigation}) => {
           onCancel={() => {
             setOpen(false);
           }}
-          onTouchCancel={()=>{
+          onTouchCancel={() => {
             setOpen(false);
           }}
-          onPointerCancel={()=>{
+          onPointerCancel={() => {
             setOpen(false);
           }}
         />
@@ -872,29 +869,33 @@ const MedicationSample = ({navigation}) => {
               {MedicationnRecord.length > 0 && <>{memoizedSlider()}</>}
             </>
           ) : (
-            <View
-              style={{ justifyContent: 'center', marginTop:20}}>
+            <View style={{justifyContent: 'center', marginTop: 20}}>
               <SubscribeBar
                 title="Subscribe now to log your daily medication intake"
-                title2={"Upgrade to premium and start logging your medication to better understand its impact on your daily life. By tracking your dosage, you can easily see how your medication is affecting your quality of life. This information is also valuable to share with your doctors, helping them identify if you're developing a tolerance to certain medications. You can even use this feature to track your home remedies."}
+                title2={
+                  "Upgrade to premium and start logging your medication to better understand its impact on your daily life. By tracking your dosage, you can easily see how your medication is affecting your quality of life. This information is also valuable to share with your doctors, helping them identify if you're developing a tolerance to certain medications. You can even use this feature to track your home remedies."
+                }
                 handlePress={() => navigation.navigate('Subscription')}
                 img={AppImages.MedicationGraph}
               />
             </View>
           )}
 
-            {
-              expireDate && (
-          <View style={{marginTop: 20}}>
+          {expireDate && (
+            <View style={{marginTop: 20, gap: 20}}>
+              <AppButton
+                title={'GO TO DATA VISUALIZER'}
+                RightColour={AppColors.rightArrowCOlor}
+                handlePress={() => navigation.navigate('Data Visualizer')}
+              />
 
-                <AppButton
-                  title={'GO TO DATA VISUALIZER'}
-                  RightColour={AppColors.rightArrowCOlor}
-                  handlePress={() => navigation.navigate('Data Visualizer')}
-                />
-          </View>
-              )
-            }
+              <AppButton
+                title={'Add Medication'}
+                RightColour={AppColors.rightArrowCOlor}
+                handlePress={() => navigation.navigate('ManageMedications')}
+              />
+            </View>
+          )}
         </ScrollView>
       </View>
     </SafeAreaView>

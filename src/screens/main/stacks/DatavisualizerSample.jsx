@@ -50,7 +50,8 @@ import {
   setActiveMedication,
 } from '../../../redux/Slices/MedicationSlice';
 import {useFocusEffect} from '@react-navigation/native';
-import Svg, {Circle, G, Polyline, Rect} from 'react-native-svg';
+import Svg, {Circle, G, Line, Polyline, Rect} from 'react-native-svg';
+import SvgDashLine from '../../../components/SvgDashLine';
 
 const DatavisualizerSample = ({navigation}) => {
   const dispatch = useDispatch();
@@ -85,14 +86,7 @@ const DatavisualizerSample = ({navigation}) => {
     moment().local().format('YYYY-MM-DD'),
   );
 
-  const colours = [
-  
-   "#FF9999",  
-  "#66B2FF",  
-  "#99FF66",  
-  "#FFD966",  
-  "#CC99FF"  
-  ];
+  const colours = ['#FF9999', '#66B2FF', '#99FF66', '#FFD966', '#CC99FF'];
 
   const [open, setOpen] = useState(false);
 
@@ -806,8 +800,6 @@ const DatavisualizerSample = ({navigation}) => {
   }));
   const thirdpoints = newthirdLineData?.map(p => `${p.x},${p.y}`).join(' ');
 
-
-
   //fourth
   const newfourthLineData = fourthLineData?.map((d, i) => ({
     x: i == 0 ? 0.1 * responsiveWidth(30) : i * responsiveWidth(30),
@@ -901,7 +893,29 @@ const DatavisualizerSample = ({navigation}) => {
                   // position: 'absolute',
                 }}>
                 {MedicationnRecord?.length > 0 ? (
-                  <View>
+                  <View style={{}}>
+                    <View style={{minHeight: responsiveHeight(30), width:responsiveWidth(100),  position:'absolute', gap:1.5}}>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <Svg height={22} width="100%">
+            <Line
+              x1="0"
+              y1="10"
+              x2="100%"
+              y2="10"
+              stroke="black"
+              strokeWidth="2"
+              
+            />
+          </Svg>
+                    </View>
                     <ScrollView
                       contentContainerStyle={{}}
                       style={{marginLeft: 10}}
@@ -1020,6 +1034,9 @@ const DatavisualizerSample = ({navigation}) => {
                         />
                       </View>
 
+                      {
+                        //graph lines
+                      }
                       <View
                         style={{
                           position: 'absolute',
@@ -1094,14 +1111,14 @@ const DatavisualizerSample = ({navigation}) => {
                           />
                           {newthirdLineData.map((p, i) => (
                             <>
-                            <Circle
-                              key={i}
-                              cx={p.x}
-                              cy={p.y}
-                              r="4"
-                              fill={colours[2]}
+                              <Circle
+                                key={i}
+                                cx={p.x}
+                                cy={p.y}
+                                r="4"
+                                fill={colours[2]}
                               />
-                              </>
+                            </>
                           ))}
                         </Svg>
                       </View>
@@ -1270,7 +1287,7 @@ const DatavisualizerSample = ({navigation}) => {
                     <View
                       style={{
                         minHeight: responsiveHeight(6),
-                        width: responsiveWidth(90),
+                        width: responsiveWidth(87),
                         paddingVertical: 10,
                         borderRadius: 10,
                         borderColor: AppColors.LIGHTGRAY,
@@ -1279,6 +1296,7 @@ const DatavisualizerSample = ({navigation}) => {
                         marginTop: 5,
                         justifyContent: 'space-between',
                         alignItems: 'center',
+                        alignSelf:'center',
                         paddingRight: 0,
                         paddingLeft: 5,
                         borderWidth: 1,
@@ -1286,7 +1304,7 @@ const DatavisualizerSample = ({navigation}) => {
                       <AppText
                         title={item.allergen_name}
                         textSize={1.5}
-                        textwidth={65}
+                        textwidth={60}
                       />
 
                       {loadingItemId == item?.id ? (
