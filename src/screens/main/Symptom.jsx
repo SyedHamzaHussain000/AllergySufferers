@@ -111,12 +111,12 @@ const Symptom = ({navigation}) => {
 
       // Alert.alert("slide")
 
-      // if (sliderRef.current && graphSlides.length > 0) {
+      if (sliderRef.current && graphSlides.length > 0) {
         // Jump to the last slide
         sliderRef.current.goToSlide(graphSlides.length - 1, false); // false = don't trigger onSlideChange
         setSelectedDate(moment().local().format('YYYY-MM-DD'))
         // scrollToDateSlide(moment(selecteddate).format('D'))
-      // }
+      }
     })
     return nav;
   }, [navigation]);

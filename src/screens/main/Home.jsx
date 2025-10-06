@@ -76,7 +76,6 @@ const Home = ({navigation}) => {
   const subscriptionType = useSelector(state => state?.auth?.SubscriptionType);
   const subscriptionExpire = useSelector(state => state?.auth?.expireDate);
 
-
   // console.log("AllForcast", AllForcast?.length)
 
   const watchFreeTut = useSelector(state => state?.auth?.WatchFreeTut);
@@ -206,45 +205,39 @@ const Home = ({navigation}) => {
     }, [AllCities]),
   );
 
-
   // dispatch(removeForeCastSlice())
 
   const getPollensData = (allcities, newindex) => {
     // Alert.alert("this is getPollensData ?")
 
+    const userLocation = AllForcast[newindex]?.user?.locations?.closest?.name;
+    const LocalSavedUserDate =
+      AllForcast[newindex]?.forecast[userLocation]?.today?.date_label;
+    const currentDatet = moment().local().format('MMMM Do, YYYY');
 
+    if (LocalSavedUserDate == currentDatet) {
+      if (AllForcast.length > 0) {
+        const isExistInArray = AllForcast?.filter(
+          res =>
+            res?.user?.locations?.closest?.name ==
+            allcities[newindex ? newindex : 0]?.city_name,
+        );
 
-
-    const userLocation = AllForcast[newindex]?.user?.locations?.closest?.name
-    const LocalSavedUserDate = AllForcast[newindex]?.forecast[userLocation]?.today?.date_label
-    const currentDatet = moment().local().format('MMMM Do, YYYY')
-
-    if(LocalSavedUserDate == currentDatet){
-
-
-      if(AllForcast.length > 0){
-  
-      
-      const isExistInArray = AllForcast?.filter(
-        res =>
-          res?.user?.locations?.closest?.name ==
+        console.log(
+          'isExistInArray',
+          isExistInArray[0]?.user?.locations?.closest?.name,
           allcities[newindex ? newindex : 0]?.city_name,
-      )
-  
-      console.log("isExistInArray",isExistInArray[0]?.user?.locations?.closest?.name,  allcities[newindex ? newindex : 0]?.city_name)
-  
-      if (isExistInArray.length > 0) {
+        );
+
+        if (isExistInArray.length > 0) {
           const localData = JSON.parse(JSON.stringify(isExistInArray[0]));
-  
-        setForcastLocal(localData);
-        return;
+
+          setForcastLocal(localData);
+          return;
+        }
       }
-      }
-      return
-    } 
-
-
-
+      return;
+    }
 
     setPollenLoader(true);
     let data = new FormData();
@@ -273,23 +266,21 @@ const Home = ({navigation}) => {
         const today = response?.data?.forecast?.[city]?.today;
         const future = response?.data?.forecast?.[city]?.future;
 
-
-        if(LocalSavedUserDate == currentDatet){
-
-          if (AllForcast.some(f => f?.user?.locations?.closest?.name === city)) {
-            dispatch(updateYesterdaySavedForcast({ data: res, city }));
+        if (LocalSavedUserDate == currentDatet) {
+          if (
+            AllForcast.some(f => f?.user?.locations?.closest?.name === city)
+          ) {
+            dispatch(updateYesterdaySavedForcast({data: res, city}));
           }
-
-
-
-        }else{
-          if (!AllForcast.some(f => f?.user?.locations?.closest?.name === city)) {
+        } else {
+          if (
+            !AllForcast.some(f => f?.user?.locations?.closest?.name === city)
+          ) {
             dispatch(setForeCastSlice({data: res, city}));
           }
         }
 
-
-        setForcastLocal(response.data)
+        setForcastLocal(response.data);
         // dispatch(setForeCastSlice({data:res, city : city}))
 
         // if (!today) {
@@ -478,64 +469,56 @@ const Home = ({navigation}) => {
   ];
 
   const setForcastLocal = isExistInArray => {
-
     try {
-      
-    
-    const res = isExistInArray; //Local data here
+      const res = isExistInArray; //Local data here
 
+      const city = res?.user?.locations?.closest?.name;
 
+      const past = res?.forecast?.[city]?.past;
+      const today = res?.forecast?.[city]?.today;
+      const future = res?.forecast?.[city]?.future;
 
+      if (!today) {
+        // Alert.alert("today us undefined")
+        setPastPollenData();
+        setTodayPollensData();
+        setFuturePollenData();
+        setIsPastArray([]);
+        setIsFutureArray([]);
+        setPollenLoader(false);
+        setLoadCities(false);
+        // setMessage(
+        //   `No data found in ${
+        //     allcities[newindex ? newindex : 0]?.city_name
+        //   }. Please try another city.`,
+        // );
 
-    const city = res?.user?.locations?.closest?.name;
+        return;
+      }
+      setMessage('');
 
+      const pastArray = Object.entries(past).map(([date, data]) => ({
+        key: date,
+        ...data,
+      }));
 
-    const past = res?.forecast?.[city]?.past;
-    const today = res?.forecast?.[city]?.today;
-    const future = res?.forecast?.[city]?.future;
+      const futureArray = Object.entries(future).map(([date, data]) => ({
+        key: date,
+        ...data,
+      }));
 
-    if (!today) {
-      // Alert.alert("today us undefined")
-      setPastPollenData();
-      setTodayPollensData();
-      setFuturePollenData();
-      setIsPastArray([]);
-      setIsFutureArray([]);
+      setPastPollenData(past);
+      setTodayPollensData(today);
+      setFuturePollenData(future);
+
+      setIsPastArray(pastArray);
+      setIsFutureArray(futureArray);
+
       setPollenLoader(false);
       setLoadCities(false);
-      // setMessage(
-      //   `No data found in ${
-      //     allcities[newindex ? newindex : 0]?.city_name
-      //   }. Please try another city.`,
-      // );
-
-      return;
-    }
-    setMessage('');
-
-    const pastArray = Object.entries(past).map(([date, data]) => ({
-      key: date,
-      ...data,
-    }));
-
-    const futureArray = Object.entries(future).map(([date, data]) => ({
-      key: date,
-      ...data,
-    }));
-
-    setPastPollenData(past);
-    setTodayPollensData(today);
-    setFuturePollenData(future);
-
-    setIsPastArray(pastArray);
-    setIsFutureArray(futureArray);
-
-    setPollenLoader(false);
-    setLoadCities(false);
-    setHasFetchedOnce(true);
+      setHasFetchedOnce(true);
     } catch (error) {
-      
-      console.log("error in local function", error)
+      console.log('error in local function', error);
     }
   };
 
@@ -888,7 +871,7 @@ const Home = ({navigation}) => {
                                         ? 'Very High'
                                         : 'None'
                                     }
-                                    isPollenorSpores={'pollen'}
+                                    isPollenorSpores={'spore'}
                                     TempreaturePriorityFontSize={1.6}
                                   />
                                 </View>
@@ -987,7 +970,6 @@ const Home = ({navigation}) => {
                                     justifyContent: 'space-between',
                                     borderBottomWidth: index == 0 ? 1 : 0,
                                   }}>
-                                
                                   {index >= ispastArray?.length - 5 ? (
                                     <TouchableOpacity
                                       onPress={() => {
@@ -1405,285 +1387,301 @@ const Home = ({navigation}) => {
                       </>
                     ) : selected == 'Future' ? (
                       <>
+                        {isfutureArray?.length > 0 && (
+                          <FlatList
+                            data={isfutureArray}
+                            contentContainerStyle={{paddingBottom: 50}}
+                            renderItem={({item, index}) => {
+                              const futurePollenAndSpores = item?.current?.sort(
+                                (a, b) => {
+                                  if (a.type !== b.type) {
+                                    return a.type === 'pollen' ? -1 : 1;
+                                  }
+                                  return b.level - a.level;
+                                },
+                              );
 
-                      {
-                        isfutureArray?.length > 0 && (
+                              console.log('item, future', item);
 
-<FlatList
-  data={isfutureArray}
-  contentContainerStyle={{paddingBottom: 50}}
-  renderItem={({item, index}) => {
+                              const FuturefreeData = [
+                                {
+                                  id: 0,
+                                  name: 'Accumulated Pollen',
+                                  value: item?.average,
+                                },
+                                {
+                                  id: 1,
+                                  name: 'Total Spores',
+                                  value: item?.total_spores,
+                                },
+                                {
+                                  id: 2,
+                                  name: 'Total Trees',
+                                  value: item?.total_trees,
+                                },
+                                {
+                                  id: 3,
+                                  name: 'Total Grasses',
+                                  value: item?.total_grasses,
+                                },
+                                {
+                                  id: 4,
+                                  name: 'Total Weeds',
+                                  value: item?.total_weeds,
+                                },
+                              ];
 
-    const futurePollenAndSpores = item?.current?.sort(
-      (a, b) => {
-        if (a.type !== b.type) {
-          return a.type === 'pollen' ? -1 : 1;
-        }
-        return b.level - a.level;
-      },
-    );
+                              const pollenHeaderIndex =
+                                futurePollenAndSpores.findIndex(
+                                  i => i.type === 'pollen',
+                                );
+                              const sporesHeaderIndex =
+                                futurePollenAndSpores.findIndex(
+                                  i => i.type === 'spore',
+                                );
 
-    // console.log("item, future",item)
+                              return (
+                                <View
+                                  style={{
+                                    borderWidth: 1,
+                                    borderTopRightRadius: index == 0 ? 10 : 0,
+                                    borderTopLeftRadius: index == 0 ? 10 : 0,
+                                    borderBottomRightRadius:
+                                      index == isfutureArray?.length - 1
+                                        ? 10
+                                        : 0,
+                                    borderBottomLeftRadius:
+                                      index == isfutureArray?.length - 1
+                                        ? 10
+                                        : 0,
+                                    padding: 20,
+                                    alignItems: 'flex-start',
+                                    justifyContent: 'space-between',
+                                    borderBottomWidth:
+                                      index == isfutureArray?.length - 1
+                                        ? 1
+                                        : 0,
+                                  }}>
+                                  <TouchableOpacity
+                                    onPress={() => {
+                                      if (expireDate) {
+                                        if (expandedFutureKey === item.key) {
+                                          setExpandedFutureKey(null); // Collapse if already expanded
+                                        } else {
+                                          setExpandedFutureKey(item.key); // Expand only this one
+                                        }
+                                      } else {
+                                        console.log('Please Subscribe');
+                                      }
+                                    }}
+                                    style={{
+                                      flexDirection: 'row',
+                                      gap: 10,
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      width: responsiveWidth(80),
+                                    }}>
+                                    <View
+                                      style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        gap: 5,
+                                      }}>
+                                      <View
+                                        style={{
+                                          height: 20,
+                                          width: 20,
+                                          borderRadius: 200,
+                                          borderWidth: 1,
+                                          borderColor: getThBgColour(
+                                            item?.label,
+                                          ),
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                        }}>
+                                        <View
+                                          style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderRadius: 200,
+                                            backgroundColor: getThBgColour(
+                                              item?.label,
+                                            ),
+                                          }}
+                                        />
+                                      </View>
 
-    const FuturefreeData = [
-      {
-        id:0,
-        name: "Accumulated Pollen",
-        value: item?.average,
-      },
-      {
-        id: 1,
-        name: 'Total Spores',
-        value: item?.total_spores,
-      },
-      {
-        id: 2,
-        name: 'Total Trees',
-        value: item?.total_trees,
-      },
-      {
-        id: 3,
-        name: 'Total Grasses',
-        value: item?.total_grasses,
-      },
-      {
-        id: 4,
-        name: 'Total Weeds',
-        value: item?.total_weeds,
-      },
-    ];
+                                      <AppText
+                                        title={item.key}
+                                        textSize={2}
+                                        textColor={AppColors.BLACK}
+                                        textFontWeight
+                                      />
+                                    </View>
 
-    const pollenHeaderIndex =
-      futurePollenAndSpores.findIndex(
-        i => i.type === 'pollen',
-      );
-    const sporesHeaderIndex =
-      futurePollenAndSpores.findIndex(
-        i => i.type === 'spore',
-      );
+                                    <AntDesign
+                                      name={'plus'}
+                                      size={responsiveFontSize(3)}
+                                      color={AppColors.BLACK}
+                                    />
+                                  </TouchableOpacity>
 
-    return (
-      <View
-        style={{
-          borderWidth: 1,
-          borderTopRightRadius: index == 0 ? 10 : 0,
-          borderTopLeftRadius: index == 0 ? 10 : 0,
-          borderBottomRightRadius:
-            index == isfutureArray?.length - 1 ? 10 : 0,
-          borderBottomLeftRadius:
-            index == isfutureArray?.length - 1 ? 10 : 0,
-          padding: 20,
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          borderBottomWidth:
-            index == isfutureArray?.length - 1 ? 1 : 0,
-        }}>
-        <TouchableOpacity
-          onPress={() => {
-            if (expireDate) {
-              if (expandedFutureKey === item.key) {
-                setExpandedFutureKey(null); // Collapse if already expanded
-              } else {
-                setExpandedFutureKey(item.key); // Expand only this one
-              }
-            } else {
-              console.log('Please Subscribe');
-            }
-          }}
-          style={{
-            flexDirection: 'row',
-            gap: 10,
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: responsiveWidth(80),
-          }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 5,
-            }}>
-            <View
-              style={{
-                height: 20,
-                width: 20,
-                borderRadius: 200,
-                borderWidth: 1,
-                borderColor: getThBgColour(item?.label),
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <View
-                style={{
-                  height: 15,
-                  width: 15,
-                  borderRadius: 200,
-                  backgroundColor: getThBgColour(
-                    item?.label,
-                  ),
-                }}
-              />
-            </View>
+                                  <ScrollView
+                                    horizontal
+                                    contentContainerStyle={{
+                                      gap: 10,
+                                      marginTop: 20,
+                                    }}>
+                                    {expireDate ? (
+                                      <>
+                                        {activePollen?.map(newItem => {
+                                          const indexes =
+                                            item.current.findIndex(
+                                              active =>
+                                                active.name ==
+                                                newItem.common_name,
+                                            );
 
-            <AppText
-              title={item.key}
-              textSize={2}
-              textColor={AppColors.BLACK}
-              textFontWeight
-            />
-          </View>
+                                          return (
+                                            <View
+                                              style={{
+                                                gap: 10,
+                                                alignItems: 'center',
+                                              }}>
+                                              <AppText
+                                                title={newItem.common_name}
+                                                textAlignment={'center'}
+                                                textSize={1.5}
+                                                textColor={AppColors.BLACK}
+                                                textFontWeight
+                                                textwidth={40}
+                                                textHeight={5}
+                                              />
 
-          <AntDesign
-            name={'plus'}
-            size={responsiveFontSize(3)}
-            color={AppColors.BLACK}
-          />
-        </TouchableOpacity>
+                                              <SpeedoMeter
+                                                imgWeight={30}
+                                                imgHeight={10}
+                                                speedometerWidth={30}
+                                                imageTop={-10}
+                                                TextBottom={
+                                                  item?.current[indexes]
+                                                    ?.level == 1
+                                                    ? 'Low'
+                                                    : item?.current[indexes]
+                                                        ?.level == 2
+                                                    ? 'Moderate'
+                                                    : item?.current[indexes]
+                                                        ?.level == 3
+                                                    ? 'High'
+                                                    : item?.current[indexes]
+                                                        ?.level == 4
+                                                    ? 'Very High'
+                                                    : 'None'
+                                                }
+                                                isPollenorSpores={
+                                                  item?.current[indexes]?.type
+                                                }
+                                                TempreaturePriorityFontSize={
+                                                  1.6
+                                                }
+                                              />
+                                            </View>
+                                          );
+                                        })}
+                                      </>
+                                    ) : (
+                                      <>
+                                        {FuturefreeData.map(newItem => {
+                                          return (
+                                            <View style={{gap: 10}}>
+                                              <AppText
+                                                title={newItem?.name}
+                                                textAlignment={'center'}
+                                                textSize={1.5}
+                                                textColor={AppColors.BLACK}
+                                                textFontWeight
+                                                textwidth={40}
+                                                textHeight={6}
+                                              />
 
-        <ScrollView
-          horizontal
-          contentContainerStyle={{
-            gap: 10,
-            marginTop: 20,
-          }}>
-          {expireDate ? (
-            <>
-              {activePollen?.map(newItem => {
-                const indexes = item.current.findIndex(
-                  active =>
-                    active.name == newItem.common_name,
-                );
+                                              <SpeedoMeter
+                                                imgWeight={30}
+                                                imgHeight={10}
+                                                speedometerWidth={30}
+                                                imageTop={-10}
+                                                TextBottom={
+                                                  newItem?.value == 1
+                                                    ? 'Low'
+                                                    : newItem?.value == 2
+                                                    ? 'Moderate'
+                                                    : newItem?.value == 3
+                                                    ? 'High'
+                                                    : newItem?.value == 4
+                                                    ? 'Very High'
+                                                    : 'None'
+                                                }
+                                                isPollenorSpores={
+                                                  newItem.id != 0
+                                                    ? 'spore'
+                                                    : ''
+                                                }
+                                                TempreaturePriorityFontSize={
+                                                  1.6
+                                                }
+                                              />
+                                            </View>
+                                          );
+                                        })}
+                                      </>
+                                    )}
+                                  </ScrollView>
 
-                return (
-                  <View
-                    style={{
-                      gap: 10,
-                      alignItems: 'center',
-                    }}>
-                    <AppText
-                      title={newItem.common_name}
-                      textAlignment={'center'}
-                      textSize={1.5}
-                      textColor={AppColors.BLACK}
-                      textFontWeight
-                      textwidth={40}
-                      textHeight={5}
-                    />
+                                  {expandedFutureKey === item.key && (
+                                    <View style={{marginTop: 20}}>
+                                      <FlatList
+                                        data={futurePollenAndSpores}
+                                        renderItem={({item, index}) => {
+                                          return (
+                                            <View style={{gap: 5}}>
+                                              {index === pollenHeaderIndex && (
+                                                <AppText
+                                                  title="Pollen"
+                                                  textSize={2}
+                                                  textFontWeight
+                                                />
+                                              )}
 
-                    <SpeedoMeter
-                      imgWeight={30}
-                      imgHeight={10}
-                      speedometerWidth={30}
-                      imageTop={-10}
-                      TextBottom={
-                        item?.current[indexes]?.level == 1
-                          ? 'Low'
-                          : item?.current[indexes]
-                              ?.level == 2
-                          ? 'Moderate'
-                          : item?.current[indexes]
-                              ?.level == 3
-                          ? 'High'
-                          : item?.current[indexes]
-                              ?.level == 4
-                          ? 'Very High'
-                          : 'None'
-                      }
-                      isPollenorSpores={
-                        item?.current[indexes]?.type
-                      }
-                      TempreaturePriorityFontSize={1.6}
-                    />
-                  </View>
-                );
-              })}
-            </>
-          ) : (
-            <>
-              {FuturefreeData.map(newItem => {
-                return (
-                  <View style={{gap: 10}}>
-                    <AppText
-                      title={newItem?.name}
-                      textAlignment={'center'}
-                      textSize={1.5}
-                      textColor={AppColors.BLACK}
-                      textFontWeight
-                      textwidth={40}
-                      textHeight={6}
-                    />
+                                              {index === sporesHeaderIndex && (
+                                                <AppText
+                                                  title="Spores"
+                                                  textSize={2}
+                                                  marginTop={2}
+                                                  textFontWeight
+                                                />
+                                              )}
 
-                    <SpeedoMeter
-                      imgWeight={30}
-                      imgHeight={10}
-                      speedometerWidth={30}
-                      imageTop={-10}
-                      TextBottom={
-                        newItem?.value == 1
-                          ? 'Low'
-                          : newItem?.value == 2
-                          ? 'Moderate'
-                          : newItem?.value == 3
-                          ? 'High'
-                          : newItem?.value == 4
-                          ? 'Very High'
-                          : 'None'
-                      }
-                      isPollenorSpores={newItem.id != 0 ?  'pollen' : ''}
-                      TempreaturePriorityFontSize={1.6}
-                    />
-                  </View>
-                );
-              })}
-            </>
-          )}
-        </ScrollView>
-
-        {expandedFutureKey === item.key && (
-          <View style={{marginTop: 20}}>
-            <FlatList
-              data={futurePollenAndSpores}
-              renderItem={({item, index}) => {
-                return (
-                  <View style={{gap: 5}}>
-                    {index === pollenHeaderIndex && (
-                      <AppText
-                        title="Pollen"
-                        textSize={2}
-                        textFontWeight
-                      />
-                    )}
-
-                    {index === sporesHeaderIndex && (
-                      <AppText
-                        title="Spores"
-                        textSize={2}
-                        marginTop={2}
-                        textFontWeight
-                      />
-                    )}
-
-                    <PointPollenSpores
-                      PollenSporesArr={
-                        futurePollenAndSpores
-                      }
-                      index={index}
-                      item={item}
-                      selected={selected}
-                      containerwidth={responsiveWidth(80)}
-                    />
-                  </View>
-                );
-              }}
-            />
-          </View>
-        )}
-      </View>
-    );
-  }}
-/>
-                        )
-                      }
+                                              <PointPollenSpores
+                                                PollenSporesArr={
+                                                  futurePollenAndSpores
+                                                }
+                                                index={index}
+                                                item={item}
+                                                selected={selected}
+                                                containerwidth={responsiveWidth(
+                                                  80,
+                                                )}
+                                              />
+                                            </View>
+                                          );
+                                        }}
+                                      />
+                                    </View>
+                                  )}
+                                </View>
+                              );
+                            }}
+                          />
+                        )}
                       </>
                     ) : null}
                   </>
