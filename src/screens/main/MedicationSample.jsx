@@ -165,7 +165,7 @@ const MedicationSample = ({navigation}) => {
   };
 
   const SaveMedicationDataInApi = async allActiveMedicationRedux => {
-    setSavingDataLoader(true);
+    // setSavingDataLoader(true);
     const AllActiveArray = allActiveMedicationRedux.map(res => ({
       date: res.date,
       units: res.units,
@@ -180,10 +180,10 @@ const MedicationSample = ({navigation}) => {
         userData?.id,
         {data: AllActiveArray},
       );
-      setSavingDataLoader(false);
+      // setSavingDataLoader(false);
       console.log('dataSaved');
     } else {
-      setSavingDataLoader(false);
+      // setSavingDataLoader(false);
     }
   };
 

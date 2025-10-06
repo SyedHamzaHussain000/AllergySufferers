@@ -10,7 +10,7 @@ const SvgDashLine = () => {
               y1="10"
               x2="100%"
               y2="10"
-              stroke="lightgrey"
+              stroke="#EEEEEE"
               strokeWidth="2"
               strokeDasharray="5,5" // <--- DASHED pattern: 5 units dash, 5 units gap
             />

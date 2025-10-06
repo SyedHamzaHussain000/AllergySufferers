@@ -1413,6 +1413,7 @@ const Home = ({navigation}) => {
   data={isfutureArray}
   contentContainerStyle={{paddingBottom: 50}}
   renderItem={({item, index}) => {
+
     const futurePollenAndSpores = item?.current?.sort(
       (a, b) => {
         if (a.type !== b.type) {
@@ -1425,6 +1426,11 @@ const Home = ({navigation}) => {
     // console.log("item, future",item)
 
     const FuturefreeData = [
+      {
+        id:0,
+        name: "Accumulated Pollen",
+        value: item?.average,
+      },
       {
         id: 1,
         name: 'Total Spores',
@@ -1623,7 +1629,7 @@ const Home = ({navigation}) => {
                           ? 'Very High'
                           : 'None'
                       }
-                      isPollenorSpores={'pollen'}
+                      isPollenorSpores={newItem.id != 0 ?  'pollen' : ''}
                       TempreaturePriorityFontSize={1.6}
                     />
                   </View>

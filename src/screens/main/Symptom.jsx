@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   ScrollView,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -106,11 +107,19 @@ const Symptom = ({navigation}) => {
   }, [navigation]);
 
   useEffect(() => {
-    if (sliderRef.current && graphSlides.length > 0) {
-      // Jump to the last slide
-      sliderRef.current.goToSlide(graphSlides.length - 1, false); // false = don't trigger onSlideChange
-    }
-  }, [graphSlides]);
+    const nav = navigation.addListener('focus', () => {
+
+      // Alert.alert("slide")
+
+      // if (sliderRef.current && graphSlides.length > 0) {
+        // Jump to the last slide
+        sliderRef.current.goToSlide(graphSlides.length - 1, false); // false = don't trigger onSlideChange
+        setSelectedDate(moment().local().format('YYYY-MM-DD'))
+        // scrollToDateSlide(moment(selecteddate).format('D'))
+      // }
+    })
+    return nav;
+  }, [navigation]);
 
   const setApiSymtomsData = id => {
     const day = moment(selecteddate).format('D'); // returns "26"
@@ -120,8 +129,8 @@ const Symptom = ({navigation}) => {
     if (updateDatalocal.length > 0) {
       dispatch(setAllSymtomsToReduxFromApi(updateDatalocal));
       setSymtomsNumber(id);
-
-      sliderRef?.current?.goToSlide(graphSlides?.length - 1, false);
+      scrollToDateSlide(day)
+      // sliderRef?.current?.goToSlide(graphSlides?.length - 1, false);
 
       // return
     }
@@ -167,6 +176,8 @@ const Symptom = ({navigation}) => {
   // console.log("AllSymtomsDataFromRedux",AllSymtomsDataFromRedux)
   const generateGraphSlides = async selectedDate => {
     
+
+    console.log("selectedDate",selectedDate)
 
     if(AllSymtomsDataFromRedux?.length > 0){
 
@@ -247,6 +258,7 @@ const Symptom = ({navigation}) => {
     setLoader(false);
   };
 
+
   const updateData = (allData, targetDate, newValue) => {
     return allData.map(item => {
       const index = item.chartData.labels.indexOf(String(targetDate));
@@ -270,6 +282,22 @@ const Symptom = ({navigation}) => {
       return item;
     });
   };
+
+  const scrollToDateSlide = (targetDay) => {
+    console.log("targetDay",targetDay)
+  if (!AllSymtomsDataFromRedux || AllSymtomsDataFromRedux.length === 0) return;
+
+  // Find which slide contains this day
+  const foundIndex = AllSymtomsDataFromRedux.findIndex(slide =>
+    slide?.chartData?.labels?.includes(String(parseInt(targetDay)))
+  );
+
+  if (foundIndex !== -1 && sliderRef.current) {
+    // scroll to that week’s slide
+    sliderRef.current.goToSlide(foundIndex, true);
+  }
+};
+
 
   return (
     <SafeAreaView
@@ -300,7 +328,7 @@ const Symptom = ({navigation}) => {
             const picked = moment(selectedDate).startOf('day');
             const formattedDate = picked.format('YYYY-MM-DD');
             setSelectedDate(formattedDate);
-
+            scrollToDateSlide(moment(formattedDate).format('D'))
             // getSymtomsData(formattedDate);
             // generateGraphSlides(formattedDate);
           }}
