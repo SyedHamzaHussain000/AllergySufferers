@@ -1,5 +1,5 @@
 import {View, Text, Image, StyleSheet, Platform, StatusBar, SafeAreaView } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
@@ -35,6 +35,8 @@ import { responsiveHeight } from '../utils/Responsive_Dimensions';
 import AppSubscription from '../screens/main/subscription/AppSubscription';
 import ViewAppGuide from '../screens/main/stacks/Help/ViewAppGuide';
 import ViewFreeAppGuide from '../screens/main/stacks/Help/ViewFreeAppGuide';
+import { getMessaging } from '@react-native-firebase/messaging';
+import { useNavigation } from '@react-navigation/native';
 // import { SafeAreaView, useSafeAreaInsets } from "react-SafeAreaViewnative-safe-area-context";
 
 
@@ -129,6 +131,33 @@ const Main = () => {
 };
 
 function MyTabs() {
+  const navigationRef = useNavigation()
+  useEffect(() => {
+    // When app is in background
+    
+    const unsubscribe = getMessaging().onNotificationOpenedApp(remoteMessage => {
+      console.log("remoteMessage",remoteMessage)
+      navigationRef.reset({
+        index: 0,
+        routes: [{ name: 'Home' }], // Always open Home
+      });
+    });
+
+    // // When app is opened from quit state
+    // getMessaging()
+    //   .getInitialNotification()
+    //   .then(remoteMessage => {
+    //     if (remoteMessage) {
+    //       console.log("iital remoteMessage",remoteMessage)
+    //       navigationRef.reset({
+    //         index: 0,
+    //         routes: [{ name: 'Home' }],
+    //       });
+    //     }
+    //   });
+
+    return unsubscribe;
+  }, []);
 
   // const insets = useSafeAreaInsets();
   return (

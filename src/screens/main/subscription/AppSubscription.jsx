@@ -207,7 +207,7 @@ const AppSubscription = ({navigation}) => {
             });
             navigation.navigate('Home');
           } catch (error) {
-            ShowError(error)
+            ShowError(error);
           }
         } else {
           Toast.show({
@@ -262,8 +262,6 @@ const AppSubscription = ({navigation}) => {
         skus: androidsubscriptionsId,
       });
 
-      console.log('sussssb', subscriptions);
-
       setSubscriptionLocal(subscriptions);
     } catch (error) {
       console.error('Error fetching products: ', error);
@@ -272,106 +270,111 @@ const AppSubscription = ({navigation}) => {
 
   const subscribeNow = async (data, isExpired, type) => {
     //  return console.log('item ===>',data)
-    if (Platform.OS == 'android') {
-      if (userData?.email) {
-        // navigation.navigate('Home');
-        // return
-        const offerToken = data?.subscriptionOfferDetails[0]?.offerToken;
+    try {
+      if (Platform.OS == 'android') {
+        if (userData?.email) {
+          // navigation.navigate('Home');
+          // return
+          const offerToken = data?.subscriptionOfferDetails[0]?.offerToken;
 
-        const purchaseData = await requestSubscription({
-          sku: data?.productId,
-          ...(offerToken && {
-            subscriptionOffers: [{sku: data?.productId, offerToken}],
-          }),
-        });
-        // console.log('offerToken', purchaseData);
-
-        if (purchaseData.length > 0) {
-          const subscribeApi = await SubscribeNow(
-            purchaseData[0]?.productId == 'premium_monthly'
-              ? 'monthly'
-              : 'yearly',
-            userData?.id,
-          );
-
-          dispatch(
-            setSubscription({
-              isExpired: false,
-              SubscriptionType: purchaseData[0]?.productId,
-              expireDate: subscribeApi.expiry,
+          const purchaseData = await requestSubscription({
+            sku: data?.productId,
+            ...(offerToken && {
+              subscriptionOffers: [{sku: data?.productId, offerToken}],
             }),
-          );
-          navigation.navigate('Home');
+          });
+          console.log('offerToken', purchaseData);
+
+          if (purchaseData.length > 0) {
+            const subscribeApi = await SubscribeNow(
+              purchaseData[0]?.productId == 'premium_monthly'
+                ? 'monthly'
+                : 'yearly',
+              userData?.id,
+            );
+
+            dispatch(
+              setSubscription({
+                isExpired: false,
+                SubscriptionType: purchaseData[0]?.productId,
+                expireDate: subscribeApi.expiry,
+              }),
+            );
+            navigation.navigate('Home');
+          }
+        } else {
+          const offerToken = data?.subscriptionOfferDetails[0]?.offerToken;
+          const purchaseData = await requestSubscription({
+            sku: data?.productId,
+            ...(offerToken && {
+              subscriptionOffers: [{sku: data?.productId, offerToken}],
+            }),
+          });
+
+          if (purchaseData.length > 0) {
+            Toast.show({
+              type: 'success',
+              text1:
+                'Please create or login to account to enjoy the subscription',
+            });
+
+            dispatch(
+              setSubscription({
+                isExpired: false,
+                SubscriptionType: purchaseData[0]?.productId,
+                expireDate: moment().add(1, 'month').format('YYYY-MM-DD'),
+              }),
+            );
+            navigation.navigate('Login');
+          }
         }
       } else {
-        const offerToken = data?.subscriptionOfferDetails[0]?.offerToken;
         const purchaseData = await requestSubscription({
           sku: data?.productId,
-          ...(offerToken && {
-            subscriptionOffers: [{sku: data?.productId, offerToken}],
-          }),
         });
 
-        if (purchaseData.length > 0) {
-          Toast.show({
-            type: 'success',
-            text1:
-              'Please create or login to account to enjoy the subscription',
-          });
+        if (purchaseData) {
+          console.log('📦 iOS purchase data =>', purchaseData);
 
-          dispatch(
-            setSubscription({
-              isExpired: false,
-              SubscriptionType: purchaseData[0]?.productId,
-              expireDate: moment().add(1, 'month').format('YYYY-MM-DD'),
-            }),
-          );
-          navigation.navigate('Login');
+          if (userData?.email) {
+            const subscribeApi = await SubscribeNow(
+              data?.productId === 'allergy_month' ? 'monthly' : 'yearly',
+              userData?.id,
+              purchaseData?.originalTransactionIdentifierIOS,
+            );
+            dispatch(
+              setSubscription({
+                isExpired: false,
+                SubscriptionType: data?.productId,
+                expireDate: subscribeApi.expiry,
+                transactionId: purchaseData?.originalTransactionIdentifierIOS,
+              }),
+            );
+            navigation.navigate('Home');
+          } else {
+            Toast.show({
+              type: 'success',
+              text1: 'Please create or login to enjoy the subscription',
+            });
+
+            dispatch(
+              setSubscription({
+                isExpired: false,
+                SubscriptionType: data?.productId,
+                expireDate: moment().add(1, 'month').format('YYYY-MM-DD'),
+                transactionId: purchaseData?.originalTransactionIdentifierIOS,
+              }),
+            );
+            navigation.navigate('Login');
+          }
         }
       }
-    } else {
-      const purchaseData = await requestSubscription({
-        sku: data?.productId,
-      });
-
-      if (purchaseData) {
-        console.log('📦 iOS purchase data =>', purchaseData);
-
-        if (userData?.email) {
-          const subscribeApi = await SubscribeNow(
-            data?.productId === 'allergy_month' ? 'monthly' : 'yearly',
-            userData?.id,
-            purchaseData?.originalTransactionIdentifierIOS,
-          );
-          dispatch(
-            setSubscription({
-              isExpired: false,
-              SubscriptionType: data?.productId,
-              expireDate: subscribeApi.expiry,
-              transactionId: purchaseData?.originalTransactionIdentifierIOS,
-            }),
-          );
-          navigation.navigate('Home');
-        } else {
-          Toast.show({
-            type: 'success',
-            text1: 'Please create or login to enjoy the subscription',
-          });
-
-          dispatch(
-            setSubscription({
-              isExpired: false,
-              SubscriptionType: data?.productId,
-              expireDate: moment().add(1, 'month').format('YYYY-MM-DD'),
-              transactionId: purchaseData?.originalTransactionIdentifierIOS,
-            }),
-          );
-          navigation.navigate('Login');
-        }
-      }
+    } catch (error) {
+      console.error('Error in subscribeNow:', error);
+      Alert.alert('Error', 'Something went wrong during subscription.');
     }
 
-    return;
+    // return;
   };
 
   useEffect(() => {

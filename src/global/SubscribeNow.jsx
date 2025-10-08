@@ -7,7 +7,7 @@ const SubscribeNow = async(subscriptionType, userId,transactionId,transactionDat
   let data = new FormData();
   data.append('duration', subscriptionType);
   data.append('transactionId',transactionId)
-  data.append('transactionDate',transactionDate)
+  // data.append('transactionDate',transactionDate)
 
   let config = {
     method: 'post',

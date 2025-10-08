@@ -12,7 +12,7 @@ import BASE_URL from '../../../../utils/BASE_URL';
 import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
-import { deleteAllData } from '../../../../redux/Slices/AuthSlice';
+import { deleteAllData } from '../../../../redux/Slices/MedicationSlice';
 import { persistor } from '../../../../redux/store';
 
 const DeleteAllData = () => {
@@ -21,7 +21,7 @@ const DeleteAllData = () => {
 
   const dispatch = useDispatch()
 
-  const DeleteAllData = () => {
+  const DeletemyAllData = () => {
     setLoader(true);
 
     let config = {
@@ -37,7 +37,7 @@ const DeleteAllData = () => {
         console.log(JSON.stringify(response.data));
         dispatch(deleteAllData())
           await persistor.purge(); // 2. clear persisted storage
-  await persistor.flush(); // 3. force-flush queued writes
+          await persistor.flush(); // 3. force-flush queued writes
 
         setLoader(false);
 
@@ -47,6 +47,7 @@ const DeleteAllData = () => {
         });
       })
       .catch(error => {
+        dispatch(deleteAllData())
         console.log(error);
         setLoader(false);
       });
@@ -72,7 +73,7 @@ const DeleteAllData = () => {
                 {text: 'Cancel', style: 'cancel'},
                 {
                   text: 'Yes',
-                  onPress: () => DeleteAllData(),
+                  onPress: () => DeletemyAllData(),
                   style: 'destructive',
                 },
               ],

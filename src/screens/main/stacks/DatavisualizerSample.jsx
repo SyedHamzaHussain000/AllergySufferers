@@ -24,7 +24,7 @@ import {
 } from '../../../utils/Responsive_Dimensions';
 import AppText from '../../../components/AppTextComps/AppText';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Ionicons from 'react-native-vector-icons/Ionicons'
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import BASE_URL from '../../../utils/BASE_URL';
 import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
@@ -50,7 +50,8 @@ import {
   setActiveMedication,
 } from '../../../redux/Slices/MedicationSlice';
 import {useFocusEffect} from '@react-navigation/native';
-import Svg, {Circle, G, Polyline, Rect} from 'react-native-svg';
+import Svg, {Circle, G, Line, Polyline, Rect} from 'react-native-svg';
+import SvgDashLine from '../../../components/SvgDashLine';
 
 const DatavisualizerSample = ({navigation}) => {
   const dispatch = useDispatch();
@@ -85,12 +86,17 @@ const DatavisualizerSample = ({navigation}) => {
     moment().local().format('YYYY-MM-DD'),
   );
 
-  const colours = ['lightblue', 'lightgreen'];
+  const colours = ['#FF9999', '#66B2FF', '#99FF66', '#FFD966', '#CC99FF'];
 
   const [open, setOpen] = useState(false);
 
   const [PrimaryLineData, setPrimaryLineData] = useState([]);
   const [SecondaryLineData, setSecondaryLineData] = useState([]);
+
+  // ew
+  const [thirdLineData, setthirdLineData] = useState([]);
+  const [fourthLineData, setfourthLineData] = useState([]);
+  const [FifthLineData, setFifthLineData] = useState([]);
 
   const [medicationLoadingMap, setMedicationLoadingMap] = useState({});
 
@@ -265,7 +271,6 @@ const DatavisualizerSample = ({navigation}) => {
       });
   };
 
-
   // working ********
   // const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
   //   if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
@@ -329,59 +334,54 @@ const DatavisualizerSample = ({navigation}) => {
   //   setMedicationnRecord(barData);
   // };
 
-
-
-  
-  
   // console.log("medicationRecord",MedicationnRecord)
 
   const getMedicationRecords = (ewformateddate, allActiveMedicationRedux) => {
-  if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
-    setMedicationnRecord([]);
-    return;
-  }
-
-  const end = moment(); // today
-  const start = moment().local().subtract(6, 'day'); // last 7 days
-
-  setStartDate(start);
-  setEndDate(end);
-
-  // ✅ sirf last 7 din ka data lo
-  const filteredData = allActiveMedicationRedux.filter(entry =>
-    moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
-  );
-
-  setStartDate(filteredData[0]?.date);
-
-  // ✅ Group by date
-  const grouped = {};
-  filteredData.forEach(entry => {
-    if (!grouped[entry.date]) {
-      grouped[entry.date] = [];
+    if (!allActiveMedicationRedux || allActiveMedicationRedux.length === 0) {
+      setMedicationnRecord([]);
+      return;
     }
-    grouped[entry.date].push(entry);
-  });
 
-  // ✅ Ab proper grouped structure banao
-  const barData = Object.keys(grouped).map(date => {
-    const group = grouped[date];
-    const formattedLabel = moment(date, 'YYYY-MM-DD').format('D');
+    const end = moment(); // today
+    const start = moment().local().subtract(6, 'day'); // last 7 days
 
-    return {
-      label: formattedLabel,
-      meds: group.map((entry, idx) => ({
-        value: parseInt(entry.units) || 0,
-        spacing: idx === group.length - 1 ? 30 : 0,
-        frontColor: entry.frontColor || '#E23131',
-        labelWidth: 30,
-      })),
-    };
-  });
+    setStartDate(start);
+    setEndDate(end);
 
-  setMedicationnRecord(barData);
-};
+    // ✅ sirf last 7 din ka data lo
+    const filteredData = allActiveMedicationRedux.filter(entry =>
+      moment(entry.date, 'YYYY-MM-DD').isBetween(start, end, 'day', '[]'),
+    );
 
+    setStartDate(filteredData[0]?.date);
+
+    // ✅ Group by date
+    const grouped = {};
+    filteredData.forEach(entry => {
+      if (!grouped[entry.date]) {
+        grouped[entry.date] = [];
+      }
+      grouped[entry.date].push(entry);
+    });
+
+    // ✅ Ab proper grouped structure banao
+    const barData = Object.keys(grouped).map(date => {
+      const group = grouped[date];
+      const formattedLabel = moment(date, 'YYYY-MM-DD').format('D');
+
+      return {
+        label: formattedLabel,
+        meds: group.map((entry, idx) => ({
+          value: parseInt(entry.units) || 0,
+          spacing: idx === group.length - 1 ? 30 : 0,
+          frontColor: entry.frontColor || '#E23131',
+          labelWidth: 30,
+        })),
+      };
+    });
+
+    setMedicationnRecord(barData);
+  };
 
   const getDataVisualizer = async (selecallergens, city) => {
     // console.log("city ? city : AllCities[0]", city ? city : AllCities[0])
@@ -391,6 +391,9 @@ const DatavisualizerSample = ({navigation}) => {
       // no allergens selected, clear chart data
       setPrimaryLineData([]);
       setSecondaryLineData([]);
+      setthirdLineData([]);
+      setfourthLineData([]);
+      setFifthLineData([]);
       setLoadingItemId(null);
       return;
     }
@@ -474,9 +477,13 @@ const DatavisualizerSample = ({navigation}) => {
           }
         });
 
+        // console.log('selecallergens', selecallergens);
         //edited code
         const first = selecallergens[0];
         const second = selecallergens[1];
+        const third = selecallergens[2];
+        const fourth = selecallergens[3];
+        const fifth = selecallergens[4];
 
         // console.log("first",first, second )
 
@@ -486,6 +493,19 @@ const DatavisualizerSample = ({navigation}) => {
         );
         const miscData = buildLineData(
           chartLineData[second?.allergen_name],
+          MedicationnRecord,
+        );
+        // new
+        const FRAXINUSData = buildLineData(
+          chartLineData[third?.allergen_name],
+          MedicationnRecord,
+        );
+        const HELICOMYCESData = buildLineData(
+          chartLineData[fourth?.allergen_name],
+          MedicationnRecord,
+        );
+        const MISCELLANEOUSData = buildLineData(
+          chartLineData[fifth?.allergen_name],
           MedicationnRecord,
         );
 
@@ -500,9 +520,16 @@ const DatavisualizerSample = ({navigation}) => {
 
         setPrimaryLineData(ambrosiaData || []);
         setSecondaryLineData(miscData || []);
+        setthirdLineData(FRAXINUSData || []);
+        setfourthLineData(HELICOMYCESData || []);
+        setFifthLineData(MISCELLANEOUSData || []);
 
-        colours[0] = first?.chartColor || 'lightblue';
-        colours[1] = second?.chartColor || 'lightgreen';
+        colours[0] = first?.chartColor || '#4A90E2';
+        colours[1] = second?.chartColor || '#50E3C2';
+        colours[2] = third?.chartColor || '#F5A623';
+        colours[3] = fourth?.chartColor || '#D0021B';
+        colours[4] = fifth?.chartColor || '#7ED321';
+
         setLoadingItemId(null);
         // ....................
 
@@ -573,11 +600,11 @@ const DatavisualizerSample = ({navigation}) => {
   const addAllergens = item => {
     setPollenLoader(true);
 
-    if (takingMedications.length == 2) {
+    if (takingMedications.length == 5) {
       setPollenLoader(false);
       return Alert.alert(
         'Limit Reached',
-        `You can only view 2 allergens at a time. Please remove one of: ${takingMedications
+        `You can only view 5 allergens at a time. Please remove one of: ${takingMedications
           .map(item => item.allergen_name)
           .join(', ')}.`,
       );
@@ -766,14 +793,32 @@ const DatavisualizerSample = ({navigation}) => {
   }));
   const secondpoints = secondLineData?.map(p => `${p.x},${p.y}`).join(' ');
 
+  //third
+  const newthirdLineData = thirdLineData?.map((d, i) => ({
+    x: i == 0 ? 0.1 * responsiveWidth(30) : i * responsiveWidth(30),
+    y: scaleY(d.value),
+  }));
+  const thirdpoints = newthirdLineData?.map(p => `${p.x},${p.y}`).join(' ');
+
+  //fourth
+  const newfourthLineData = fourthLineData?.map((d, i) => ({
+    x: i == 0 ? 0.1 * responsiveWidth(30) : i * responsiveWidth(30),
+    y: scaleY(d.value),
+  }));
+  const fourthpoints = newfourthLineData?.map(p => `${p.x},${p.y}`).join(' ');
+
+  //fifth
+  const newfifithLineData = FifthLineData?.map((d, i) => ({
+    x: i == 0 ? 0.1 * responsiveWidth(30) : i * responsiveWidth(30),
+    y: scaleY(d.value),
+  }));
+  const fifthpoints = newfifithLineData?.map(p => `${p.x},${p.y}`).join(' ');
+
   const symtomsData = allSymtoms?.map((d, i) => ({
     value: d?.value,
     spacing: d?.spacing + 80,
   }));
-  {
 
-    console.log("MedicationnRecord",MedicationnRecord)
-  }
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: AppColors.WHITE}}>
       <ScrollView
@@ -799,7 +844,14 @@ const DatavisualizerSample = ({navigation}) => {
         {expireDate ? (
           <>
             {startDate && endDate && (
-              <View style={{marginTop: 20, marginBottom: 20, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
+              <View
+                style={{
+                  marginTop: 20,
+                  marginBottom: 20,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
                 <AppText
                   title={`${moment(startDate).format('MMM DD')} - ${moment(
                     endDate,
@@ -809,12 +861,14 @@ const DatavisualizerSample = ({navigation}) => {
                   textAlignment={'center'}
                 />
 
-                <TouchableOpacity style={{padding:20,}} onPress={()=> getSelectedAllergens(activeCity)}>
-                        <Ionicons
-                            name="reload"
-                            size={responsiveFontSize(3)}
-                            color={AppColors.BLACK}
-                          />
+                <TouchableOpacity
+                  style={{padding: 20}}
+                  onPress={() => getSelectedAllergens(activeCity)}>
+                  <Ionicons
+                    name="reload"
+                    size={responsiveFontSize(3)}
+                    color={AppColors.BLACK}
+                  />
                 </TouchableOpacity>
               </View>
             )}
@@ -839,7 +893,29 @@ const DatavisualizerSample = ({navigation}) => {
                   // position: 'absolute',
                 }}>
                 {MedicationnRecord?.length > 0 ? (
-                  <View>
+                  <View style={{}}>
+                    <View style={{minHeight: responsiveHeight(30), width:responsiveWidth(100),  position:'absolute', gap:1.5}}>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <SvgDashLine/>
+                      <Svg height={22} width="100%">
+            <Line
+              x1="0"
+              y1="10"
+              x2="100%"
+              y2="10"
+              stroke="black"
+              strokeWidth="2"
+              
+            />
+          </Svg>
+                    </View>
                     <ScrollView
                       contentContainerStyle={{}}
                       style={{marginLeft: 10}}
@@ -887,148 +963,11 @@ const DatavisualizerSample = ({navigation}) => {
                         })}
                       </View>
 
-                      {/* <BarChart
-                        data={MedicationnRecord || []}
-                        barWidth={7}
-                        barStyle={{
-                          backgroundColor: 'gray',
-                        }}
-                        frontColor="#E23131" // bar color
-                        // showLine={
-                        //   // true
-                        //   PrimaryLineData.length > 0 ||
-                        //   SecondaryLineData.length > 0
-                        // }
-                        // // xAxisLabelTexts={[]}
-                        // lineData={primaryLanecustom || []}
-                        // lineData2={SecondaryLineData || []}
-                        showLine={false}
-                        // lineConfig={{
-                        //   color: colours[0],
-                        //   thickness: 2,
-                        //   curved: false,
-                        //   dataPointsColor: colours[0],
-                        //   // spacing: chartSpacing,
-                        //   // textColor: 'red',
-                        //   initialSpacing: responsiveWidth(5),
-                        // }}
-                        // lineConfig2={{
-                        //   color: colours[1],
-                        //   thickness: 2,
-                        //   curved: false,
-                        //   dataPointsColor: colours[1],
-                        //   // spacing: chartSpacing,
-                        //   initialSpacing: responsiveWidth(5),
-                        // }}
-                        // xAxisIndicesWidth={responsiveWidth(28)}
-                        // yAxisLabelTexts={[
-                        //   '0',
-                        //   ' ',
-                        //   '2',
-                        //   ' ',
-                        //   '4',
-                        //   ' ',
-                        //   '6',
-                        //   ' ',
-                        //   '8',
-                        // ]}
-                        showYAxisIndices={false}
-                        showVerticalLines={false}
-                        hideYAxisText={true}
-                        yAxisThickness={0}
-                        // hideXAxisText={true}
-                        // xAxisLabelTexts={[]} // extra safety
-                        // xAxisLabelTextStyle={{
-                        //   color: 'transparent',
-                        //   fontSize: 0,
-                        // }}
-                        barBorderRadius={2}
-                        isAnimated={true}
-                        noOfSections={8}
-                        // spacing={responsiveWidth(9)}
-                        initialSpacing={responsiveWidth(0)} // same for all
-                        formatYLabel={label => parseFloat(label).toFixed(0)}
-                        stepValue={1}
-                      /> */}
-
-                      {/* <View
-                        style={{
-                          marginTop: 20,
-                          
-                          // backgroundColor: 'green',
-                        }}>
-                        <Svg
-                          height={responsiveHeight(28)}
-                          width={responsiveWidth(200)} // adjust depending on scroll
-                        >
-                          {MedicationnRecord.map((item, index) => {
-                            console.log("item.spacing",item.spacing)
-                            const barWidth = 7;
-                            const spacing = item.spacing;
-                            const chartHeight = responsiveHeight(25); // total chart height
-                            const maxValue = 8; // since you show 0,2,4,6,8
-                            const scaleY = chartHeight / maxValue;
-
-                            const barHeight = item?.value * scaleY;
-                            // const x = index * (barWidth + spacing);
-
-                            const x = index * (barWidth );
-                            const y = chartHeight - barHeight;
-
-                            return (
-                              <Rect
-                                key={index}
-                                x={x}
-                                y={y}
-                                width={barWidth}
-                                height={barHeight}
-                                fill={item.frontColor}
-                                rx={2}
-                              />
-                            );
-                          })}
-                        </Svg>
-                      </View> */}
-
-                      {/* <Svg
-                        height={responsiveHeight(28)}
-                        width={responsiveWidth(200)}>
-                        {MedicationnRecord.map((item, index) => {
-                          console.log("item.label",item.label)
-                          const barWidth = 7;
-                          const chartHeight = responsiveHeight(25);
-                          const maxValue = 8;
-                          const scaleY = chartHeight / maxValue;
-
-                          const barHeight = item.value * scaleY;
-
-                          // --- calculate X with group gap ---
-                          const spacing = 10; // normal spacing between bars
-                          const groupGap = 40; // gap after each date group
-
-                          // Find how many groups have already passed
-                          const groupsBefore = Math.floor(index / 8); // since max 8 bars per date
-                          const x =  index * item.spacing
-                          const y = chartHeight - barHeight;
-
-                          return (
-                            <Rect
-                              key={index}
-                              x={x}
-                              y={y}
-                              width={barWidth}
-                              height={barHeight}
-                              fill={item.frontColor}
-                              rx={2}
-                            />
-                          );
-                        })}
-                      </Svg> */}
-
                       <View>
-                        {/* <FlatList
-                          data={MedicationnRecord}
+                        <FlatList
+                          data={MedicationnRecord} // [{label: '11', meds: [...]}, {label: '12', meds: [...]}]
                           horizontal
+                          keyExtractor={item => item.label}
                           contentContainerStyle={{
                             width: responsiveWidth(200),
                             spacing: 20,
@@ -1037,61 +976,67 @@ const DatavisualizerSample = ({navigation}) => {
                             marginBottom: 20,
                             marginLeft: responsiveWidth(3.5),
                           }}
-                          renderItem={({item, index}) => {
-                            // console.log("itemm", item)
-                            return (
+                          renderItem={({item}) => (
+                            <View
+                              style={{
+                                width: responsiveWidth(29), // fixed slot per day
+                                alignItems: 'center',
+                              }}>
+                              {/* Bars */}
                               <View
                                 style={{
-                                  height: responsiveHeight(item?.value * 3.4),
-                                  width: 8,
-                                  marginRight: item.spacing,
-                                  backgroundColor: item?.frontColor,
-                                }}
-                              />
-                            );
-                          }}
-                        /> */}
-                        <FlatList
-  data={MedicationnRecord} // [{label: '11', meds: [...]}, {label: '12', meds: [...]}]
-  horizontal
-  keyExtractor={(item) => item.label}
-        contentContainerStyle={{
-                            width: responsiveWidth(200),
-                            spacing: 20,
-                            height: 220,
-                            alignItems: 'flex-end',
-                            marginBottom: 20,
-                            marginLeft: responsiveWidth(3.5),
-                          }}
-  renderItem={({ item }) => (
-    <View
-      style={{
-        width: responsiveWidth(29), // fixed slot per day
-        alignItems: 'center',
-        
-
-      }}
-    >
-      {/* Bars */}
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-        {item?.meds?.map((m, idx) => (
-          <View
-            key={idx}
-            style={{
-              height: m.value > 0 ? responsiveHeight(m.value * 3.4) : 0,
-              width: 8,
-              marginRight: m.spacing,
-              backgroundColor: m.value > 0 ? m.frontColor : 'transparent',
-            }}
-          />
-        ))}
-      </View>
-    </View>
-  )}
-/>
-
+                                  flexDirection: 'row',
+                                  alignItems: 'flex-end',
+                                }}>
+                                {item?.meds?.map((m, idx) => (
+                                  <View
+                                    key={idx}
+                                    style={{
+                                      height:
+                                        m.value > 0
+                                          ? responsiveHeight(m.value * 3.4)
+                                          : 0,
+                                      width: 8,
+                                      marginRight: m.spacing,
+                                      backgroundColor:
+                                        m.value > 0
+                                          ? m.frontColor
+                                          : 'transparent',
+                                    }}
+                                  />
+                                ))}
+                              </View>
+                            </View>
+                          )}
+                        />
                       </View>
 
+                      <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 100,
+                          marginLeft: responsiveWidth(3),
+                          bottom: -0,
+                        }}>
+                        <FlatList
+                          data={MedicationnRecord?.filter(res => res.label)}
+                          contentContainerStyle={{
+                            marginLeft: responsiveWidth(3),
+                          }}
+                          horizontal
+                          renderItem={({item, index}) => {
+                            return (
+                              <View style={{width: responsiveWidth(30)}}>
+                                <AppText title={item.label} textSize={2} />
+                              </View>
+                            );
+                          }}
+                        />
+                      </View>
+
+                      {
+                        //graph lines
+                      }
                       <View
                         style={{
                           position: 'absolute',
@@ -1122,29 +1067,6 @@ const DatavisualizerSample = ({navigation}) => {
                       <View
                         style={{
                           position: 'absolute',
-                          zIndex: 100,
-                          marginLeft: responsiveWidth(3),
-                          bottom: -0,
-                        }}>
-                        <FlatList
-                          data={MedicationnRecord?.filter(res => res.label)}
-                          contentContainerStyle={{
-                            marginLeft: responsiveWidth(3),
-                          }}
-                          horizontal
-                          renderItem={({item, index}) => {
-                            return (
-                              <View style={{width: responsiveWidth(30)}}>
-                                <AppText title={item.label} textSize={2} />
-                              </View>
-                            );
-                          }}
-                        />
-                      </View>
-
-                      <View
-                        style={{
-                          position: 'absolute',
                           zIndex: 11,
                           marginLeft: responsiveWidth(4),
                         }}>
@@ -1169,6 +1091,97 @@ const DatavisualizerSample = ({navigation}) => {
                         </Svg>
                       </View>
 
+                      {
+                        //third graph lines
+                      }
+                      <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 11,
+                          marginLeft: responsiveWidth(4),
+                        }}>
+                        <Svg
+                          width={responsiveWidth(200)}
+                          height={responsiveHeight(28)}>
+                          <Polyline
+                            points={thirdpoints}
+                            stroke={colours[2]}
+                            strokeWidth="2"
+                            fill="none"
+                          />
+                          {newthirdLineData.map((p, i) => (
+                            <>
+                              <Circle
+                                key={i}
+                                cx={p.x}
+                                cy={p.y}
+                                r="4"
+                                fill={colours[2]}
+                              />
+                            </>
+                          ))}
+                        </Svg>
+                      </View>
+
+                      {
+                        //fourth graph lines
+                      }
+                      <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 11,
+                          marginLeft: responsiveWidth(4),
+                        }}>
+                        <Svg
+                          width={responsiveWidth(200)}
+                          height={responsiveHeight(28)}>
+                          <Polyline
+                            points={fourthpoints}
+                            stroke={colours[3]}
+                            strokeWidth="2"
+                            fill="none"
+                          />
+                          {newfourthLineData.map((p, i) => (
+                            <Circle
+                              key={i}
+                              cx={p.x}
+                              cy={p.y}
+                              r="4"
+                              fill={colours[3]}
+                            />
+                          ))}
+                        </Svg>
+                      </View>
+
+                      {
+                        //fifth graph lines
+                      }
+                      <View
+                        style={{
+                          position: 'absolute',
+                          zIndex: 11,
+                          marginLeft: responsiveWidth(4),
+                        }}>
+                        <Svg
+                          width={responsiveWidth(200)}
+                          height={responsiveHeight(28)}>
+                          <Polyline
+                            points={fifthpoints}
+                            stroke={colours[4]}
+                            strokeWidth="2"
+                            fill="none"
+                          />
+                          {newfifithLineData.map((p, i) => (
+                            <Circle
+                              key={i}
+                              cx={p.x}
+                              cy={p.y}
+                              r="4"
+                              fill={colours[4]}
+                            />
+                          ))}
+                        </Svg>
+                      </View>
                     </ScrollView>
 
                     <View
@@ -1274,7 +1287,7 @@ const DatavisualizerSample = ({navigation}) => {
                     <View
                       style={{
                         minHeight: responsiveHeight(6),
-                        width: responsiveWidth(90),
+                        width: responsiveWidth(87),
                         paddingVertical: 10,
                         borderRadius: 10,
                         borderColor: AppColors.LIGHTGRAY,
@@ -1283,6 +1296,7 @@ const DatavisualizerSample = ({navigation}) => {
                         marginTop: 5,
                         justifyContent: 'space-between',
                         alignItems: 'center',
+                        alignSelf:'center',
                         paddingRight: 0,
                         paddingLeft: 5,
                         borderWidth: 1,
@@ -1290,7 +1304,7 @@ const DatavisualizerSample = ({navigation}) => {
                       <AppText
                         title={item.allergen_name}
                         textSize={1.5}
-                        textwidth={65}
+                        textwidth={60}
                       />
 
                       {loadingItemId == item?.id ? (

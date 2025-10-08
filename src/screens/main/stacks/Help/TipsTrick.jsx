@@ -87,12 +87,13 @@ const TipsTrick = () => {
         data={AllergyTips}
         keyExtractor={item => item.id.toString()}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom:200}}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 15 }}>
             <Text style={{ 
               fontSize: responsiveFontSize(2),
               fontWeight: 'bold',
-              marginBottom: 5 
+              marginBottom: 5,
             }}>
               Allergy tip #{item.id}
             </Text>

@@ -72,18 +72,21 @@ import { persistReducer, persistStore } from 'redux-persist';
 import AuthReducer from './Slices/AuthSlice';
 import MedicationReducer from './Slices/MedicationSlice';
 import BlackListSlice from './Slices/BlackListSlice'
-
+import ForecastSlice from './Slices/ForecastSlice'
+import SymtomsSlice from './Slices/SymtomsSlice'
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['auth', 'medications'],
+  whitelist: ['auth', 'medications','forecast','symtoms'],
   blacklist: ['blacklist'],
 };
 
 const rootReducer = combineReducers({
   auth: AuthReducer,
   medications: MedicationReducer,
-  blacklist: BlackListSlice
+  blacklist: BlackListSlice,
+  forecast: ForecastSlice,
+  symtoms: SymtomsSlice
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -93,6 +96,7 @@ export const store = configureStore({
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: false,
+      immutableCheck: false, // 👈 disable heavy check
     }),
   devTools: process.env.NODE_ENV !== 'production',
 });

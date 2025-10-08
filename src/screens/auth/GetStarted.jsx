@@ -18,7 +18,8 @@ import GetAllLocation from '../../global/GetAllLocation';
 import { ApiCallWithUserId } from '../../global/ApiCall';
 import { getAvailablePurchases } from 'react-native-iap';
 import { hideNavigationBar } from 'react-native-navigation-bar-color';
-
+import NetInfo from '@react-native-community/netinfo'
+import ShowError from '../../utils/ShowError';
 const GetStarted = ({navigation}) => {
     const allMyCity = useSelector(state => state?.medications?.allMyCity);
     const subscribeType = useSelector(state => state?.auth?.SubscriptionType);
@@ -27,6 +28,7 @@ const GetStarted = ({navigation}) => {
   const dispatch = useDispatch();
 
   const [fetchingCurrentLocation, setFechingCurrentLocation] = useState(false);
+  const [isInternetConnected, settInterenetConnected] = useState(true)
 
   const [subLoader, setSubLoader] = useState(false);
 
@@ -37,8 +39,31 @@ const GetStarted = ({navigation}) => {
     })
     return nav
   },[navigation])
+
+    useEffect(() => {
+        const unsubscribe = NetInfo.addEventListener(state => {
+          // dispatch(setInternet(state.isConnected))
+            console.log("is",state.isConnected)
+            settInterenetConnected(state.isConnected)
+          // setIsConnected(state.isConnected);
+        });
+    
+        return () => {
+          unsubscribe();
+        };
+      }, []);
+    
+
+
+
+  
   
   const checkLoginandPremium = async() => {
+
+    if(isInternetConnected == false){
+      ShowError("No Internet Connection", 3000)
+      return
+    }
 
     hideNavigationBar();
     try {
@@ -100,30 +125,6 @@ const GetStarted = ({navigation}) => {
 
 
 
-    // const getCurrentLocation = async () => {
-    //   // console.log('----------------------------');
-    //   setFechingCurrentLocation(true);
-    //   const gettingCurrentLatlng = await GetCurrentLocation();
-  
-    //   // Alert.alert("gettingCurrentLatlng",)
-    //   console.log('triple H', gettingCurrentLatlng);
-  
-    //   const getCityName = await GetCityName(
-    //     gettingCurrentLatlng.latitude,
-    //     gettingCurrentLatlng.longitude,
-    //   );
-
-    //   dispatch(setAddCity({
-    //     lat: JSON.stringify(gettingCurrentLatlng?.latitude),
-    //     lng: JSON.stringify(gettingCurrentLatlng?.longitude),
-    //     city_name: getCityName,
-    //     currentLocation: true
-    //   }))
-    //   setSubLoader(false)
-      
-    //   // setMyLocation(gettingCurrentLatlng);
-    //   // return
-    // };
   
 
   return (
