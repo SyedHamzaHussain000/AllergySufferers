@@ -82,7 +82,7 @@ const internetConnection = useSelector(state => state?.blacklist?.isInternetConn
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         ShowError("Account created successfully", 1000)
         navigation.navigate("Login")
         setLoader(false)

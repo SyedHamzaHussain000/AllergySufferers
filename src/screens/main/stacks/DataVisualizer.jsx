@@ -119,7 +119,7 @@ const DataVisualizer = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         setPollenLoader(false);
         setTodayPollensData(response.data);
       })
@@ -396,7 +396,7 @@ const DataVisualizer = ({navigation}) => {
         .request(config)
         .then(response => {
           const apiData = response.data;
-          console.log('api data of symptoms', apiData);
+          // console.log('api data of symptoms', apiData);
           setAllSymtoms(apiData.symptom_level);
           const chartLineData = {};
           Object.keys(apiData).forEach(key => {
@@ -491,7 +491,7 @@ const DataVisualizer = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log('allergens', response.data.allergens);
+
 
         //edited code
         const coloredAllergens = assignColorsToAllergens(
@@ -544,7 +544,7 @@ const DataVisualizer = ({navigation}) => {
 
       setTakingMedications(updatedAllergens);
 
-      console.log('updatedAllergens', updatedAllergens);
+      // console.log('updatedAllergens', updatedAllergens);
 
       // 🧠 Update graph based on remaining allergens
       if (updatedAllergens.length === 0) {
@@ -588,7 +588,7 @@ const DataVisualizer = ({navigation}) => {
   const removeMedication = async item => {
     setMedicationLoading(item.id, true);
 
-    console.log('item', item);
+    // console.log('item', item);
     try {
       const data = JSON.stringify({
         medication_id: item.id,
@@ -623,7 +623,7 @@ const DataVisualizer = ({navigation}) => {
     setType(type);
     if (userData.email) {
       const res = await GetAllLocation(userData?.id);
-      console.log('res', res);
+      // console.log('res', res);
 
       setAllCities(res.cities);
     } else {

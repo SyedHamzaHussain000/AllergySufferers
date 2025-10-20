@@ -14,7 +14,7 @@ const AppSetting = ({navigation}) => {
 
   const userData = useSelector(state => state?.auth?.user);
   const [loader, setLoader] = useState()
-  console.log("userDat", userData)
+
 
   const dispatch = useDispatch()
      const pollens = [

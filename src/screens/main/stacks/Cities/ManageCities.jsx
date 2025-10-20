@@ -83,7 +83,7 @@ const ManageCities = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
 
         setActiveMedication(response?.data?.cities);
 
@@ -140,7 +140,7 @@ const ManageCities = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log('delete response', JSON.stringify(response.data));
+        // console.log('delete response', JSON.stringify(response.data));
         setActiveMedication(response?.data?.cities);
         setLoader(false);
         // getAllCities();
@@ -164,7 +164,7 @@ const ManageCities = ({navigation}) => {
 
   const NoifyCity = async (cityProps) => {
 
-    console.log(cityProps)
+
 
 
     setNotifyLoader(true)

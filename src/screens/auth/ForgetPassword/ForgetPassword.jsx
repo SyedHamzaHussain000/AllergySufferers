@@ -37,7 +37,7 @@ const ForgetPassword = ({navigation}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+
         if(response?.data?.status == "success"){
           setLoader(false)
           ShowError(response.data.message, 1000)

@@ -72,7 +72,7 @@ const Notification = ({navigation}) => {
     setNotificationLoader(true);
     let data = JSON.stringify({
       level: level ? level : 1,
-      scientific_name: item.name,
+      scientific_name: item.name == "Total Pollen" ? "Average" : item.name,
     });
 
     let config = {
@@ -104,6 +104,8 @@ const Notification = ({navigation}) => {
 
   const getNewNotification = item => {
     setNotificationLoader(true);
+
+    console.log("userData?.id",userData?.id)
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
@@ -159,6 +161,7 @@ const Notification = ({navigation}) => {
     {id: 2, name: 'Total Trees'},
     {id: 3, name: 'Total Grasses'},
     {id: 4, name: 'Total Weeds'},
+    {id: 5, name: 'Total Pollen'},
   ];
 
   // console.log('all pollens list =====>', allPollens)
@@ -204,7 +207,7 @@ const Notification = ({navigation}) => {
                         justifyContent: 'space-between',
                       }}>
                       {/* Main Title */}
-                      <AppText title={item.name} textSize={2} textFontWeight />
+                      <AppText title={item.name == "Average" ? "Total Pollen" : item.name } textSize={2} textFontWeight />
                       <TouchableOpacity
                         onPress={() => deleteNotification(item)}>
                         <MaterialIcons

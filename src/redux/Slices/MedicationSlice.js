@@ -8,12 +8,16 @@ const initialState = {
   MyCurrentMeds: [],
   allMyCity: [],
   ActiveCity: null,
+  AllMedication: []
 };
 
 const MedicationSlice = createSlice({
   name: 'medications',
   initialState,
   reducers: {
+    GetAllMedicationFromApi: (state, action) => {
+      state.AllMedication = action.payload
+    },
     setActiveMedication: (state, action) => {
       state.ActiveMedications = action.payload;
     },
@@ -52,7 +56,6 @@ const MedicationSlice = createSlice({
       // Alert.alert("sadasdas redux")
 
       const newMed = action.payload;
-      console.log("newMed",newMed[newMed.length - 1])
 
       state.MyCurrentMeds = newMed;
     },
@@ -68,9 +71,9 @@ const MedicationSlice = createSlice({
       );
 
       if (existMed) {
-        console.log('this med is already exist');
+        // console.log('this med is already exist');
       } else {
-        console.log('We are adding the medication');
+        // console.log('We are adding the medication');
         state.ActiveMedications.push({
           ...newMed,
           date: curretDate,
@@ -95,9 +98,9 @@ const MedicationSlice = createSlice({
 
       if (index !== -1) {
         state.ActiveMedications.splice(index, 1); // remove 1 element at index
-        console.log('medication removed successfully');
+        // console.log('medication removed successfully');
       } else {
-        console.log('no matching medication found to remove');
+        // console.log('no matching medication found to remove');
       }
     },
     removeCurrentActiveMedication: (state, action) => {
@@ -144,7 +147,7 @@ const MedicationSlice = createSlice({
     setAddCity: (state, action) => {
       const newCity = action.payload;
       
-      console.log("state.allMyCity",newCity)
+      // console.log("state.allMyCity",newCity)
       if (newCity.currentLocation === true) {
         // ✅ Remove old current location
         state.allMyCity = state.allMyCity.filter(
@@ -153,7 +156,7 @@ const MedicationSlice = createSlice({
 
         // ✅ Always add the new current location
         state.allMyCity.push(newCity);
-        console.log('New current location set:', newCity);
+        // console.log('New current location set:', newCity);
       } else {
         // ✅ Normal city logic (avoid duplicate by city_name)
         const exists = state.allMyCity.find(
@@ -162,9 +165,9 @@ const MedicationSlice = createSlice({
 
         if (!exists) {
           state.allMyCity.push(newCity);
-          console.log('City added:', newCity);
+          // console.log('City added:', newCity);
         } else {
-          console.log('City already exists, no update needed.');
+          // console.log('City already exists, no update needed.');
         }
       }
     },
@@ -179,7 +182,7 @@ const MedicationSlice = createSlice({
       state.allMyCity = state.allMyCity.filter(
         city => city.city_name !== cityToRemove.city_name,
       );
-      console.log('City removed successfully');
+      // console.log('City removed successfully');
     },
     setActiveCity: (state, action) => {
       state.ActiveCity = action.payload
@@ -194,6 +197,7 @@ const MedicationSlice = createSlice({
 });
 
 export const {
+  GetAllMedicationFromApi,
   setActiveMedication,
   deleteActiveMedication,
   addUnitToActiveMedicaton,

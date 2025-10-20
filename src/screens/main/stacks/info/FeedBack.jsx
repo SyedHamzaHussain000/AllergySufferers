@@ -61,7 +61,7 @@ const FeedBack = () => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         if (response.data.status == 'success') {
           setIsLaoder(false);
           setFeedBackData({

@@ -24,7 +24,7 @@ const ForecastSlice = createSlice({
         const clonedPayload = JSON.parse(JSON.stringify(forcastPayload));
         state.AllForcast = [...state.AllForcast, clonedPayload];
       } else {
-        console.log(`⚠️ Forecast for ${cityPayload} already exists, skipping`);
+        // console.log(`⚠️ Forecast for ${cityPayload} already exists, skipping`);
       }
     },
     removeForeCastSlice: (state, action) => {
@@ -34,7 +34,7 @@ const ForecastSlice = createSlice({
         f => f?.user?.locations?.closest?.name !== cityPayload,
       );
 
-      console.log(`🗑️ Removed forecast for ${cityPayload}`);
+      // console.log(`🗑️ Removed forecast for ${cityPayload}`);
     },
     updateYesterdaySavedForcast: (state, action) => {
   const cityToUpdate = action.payload.city;
@@ -47,9 +47,9 @@ const ForecastSlice = createSlice({
   if (index !== -1) {
     // Replace the existing forecast at this index
     state.AllForcast[index] = JSON.parse(JSON.stringify(newForecastData));
-    console.log(`🔄 Updated forecast for ${cityToUpdate}`);
+    // console.log(`🔄 Updated forecast for ${cityToUpdate}`);
   } else {
-    console.log(`⚠️ No forecast found for ${cityToUpdate} to update`);
+    // console.log(`⚠️ No forecast found for ${cityToUpdate} to update`);
   }
 },
     clearForaCastSlive: state => {

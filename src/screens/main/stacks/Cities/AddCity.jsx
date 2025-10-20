@@ -105,7 +105,7 @@ const AddCity = ({navigation}) => {
       axios
         .request(config)
         .then(response => {
-          console.log('Response', response.data);
+          // console.log('Response', response.data);
           navigation.navigate('ManageCities');
           setCityLoader(false);
         })
@@ -138,7 +138,7 @@ const AddCity = ({navigation}) => {
         <GooglePlacesTextInput
           apiKey="AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc"
           onPlaceSelect={res => {
-            console.log('res', res);
+            // console.log('res', res);
             setDetil(res.details);
           }}
           debounceDelay={200}

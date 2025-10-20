@@ -54,7 +54,7 @@ const EnterOtp = ({navigation, route}) => {
     axios
       .request(config)
       .then(response => {
-        console.log('res', JSON.stringify(response.data));
+
         if (response.data.status == 'success') {
           ShowError(response.data.message, 1000);
           navigation.navigate('EnternewPassword', {email: email});

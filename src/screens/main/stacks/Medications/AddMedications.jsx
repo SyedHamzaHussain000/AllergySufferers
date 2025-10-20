@@ -34,6 +34,7 @@ import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 import {ApiCallWithUserId} from '../../../../global/ApiCall';
 import {
+  GetAllMedicationFromApi,
   setActiveMedication,
   setCurrentActiveMedication,
   UpdateMedicationListOnEveryDate,
@@ -49,14 +50,15 @@ const AddMedications = ({navigation}) => {
   const ActiveMedications = useSelector(
     state => state.medications.ActiveMedications,
   );
+  const allMedication = useSelector(
+    state => state.medications.AllMedication,
+  );
 
   const currentDate = moment().local().format('YYYY-MM-DD')
   const currentDateMeds = ActiveMedications?.filter(
     item => item.date === currentDate,
   );
-  console.log("ActiveMedications",currentDateMeds)
 
-console.log("currentDateMeds",currentDateMeds.length)
 
     const expireDate = useSelector(state => state.auth.expireDate);
   
@@ -86,7 +88,12 @@ console.log("currentDateMeds",currentDateMeds.length)
   }, [navigation]);
 
   const getMedicationApi = () => {
-    setMedciationLoader(true);
+    if(allMedication.length > 0){
+      setMedciationLoader(false);  
+    }else{
+      setMedciationLoader(true);  
+    }
+    
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
@@ -97,8 +104,8 @@ console.log("currentDateMeds",currentDateMeds.length)
     axios
       .request(config)
       .then(async response => {
-        console.log(JSON.stringify(response.data));
-
+        // console.log(JSON.stringify(response.data));
+        dispatch(GetAllMedicationFromApi(response.data.data))
         setMedicationsData(response.data.data);
         setMedciationLoader(false);
         const MedicationData = await ApiCallWithUserId(
@@ -223,7 +230,7 @@ console.log("currentDateMeds",currentDateMeds.length)
             axios
               .request(config)
               .then(response => {
-                console.log(JSON.stringify(response.data));
+                // console.log(JSON.stringify(response.data));
                 setMedciationLoader(false);
                 Toast.show({
                   type: 'success',
@@ -269,7 +276,7 @@ console.log("currentDateMeds",currentDateMeds.length)
     axios
       .request(config)
       .then(response => {
-        console.log('what just happened', JSON.stringify(response.data));
+        // console.log('what just happened', JSON.stringify(response.data));
         setCustomMedicationLoader(false);
         SetAddYourMedication(false);
         getMedicationApi();
@@ -439,9 +446,9 @@ console.log("currentDateMeds",currentDateMeds.length)
               flexGrow: 1,
               paddingBottom: responsiveHeight(80),
             }}>
-            {medicationData?.length > 0 ? (
+            {allMedication?.length > 0 ? (
               <>
-                {medicationData
+                {allMedication
                   ?.filter(item =>
                     item.name
                       .toLowerCase()
@@ -456,9 +463,9 @@ console.log("currentDateMeds",currentDateMeds.length)
                           borderTopRightRadius: index == 0 ? 10 : 0,
                           borderTopLeftRadius: index == 0 ? 10 : 0,
                           borderBottomRightRadius:
-                            index == medicationData?.length - 1 ? 10 : 0,
+                            index == allMedication?.length - 1 ? 10 : 0,
                           borderBottomLeftRadius:
-                            index == medicationData?.length - 1 ? 10 : 0,
+                            index == allMedication?.length - 1 ? 10 : 0,
                           padding: 20,
                           flexDirection: 'row',
                           alignItems: 'center',

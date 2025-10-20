@@ -83,6 +83,7 @@ const Home = ({navigation}) => {
 
   const sliderRef = useRef(null);
 
+  console.log("AllCities",AllCities)
   const sortCities = [...AllCities].sort((a, b) => {
     return (
       (b.currentLocation || b.isCurrentLocation ? 1 : 0) -
@@ -223,11 +224,11 @@ const Home = ({navigation}) => {
             allcities[newindex ? newindex : 0]?.city_name,
         );
 
-        console.log(
-          'isExistInArray',
-          isExistInArray[0]?.user?.locations?.closest?.name,
-          allcities[newindex ? newindex : 0]?.city_name,
-        );
+        // console.log(
+        //   'isExistInArray',
+        //   isExistInArray[0]?.user?.locations?.closest?.name,
+        //   allcities[newindex ? newindex : 0]?.city_name,
+        // );
 
         if (isExistInArray.length > 0) {
           const localData = JSON.parse(JSON.stringify(isExistInArray[0]));
@@ -335,7 +336,7 @@ const Home = ({navigation}) => {
     if (AllCities.length == 0) {
       const getLocationFromApi = await GetAllLocation(userData?.id);
 
-      console.log('getLocationFromApi.cities', getLocationFromApi);
+      // console.log('getLocationFromApi.cities', getLocationFromApi);
       if (getLocationFromApi?.cities?.length > 0) {
         dispatch(setAllCityFromApi(getLocationFromApi.cities));
       } else {
@@ -462,10 +463,10 @@ const Home = ({navigation}) => {
   const settingData = SettingHeaders();
 
   const freeData = [
-    {id: 1, name: 'Total Spores', value: todayPollensData?.total_spores},
-    {id: 2, name: 'Total Trees', value: todayPollensData?.total_trees},
-    {id: 3, name: 'Total Grasses', value: todayPollensData?.total_grasses},
-    {id: 4, name: 'Total Weeds', value: todayPollensData?.total_weeds},
+    {id: 1, name: 'Total Spores', value: todayPollensData?.total_spores, type: "spore"},
+    {id: 2, name: 'Total Trees', value: todayPollensData?.total_trees, type: "pollen"},
+    {id: 3, name: 'Total Grasses', value: todayPollensData?.total_grasses, type: "pollen"},
+    {id: 4, name: 'Total Weeds', value: todayPollensData?.total_weeds, type: "pollen"},
   ];
 
   const setForcastLocal = isExistInArray => {
@@ -748,6 +749,8 @@ const Home = ({navigation}) => {
                                 flexDirection: 'row',
                               }}
                               renderItem={({item}) => {
+                                  
+                                console.log("todayPollensData?.current",todayPollensData?.current)
                                 const index =
                                   todayPollensData?.current.findIndex(
                                     p => p.scientific_name === item.name,
@@ -871,7 +874,7 @@ const Home = ({navigation}) => {
                                         ? 'Very High'
                                         : 'None'
                                     }
-                                    isPollenorSpores={'spore'}
+                                    isPollenorSpores={item.type}
                                     TempreaturePriorityFontSize={1.6}
                                   />
                                 </View>
@@ -1401,33 +1404,38 @@ const Home = ({navigation}) => {
                                 },
                               );
 
-                              console.log('item, future', item);
+                              // console.log('item, future', item);
 
                               const FuturefreeData = [
                                 {
                                   id: 0,
-                                  name: 'Accumulated Pollen',
+                                  name: 'Total Pollen',
                                   value: item?.average,
+                                  type: "pollen"
                                 },
                                 {
                                   id: 1,
                                   name: 'Total Spores',
                                   value: item?.total_spores,
+                                  type: "spore"
                                 },
                                 {
                                   id: 2,
                                   name: 'Total Trees',
                                   value: item?.total_trees,
+                                  type: "pollen"
                                 },
                                 {
                                   id: 3,
                                   name: 'Total Grasses',
                                   value: item?.total_grasses,
+                                  type: "pollen"
                                 },
                                 {
                                   id: 4,
                                   name: 'Total Weeds',
                                   value: item?.total_weeds,
+                                  type: "pollen"
                                 },
                               ];
 
@@ -1621,9 +1629,7 @@ const Home = ({navigation}) => {
                                                     : 'None'
                                                 }
                                                 isPollenorSpores={
-                                                  newItem.id != 0
-                                                    ? 'spore'
-                                                    : ''
+                                                  newItem.type
                                                 }
                                                 TempreaturePriorityFontSize={
                                                   1.6

@@ -136,7 +136,7 @@ function MyTabs() {
     // When app is in background
     
     const unsubscribe = getMessaging().onNotificationOpenedApp(remoteMessage => {
-      console.log("remoteMessage",remoteMessage)
+      // console.log("remoteMessage",remoteMessage)
       navigationRef.reset({
         index: 0,
         routes: [{ name: 'Home' }], // Always open Home

@@ -15,12 +15,12 @@ export const GetCurrentLocation = async () => {
     );
 
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('granted', granted);
+      // console.log('granted', granted);
 
       return new Promise((resolve, reject) => {
         Geolocation.getCurrentPosition(
           pos => {
-            console.log("poosition", pos);
+            // console.log("poosition", pos);
             resolve({
               latitude: pos.coords.latitude,
               longitude: pos.coords.longitude,
@@ -33,7 +33,7 @@ export const GetCurrentLocation = async () => {
       });
     } else {
 
-        console.log('Location permission denied');
+        // console.log('Location permission denied');
       
     }
     }else{
@@ -49,7 +49,7 @@ export const GetCurrentLocation = async () => {
        return new Promise((resolve, reject) => {
         Geolocation.getCurrentPosition(
           pos => {
-            console.log("poosition", pos);
+            // console.log("poosition", pos);
             resolve({
               latitude: pos.coords.latitude,
               longitude: pos.coords.longitude,
@@ -61,7 +61,7 @@ export const GetCurrentLocation = async () => {
         );
       });
       }else{
-        console.log('Location permission denied');
+        // console.log('Location permission denied');
       }
     }
   } catch (error) {

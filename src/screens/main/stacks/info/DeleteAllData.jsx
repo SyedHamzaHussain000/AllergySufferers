@@ -34,7 +34,7 @@ const DeleteAllData = () => {
     axios
       .request(config)
       .then(async response => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         dispatch(deleteAllData())
           await persistor.purge(); // 2. clear persisted storage
           await persistor.flush(); // 3. force-flush queued writes

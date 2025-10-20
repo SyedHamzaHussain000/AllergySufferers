@@ -151,10 +151,10 @@ const MedicationSample = ({navigation}) => {
       // const filt = getActiveMedicationData.filter(med => med.date == moment("2025-09-29").local().format("YYYY MM DD"))
 
       if (getActiveMedicationData?.entries?.items?.length > 0) {
-        console.log(
-          'getActiveMedicationData',
-          getActiveMedicationData?.entries?.items,
-        );
+        // console.log(
+        //   'getActiveMedicationData',
+        //   getActiveMedicationData?.entries?.items,
+        // );
         dispatch(setActiveMedication(getActiveMedicationData?.entries?.items));
         setSavingDataLoader(false);
       } else {
@@ -488,7 +488,7 @@ const MedicationSample = ({navigation}) => {
       item => item.date === selecteddate,
     );
 
-    console.log('filteredMedication', filteredMedication);
+    // console.log('filteredMedication', filteredMedication);
 
     return (
       <FlatList

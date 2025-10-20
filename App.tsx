@@ -96,7 +96,7 @@ const App = () => {
     useEffect(() => {
       const unsubscribe = NetInfo.addEventListener(state => {
         // dispatch(setInternet(state.isConnected))
-          console.log("is",state.isConnected)
+          // console.log("is",state.isConnected)
           settInterenetConnected(state.isConnected)
         // setIsConnected(state.isConnected);
       });

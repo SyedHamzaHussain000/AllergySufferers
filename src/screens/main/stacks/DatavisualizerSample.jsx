@@ -193,10 +193,7 @@ const DatavisualizerSample = ({navigation}) => {
       );
 
       if (getActiveMedicationData?.entries?.items?.length > 0) {
-        console.log(
-          'getActiveMedicationData',
-          getActiveMedicationData?.entries?.items,
-        );
+        
         dispatch(setActiveMedication(getActiveMedicationData?.entries?.items));
         setSavingDataLoader(false);
       } else {
@@ -401,7 +398,7 @@ const DatavisualizerSample = ({navigation}) => {
     // const getCity = await AsyncStorage.getItem('isCity');
     // const parseCity = JSON.parse(getCity);
 
-    console.log('first', allActiveMedicationRedux);
+
 
     setPickedCity(AllCities[0]);
 
@@ -469,7 +466,7 @@ const DatavisualizerSample = ({navigation}) => {
       .request(config)
       .then(response => {
         const apiData = response.data;
-        console.log('api data of symptoms', apiData);
+
         const chartLineData = {};
         Object.keys(apiData).forEach(key => {
           if (key !== 'dates' && key !== 'symptom_level') {
@@ -1286,7 +1283,7 @@ const DatavisualizerSample = ({navigation}) => {
                   renderItem={({item, index}) => (
                     <View
                       style={{
-                        minHeight: responsiveHeight(6),
+                        minHeight: responsiveHeight(5),
                         width: responsiveWidth(87),
                         paddingVertical: 10,
                         borderRadius: 10,

@@ -16,7 +16,7 @@ const Routes = () => {
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       dispatch(setInternet(state.isConnected))
-        console.log("is",state.isConnected)
+        // console.log("is",state.isConnected)
       // setIsConnected(state.isConnected);
     });
 

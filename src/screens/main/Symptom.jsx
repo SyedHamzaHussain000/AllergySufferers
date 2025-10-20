@@ -163,7 +163,7 @@ const Symptom = ({navigation}) => {
         .then(response => {
           // getSymtomsData();
           generateGraphSlides(selecteddate);
-          console.log('response', response.data);
+
         })
         .catch(error => {
           console.log(error);
@@ -177,7 +177,7 @@ const Symptom = ({navigation}) => {
   const generateGraphSlides = async selectedDate => {
     
 
-    console.log("selectedDate",selectedDate)
+
 
     if(AllSymtomsDataFromRedux?.length > 0){
 
@@ -284,7 +284,7 @@ const Symptom = ({navigation}) => {
   };
 
   const scrollToDateSlide = (targetDay) => {
-    console.log("targetDay",targetDay)
+
   if (!AllSymtomsDataFromRedux || AllSymtomsDataFromRedux.length === 0) return;
 
   // Find which slide contains this day
@@ -419,7 +419,7 @@ const Symptom = ({navigation}) => {
                   activeDotStyle={{backgroundColor: AppColors.PRIMARY}}
                   dotStyle={{backgroundColor: AppColors.LIGHTGRAY}}
                   style={{width: responsiveWidth(90), alignSelf: 'center'}}
-                  onSlideChange={index => console.log('index ii', index)}
+                  // onSlideChange={index => console.log('index ii', index)}
                   renderItem={({item, index}) => {
                     return (
                       <>

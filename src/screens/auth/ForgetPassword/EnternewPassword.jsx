@@ -38,7 +38,7 @@ const EnternewPassword = ({navigation, route}) => {
     axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+
         if (response?.data?.status == 'success') {
           Alert.alert('Successfull', response?.data?.message);
           navigation.navigate('Login', {email: email});

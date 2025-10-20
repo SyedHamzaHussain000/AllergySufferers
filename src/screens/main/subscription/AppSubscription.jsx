@@ -80,7 +80,7 @@ const AppSubscription = ({navigation}) => {
         // const purchases = await RNIap.getAvailablePurchases();
         const purchases = await getAvailablePurchases();
 
-        console.log("getAvailablePurchases", purchases)
+        // console.log("getAvailablePurchases", purchases)
         // GPA.3367-3679-0099-64031
         if (purchases.length > 0) {
            if (userData?.email) {
@@ -214,7 +214,7 @@ const AppSubscription = ({navigation}) => {
             subscriptionOffers: [{sku: data?.productId, offerToken}],
           }),
         });
-        console.log('offerToken', purchaseData);
+        // console.log('offerToken', purchaseData);
 
         if (purchaseData.length > 0) {
           const subscribeApi = await SubscribeNow(

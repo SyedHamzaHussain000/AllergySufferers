@@ -6,7 +6,7 @@ export const GetCityName = async (lat, lng) => {
     const json = await Geocoder.from({ latitude: lat, longitude: lng });
     if (json.results.length > 0) {
 
-      console.log("json..,", json)
+      // console.log("json..,", json)
       const addressComponents = json.results[0].address_components;
 
       // find locality (city)
@@ -14,7 +14,7 @@ export const GetCityName = async (lat, lng) => {
         c.types.includes('locality')
       );
 
-      console.log("cityComponent",cityComponent)
+      // console.log("cityComponent",cityComponent)
 
       if (cityComponent?.long_name) {
         return cityComponent.long_name; // e.g. Karachi
@@ -24,7 +24,7 @@ export const GetCityName = async (lat, lng) => {
       const adminArea = addressComponents.find(c =>
         c.types.includes('administrative_area_level_2')
       );
-      console.log("adminArea",adminArea)
+      // console.log("adminArea",adminArea)
       if (adminArea) {
         return adminArea.long_name;
       }
