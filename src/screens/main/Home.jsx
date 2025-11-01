@@ -9,6 +9,7 @@ import {
   Platform,
   Animated,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -66,7 +67,13 @@ import {
   setForeCastSlice,
   updateYesterdaySavedForcast,
 } from '../../redux/Slices/ForecastSlice';
+import {BannerAd, BannerAdSize, TestIds} from 'react-native-google-mobile-ads';
+
 const Home = ({navigation}) => {
+  const bannerAdUnitId = __DEV__
+    ? TestIds.BANNER
+    : 'ca-app-pub-8551767929999166/4471222920'; // replace with your real ad id
+
   Geocoder.init('AIzaSyD3LZ2CmmJizWJlnW4u3fYb44RJvVuxizc'); // use a valid API key
   const AllForcast = useSelector(state => state?.forecast?.AllForcast);
   const dispatch = useDispatch();
@@ -83,7 +90,7 @@ const Home = ({navigation}) => {
 
   const sliderRef = useRef(null);
 
-  console.log("AllCities",AllCities)
+  console.log('AllCities', AllCities);
   const sortCities = [...AllCities].sort((a, b) => {
     return (
       (b.currentLocation || b.isCurrentLocation ? 1 : 0) -
@@ -463,10 +470,30 @@ const Home = ({navigation}) => {
   const settingData = SettingHeaders();
 
   const freeData = [
-    {id: 1, name: 'Total Spores', value: todayPollensData?.total_spores, type: "spore"},
-    {id: 2, name: 'Total Trees', value: todayPollensData?.total_trees, type: "pollen"},
-    {id: 3, name: 'Total Grasses', value: todayPollensData?.total_grasses, type: "pollen"},
-    {id: 4, name: 'Total Weeds', value: todayPollensData?.total_weeds, type: "pollen"},
+    {
+      id: 1,
+      name: 'Total Spores',
+      value: todayPollensData?.total_spores,
+      type: 'spore',
+    },
+    {
+      id: 2,
+      name: 'Total Trees',
+      value: todayPollensData?.total_trees,
+      type: 'pollen',
+    },
+    {
+      id: 3,
+      name: 'Total Grasses',
+      value: todayPollensData?.total_grasses,
+      type: 'pollen',
+    },
+    {
+      id: 4,
+      name: 'Total Weeds',
+      value: todayPollensData?.total_weeds,
+      type: 'pollen',
+    },
   ];
 
   const setForcastLocal = isExistInArray => {
@@ -574,6 +601,25 @@ const Home = ({navigation}) => {
                   marginTop: 30,
                 }}
                 showsVerticalScrollIndicator={false}>
+                {!expireDate && (
+                  <View style={styles.container}>
+                    <BannerAd
+                      unitId={bannerAdUnitId}
+                      size={BannerAdSize.FULL_BANNER}
+                      requestOptions={{
+                        requestNonPersonalizedAdsOnly: true,
+                      }}
+                      onAdLoaded={() => {
+                        console.log('Banner ad loaded');
+                      }}
+                      onAdFailedToLoad={error => {
+                        console.error('Banner ad failed to load: ', error);
+                      }}
+                      width={responsiveWidth(100)}
+                    />
+                  </View>
+                )}
+
                 <View
                   style={{
                     flexDirection: 'row',
@@ -749,8 +795,10 @@ const Home = ({navigation}) => {
                                 flexDirection: 'row',
                               }}
                               renderItem={({item}) => {
-                                  
-                                console.log("todayPollensData?.current",todayPollensData?.current)
+                                console.log(
+                                  'todayPollensData?.current',
+                                  todayPollensData?.current,
+                                );
                                 const index =
                                   todayPollensData?.current.findIndex(
                                     p => p.scientific_name === item.name,
@@ -1411,31 +1459,31 @@ const Home = ({navigation}) => {
                                   id: 0,
                                   name: 'Total Pollen',
                                   value: item?.average,
-                                  type: "pollen"
+                                  type: 'pollen',
                                 },
                                 {
                                   id: 1,
                                   name: 'Total Spores',
                                   value: item?.total_spores,
-                                  type: "spore"
+                                  type: 'spore',
                                 },
                                 {
                                   id: 2,
                                   name: 'Total Trees',
                                   value: item?.total_trees,
-                                  type: "pollen"
+                                  type: 'pollen',
                                 },
                                 {
                                   id: 3,
                                   name: 'Total Grasses',
                                   value: item?.total_grasses,
-                                  type: "pollen"
+                                  type: 'pollen',
                                 },
                                 {
                                   id: 4,
                                   name: 'Total Weeds',
                                   value: item?.total_weeds,
-                                  type: "pollen"
+                                  type: 'pollen',
                                 },
                               ];
 
@@ -1628,9 +1676,7 @@ const Home = ({navigation}) => {
                                                     ? 'Very High'
                                                     : 'None'
                                                 }
-                                                isPollenorSpores={
-                                                  newItem.type
-                                                }
+                                                isPollenorSpores={newItem.type}
                                                 TempreaturePriorityFontSize={
                                                   1.6
                                                 }
@@ -1741,3 +1787,11 @@ const Home = ({navigation}) => {
 };
 
 export default Home;
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: responsiveWidth(100),
+  },
+});

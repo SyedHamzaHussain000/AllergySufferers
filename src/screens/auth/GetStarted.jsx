@@ -71,13 +71,9 @@ const GetStarted = ({navigation}) => {
 
     if (userData?.email) {
 
-
-
       setSubLoader(true);
       
       const checkSub = await CheckSubscription(userData?.id)
-
-      
 
       if(checkSub.expiry){
 

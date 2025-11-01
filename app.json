@@ -1,4 +1,9 @@
 {
   "name": "AllergySufferers",
-  "displayName": "AllergySufferers"
+  "displayName": "AllergySufferers",
+   "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-8551767929999166~8470385172",
+    "ios_app_id": "ca-app-pub-8551767929999166~8470385172"
+  }
+  
 }

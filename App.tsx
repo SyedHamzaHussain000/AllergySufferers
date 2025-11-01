@@ -53,8 +53,17 @@ import AppColors from './src/utils/AppColors';
 import { responsiveWidth } from './src/utils/Responsive_Dimensions';
 import NetInfo from '@react-native-community/netinfo'
 import AppText from './src/components/AppTextComps/AppText';
+import mobileAds from 'react-native-google-mobile-ads';
+
 const App = () => {
   const [isInternetConnected, settInterenetConnected] = useState(true)
+
+
+  mobileAds()
+  .initialize()
+  .then(() => {
+    console.log('AdMob initialized');
+  })
   useEffect(() => {
     // Create channel on start
     async function setup() {
