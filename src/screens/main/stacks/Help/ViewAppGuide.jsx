@@ -51,7 +51,7 @@ const tutArray = [
     <SafeAreaView style={{flex:1}} >
         <View style={{paddingHorizontal:10, marginTop:30}}>
 
-        <AppHeader goBack={true} heading="Go Back"  />
+        <AppHeader goBack={true} heading="Go Back" skipButton={true}  />
         </View>
 
 

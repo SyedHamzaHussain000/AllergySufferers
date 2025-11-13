@@ -5,20 +5,24 @@ import { responsiveFontSize } from '../../../../utils/Responsive_Dimensions';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 import AppText from '../../../../components/AppTextComps/AppText';
 import AppColors from '../../../../utils/AppColors';
-const HelpScreen = ({navigation}) => {
+const GuideInstructionSubCatogory = ({navigation,route}) => {
+
+    const {type} = route.params
 
 
-  const pollens = [
-    {id: 1, name: 'View Free App Guide Instructions', onPress: ()=>  navigation.navigate("GuideInstructionSubCatogory", {type: "free"}),  top: true, },
-    {id: 2, name: 'View Premium App Guide Instructions', onPress: ()=> navigation.navigate("GuideInstructionSubCatogory",{type: "paid"}), },
-    {id: 2, name: 'Tips & Tricks', onPress: ()=> navigation.navigate("TipsTrick")},
-    {id: 3, name: 'Pollen Information for Canada', bottom: true, onPress: ()=> navigation.navigate("PollenInfoForCad")},
+
+    const pollens = [
+    {id: 1, name: 'Forecast', onPress: ()=> navigation.navigate("ViewSubGuideInstruction", {type:"Forecast", SubType: type}),  top: true, },
+    {id: 2, name: 'Symptoms', onPress: ()=> navigation.navigate("ViewSubGuideInstruction", {type:"Symptoms", SubType: type}), },
+    {id: 2, name: 'Medication', onPress: ()=> navigation.navigate("ViewSubGuideInstruction", {type:"Medication", SubType: type})},
+    {id: 3, name: 'Data Visualizer', onPress: ()=> navigation.navigate("ViewSubGuideInstruction", {type:"Data Visualizer", SubType: type})},
+    {id: 4, name: 'Other', bottom: true, onPress: ()=> navigation.navigate("ViewSubGuideInstruction", {type:"Other", SubType: type})},
   ];
 
 
   return (
-    <View style={{padding:20, flex:1}}>
-            <AppHeader goBack={true} heading="Help" />
+       <View style={{padding:20, flex:1}}>
+            <AppHeader goBack={true} heading="Guide Instruction" />
 
 
               <View style={{marginBottom: 20}}>
@@ -71,4 +75,4 @@ const HelpScreen = ({navigation}) => {
   )
 }
 
-export default HelpScreen
+export default GuideInstructionSubCatogory

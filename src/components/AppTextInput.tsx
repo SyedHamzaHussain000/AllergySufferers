@@ -31,7 +31,7 @@ const AppTextInput = ({
   logo,
   inputBgColour,
   inputPlaceHolder,
-  inputWidth = 80,
+  inputWidth = 70,
   containerBg,
   rightLogo,
   title,

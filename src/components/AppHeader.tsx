@@ -3,6 +3,7 @@ import React from 'react';
 import AppText from './AppTextComps/AppText';
 import AppColors from '../utils/AppColors';
 import BackIcon from './AppTextComps/BackIcon';
+import { useNavigation } from '@react-navigation/native';
 
 type props = {
   heading?: string;
@@ -13,6 +14,7 @@ type props = {
   date?: string;
   setOpen: (open: boolean) => void;
   selecteddate?: any;
+  skipButton?: boolean
 };
 
 const AppHeader = ({
@@ -24,7 +26,9 @@ const AppHeader = ({
   date,
   setOpen,
   selecteddate,
+  skipButton
 }: props) => {
+  const navigation = useNavigation()
   return (
     <View
       style={{
@@ -52,6 +56,13 @@ const AppHeader = ({
         <AppText title={subheading} textColor={'#777777'} textSize={2} />
       </View>
 
+      {
+        skipButton ? (
+          <TouchableOpacity onPress={()=> navigation.goBack()} style={{backgroundColor:AppColors.BTNCOLOURS, paddingHorizontal:20, paddingVertical:5, borderRadius:10}}>
+            <AppText title={"Skip"} textSize={2} textColor={AppColors.WHITE} />
+          </TouchableOpacity>
+        ):(
+
       <TouchableOpacity onPress={setOpen}>
         <AppText
           title={Rightheading}
@@ -67,6 +78,9 @@ const AppHeader = ({
           />
         )}
       </TouchableOpacity>
+        )
+      }
+
     </View>
   );
 };

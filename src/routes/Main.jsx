@@ -37,6 +37,8 @@ import ViewAppGuide from '../screens/main/stacks/Help/ViewAppGuide';
 import ViewFreeAppGuide from '../screens/main/stacks/Help/ViewFreeAppGuide';
 import { getMessaging } from '@react-native-firebase/messaging';
 import { useNavigation } from '@react-navigation/native';
+import GuideInstructionSubCatogory from '../screens/main/stacks/Help/GuideInstructionSubCatogory';
+import ViewSubGuideInstruction from '../screens/main/stacks/Help/ViewSubGuideInstruction';
 // import { SafeAreaView, useSafeAreaInsets } from "react-SafeAreaViewnative-safe-area-context";
 
 
@@ -124,6 +126,8 @@ const Main = () => {
         component={HomeWithSafeArea(AddMedications)}
       />
       <Stack.Screen name="TipsTrick" component={HomeWithSafeArea(TipsTrick)} />
+      <Stack.Screen name="GuideInstructionSubCatogory" component={HomeWithSafeArea(GuideInstructionSubCatogory)} />
+      <Stack.Screen name="ViewSubGuideInstruction" component={HomeWithSafeArea(ViewSubGuideInstruction)} />
   
       
     </Stack.Navigator>
