@@ -327,10 +327,10 @@ const AddMedications = ({navigation}) => {
       return;
     }
 
-    if(currentDateMeds.length >= 7 ){
+    if(currentDateMeds.length >= 6 ){
         Toast.show({
         type: 'error',
-        text1: 'You can only add 7 medications at a time',
+        text1: 'You can only add 6 medications at a time',
         position:'bottom',
         visibilityTime:800
       });

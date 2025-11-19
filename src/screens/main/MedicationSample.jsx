@@ -755,6 +755,7 @@ const MedicationSample = ({navigation}) => {
               isAnimated={true}
               maxValue={8}
               stepValue={1}
+              
               hideDataPoints={false}
               spacing={spacing}
               formatYLabel={label => parseFloat(label).toFixed(0)}
